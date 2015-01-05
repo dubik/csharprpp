@@ -97,11 +97,11 @@ tokens
             // return true here for any operators that are right-to-left associative
             return type == NOT || type == TILD;
         }
-        
+
         int getOperatorPrecedence(int type)
         {
-                switch (type)
-                {
+            switch (type)
+            {
                 case ASSIGN:
                     return 4;
                 case PLUS:
@@ -114,45 +114,45 @@ tokens
                     return 1;
                 default:
                     return 0; // really this shouldn't be hit
-                }
+            }
         }
-        
-        int findPivot( List operators, int startIndex, int stopIndex )
-        {
-                int pivot = startIndex;
-                int pivotRank = getOperatorPrecedence( ((Token)operators.get(pivot)).getType() );
-                for ( int i = startIndex + 1; i <= stopIndex; i++ )
-                {
-                        int type = ((Token)operators.get(i)).getType();
-                        int current = getOperatorPrecedence( type );
-                        boolean rtl = isRightToLeft(type);
-                        if ( current > pivotRank || (current == pivotRank && rtl) )
-                        {
-                                pivot = i;
-                                pivotRank = current;
-                        }
-                }
-                return pivot;
-        }
-        
-        Tree createPrecedenceTree( List expressions, List operators, int startIndex, int stopIndex )
-        {
-                if ( stopIndex == startIndex )
-                        return (Tree)expressions.get(startIndex);
 
-                int pivot = findPivot( operators, startIndex, stopIndex - 1 );
-                Tree root = (Tree)adaptor.nil();
-                Object root_1 = (Object)adaptor.nil();
-                root_1 = (Object)adaptor.becomeRoot( (Token)operators.get(pivot), root_1 );
-                adaptor.addChild( root_1, createPrecedenceTree( expressions, operators, startIndex, pivot ) );
-                adaptor.addChild( root_1, createPrecedenceTree( expressions, operators, pivot + 1, stopIndex ) );
-                adaptor.addChild( root, root_1 );
-                return root;
-        }
-        
-        Tree createPrecedenceTree( List expressions, List operators )
+        int findPivot(IList<IToken> operators, int startIndex, int stopIndex)
         {
-                return createPrecedenceTree( expressions, operators, 0, expressions.size() - 1 );
+            int pivot = startIndex;
+            int pivotRank = getOperatorPrecedence(operators[pivot].Type);
+            for (int i = startIndex + 1; i <= stopIndex; i++)
+            {
+                int type = operators[pivot].Type;
+                int current = getOperatorPrecedence(type);
+                bool rtl = isRightToLeft(type);
+                if (current > pivotRank || (current == pivotRank && rtl))
+                {
+                    pivot = i;
+                    pivotRank = current;
+                }
+            }
+            return pivot;
+        }
+
+        ITree createPrecedenceTree(IList<ITree> expressions, IList<IToken> operators, int startIndex, int stopIndex)
+        {
+            if (stopIndex == startIndex)
+                return expressions[startIndex];
+
+            int pivot = findPivot(operators, startIndex, stopIndex - 1);
+            ITree root = adaptor.Nil() as ITree;
+            object root_1 = adaptor.Nil();
+            root_1 = adaptor.BecomeRoot(operators[pivot], root_1);
+            adaptor.AddChild(root_1, createPrecedenceTree(expressions, operators, startIndex, pivot));
+            adaptor.AddChild(root_1, createPrecedenceTree(expressions, operators, pivot + 1, stopIndex));
+            adaptor.AddChild(root, root_1);
+            return root;
+        }
+
+        ITree createPrecedenceTree(IList<ITree> expressions, IList<IToken> operators)
+        {
+            return createPrecedenceTree(expressions, operators, 0, expressions.Count - 1);
         }
 }
 
@@ -196,17 +196,17 @@ type : primitiveType | Id;
 expression 
 @init
 {
-        List expressions = new ArrayList();
-        List operators = new ArrayList();
+    IList<ITree> expressions = new List<ITree>();
+    IList<IToken> operators = new List<IToken>();
 }
         :       (       left=primaryExpression
-                        { expressions.add($left.tree); }
+                        { expressions.Add($left.tree); }
                 )
                 (       operator
                         right=primaryExpression
                         {
-                                operators.add($operator.start);
-                                expressions.add($right.tree);
+                                operators.Add($operator.start);
+                                expressions.Add($right.tree);
                         }
                 )*
                 -> {createPrecedenceTree(expressions,operators)}
