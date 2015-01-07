@@ -9,6 +9,7 @@ options {
 @header {
   //package org.dubik.jrpp.parser;
   //import org.dubik.jrpp.*;
+  using System.Collections.Generic;
 }
 
 @namespace { CSharpRpp }
@@ -37,9 +38,9 @@ classParam returns [RppField node]
          )
     ;
 
-modifiers returns [List<String> list]
+modifiers returns [IList<string> list]
 @init {
-    list = new ArrayList<String>();
+    list = new List<string>();
 }
     : ^(RPP_MODIFIERS (m =. { list.add($m.getText()); })* )
     ;

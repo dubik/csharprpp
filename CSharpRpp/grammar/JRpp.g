@@ -200,13 +200,21 @@ expression
     IList<IToken> operators = new List<IToken>();
 }
         :       (       left=primaryExpression
-                        { expressions.Add($left.tree); }
+                        {
+                            object leftTree = $left.tree;
+                            if(leftTree != null) {
+                                expressions.Add(leftTree as ITree);
+                            }
+                        }
                 )
                 (       operator
                         right=primaryExpression
                         {
                                 operators.Add($operator.start);
-                                expressions.Add($right.tree);
+                                object rightTree = $right.tree;
+                                if(rightTree != null) {
+                                    expressions.Add(rightTree as ITree);
+                                }
                         }
                 )*
                 -> {createPrecedenceTree(expressions,operators)}
@@ -278,4 +286,4 @@ fragment ExponentPart     :  ('E' | 'e') ('+' | '-')? Digit+;
 fragment Digit : '0' | NonZeroDigit;
 fragment NonZeroDigit : '1' .. '9';
 
-WS : ( '\t' | ' ' | '\u000C' )+ { $channel = HIDDEN; } ;
+WS : ( '\t' | ' ' | '\u000C' )+ { $channel = Antlr.Runtime.TokenChannels.Hidden; } ;
