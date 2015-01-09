@@ -7,9 +7,6 @@ options {
 }
 
 @header {
-  //package org.dubik.jrpp.parser;
-  //import org.dubik.jrpp.*;
-  using System.Collections.Generic;
 }
 
 @namespace { CSharpRpp }
@@ -18,13 +15,13 @@ walk returns [RppProgram program]
 @init {
   program = new RppProgram();
 }
-    :   ^(RPP_PROGRAM (classDef {program.add($classDef.node);})*)
+    :   ^(RPP_PROGRAM (classDef {program.Add($classDef.node);})*)
     ;
  
 classDef returns [RppClass node]
-    :   ^(RPP_CLASS id=. { node = new RppClass($id.getText()); }
-            ^(RPP_FIELDS (c=classParam { node.addField($c.node); })*)
-            ^(RPP_EXTENDS (t=. { node.setExtends($t.getText()); })? )
+    :   ^(RPP_CLASS id=. { node = new RppClass($id.Text); }
+            ^(RPP_FIELDS (c=classParam { node.AddField($c.node); })*)
+            ^(RPP_EXTENDS (t=. { node.SetExtends($t.Text); })? )
             ^(RPP_BODY templateBody[node]?)
             )
     ;
@@ -34,7 +31,7 @@ classParam returns [RppField node]
     :   ^(RPP_CLASSPARAM
             id=.
             m=modifiers
-            t=type { node = new RppField($id.getText(), $m.list, $t.node); }
+            t=type { node = new RppField($id.Text, $m.list, $t.node); }
          )
     ;
 
@@ -42,11 +39,11 @@ modifiers returns [IList<string> list]
 @init {
     list = new List<string>();
 }
-    : ^(RPP_MODIFIERS (m =. { list.add($m.getText()); })* )
+    : ^(RPP_MODIFIERS (m =. { list.Add($m.Text); })* )
     ;
 
 templateBody[RppClass node]
-    : ^(RPP_FUNC func=def { node.addFunc($func.node); })
+    : ^(RPP_FUNC func=def { node.AddFunc($func.node); })
     | ^(RPP_FIELD id=.)
     ;
 
@@ -54,22 +51,22 @@ def returns [RppFunc node]
     : id=.
         p=params
         r=type
-        e=expr { node = new RppFunc($id.getText(), $p.list, $r.node, $e.node); }
+        e=expr { node = new RppFunc($id.Text, $p.list, $r.node, $e.node); }
     ;
 
-params returns [List<RppParam> list]
+params returns [IList<RppParam> list]
 @init {
-    list = new ArrayList<RppParam>();
+    list = new List<RppParam>();
 }
-    : ^(RPP_PARAMS (param { list.add($param.node); })*)
+    : ^(RPP_PARAMS (param { list.Add($param.node); })*)
     ;
 
 param returns [RppParam node]
-    : ^(RPP_PARAM id=. t=. {$node = new RppParam($id.getText(), new RppType($t.getText()));})
+    : ^(RPP_PARAM id=. t=. {$node = new RppParam($id.Text, new RppTypeName($t.Text));})
     ;
 
 type returns [RppType node]
-    : ^(RPP_TYPE t=. { node = new RppType($t.getText()); })
+    : ^(RPP_TYPE t=. { node = new RppTypeName($t.Text); })
     ;
 
 expr returns [RppExpr node]

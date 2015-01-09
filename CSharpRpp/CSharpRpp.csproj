@@ -52,8 +52,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRppNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RppClass.cs" />
+    <Compile Include="RppExpr.cs" />
+    <Compile Include="RppField.cs" />
+    <Compile Include="RppFunc.cs" />
+    <Compile Include="RppNamedNode.cs" />
+    <Compile Include="RppProgram.cs" />
+    <Compile Include="RppScope.cs" />
+    <Compile Include="RppType.cs" />
+    <Compile Include="tests\ScopeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
