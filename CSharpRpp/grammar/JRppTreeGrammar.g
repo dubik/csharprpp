@@ -11,7 +11,7 @@ options {
 
 @namespace { CSharpRpp }
 
-walk returns [RppProgram program]
+public walk returns [RppProgram program]
 @init {
   program = new RppProgram();
 }

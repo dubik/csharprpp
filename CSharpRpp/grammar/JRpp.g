@@ -156,7 +156,7 @@ tokens
         }
 }
 
-compilationUnit : ('package' qualId)? topStatSeq -> ^(RPP_PROGRAM topStatSeq);
+public compilationUnit : ('package' qualId)? topStatSeq -> ^(RPP_PROGRAM topStatSeq);
 qualId : Id ('.' Id)*;
 topStatSeq : (NewLine!)* topStat (NewLine!+ topStat?)*;
 topStat : modifier* tmplDef

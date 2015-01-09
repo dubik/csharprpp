@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Antlr.Runtime;
+using Antlr.Runtime.Tree;
 
 [assembly: CLSCompliant(true)]
 namespace CSharpRpp
@@ -8,8 +10,19 @@ namespace CSharpRpp
     {
         private static void Main(string[] args)
         {
-            IList<string> k = new List<string>();
-            k.Add("Hello");
+            string code = @"
+class Array(k: Int)
+{
+   def length = 10
+}";
+            ANTLRStringStream input = new ANTLRStringStream(code);
+            JRppLexer lexer = new JRppLexer(input);
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            JRppParser parser = new JRppParser(tokens);
+            var result = parser.compilationUnit();
+            CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result.Tree);
+            JRppTreeGrammar walker = new JRppTreeGrammar(treeNodeStream);
+            RppProgram program = walker.walk();
         }
     }
 }
