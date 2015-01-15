@@ -1,11 +1,9 @@
-﻿using System;
+﻿using System.Diagnostics;
 
 namespace CSharpRpp
 {
-    public abstract class RppExpr : IRppNode
+    public abstract class RppExpr : RppNode
     {
-        public abstract void PreAnalyze(RppScope scope);
-        public abstract IRppNode Analyze(RppScope scope);
     }
 
     public class BinOp : RppExpr
@@ -23,32 +21,28 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            throw new NotImplementedException();
+            _left.PreAnalyze(scope);
+            _right.PreAnalyze(scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            throw new NotImplementedException();
+            _left = _left.Analyze(scope) as RppExpr;
+            Debug.Assert(_left != null);
+            _right = _right.Analyze(scope) as RppExpr;
+            Debug.Assert(_right != null);
+
+            return this;
         }
     }
 
     public class RppInteger : RppExpr
     {
-        private string _valueStr;
+        private int _value;
 
         public RppInteger(string valueStr)
         {
-            _valueStr = valueStr;
-        }
-
-        public override void PreAnalyze(RppScope scope)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IRppNode Analyze(RppScope scope)
-        {
-            throw new NotImplementedException();
+            _value = int.Parse(valueStr);
         }
     }
 }

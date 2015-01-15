@@ -1,6 +1,6 @@
 ﻿namespace CSharpRpp
 {
-    public abstract class RppNamedNode : IRppNode
+    public abstract class RppNamedNode : RppNode
     {
         public readonly string Name;
 
@@ -8,8 +8,5 @@
         {
             Name = name;
         }
-
-        public abstract void PreAnalyze(RppScope scope);
-        public abstract IRppNode Analyze(RppScope scope);
     }
 }

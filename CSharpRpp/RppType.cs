@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace CSharpRpp
 {
@@ -16,7 +17,7 @@ namespace CSharpRpp
 
     public class RppType
     {
-        virtual public RppType Resolve(RppScope scope)
+        public virtual RppType Resolve(RppScope scope)
         {
             return this;
         }
@@ -71,10 +72,10 @@ namespace CSharpRpp
             else
             {
                 scope.Lookup(Name);
+                Debug.Assert(false, "Not implemented yet");
             }
 
             return null;
         }
     }
-
 }

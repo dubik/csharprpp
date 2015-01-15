@@ -39,14 +39,9 @@ namespace CSharpRpp
     {
         private RppType _type;
 
-        public RppParam(string name, RppType type)
-            : base(name)
+        public RppParam(string name, RppType type) : base(name)
         {
             _type = type;
-        }
-
-        public override void PreAnalyze(RppScope scope)
-        {
         }
 
         public override IRppNode Analyze(RppScope scope)
