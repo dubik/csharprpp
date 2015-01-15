@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRpp", "CSharpRpp\CSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRppTest", "CSharpRppTest\CSharpRppTest.csproj", "{512693B0-DDFB-4D79-A646-A211CC6A92D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLRCodeGen", "CLRCodeGen\CLRCodeGen.csproj", "{A5CBF7BE-DC5B-4A80-A8C5-FAC08C57DB03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{512693B0-DDFB-4D79-A646-A211CC6A92D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{512693B0-DDFB-4D79-A646-A211CC6A92D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{512693B0-DDFB-4D79-A646-A211CC6A92D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5CBF7BE-DC5B-4A80-A8C5-FAC08C57DB03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5CBF7BE-DC5B-4A80-A8C5-FAC08C57DB03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5CBF7BE-DC5B-4A80-A8C5-FAC08C57DB03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5CBF7BE-DC5B-4A80-A8C5-FAC08C57DB03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
