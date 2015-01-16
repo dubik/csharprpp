@@ -13,20 +13,20 @@ namespace CSharpRpp
 
         public void CreateAssembly(string name)
         {
-            
             AssemblyName = new AssemblyName(name);
-            AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save);
+            AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(AssemblyName, AssemblyBuilderAccess.Save);
         }
 
         public void CreateModuleBuilder()
         {
-            ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyName.Name, ssemblyName.Name + ".exe");
+            ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyName.Name, AssemblyName.Name + ".exe");
         }
     }
 
-    public class RppProgram : RppNode
+    public class RppProgram : RppNode, IMethodProvider
     {
         private IList<RppClass> _classes = new List<RppClass>();
+        private readonly CodegenContext context = new CodegenContext();
 
         public void Add(RppClass clazz)
         {
@@ -35,6 +35,9 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
+            context.CreateAssembly("sampleAssembly");
+            context.CreateModuleBuilder();
+
             NodeUtils.PreAnalyze(scope, _classes);
         }
 
@@ -44,12 +47,17 @@ namespace CSharpRpp
             return this;
         }
 
+        public void CodegenType(RppScope scope)
+        {
+            _classes.ForEach(clazz => clazz.CodegenType(scope, context.ModuleBuilder));
+        }
+
+        public void CodegenMethodStubs(CodegenContext ctx)
+        {
+        }
+
         public override void Codegen(CodegenContext ctx)
         {
-            
-
-            ctx.ModuleBuilder = moduleBuilder;
-
             _classes.ForEach(clazz => clazz.Codegen(ctx));
         }
     }

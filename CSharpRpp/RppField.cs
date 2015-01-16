@@ -16,12 +16,13 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return this;
         }
     }
 }

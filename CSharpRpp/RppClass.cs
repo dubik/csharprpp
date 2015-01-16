@@ -1,17 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public class RppClass : RppNamedNode
+    public class RppClass : RppNamedNode, IMethodProvider
     {
         private IList<RppField> _fields = new List<RppField>();
         private IList<RppFunc> _funcs = new List<RppFunc>();
         private RppScope _scope;
 
+        #region Codegen
+
+        private TypeBuilder _typeBuilder;
+
+        #endregion
+
         public RppClass(string name) : base(name)
         {
         }
+
+        public void AddField(RppField field)
+        {
+            _fields.Add(field);
+        }
+
+        public void AddFunc(RppFunc func)
+        {
+            _funcs.Add(func);
+        }
+
+        public void SetExtends(string name)
+        {
+        }
+
+        #region Semantic
 
         public override void PreAnalyze(RppScope scope)
         {
@@ -31,23 +55,24 @@ namespace CSharpRpp
             return this;
         }
 
+        #endregion
+
+        #region Codegen
+
+        public void CodegenType(RppScope scope, ModuleBuilder moduleBuilder)
+        {
+            _typeBuilder = moduleBuilder.DefineType(Name);
+        }
+
+        public void CodegenMethodStubs(CodegenContext ctx)
+        {
+            _funcs.ForEach(func => func.CodegenMethodStubs(_typeBuilder));
+        }
+
         public override void Codegen(CodegenContext ctx)
         {
-            
         }
 
-        public void AddField(RppField field)
-        {
-            _fields.Add(field);
-        }
-
-        public void AddFunc(RppFunc func)
-        {
-            _funcs.Add(func);
-        }
-
-        public void SetExtends(string name)
-        {
-        }
+        #endregion
     }
 }

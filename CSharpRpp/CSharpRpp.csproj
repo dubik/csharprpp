@@ -53,7 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="IMethodProvider.cs" />
     <Compile Include="IRppNode.cs" />
+    <Compile Include="ITypeProvider.cs" />
     <Compile Include="NodeUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

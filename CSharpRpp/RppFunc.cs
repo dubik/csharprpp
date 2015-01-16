@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
@@ -8,6 +11,12 @@ namespace CSharpRpp
         private RppType _returnType;
         private RppExpr _expr;
         private RppScope _scope;
+
+        #region Codegen
+
+        private MethodBuilder _methodBuilder;
+
+        #endregion
 
         public RppFunc(string name, IList<RppParam> funcParams, RppType returnType, RppExpr expr) : base(name)
         {
@@ -33,6 +42,20 @@ namespace CSharpRpp
 
             return this;
         }
+
+        #region Codegen
+
+        public void CodegenMethodStubs(TypeBuilder typeBuilder)
+        {
+            _methodBuilder = typeBuilder.DefineMethod(Name, MethodAttributes.Public);
+        }
+
+        public override void Codegen(CodegenContext ctx)
+        {
+
+        }
+
+        #endregion
     }
 
     public class RppParam : RppNamedNode

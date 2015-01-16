@@ -9,7 +9,7 @@ namespace CSharpRpp
     {
         private static void Main(string[] args)
         {
-            string code = @"
+            const string code = @"
 class Array(k: Int)
 {
    def length = 10
@@ -22,6 +22,14 @@ class Array(k: Int)
             CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result.Tree);
             JRppTreeGrammar walker = new JRppTreeGrammar(treeNodeStream);
             RppProgram program = walker.walk();
+
+            RppScope scope = new RppScope(null);
+            CodegenContext codegenContext = new CodegenContext();
+            program.PreAnalyze(scope);
+            program.CodegenType(scope);
+            program.CodegenMethodStubs(codegenContext);
+            program.Analyze(scope);
+            program.Codegen(codegenContext);
         }
     }
 }
