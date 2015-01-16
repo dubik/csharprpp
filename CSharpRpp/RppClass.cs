@@ -31,6 +31,11 @@ namespace CSharpRpp
             return this;
         }
 
+        public override void Codegen(CodegenContext ctx)
+        {
+            
+        }
+
         public void AddField(RppField field)
         {
             _fields.Add(field);

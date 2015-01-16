@@ -1,8 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public class RppProgram : IRppNode
+    public class CodegenContext
+    {
+        public AssemblyName AssemblyName;
+        public AssemblyBuilder AssemblyBuilder { get; private set; }
+        public ModuleBuilder ModuleBuilder { get; private set; }
+
+        public void CreateAssembly(string name)
+        {
+            
+            AssemblyName = new AssemblyName(name);
+            AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save);
+        }
+
+        public void CreateModuleBuilder()
+        {
+            ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyName.Name, ssemblyName.Name + ".exe");
+        }
+    }
+
+    public class RppProgram : RppNode
     {
         private IList<RppClass> _classes = new List<RppClass>();
 
@@ -11,15 +33,24 @@ namespace CSharpRpp
             _classes.Add(clazz);
         }
 
-        public void PreAnalyze(RppScope scope)
+        public override void PreAnalyze(RppScope scope)
         {
             NodeUtils.PreAnalyze(scope, _classes);
         }
 
-        public IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(RppScope scope)
         {
             _classes = NodeUtils.Analyze(scope, _classes);
             return this;
+        }
+
+        public override void Codegen(CodegenContext ctx)
+        {
+            
+
+            ctx.ModuleBuilder = moduleBuilder;
+
+            _classes.ForEach(clazz => clazz.Codegen(ctx));
         }
     }
 }
