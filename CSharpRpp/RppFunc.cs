@@ -8,13 +8,14 @@ namespace CSharpRpp
     public class RppFunc : RppNamedNode
     {
         private IList<RppParam> _params;
-        private RppType _returnType;
+        private readonly RppType _returnType;
         private RppExpr _expr;
         private RppScope _scope;
 
         #region Codegen
 
         private MethodBuilder _methodBuilder;
+        private Type _runtimeReturnType;
 
         #endregion
 
@@ -38,7 +39,7 @@ namespace CSharpRpp
             _params = NodeUtils.Analyze(_scope, _params);
             _expr = NodeUtils.Analyze(_scope, _expr);
 
-            _returnType = _returnType.Resolve(_scope);
+            _runtimeReturnType = _returnType.Resolve(_scope);
 
             return this;
         }
@@ -52,7 +53,6 @@ namespace CSharpRpp
 
         public override void Codegen(CodegenContext ctx)
         {
-
         }
 
         #endregion
@@ -60,7 +60,8 @@ namespace CSharpRpp
 
     public class RppParam : RppNamedNode
     {
-        private RppType _type;
+        private readonly RppType _type;
+        private Type _runtimeType;
 
         public RppParam(string name, RppType type) : base(name)
         {
@@ -69,7 +70,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _type = _type.Resolve(scope);
+            _runtimeType = _type.Resolve(scope);
             return this;
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace CSharpRpp
@@ -15,12 +16,9 @@ namespace CSharpRpp
         EDouble
     }
 
-    public class RppType
+    public abstract class RppType
     {
-        public virtual RppType Resolve(RppScope scope)
-        {
-            return this;
-        }
+        public abstract Type Resolve(RppScope scope);
     }
 
     public class RppPrimitiveType : RppType
@@ -38,6 +36,17 @@ namespace CSharpRpp
             {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)}
         };
 
+        private static readonly Dictionary<ERppPrimitiveType, Type> SystemTypesMap = new Dictionary<ERppPrimitiveType, Type>
+        {
+            {ERppPrimitiveType.EBool, typeof (bool)},
+            {ERppPrimitiveType.EChar, typeof (char)},
+            {ERppPrimitiveType.EShort, typeof (short)},
+            {ERppPrimitiveType.EInt, typeof (int)},
+            {ERppPrimitiveType.ELong, typeof (long)},
+            {ERppPrimitiveType.EFloat, typeof (float)},
+            {ERppPrimitiveType.EDouble, typeof (double)}
+        };
+
         public RppPrimitiveType(ERppPrimitiveType primitiveType)
         {
             PrimitiveType = primitiveType;
@@ -47,10 +56,19 @@ namespace CSharpRpp
         {
             return PrimitiveTypesMap.TryGetValue(name, out type);
         }
+
+        public override Type Resolve(RppScope scope)
+        {
+            return SystemTypesMap[PrimitiveType];
+        }
     }
 
     public class RppObjectType : RppType
     {
+        public override Type Resolve(RppScope scope)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class RppTypeName : RppType
@@ -62,12 +80,12 @@ namespace CSharpRpp
             Name = name;
         }
 
-        public override RppType Resolve(RppScope scope)
+        public override Type Resolve(RppScope scope)
         {
             RppPrimitiveType primitiveType;
             if (RppPrimitiveType.IsPrimitive(Name, out primitiveType))
             {
-                return primitiveType;
+                return primitiveType.Resolve(scope);
             }
             else
             {
