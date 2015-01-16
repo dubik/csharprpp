@@ -6,7 +6,6 @@ namespace CLRCodeGen
 {
     internal class ICodegenContext
     {
-        
     }
 
     internal class Node
@@ -57,6 +56,44 @@ namespace CLRCodeGen
             assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
 
+        private class Foo
+        {
+            public Bar _child;
+        }
+
+        private class Bar
+        {
+            public Foo _parent;
+        }
+
+        private static void CreateObjects()
+        {
+            AssemblyName assemblyName = new AssemblyName("sampleAssembl");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
+
+            TypeBuilder fooTypeBuilder = moduleBuilder.DefineType("Foo", TypeAttributes.Public);
+
+            TypeBuilder barTypeBuilder = moduleBuilder.DefineType("Bar", TypeAttributes.Public);
+            barTypeBuilder.DefineField("_parent", fooTypeBuilder, FieldAttributes.Public);
+
+            fooTypeBuilder.DefineField("_child", barTypeBuilder, FieldAttributes.Public);
+
+            MethodBuilder mainMethod = fooTypeBuilder.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard,
+                typeof (int),
+                new[] {typeof (String[])});
+            ILGenerator il = mainMethod.GetILGenerator();
+            il.UsingNamespace("System");
+            il.EmitWriteLine("Moikka");
+            il.Emit(OpCodes.Ret);
+
+            fooTypeBuilder.CreateType();
+            barTypeBuilder.CreateType();
+
+            assemblyBuilder.SetEntryPoint(mainMethod.GetBaseDefinition());
+            assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
         public static void Print()
         {
             Console.WriteLine("Moika");
@@ -64,7 +101,7 @@ namespace CLRCodeGen
 
         private static void Main()
         {
-            CreateExe();
+            CreateObjects();
         }
     }
 }
