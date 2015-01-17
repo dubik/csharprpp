@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public class RppClass : RppNamedNode, IMethodProvider
+    public class RppClass : RppNamedNode
     {
         private IList<RppField> _fields = new List<RppField>();
         private IList<RppFunc> _funcs = new List<RppFunc>();
@@ -64,8 +65,10 @@ namespace CSharpRpp
             _typeBuilder = moduleBuilder.DefineType(Name);
         }
 
-        public void CodegenMethodStubs(CodegenContext ctx)
+        public void CodegenMethodStubs(RppScope scope)
         {
+            Debug.Assert(_typeBuilder != null);
+
             _funcs.ForEach(func => func.CodegenMethodStubs(_typeBuilder));
         }
 
@@ -74,5 +77,6 @@ namespace CSharpRpp
         }
 
         #endregion
+
     }
 }

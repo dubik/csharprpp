@@ -12,7 +12,7 @@ namespace CSharpRpp
             const string code = @"
 class Array(k: Int)
 {
-   def length = 10
+   def length : Int = 10
 }";
             ANTLRStringStream input = new ANTLRStringStream(code);
             JRppLexer lexer = new JRppLexer(input);
@@ -27,7 +27,7 @@ class Array(k: Int)
             CodegenContext codegenContext = new CodegenContext();
             program.PreAnalyze(scope);
             program.CodegenType(scope);
-            program.CodegenMethodStubs(codegenContext);
+            program.CodegenMethodStubs(scope, codegenContext);
             program.Analyze(scope);
             program.Codegen(codegenContext);
         }

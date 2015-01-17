@@ -23,7 +23,7 @@ namespace CSharpRpp
         }
     }
 
-    public class RppProgram : RppNode, IMethodProvider
+    public class RppProgram : RppNode
     {
         private IList<RppClass> _classes = new List<RppClass>();
         private readonly CodegenContext context = new CodegenContext();
@@ -52,8 +52,9 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.CodegenType(scope, context.ModuleBuilder));
         }
 
-        public void CodegenMethodStubs(CodegenContext ctx)
+        public void CodegenMethodStubs(RppScope scope, CodegenContext ctx)
         {
+            _classes.ForEach(clazz => clazz.CodegenMethodStubs(scope));
         }
 
         public override void Codegen(CodegenContext ctx)
