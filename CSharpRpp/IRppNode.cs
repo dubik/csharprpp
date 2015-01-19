@@ -6,7 +6,6 @@ namespace CSharpRpp
     {
         void PreAnalyze(RppScope scope);
         IRppNode Analyze(RppScope scope);
-        void Codegen(CodegenContext ctx);
     }
 
     public class RppNode : IRppNode
@@ -18,10 +17,6 @@ namespace CSharpRpp
         public virtual IRppNode Analyze(RppScope scope)
         {
             return this;
-        }
-
-        public virtual void Codegen(CodegenContext ctx)
-        {
         }
     }
 

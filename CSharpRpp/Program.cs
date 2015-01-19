@@ -3,11 +3,12 @@ using Antlr.Runtime;
 using Antlr.Runtime.Tree;
 
 [assembly: CLSCompliant(true)]
+
 namespace CSharpRpp
 {
     public class Program
     {
-        private static int Main(string[] args)
+        private static void Main(string[] args)
         {
             const string code = @"
 class Array(k: Int)
@@ -31,7 +32,6 @@ class Array(k: Int)
             program.Analyze(scope);
             program.Codegen(codegenContext);
             program.Save();
-            return 0;
         }
     }
 }

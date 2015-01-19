@@ -59,7 +59,7 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.CodegenMethodStubs(scope));
         }
 
-        public override void Codegen(CodegenContext ctx)
+        public void Codegen(CodegenContext ctx)
         {
             _classes.ForEach(clazz => clazz.Codegen(ctx));
         }

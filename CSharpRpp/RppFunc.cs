@@ -52,20 +52,27 @@ namespace CSharpRpp
             _methodBuilder = typeBuilder.DefineMethod(Name, MethodAttributes.Public);
         }
 
-        public override void Codegen(CodegenContext ctx)
+        public void Codegen(CodegenContext ctx)
         {
+            _methodBuilder.SetReturnType(_runtimeReturnType);
             CodegenParams(_params, _methodBuilder);
 
-            _methodBuilder.SetReturnType(_runtimeReturnType);
+            ILGenerator generator = _methodBuilder.GetILGenerator();
+            _expr.Codegen(generator);
 
-            _methodBuilder.GetILGenerator().Emit(OpCodes.Ret);
+            if (_runtimeReturnType == typeof (void))
+            {
+                generator.Emit(OpCodes.Pop);
+            }
+
+            generator.Emit(OpCodes.Ret);
         }
 
-        private static void CodegenParams(IList<RppParam> paramList, MethodBuilder methodBuilder)
+        private static void CodegenParams(IEnumerable<RppParam> paramList, MethodBuilder methodBuilder)
         {
             Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
             methodBuilder.SetParameters(parameterTypes);
-            paramList.ForEachWithIndex((index, param) => methodBuilder.DefineParameter(index + 1, ParameterAttributes.In, param.Name));
+            // paramList.ForEachWithIndex((index, param) => methodBuilder.DefineParameter(index, ParameterAttributes.In, param.Name));
         }
 
         #endregion

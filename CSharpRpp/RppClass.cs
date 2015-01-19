@@ -70,7 +70,7 @@ namespace CSharpRpp
             _funcs.ForEach(func => func.CodegenMethodStubs(_typeBuilder));
         }
 
-        public override void Codegen(CodegenContext ctx)
+        public void Codegen(CodegenContext ctx)
         {
             _fields.ForEach(field => field.Codegen(ctx));
             _funcs.ForEach(func => func.Codegen(ctx));
