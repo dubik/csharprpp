@@ -25,8 +25,10 @@ namespace CSharpRpp
 
     public class RppProgram : RppNode
     {
+        public string Name { get; set; }
+
         private IList<RppClass> _classes = new List<RppClass>();
-        private readonly CodegenContext context = new CodegenContext();
+        private readonly CodegenContext _context = new CodegenContext();
 
         public void Add(RppClass clazz)
         {
@@ -35,8 +37,8 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            context.CreateAssembly("sampleAssembly");
-            context.CreateModuleBuilder();
+            _context.CreateAssembly(Name);
+            _context.CreateModuleBuilder();
 
             NodeUtils.PreAnalyze(scope, _classes);
         }
@@ -49,7 +51,7 @@ namespace CSharpRpp
 
         public void CodegenType(RppScope scope)
         {
-            _classes.ForEach(clazz => clazz.CodegenType(scope, context.ModuleBuilder));
+            _classes.ForEach(clazz => clazz.CodegenType(scope, _context.ModuleBuilder));
         }
 
         public void CodegenMethodStubs(RppScope scope, CodegenContext ctx)
@@ -60,6 +62,11 @@ namespace CSharpRpp
         public override void Codegen(CodegenContext ctx)
         {
             _classes.ForEach(clazz => clazz.Codegen(ctx));
+        }
+
+        public void Save()
+        {
+            _context.AssemblyBuilder.Save(Name + ".exe");
         }
     }
 }

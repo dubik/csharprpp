@@ -13,7 +13,8 @@ namespace CSharpRpp
         EInt,
         ELong,
         EFloat,
-        EDouble
+        EDouble,
+        EUnit
     }
 
     public abstract class RppType
@@ -33,7 +34,8 @@ namespace CSharpRpp
             {"Int", new RppPrimitiveType(ERppPrimitiveType.EInt)},
             {"Long", new RppPrimitiveType(ERppPrimitiveType.ELong)},
             {"Float", new RppPrimitiveType(ERppPrimitiveType.EFloat)},
-            {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)}
+            {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)},
+            {"Unit", new RppPrimitiveType(ERppPrimitiveType.EUnit)}
         };
 
         private static readonly Dictionary<ERppPrimitiveType, Type> SystemTypesMap = new Dictionary<ERppPrimitiveType, Type>
@@ -44,7 +46,8 @@ namespace CSharpRpp
             {ERppPrimitiveType.EInt, typeof (int)},
             {ERppPrimitiveType.ELong, typeof (long)},
             {ERppPrimitiveType.EFloat, typeof (float)},
-            {ERppPrimitiveType.EDouble, typeof (double)}
+            {ERppPrimitiveType.EDouble, typeof (double)},
+            {ERppPrimitiveType.EUnit, typeof(void)}
         };
 
         public RppPrimitiveType(ERppPrimitiveType primitiveType)

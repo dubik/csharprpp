@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -53,6 +54,18 @@ namespace CSharpRpp
 
         public override void Codegen(CodegenContext ctx)
         {
+            CodegenParams(_params, _methodBuilder);
+
+            _methodBuilder.SetReturnType(_runtimeReturnType);
+
+            _methodBuilder.GetILGenerator().Emit(OpCodes.Ret);
+        }
+
+        private static void CodegenParams(IList<RppParam> paramList, MethodBuilder methodBuilder)
+        {
+            Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
+            methodBuilder.SetParameters(parameterTypes);
+            paramList.ForEachWithIndex((index, param) => methodBuilder.DefineParameter(index + 1, ParameterAttributes.In, param.Name));
         }
 
         #endregion
@@ -60,8 +73,8 @@ namespace CSharpRpp
 
     public class RppParam : RppNamedNode
     {
+        public Type RuntimeType { get; set; }
         private readonly RppType _type;
-        private Type _runtimeType;
 
         public RppParam(string name, RppType type) : base(name)
         {
@@ -70,7 +83,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _runtimeType = _type.Resolve(scope);
+            RuntimeType = _type.Resolve(scope);
             return this;
         }
     }

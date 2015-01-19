@@ -7,12 +7,12 @@ namespace CSharpRpp
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static int Main(string[] args)
         {
             const string code = @"
 class Array(k: Int)
 {
-   def length : Int = 10
+   def apply(index: Int, value: Int) : Unit = 10
 }";
             ANTLRStringStream input = new ANTLRStringStream(code);
             JRppLexer lexer = new JRppLexer(input);
@@ -22,7 +22,7 @@ class Array(k: Int)
             CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result.Tree);
             JRppTreeGrammar walker = new JRppTreeGrammar(treeNodeStream);
             RppProgram program = walker.walk();
-
+            program.Name = "Sample";
             RppScope scope = new RppScope(null);
             CodegenContext codegenContext = new CodegenContext();
             program.PreAnalyze(scope);
@@ -30,6 +30,8 @@ class Array(k: Int)
             program.CodegenMethodStubs(scope, codegenContext);
             program.Analyze(scope);
             program.Codegen(codegenContext);
+            program.Save();
+            return 0;
         }
     }
 }

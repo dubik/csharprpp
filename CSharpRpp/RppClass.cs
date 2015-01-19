@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
@@ -74,6 +72,10 @@ namespace CSharpRpp
 
         public override void Codegen(CodegenContext ctx)
         {
+            _fields.ForEach(field => field.Codegen(ctx));
+            _funcs.ForEach(func => func.Codegen(ctx));
+
+            _typeBuilder.CreateType();
         }
 
         #endregion
