@@ -71,7 +71,7 @@ namespace CSharpRpp
     {
         public override Type Resolve(RppScope scope)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 
@@ -93,8 +93,14 @@ namespace CSharpRpp
 
         public override Type Resolve(RppScope scope)
         {
-            var paramsType = _params.Select(par => par.Resolve(scope)).ToList();
-            RppNamedNode genericType = scope.Lookup(_typeName.Name);
+            // var paramsType = _params.Select(par => par.Resolve(scope)).ToList();
+            // RppNamedNode genericType = scope.Lookup(_typeName.Name);
+            if (_typeName.Name == "Array")
+            {
+                Type subType = _params[0].Resolve(scope);
+                return subType.MakeArrayType();
+            }
+
             return null;
         }
     }
@@ -116,11 +122,14 @@ namespace CSharpRpp
             {
                 return primitiveType.Resolve(scope);
             }
-            else
+
+            if (Name == "String")
             {
-                scope.Lookup(Name);
-                Debug.Assert(false, "Not implemented yet");
+                return typeof (String);
             }
+
+            scope.Lookup(Name);
+            Debug.Assert(false, "Not implemented yet");
 
             return null;
         }

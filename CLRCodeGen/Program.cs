@@ -97,10 +97,15 @@ namespace CLRCodeGen
         public static void Print()
         {
             Console.WriteLine("Moika");
+
+            string res = "hello";
+            Console.WriteLine(res);
         }
 
-        private static void Main()
+        private static void Main(String[] args)
         {
+            int l = args.Length;
+            String item = args[0];
             CreateObjects();
         }
     }
