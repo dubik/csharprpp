@@ -177,7 +177,7 @@ paramType : type;
 
 classTemplateOpt : ('extends' Id)? NewLine? templateBody? -> ^(RPP_EXTENDS Id?) ^(RPP_BODY templateBody?);
 
-templateBody : '{'! NewLine!* templateStat* NewLine!* '}'!;
+templateBody : '{'! NewLine!* (templateStat NewLine!*)* '}'!;
 
 templateStat : 'def' funDef -> funDef
               ;

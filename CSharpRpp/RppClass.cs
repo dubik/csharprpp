@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
+    [DebuggerDisplay("Name = {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode
     {
         private IList<RppField> _fields = new List<RppField>();
@@ -79,6 +80,5 @@ namespace CSharpRpp
         }
 
         #endregion
-
     }
 }

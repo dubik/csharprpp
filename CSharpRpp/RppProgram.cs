@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -23,6 +24,7 @@ namespace CSharpRpp
         }
     }
 
+    [DebuggerDisplay("Name = {Name}, Classes = {_classes.Count}")]
     public class RppProgram : RppNode
     {
         public string Name { get; set; }

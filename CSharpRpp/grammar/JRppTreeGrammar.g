@@ -43,6 +43,10 @@ modifiers returns [IList<string> list]
     ;
 
 templateBody[RppClass node]
+    : templateBodyStat[node]+
+    ;
+
+templateBodyStat[RppClass node]
     : ^(RPP_FUNC func=def { node.AddFunc($func.node); })
     | ^(RPP_FIELD id=.)
     ;
