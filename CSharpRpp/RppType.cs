@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CSharpRpp
 {
@@ -92,7 +93,9 @@ namespace CSharpRpp
 
         public override Type Resolve(RppScope scope)
         {
-            throw new NotImplementedException();
+            var paramsType = _params.Select(par => par.Resolve(scope)).ToList();
+            RppNamedNode genericType = scope.Lookup(_typeName.Name);
+            return null;
         }
     }
 
