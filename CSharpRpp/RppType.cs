@@ -47,7 +47,7 @@ namespace CSharpRpp
             {ERppPrimitiveType.ELong, typeof (long)},
             {ERppPrimitiveType.EFloat, typeof (float)},
             {ERppPrimitiveType.EDouble, typeof (double)},
-            {ERppPrimitiveType.EUnit, typeof(void)}
+            {ERppPrimitiveType.EUnit, typeof (void)}
         };
 
         public RppPrimitiveType(ERppPrimitiveType primitiveType)
@@ -68,6 +68,28 @@ namespace CSharpRpp
 
     public class RppObjectType : RppType
     {
+        public override Type Resolve(RppScope scope)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class RppGenericType : RppType
+    {
+        private readonly IList<RppType> _params = new List<RppType>();
+
+        private readonly RppTypeName _typeName;
+
+        public RppGenericType(string typeName)
+        {
+            _typeName = new RppTypeName(typeName);
+        }
+
+        public void AddParam(RppType param)
+        {
+            _params.Add(param);
+        }
+
         public override Type Resolve(RppScope scope)
         {
             throw new NotImplementedException();

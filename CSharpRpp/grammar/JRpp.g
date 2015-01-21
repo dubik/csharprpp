@@ -86,6 +86,7 @@ tokens
     RPP_WHILE;
     RPP_STATS;
     RPP_PROGRAM;
+    RPP_GENERIC_TYPE;
 }
 
 @parser::namespace { CSharpRpp }
@@ -177,9 +178,7 @@ classParamClause : '('! classParams? ')'!;
  
 classParams : classParam (',' classParam)*;
 
-classParam : modifier* ('val' | 'var')? Id ':' paramType -> ^(RPP_CLASSPARAM Id ^(RPP_MODIFIERS modifier*) ^(RPP_TYPE paramType));
-
-paramType : type;
+classParam : modifier* ('val' | 'var')? Id ':' paramType -> ^(RPP_CLASSPARAM Id ^(RPP_MODIFIERS modifier*) paramType);
 
 classTemplateOpt : ('extends' Id)? NewLine? templateBody? -> ^(RPP_EXTENDS Id?) ^(RPP_BODY templateBody?);
 
@@ -188,7 +187,7 @@ templateBody : '{'! NewLine!* (templateStat NewLine!*)* '}'!;
 templateStat : 'def' funDef -> funDef
               ;
 
-funDef : funSig ':' type '=' expression -> ^(RPP_FUNC funSig ^(RPP_TYPE type) ^(RPP_EXPR expression))
+funDef : funSig ':' type '=' expression -> ^(RPP_FUNC funSig type ^(RPP_EXPR expression))
     ;
 
 funSig : Id ('(' params? ')')? -> Id ^(RPP_PARAMS params?);
@@ -197,7 +196,13 @@ params : param (','! param)*;
 
 param : Id ':' paramType -> ^(RPP_PARAM Id paramType);
 
-type : primitiveType | Id;
+paramType : type;
+
+type :
+        primitiveType -> ^(RPP_TYPE primitiveType)
+    |   Id  -> ^(RPP_TYPE Id)
+    |   Id  '[' type (',' type)* ']' -> ^(RPP_GENERIC_TYPE Id type*)
+    ;
 
 expression 
 @init
@@ -235,19 +240,19 @@ operator
         |       '-'
         |       '*'
         |       '/'
-        |	'='
-        |	'~'
-        |	'!'
-        ;           
+        |       '='
+        |       '~'
+        |       '!'
+        ;
 
 primaryExpression
-    :	literal
-    |	'('! expression ')'!
-    |	funcCall
-    |	Id	
-    |	'{'! NewLine!* blockExpr NewLine!* '}'!
-    | 	'if' '(' cond=expression ')' thenExpr=expression ('else' elseExpr=expression)? -> ^(RPP_IF $cond ^(RPP_THEN $thenExpr) ^(RPP_ELSE $elseExpr?))
-    |	'while' '(' cond=expression ')' block=expression -> ^(RPP_WHILE $cond ^(RPP_BODY $block))
+    :   literal
+    |   '('! expression ')'!
+    |   funcCall
+    |   Id
+    |   '{'! NewLine!* blockExpr NewLine!* '}'!
+    |   'if' '(' cond=expression ')' thenExpr=expression ('else' elseExpr=expression)? -> ^(RPP_IF $cond ^(RPP_THEN $thenExpr) ^(RPP_ELSE $elseExpr?))
+    |   'while' '(' cond=expression ')' block=expression -> ^(RPP_WHILE $cond ^(RPP_BODY $block))
     ;
 
 funcCall : Id '(' exprs? ')'  -> ^(RPP_FUNC_CALL Id ^(RPP_PARAMS exprs?));
@@ -256,21 +261,23 @@ exprs : expression (',' expression)*;
 
 blockExpr: expression (NewLine! expression)*;
 
-literal : IntegerLiteral
-    |	BooleanLiteral
-    |	FloatingPointLiteral
-    |	'null'
+literal :
+        IntegerLiteral
+    |   BooleanLiteral
+    |   FloatingPointLiteral
+    |   'null'
     ;
 
 primitiveType 
     :   'Bool'
-    |    'Char'
+    |   'Char'
     |   'Byte'
-    |	'Short'
-    |	'Int'
-    |	'Long'
-    |	'Float'
-    |	'Double'
+    |   'Short'
+    |   'Int'
+    |   'Long'
+    |   'Float'
+    |   'Double'
+    |   'Unit'
     ;
 
 

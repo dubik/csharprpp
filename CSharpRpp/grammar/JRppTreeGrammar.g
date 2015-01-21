@@ -75,11 +75,12 @@ params returns [IList<RppParam> list]
     ;
 
 param returns [RppParam node]
-    : ^(RPP_PARAM id=. t=. {$node = new RppParam($id.Text, new RppTypeName($t.Text));})
+    : ^(RPP_PARAM id=. t=type {$node = new RppParam($id.Text, $t.node);})
     ;
 
 type returns [RppType node]
     : ^(RPP_TYPE t=. { node = new RppTypeName($t.Text); })
+    | ^(RPP_GENERIC_TYPE id=. {RppGenericType genericType = new RppGenericType($id.Text); node = genericType;} (subType=type {genericType.AddParam($subType.node);})*)
     ;
 
 expr returns [RppExpr node]

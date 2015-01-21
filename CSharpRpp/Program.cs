@@ -24,7 +24,7 @@ class String(len: Int)
 
 object Main
 {
-    def main(args: Int) : Int = 10
+    def main(args: Array[String]) : Int = 10
 }
 ";
             ANTLRStringStream input = new ANTLRStringStream(code);
@@ -47,6 +47,10 @@ object Main
             program.Save();
 
             /*
+             * Array[String]
+             * Array[Array[String]]
+             * Pair[String, Int]
+             * Pair[String, Array[String]]
             RppProgram  p = new RppProgram();
             RppClass c = new RppClass("Array");
             RppFunc f = new RppFunc();
