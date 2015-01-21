@@ -21,6 +21,11 @@ class Array(k: Int)
 class String(len: Int)
 {
 }
+
+object Main
+{
+    def main(args: Int) : Int = 10
+}
 ";
             ANTLRStringStream input = new ANTLRStringStream(code);
             JRppLexer lexer = new JRppLexer(input);

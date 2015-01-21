@@ -15,9 +15,13 @@ public walk returns [RppProgram program]
 @init {
   program = new RppProgram();
 }
-    :   ^(RPP_PROGRAM (classDef {program.Add($classDef.node);})*)
+    :   ^(RPP_PROGRAM (programDef {program.Add($programDef.node);})*)
     ;
- 
+
+programDef returns [RppClass node]: classDef { node = $classDef.node;}
+    | objectDef { node = $objectDef.node;}
+    ;
+
 classDef returns [RppClass node]
     :   ^(RPP_CLASS id=. { node = new RppClass($id.Text); }
             ^(RPP_FIELDS (c=classParam { node.AddField($c.node); })*)
@@ -26,6 +30,11 @@ classDef returns [RppClass node]
             )
     ;
 
+objectDef returns [RppClass node]
+    :   ^(RPP_OBJECT id=. { node = new RppClass($id.Text); }
+            ^(RPP_BODY templateBody[node]?)
+        )
+    ;
 
 classParam returns [RppField node]
     :   ^(RPP_CLASSPARAM

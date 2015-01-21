@@ -67,24 +67,25 @@ tokens
     TILD = '~';
     NOT = '!';
     RPP_CLASS;
+    RPP_OBJECT;
     RPP_FIELDS;
     RPP_BODY;
-        RPP_CLASSPARAM;
-        RPP_MODIFIERS;
-        RPP_TYPE;
-        RPP_EXTENDS;
-        RPP_FUNC;
-        RPP_FUNC_CALL;
-        RPP_EXPR;
-        RPP_PARAMS;
-        RPP_PARAM;
-        RPP_BINOP;
-        RPP_IF;
-        RPP_THEN;
-        RPP_ELSE;
-        RPP_WHILE;
-        RPP_STATS;
-        RPP_PROGRAM;
+    RPP_CLASSPARAM;
+    RPP_MODIFIERS;
+    RPP_TYPE;
+    RPP_EXTENDS;
+    RPP_FUNC;
+    RPP_FUNC_CALL;
+    RPP_EXPR;
+    RPP_PARAMS;
+    RPP_PARAM;
+    RPP_BINOP;
+    RPP_IF;
+    RPP_THEN;
+    RPP_ELSE;
+    RPP_WHILE;
+    RPP_STATS;
+    RPP_PROGRAM;
 }
 
 @parser::namespace { CSharpRpp }
@@ -163,7 +164,12 @@ topStat : modifier* tmplDef
     ;
 
 modifier : 'private' | 'protected' | 'sealed';
-tmplDef : 'class'! classDef;
+tmplDef : 'class'! classDef
+    | 'object'! objectDef
+    ;
+
+objectDef : Id templateBody -> ^(RPP_OBJECT Id ^(RPP_BODY templateBody?))
+    ;
 
 classDef : Id classParamClause? classTemplateOpt -> ^(RPP_CLASS Id ^(RPP_FIELDS classParamClause?) classTemplateOpt);
 
