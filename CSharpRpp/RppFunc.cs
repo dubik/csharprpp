@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
+    [DebuggerDisplay("Func: {Name}, Return: {_returnType.ToString()}, Params: {_params.Count}")]
     public class RppFunc : RppNamedNode
     {
         private IList<RppParam> _params;
@@ -78,6 +80,7 @@ namespace CSharpRpp
         #endregion
     }
 
+    [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]
     public class RppParam : RppNamedNode
     {
         public Type RuntimeType { get; set; }

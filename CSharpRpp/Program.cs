@@ -13,7 +13,7 @@ namespace CSharpRpp
             const string code = @"
 class Array(k: Int)
 {
-   def apply(index: Int, value: Int) : Unit = 10
+   def apply(index: Int, value: Int) : Unit = 10 + 3
 
    def length: Int = 10
 }

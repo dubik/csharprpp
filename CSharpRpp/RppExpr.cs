@@ -8,9 +8,10 @@ namespace CSharpRpp
         public abstract void Codegen(ILGenerator generator);
     }
 
+    [DebuggerDisplay("Op = {_op}")]
     public class BinOp : RppExpr
     {
-        private string _op;
+        private readonly string _op;
         private RppExpr _left;
         private RppExpr _right;
 
@@ -53,6 +54,7 @@ namespace CSharpRpp
         }
     }
 
+    [DebuggerDisplay("Int: {_value}")]
     public class RppInteger : RppExpr
     {
         private readonly int _value;

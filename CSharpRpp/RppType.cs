@@ -74,6 +74,7 @@ namespace CSharpRpp
         }
     }
 
+    [DebuggerDisplay("{Name}")]
     public class RppTypeName : RppType
     {
         public readonly string Name;
@@ -97,6 +98,11 @@ namespace CSharpRpp
             }
 
             return null;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

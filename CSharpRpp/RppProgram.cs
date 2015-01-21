@@ -29,7 +29,7 @@ namespace CSharpRpp
     {
         public string Name { get; set; }
 
-        private IList<RppClass> _classes = new List<RppClass>();
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppClass> _classes = new List<RppClass>();
         private readonly CodegenContext _context = new CodegenContext();
 
         public void Add(RppClass clazz)

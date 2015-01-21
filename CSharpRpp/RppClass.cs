@@ -7,8 +7,8 @@ namespace CSharpRpp
     [DebuggerDisplay("Name = {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode
     {
-        private IList<RppField> _fields = new List<RppField>();
-        private IList<RppFunc> _funcs = new List<RppFunc>();
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppField> _fields = new List<RppField>();
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppFunc> _funcs = new List<RppFunc>();
         private RppScope _scope;
 
         #region Codegen
