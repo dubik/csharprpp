@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
@@ -67,6 +69,22 @@ namespace CSharpRpp
         public override void Codegen(ILGenerator generator)
         {
             generator.Emit(OpCodes.Ldc_I4, _value);
+        }
+    }
+
+    public class RppFuncCall : RppExpr
+    {
+        private string _funcName;
+        private IList<RppExpr> _paramList;
+
+        public RppFuncCall(string funcName, IList<RppExpr> paramList)
+        {
+            _funcName = funcName;
+            _paramList = paramList;
+        }
+
+        public override void Codegen(ILGenerator generator)
+        {
         }
     }
 }

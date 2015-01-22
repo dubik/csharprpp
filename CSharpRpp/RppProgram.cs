@@ -43,7 +43,17 @@ namespace CSharpRpp
             _context.CreateAssembly(Name);
             _context.CreateModuleBuilder();
 
+            BootstrapRuntime(scope);
+
             NodeUtils.PreAnalyze(scope, _classes);
+        }
+
+        private void BootstrapRuntime(RppScope scope)
+        {
+            foreach (MethodInfo methodInfo in typeof (Runtime).GetMethods(BindingFlags.Static))
+            {
+                methodInfo.GetBaseDefinition();
+            }
         }
 
         public override IRppNode Analyze(RppScope scope)
