@@ -80,6 +80,11 @@ namespace CSharpRpp
         }
 
         #endregion
+
+        public MethodInfo NativeMethodInfo()
+        {
+            return _methodBuilder.GetBaseDefinition();
+        }
     }
 
     [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]

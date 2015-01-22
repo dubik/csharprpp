@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -66,9 +67,23 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.Codegen(ctx));
         }
 
+        public RppFunc FindMain()
+        {
+            return _classes.Where(clazz => clazz.ClassType == ClassType.Object).SelectMany(obj => obj.Functions).First(func => func.Name == "main");
+        }
+
         public void Save()
         {
-            _context.AssemblyBuilder.Save(Name + ".exe");
+            RppFunc func = FindMain();
+            if (func != null)
+            {
+                _context.AssemblyBuilder.SetEntryPoint(func.NativeMethodInfo(), PEFileKinds.ConsoleApplication);
+                _context.AssemblyBuilder.Save(Name + ".exe");
+            }
+            else
+            {
+                _context.AssemblyBuilder.Save(Name + ".dll");
+            }
         }
     }
 }

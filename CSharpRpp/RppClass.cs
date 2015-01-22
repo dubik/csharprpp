@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
@@ -18,6 +19,11 @@ namespace CSharpRpp
         private RppScope _scope;
 
         public ClassType ClassType { get; private set; }
+
+        public IEnumerable<RppFunc> Functions
+        {
+            get { return _funcs.AsEnumerable(); }
+        }
 
         #region Codegen
 
