@@ -265,6 +265,7 @@ literal :
         IntegerLiteral
     |   BooleanLiteral
     |   FloatingPointLiteral
+    |   StringLiteral
     |   'null'
     ;
 
@@ -290,7 +291,12 @@ FloatingPointLiteral
                  :  Digit+ '.' Digit+ ExponentPart? FloatType?
                  |  '.' Digit+ ExponentPart? FloatType?
                  ;
- 
+StringLiteral :
+              '"' StringElement* '"'
+              ;
+
+fragment StringElement : '\u0020'| '\u0021'|'\u0023' .. '\u007F' | CharEscapeSeq;
+
 fragment DecimalNumber: Digit+;
 fragment HexNumeral : '0' 'x' HexDigit+;
 fragment HexDigit :  '0' .. '9'  |  'A' .. 'F'  |  'a' .. 'f' ;
@@ -298,5 +304,7 @@ fragment FloatType        :  'F' | 'f' | 'D' | 'd';
 fragment ExponentPart     :  ('E' | 'e') ('+' | '-')? Digit+;
 fragment Digit : '0' | NonZeroDigit;
 fragment NonZeroDigit : '1' .. '9';
+fragment PrintableChar    : '\u0020' .. '\u007F' ;
+fragment CharEscapeSeq    : '\\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\');
 
 WS : ( '\t' | ' ' | '\u000C' )+ { $channel = Antlr.Runtime.TokenChannels.Hidden; } ;

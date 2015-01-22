@@ -24,7 +24,9 @@ class String(len: Int)
 
 object Main
 {
-    def main(args: Array[String]) : Int = 10
+    def main(args: Array[String]) : Int = {
+        println(""Hello World"")
+    }
 }
 ";
             ANTLRStringStream input = new ANTLRStringStream(code);
