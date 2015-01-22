@@ -15,6 +15,8 @@ namespace CSharpRpp
         private RppExpr _expr;
         private RppScope _scope;
 
+        public bool Static { get; set; }
+
         #region Codegen
 
         private MethodBuilder _methodBuilder;
@@ -51,7 +53,7 @@ namespace CSharpRpp
 
         public void CodegenMethodStubs(TypeBuilder typeBuilder)
         {
-            _methodBuilder = typeBuilder.DefineMethod(Name, MethodAttributes.Public);
+            _methodBuilder = typeBuilder.DefineMethod(Name, MethodAttributes.Public | MethodAttributes.Static);
         }
 
         public void Codegen(CodegenContext ctx)

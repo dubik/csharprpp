@@ -4,6 +4,12 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
+    public enum ClassType
+    {
+        Class,
+        Object
+    }
+
     [DebuggerDisplay("Name = {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode
     {
@@ -11,14 +17,17 @@ namespace CSharpRpp
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppFunc> _funcs = new List<RppFunc>();
         private RppScope _scope;
 
+        public ClassType ClassType { get; private set; }
+
         #region Codegen
 
         private TypeBuilder _typeBuilder;
 
         #endregion
 
-        public RppClass(string name) : base(name)
+        public RppClass(string name, ClassType classType) : base(name)
         {
+            ClassType = classType;
         }
 
         public void AddField(RppField field)
@@ -28,6 +37,11 @@ namespace CSharpRpp
 
         public void AddFunc(RppFunc func)
         {
+            if (ClassType == ClassType.Object)
+            {
+                func.Static = true;
+            }
+
             _funcs.Add(func);
         }
 

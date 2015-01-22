@@ -32,7 +32,7 @@ object Main
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             JRppParser parser = new JRppParser(tokens);
             var result = parser.compilationUnit();
-            var s = (result.Tree as CommonTree).ToStringTree();
+            var s = ((CommonTree) result.Tree).ToStringTree();
             CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result.Tree);
             JRppTreeGrammar walker = new JRppTreeGrammar(treeNodeStream);
             RppProgram program = walker.walk();

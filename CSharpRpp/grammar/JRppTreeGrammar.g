@@ -23,7 +23,7 @@ programDef returns [RppClass node]: classDef { node = $classDef.node;}
     ;
 
 classDef returns [RppClass node]
-    :   ^(RPP_CLASS id=. { node = new RppClass($id.Text); }
+    :   ^(RPP_CLASS id=. { node = new RppClass($id.Text, ClassType.Class); }
             ^(RPP_FIELDS (c=classParam { node.AddField($c.node); })*)
             ^(RPP_EXTENDS (t=. { node.SetExtends($t.Text); })? )
             ^(RPP_BODY templateBody[node]?)
@@ -31,7 +31,7 @@ classDef returns [RppClass node]
     ;
 
 objectDef returns [RppClass node]
-    :   ^(RPP_OBJECT id=. { node = new RppClass($id.Text); }
+    :   ^(RPP_OBJECT id=. { node = new RppClass($id.Text, ClassType.Object); }
             ^(RPP_BODY templateBody[node]?)
         )
     ;
