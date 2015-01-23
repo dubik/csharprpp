@@ -7,6 +7,17 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
+    public interface IRppFunc
+    {
+        string Name { get; }
+        RppType ReturnType { get; }
+        IRppParam[] Params { get; }
+
+        bool IsStatic { get; }
+        bool IsPublic { get; }
+        bool IsAbstract { get; }
+    }
+
     [DebuggerDisplay("Func: {Name}, Return: {_returnType.ToString()}, Params: {_params.Count}")]
     public class RppFunc : RppNamedNode
     {
@@ -87,20 +98,26 @@ namespace CSharpRpp
         }
     }
 
-    [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]
-    public class RppParam : RppNamedNode
+    public interface IRppParam
     {
+        string Name { get; }
+        RppType Type { get; }
+    }
+
+    [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]
+    public class RppParam : RppNamedNode, IRppParam
+    {
+        public RppType Type { get; private set; }
         public Type RuntimeType { get; set; }
-        private readonly RppType _type;
 
         public RppParam(string name, RppType type) : base(name)
         {
-            _type = type;
+            Type = type;
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            RuntimeType = _type.Resolve(scope);
+            RuntimeType = Type.Resolve(scope);
             return this;
         }
     }

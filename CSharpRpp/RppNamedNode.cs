@@ -2,7 +2,7 @@
 {
     public abstract class RppNamedNode : RppNode
     {
-        public readonly string Name;
+        public string Name { get; private set; }
 
         protected RppNamedNode(string name)
         {

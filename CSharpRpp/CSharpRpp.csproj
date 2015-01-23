@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,6 +63,8 @@
     <Compile Include="RppField.cs" />
     <Compile Include="RppFunc.cs" />
     <Compile Include="RppNamedNode.cs" />
+    <Compile Include="Native\RppNativeParam.cs" />
+    <Compile Include="Native\RppNativeFunc.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />
     <Compile Include="RppType.cs" />
@@ -78,6 +81,12 @@
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RppRuntime\RppRuntime.csproj">
+      <Project>{05D46799-2874-40DE-966B-A49B50EEB74E}</Project>
+      <Name>RppRuntime</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

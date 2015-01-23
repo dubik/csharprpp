@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using RppRuntime;
 
 namespace CSharpRpp
 {
@@ -30,6 +31,11 @@ namespace CSharpRpp
     {
         public string Name { get; set; }
 
+        public IEnumerable<RppClass> Classes
+        {
+            get { return _classes.AsEnumerable(); }
+        }
+
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppClass> _classes = new List<RppClass>();
         private readonly CodegenContext _context = new CodegenContext();
 
@@ -46,6 +52,10 @@ namespace CSharpRpp
             BootstrapRuntime(scope);
 
             NodeUtils.PreAnalyze(scope, _classes);
+        }
+
+        public void AddRuntime()
+        {
         }
 
         private void BootstrapRuntime(RppScope scope)

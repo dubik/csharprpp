@@ -96,10 +96,31 @@ namespace CLRCodeGen
 
         public static void Print()
         {
+
             Console.WriteLine("Moika");
 
             string res = "hello";
             Console.WriteLine(res);
+        }
+
+        class Moika
+        {
+            private string some;
+
+            public Moika(string some)
+            {
+                this.some = some;
+            }
+
+            public void println()
+            {
+                Console.WriteLine(some);
+            }
+
+            public static void printSomething(string some)
+            {
+                Console.WriteLine(some);
+            }
         }
 
         private static void Main(String[] args)
@@ -107,6 +128,14 @@ namespace CLRCodeGen
             int l = args.Length;
             String item = args[0];
             CreateObjects();
+            CreateCall();
+        }
+
+        private static void CreateCall()
+        {
+            Moika m = new Moika("Hello");
+            m.println();
+            Moika.printSomething("Moika");
         }
     }
 }

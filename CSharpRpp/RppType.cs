@@ -23,6 +23,26 @@ namespace CSharpRpp
         public abstract Type Resolve(RppScope scope);
     }
 
+    public class RppNativeType : RppType
+    {
+        private readonly Type _type;
+
+        public static RppNativeType Create(Type type)
+        {
+            return new RppNativeType(type);
+        }
+
+        public RppNativeType(Type type)
+        {
+            _type = type;
+        }
+
+        public override Type Resolve(RppScope scope)
+        {
+            return _type;
+        }
+    }
+
     public class RppPrimitiveType : RppType
     {
         public readonly ERppPrimitiveType PrimitiveType;
