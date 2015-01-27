@@ -6,7 +6,7 @@ namespace CSharpRpp
 {
     class NodeUtils
     {
-        public static T Analyze<T>(RppScope scope, T node) where T : class, IRppNode
+        public static T AnalyzeNode<T>(RppScope scope, T node) where T : class, IRppNode
         {
             T analyzedNode = node.Analyze(scope) as T;
             Debug.Assert(analyzedNode != null);

@@ -6,16 +6,16 @@ namespace CSharpRpp
     public class RppScope
     {
         private readonly RppScope _parentScope;
-        private readonly Dictionary<string, RppNamedNode> _entities = new Dictionary<string, RppNamedNode>();
+        private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
 
         public RppScope(RppScope parentScope)
         {
             _parentScope = parentScope;
         }
 
-        public RppNamedNode Lookup(string name)
+        public IRppNamedNode Lookup(string name)
         {
-            RppNamedNode node;
+            IRppNamedNode node;
             if (_entities.TryGetValue(name, out node))
             {
                 return node;
@@ -24,7 +24,7 @@ namespace CSharpRpp
             return _parentScope != null ? _parentScope.Lookup(name) : null;
         }
 
-        public void Add(RppNamedNode node)
+        public void Add(IRppNamedNode node)
         {
             if (_entities.ContainsKey(node.Name))
             {

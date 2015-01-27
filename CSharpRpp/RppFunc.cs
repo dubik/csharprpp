@@ -7,38 +7,46 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public interface IRppFunc
+    public interface IRppFunc : IRppNode, IRppNamedNode
     {
-        string Name { get; }
+        MethodInfo RuntimeFuncInfo { get; }
+
         RppType ReturnType { get; }
+        Type RuntimeReturnType { get; }
         IRppParam[] Params { get; }
 
-        bool IsStatic { get; }
-        bool IsPublic { get; }
-        bool IsAbstract { get; }
+        bool IsStatic { get; set; }
+        bool IsPublic { get; set; }
+        bool IsAbstract { get; set; }
+
+        void CodegenMethodStubs(TypeBuilder typeBuilder);
+        void Codegen(CodegenContext ctx);
     }
 
     [DebuggerDisplay("Func: {Name}, Return: {_returnType.ToString()}, Params: {_params.Count}")]
-    public class RppFunc : RppNamedNode
+    public class RppFunc : RppNamedNode, IRppFunc
     {
-        private IList<RppParam> _params;
-        private readonly RppType _returnType;
         private RppExpr _expr;
         private RppScope _scope;
 
-        public bool Static { get; set; }
+        public RppType ReturnType { get; private set; }
+        public Type RuntimeReturnType { get; private set; }
+        public IRppParam[] Params { get; private set; }
+
+        public bool IsStatic { get; set; }
+        public bool IsPublic { get; set; }
+        public bool IsAbstract { get; set; }
 
         #region Codegen
 
         private MethodBuilder _methodBuilder;
-        private Type _runtimeReturnType;
 
         #endregion
 
-        public RppFunc(string name, IList<RppParam> funcParams, RppType returnType, RppExpr expr) : base(name)
+        public RppFunc(string name, IEnumerable<IRppParam> funcParams, RppType returnType, RppExpr expr) : base(name)
         {
-            _params = funcParams;
-            _returnType = returnType;
+            Params = funcParams.ToArray();
+            ReturnType = returnType;
             _expr = expr;
         }
 
@@ -46,7 +54,6 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
 
-            NodeUtils.PreAnalyze(_scope, _params);
             if (_expr != null)
             {
                 _expr.PreAnalyze(_scope);
@@ -55,18 +62,23 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _params = NodeUtils.Analyze(_scope, _params);
+            Params = NodeUtils.Analyze(_scope, Params).ToArray();
             if (_expr != null)
             {
-                _expr = NodeUtils.Analyze(_scope, _expr);
+                _expr = NodeUtils.AnalyzeNode(_scope, _expr);
             }
 
-            _runtimeReturnType = _returnType.Resolve(_scope);
+            RuntimeReturnType = ReturnType.Resolve(_scope);
 
             return this;
         }
 
         #region Codegen
+
+        public MethodInfo RuntimeFuncInfo
+        {
+            get { return _methodBuilder.GetBaseDefinition(); }
+        }
 
         public void CodegenMethodStubs(TypeBuilder typeBuilder)
         {
@@ -75,8 +87,8 @@ namespace CSharpRpp
 
         public void Codegen(CodegenContext ctx)
         {
-            _methodBuilder.SetReturnType(_runtimeReturnType);
-            CodegenParams(_params, _methodBuilder);
+            _methodBuilder.SetReturnType(RuntimeReturnType);
+            CodegenParams(Params, _methodBuilder);
 
             ILGenerator generator = _methodBuilder.GetILGenerator();
             if (_expr != null)
@@ -84,7 +96,7 @@ namespace CSharpRpp
                 _expr.Codegen(generator);
             }
 
-            if (_runtimeReturnType == typeof (void))
+            if (RuntimeReturnType == typeof (void))
             {
                 generator.Emit(OpCodes.Pop);
             }
@@ -92,7 +104,7 @@ namespace CSharpRpp
             generator.Emit(OpCodes.Ret);
         }
 
-        private static void CodegenParams(IEnumerable<RppParam> paramList, MethodBuilder methodBuilder)
+        private static void CodegenParams(IEnumerable<IRppParam> paramList, MethodBuilder methodBuilder)
         {
             Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
             methodBuilder.SetParameters(parameterTypes);
@@ -107,17 +119,18 @@ namespace CSharpRpp
         }
     }
 
-    public interface IRppParam
+    public interface IRppParam : IRppNode
     {
         string Name { get; }
         RppType Type { get; }
+        Type RuntimeType { get; }
     }
 
     [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]
     public class RppParam : RppNamedNode, IRppParam
     {
         public RppType Type { get; private set; }
-        public Type RuntimeType { get; set; }
+        public Type RuntimeType { get; private set; }
 
         public RppParam(string name, RppType type) : base(name)
         {

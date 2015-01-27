@@ -1,6 +1,11 @@
 ﻿namespace CSharpRpp
 {
-    public abstract class RppNamedNode : RppNode
+    public interface IRppNamedNode
+    {
+        string Name { get; }
+    }
+
+    public abstract class RppNamedNode : RppNode, IRppNamedNode
     {
         public string Name { get; private set; }
 

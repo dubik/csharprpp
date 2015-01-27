@@ -11,16 +11,22 @@ namespace CSharpRpp
         Object
     }
 
+    public interface IRppClass
+    {
+        string Name { get; }
+        IEnumerable<IRppFunc> Functions { get; }
+    }
+
     [DebuggerDisplay("Name = {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
-    public class RppClass : RppNamedNode
+    public class RppClass : RppNamedNode, IRppClass
     {
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppField> _fields = new List<RppField>();
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppFunc> _funcs = new List<RppFunc>();
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<IRppFunc> _funcs = new List<IRppFunc>();
         private RppScope _scope;
 
         public ClassType ClassType { get; private set; }
 
-        public IEnumerable<RppFunc> Functions
+        public IEnumerable<IRppFunc> Functions
         {
             get { return _funcs.AsEnumerable(); }
         }
@@ -41,11 +47,11 @@ namespace CSharpRpp
             _fields.Add(field);
         }
 
-        public void AddFunc(RppFunc func)
+        public void AddFunc(IRppFunc func)
         {
             if (ClassType == ClassType.Object)
             {
-                func.Static = true;
+                func.IsStatic = true;
             }
 
             _funcs.Add(func);

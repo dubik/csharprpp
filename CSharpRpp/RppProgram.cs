@@ -87,17 +87,17 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.Codegen(ctx));
         }
 
-        public RppFunc FindMain()
+        public IRppFunc FindMain()
         {
             return _classes.Where(clazz => clazz.ClassType == ClassType.Object).SelectMany(obj => obj.Functions).First(func => func.Name == "main");
         }
 
         public void Save()
         {
-            RppFunc func = FindMain();
+            IRppFunc func = FindMain();
             if (func != null)
             {
-                _context.AssemblyBuilder.SetEntryPoint(func.NativeMethodInfo(), PEFileKinds.ConsoleApplication);
+                _context.AssemblyBuilder.SetEntryPoint(func.RuntimeFuncInfo, PEFileKinds.ConsoleApplication);
                 _context.AssemblyBuilder.Save(Name + ".exe");
             }
             else
