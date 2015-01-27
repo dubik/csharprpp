@@ -47,13 +47,19 @@ namespace CSharpRpp
             _scope = new RppScope(scope);
 
             NodeUtils.PreAnalyze(_scope, _params);
-            _expr.PreAnalyze(_scope);
+            if (_expr != null)
+            {
+                _expr.PreAnalyze(_scope);
+            }
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             _params = NodeUtils.Analyze(_scope, _params);
-            _expr = NodeUtils.Analyze(_scope, _expr);
+            if (_expr != null)
+            {
+                _expr = NodeUtils.Analyze(_scope, _expr);
+            }
 
             _runtimeReturnType = _returnType.Resolve(_scope);
 
@@ -73,7 +79,10 @@ namespace CSharpRpp
             CodegenParams(_params, _methodBuilder);
 
             ILGenerator generator = _methodBuilder.GetILGenerator();
-            _expr.Codegen(generator);
+            if (_expr != null)
+            {
+                _expr.Codegen(generator);
+            }
 
             if (_runtimeReturnType == typeof (void))
             {
