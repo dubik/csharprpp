@@ -5,15 +5,14 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public enum ClassType
+    public enum ClassKind
     {
         Class,
         Object
     }
 
-    public interface IRppClass
+    public interface IRppClass : IRppNamedNode
     {
-        string Name { get; }
         IEnumerable<IRppFunc> Functions { get; }
     }
 
@@ -24,7 +23,7 @@ namespace CSharpRpp
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<IRppFunc> _funcs = new List<IRppFunc>();
         private RppScope _scope;
 
-        public ClassType ClassType { get; private set; }
+        public ClassKind Kind { get; private set; }
 
         public IEnumerable<IRppFunc> Functions
         {
@@ -37,9 +36,9 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppClass(string name, ClassType classType) : base(name)
+        public RppClass(string name, ClassKind kind) : base(name)
         {
-            ClassType = classType;
+            Kind = kind;
         }
 
         public void AddField(RppField field)
@@ -49,7 +48,7 @@ namespace CSharpRpp
 
         public void AddFunc(IRppFunc func)
         {
-            if (ClassType == ClassType.Object)
+            if (Kind == ClassKind.Object)
             {
                 func.IsStatic = true;
             }

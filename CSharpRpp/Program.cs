@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using Antlr.Runtime;
 using Antlr.Runtime.Tree;
+using CSharpRpp.Native;
 using RppRuntime;
 
 [assembly: CLSCompliant(true)]
@@ -79,11 +80,8 @@ object Main
                 Type matchingType;
                 if (typesMap.TryGetValue(clazz.Name, out matchingType))
                 {
-                    scope.Add(clazz);
-
-                    foreach (RppFunc func in clazz.Functions)
-                    {
-                    }
+                    IRppClass runtimeClass = new RppNativeClass(matchingType);
+                    scope.Add(runtimeClass);
                 }
                 else
                 {
