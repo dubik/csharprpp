@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
 
@@ -72,15 +71,37 @@ namespace CSharpRpp
         }
     }
 
+    [DebuggerDisplay("String: {_value}")]
+    public class RppString : RppExpr
+    {
+        private readonly string _value;
+
+        public RppString(string valueStr)
+        {
+            _value = valueStr;
+        }
+
+        public override void Codegen(ILGenerator generator)
+        {
+            generator.Emit(OpCodes.Ldstr, _value);
+        }
+    }
+
+    [DebuggerDisplay("FuncCall - Name: {_funcName}, Params: {_paramList.Count}")]
     public class RppFuncCall : RppExpr
     {
-        private string _funcName;
+        private readonly string _funcName;
         private IList<RppExpr> _paramList;
 
         public RppFuncCall(string funcName, IList<RppExpr> paramList)
         {
             _funcName = funcName;
             _paramList = paramList;
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            IRppNamedNode node = scope.Lookup(_funcName);
         }
 
         public override void Codegen(ILGenerator generator)

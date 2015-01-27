@@ -87,8 +87,17 @@ expr returns [RppExpr node]
     : ^(RPP_EXPR expression) { node = $expression.node; }
     ;
 
+args returns [IList<RppExpr> list]
+@init {
+	list = new List<RppExpr>();
+}
+	: ^(RPP_PARAMS (e=expression {list.Add($e.node);})*)
+	;
+
 expression returns [RppExpr node]
     : ^('+' a=expression b=expression)  { node = new BinOp("+", $a.node, $b.node); }
     | ^('-' a=expression b=expression)  { node = new BinOp("-", $a.node, $b.node); }
+	| ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
+	| StringLiteral { node = new RppString($StringLiteral.text); }
     ;
