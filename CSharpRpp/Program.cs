@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using Antlr.Runtime;
 using Antlr.Runtime.Tree;
@@ -38,8 +35,8 @@ class String(len: Int)
 
 object Main
 {
-    def main(args: Array[String]) : Int = {
-        println(""Hello World"")
+    def main(args: Array[String]) : Unit = {
+        println(""Hello World!!! Moika moika!!!"")
     }
 }
 ";
@@ -48,7 +45,7 @@ object Main
             WireRuntime(runtime.Classes, runtimeScope);
             RppProgram program = Compile(code);
             program.Name = "Sample";
-            RppScope scope = new RppScope(null);
+            RppScope scope = new RppScope(runtimeScope);
             CodegenContext codegenContext = new CodegenContext();
             program.PreAnalyze(scope);
             program.CodegenType(scope);
@@ -82,12 +79,21 @@ object Main
                 {
                     IRppClass runtimeClass = new RppNativeClass(matchingType);
                     scope.Add(runtimeClass);
+                    if (runtimeClass.Name == "Runtime")
+                    {
+                        AddFunctionsToScope(runtimeClass.Functions, scope);
+                    }
                 }
                 else
                 {
                     throw new Exception(string.Format("Can't find {0} class from runtime assembly", clazz.Name));
                 }
             }
+        }
+
+        private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, RppScope scope)
+        {
+            funcs.ForEach(scope.Add);
         }
 
         private static Assembly GetRuntimeAssembly()

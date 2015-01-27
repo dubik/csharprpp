@@ -89,7 +89,10 @@ namespace CSharpRpp
 
         public IRppFunc FindMain()
         {
-            return _classes.Where(clazz => clazz.Kind == ClassKind.Object).SelectMany(obj => obj.Functions).First(func => func.Name == "main");
+            return
+                _classes.Where(clazz => clazz.Kind == ClassKind.Object)
+                    .SelectMany(obj => obj.Functions)
+                    .First(func => func.Name == "main");
         }
 
         public void Save()

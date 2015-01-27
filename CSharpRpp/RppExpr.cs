@@ -91,7 +91,8 @@ namespace CSharpRpp
     public class RppFuncCall : RppExpr
     {
         private readonly string _funcName;
-        private IList<RppExpr> _paramList;
+        private readonly IList<RppExpr> _paramList;
+        private IRppFunc _func;
 
         public RppFuncCall(string funcName, IList<RppExpr> paramList)
         {
@@ -101,11 +102,15 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            IRppNamedNode node = scope.Lookup(_funcName);
+            _func = scope.Lookup(_funcName) as IRppFunc;
+            Debug.Assert(_func != null);
+            return this;
         }
 
         public override void Codegen(ILGenerator generator)
         {
+            _paramList.ForEach(p => p.Codegen(generator));
+            generator.Emit(OpCodes.Call, _func.RuntimeFuncInfo);
         }
     }
 }

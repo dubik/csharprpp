@@ -98,7 +98,7 @@ namespace CSharpRpp
 
             if (RuntimeReturnType == typeof (void))
             {
-                generator.Emit(OpCodes.Pop);
+                //generator.Emit(OpCodes.Pop);
             }
 
             generator.Emit(OpCodes.Ret);
