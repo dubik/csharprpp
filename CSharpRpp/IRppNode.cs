@@ -19,5 +19,4 @@ namespace CSharpRpp
             return this;
         }
     }
-
 }

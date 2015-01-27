@@ -26,7 +26,6 @@ namespace CSharpRpp
 
         public void Codegen(CodegenContext ctx)
         {
-            
         }
     }
 }

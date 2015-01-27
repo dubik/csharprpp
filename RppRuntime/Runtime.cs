@@ -10,5 +10,6 @@ namespace RppRuntime
             Console.WriteLine(line);
         }
     }
+
     // ReSharper restore InconsistentNaming
 }
