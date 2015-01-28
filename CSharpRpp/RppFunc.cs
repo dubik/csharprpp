@@ -26,7 +26,7 @@ namespace CSharpRpp
     [DebuggerDisplay("Func: {Name}, Return: {_returnType.ToString()}, Params: {_params.Count}")]
     public class RppFunc : RppNamedNode, IRppFunc
     {
-        private RppExpr _expr;
+        private IRppExpr _expr;
         private RppScope _scope;
 
         public RppType ReturnType { get; private set; }
@@ -43,30 +43,24 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppFunc(string name, IEnumerable<IRppParam> funcParams, RppType returnType, RppExpr expr) : base(name)
+        public RppFunc(string name, IEnumerable<IRppParam> funcParams, RppType returnType, IRppExpr expr) : base(name)
         {
             Params = funcParams.ToArray();
             ReturnType = returnType;
-            _expr = expr;
+            _expr = expr != null ? expr : new RppEmptyExpr();
         }
 
         public override void PreAnalyze(RppScope scope)
         {
             _scope = new RppScope(scope);
 
-            if (_expr != null)
-            {
-                _expr.PreAnalyze(_scope);
-            }
+            _expr.PreAnalyze(_scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             Params = NodeUtils.Analyze(_scope, Params).ToArray();
-            if (_expr != null)
-            {
-                _expr = NodeUtils.AnalyzeNode(_scope, _expr);
-            }
+            _expr = NodeUtils.AnalyzeNode(_scope, _expr);
 
             RuntimeReturnType = ReturnType.Resolve(_scope);
 
@@ -91,14 +85,11 @@ namespace CSharpRpp
             CodegenParams(Params, _methodBuilder);
 
             ILGenerator generator = _methodBuilder.GetILGenerator();
-            if (_expr != null)
-            {
-                _expr.Codegen(generator);
-            }
+            _expr.Codegen(generator);
 
-            if (RuntimeReturnType == typeof (void))
+            if (RuntimeReturnType == typeof (void) && _expr.RuntimeType != typeof (void))
             {
-                //generator.Emit(OpCodes.Pop);
+                generator.Emit(OpCodes.Pop);
             }
 
             generator.Emit(OpCodes.Ret);

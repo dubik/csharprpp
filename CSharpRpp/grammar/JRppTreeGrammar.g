@@ -83,21 +83,22 @@ type returns [RppType node]
     | ^(RPP_GENERIC_TYPE id=. {RppGenericType genericType = new RppGenericType($id.Text); node = genericType;} (subType=type {genericType.AddParam($subType.node);})*)
     ;
 
-expr returns [RppExpr node]
+expr returns [IRppExpr node]
     : ^(RPP_EXPR expression) { node = $expression.node; }
     ;
 
-args returns [IList<RppExpr> list]
+args returns [IList<IRppExpr> list]
 @init {
-	list = new List<RppExpr>();
+    list = new List<IRppExpr>();
 }
-	: ^(RPP_PARAMS (e=expression {list.Add($e.node);})*)
-	;
+    : ^(RPP_PARAMS (e=expression {list.Add($e.node);})*)
+    ;
 
-expression returns [RppExpr node]
+expression returns [IRppExpr node]
     : ^('+' a=expression b=expression)  { node = new BinOp("+", $a.node, $b.node); }
     | ^('-' a=expression b=expression)  { node = new BinOp("-", $a.node, $b.node); }
-	| ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
+    | ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
-	| StringLiteral { node = new RppString($StringLiteral.text); }
+    | StringLiteral { node = new RppString($StringLiteral.text); }
+    | ^(RPP_BLOCK_EXPR {var exprs = new List<IRppExpr>();} (e=expression {exprs.Add($e.node);} )*) { node = new RppBlockExpr(exprs); }
     ;

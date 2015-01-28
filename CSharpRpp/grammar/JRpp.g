@@ -77,6 +77,7 @@ tokens
     RPP_FUNC;
     RPP_FUNC_CALL;
     RPP_EXPR;
+    RPP_BLOCK_EXPR;
     RPP_PARAMS;
     RPP_PARAM;
     RPP_BINOP;
@@ -229,12 +230,8 @@ expression
                         }
                 )*
                 -> {createPrecedenceTree(expressions,operators)}
-        ; primary:
-    '('! expression ')'!
-    | literal
-    | Id
-    ;
-    
+        ;
+
 operator
         :       '+'
         |       '-'
@@ -250,7 +247,7 @@ primaryExpression
     |   '('! expression ')'!
     |   funcCall
     |   Id
-    |   '{'! NewLine!* blockExpr NewLine!* '}'!
+    |   '{' NewLine* (block=blockExpr NewLine*)? '}' -> ^(RPP_BLOCK_EXPR $block?)
     |   'if' '(' cond=expression ')' thenExpr=expression ('else' elseExpr=expression)? -> ^(RPP_IF $cond ^(RPP_THEN $thenExpr) ^(RPP_ELSE $elseExpr?))
     |   'while' '(' cond=expression ')' block=expression -> ^(RPP_WHILE $cond ^(RPP_BODY $block))
     ;

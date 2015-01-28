@@ -35,8 +35,9 @@ class String(len: Int)
 
 object Main
 {
-    def main(args: Array[String]) : Unit = {
+    def main(args: Array[String]) : Int = {
         println(""Hello World!!! Moika moika!!!"")
+        0
     }
 }
 ";
