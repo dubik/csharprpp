@@ -111,14 +111,12 @@ namespace CSharpRpp
         }
     }
 
-    public interface IRppParam : IRppNode, IRppNamedNode
+    public interface IRppParam : IRppNamedNode, IRppExpr
     {
-        RppType Type { get; }
-        Type RuntimeType { get; }
     }
 
     [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
-    public class RppParam : RppNamedNode, IRppParam, IRppExpr
+    public class RppParam : RppNamedNode, IRppParam
     {
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }

@@ -39,7 +39,7 @@ object Main
 
     def main(args: Array[String]) : Int = {
         println(""Hello World!!! Moika moika!!!"")
-        0
+        calculate(10, 5)
     }
 }
 ";

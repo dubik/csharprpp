@@ -254,7 +254,7 @@ primaryExpression
 
 funcCall : Id '(' exprs? ')'  -> ^(RPP_FUNC_CALL Id ^(RPP_PARAMS exprs?));
 
-exprs : expression (',' expression)*;
+exprs : expression (','! expression)*;
 
 blockExpr: expression (NewLine! expression)*;
 

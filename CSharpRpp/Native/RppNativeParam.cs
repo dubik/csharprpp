@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Emit;
 
 namespace CSharpRpp.Native
 {
@@ -11,6 +12,11 @@ namespace CSharpRpp.Native
         {
             Type = new RppNativeType(paramType);
             RuntimeType = paramType;
+        }
+
+        public void Codegen(ILGenerator generator)
+        {
+            throw new NotImplementedException();
         }
     }
 }

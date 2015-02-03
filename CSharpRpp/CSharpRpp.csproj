@@ -69,7 +69,6 @@
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />
     <Compile Include="RppType.cs" />
-    <Compile Include="Runtime.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
