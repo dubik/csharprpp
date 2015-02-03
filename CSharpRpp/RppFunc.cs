@@ -47,7 +47,7 @@ namespace CSharpRpp
         {
             Params = funcParams.ToArray();
             ReturnType = returnType;
-            _expr = expr != null ? expr : new RppEmptyExpr();
+            _expr = expr ?? new RppEmptyExpr();
         }
 
         public override void PreAnalyze(RppScope scope)

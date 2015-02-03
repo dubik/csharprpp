@@ -106,7 +106,7 @@ namespace CSharpRpp
 
         public RppString(string valueStr)
         {
-            _value = valueStr;
+            _value = stripQuotes(valueStr);
             RuntimeType = typeof (string);
             Type = new RppNativeType(RuntimeType);
         }
@@ -114,6 +114,16 @@ namespace CSharpRpp
         public void Codegen(ILGenerator generator)
         {
             generator.Emit(OpCodes.Ldstr, _value);
+        }
+
+        private string stripQuotes(string str)
+        {
+            if (str.Length > 1 && str[0] == '"' && str[str.Length - 1] == '"')
+            {
+                return str.Substring(1, str.Length - 2);
+            }
+
+            return str;
         }
     }
 

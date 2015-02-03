@@ -1,6 +1,4 @@
-﻿using System.Reflection.Emit;
-
-namespace CSharpRpp
+﻿namespace CSharpRpp
 {
     public interface IRppNode
     {
