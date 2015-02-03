@@ -29,6 +29,11 @@ class Array(k: Int)
    def length: Int = 10
 }
 
+class Foo
+{
+    def calculate(k : Int) = 10
+}
+
 class String(len: Int)
 {
 }
@@ -38,7 +43,8 @@ object Main
     def calculate(x : Int, y : Int) : Int = x + y
 
     def main(args: Array[String]) : Int = {
-        println(""Hello World!!! Moika moika!!!"")
+        val k : Foo = new Foo
+        println(""Hello World!!! Moika mo''ika!!!"")
         calculate(10, 5)
     }
 }

@@ -88,6 +88,8 @@ tokens
     RPP_STATS;
     RPP_PROGRAM;
     RPP_GENERIC_TYPE;
+    RPP_NEW;
+    RPP_PAT_DEF;
 }
 
 @parser::namespace { CSharpRpp }
@@ -176,7 +178,7 @@ objectDef : Id templateBody -> ^(RPP_OBJECT Id ^(RPP_BODY templateBody?))
 classDef : Id classParamClause? classTemplateOpt -> ^(RPP_CLASS Id ^(RPP_FIELDS classParamClause?) classTemplateOpt);
 
 classParamClause : '('! classParams? ')'!;
- 
+
 classParams : classParam (',' classParam)*;
 
 classParam : modifier* ('val' | 'var')? Id ':' paramType -> ^(RPP_CLASSPARAM Id ^(RPP_MODIFIERS modifier*) paramType);
@@ -250,13 +252,22 @@ primaryExpression
     |   '{' NewLine* (block=blockExpr NewLine*)? '}' -> ^(RPP_BLOCK_EXPR $block?)
     |   'if' '(' cond=expression ')' thenExpr=expression ('else' elseExpr=expression)? -> ^(RPP_IF $cond ^(RPP_THEN $thenExpr) ^(RPP_ELSE $elseExpr?))
     |   'while' '(' cond=expression ')' block=expression -> ^(RPP_WHILE $cond ^(RPP_BODY $block))
+    |   'new' Id ('(' exprs ')')? -> ^(RPP_NEW Id (^(RPP_PARAMS exprs))?)
     ;
 
 funcCall : Id '(' exprs? ')'  -> ^(RPP_FUNC_CALL Id ^(RPP_PARAMS exprs?));
 
 exprs : expression (','! expression)*;
 
-blockExpr: expression (NewLine! expression)*;
+blockExpr: blockExprItem (NewLine! blockExprItem)*;
+
+blockExprItem:
+      expression
+    | pat_def
+    ;
+
+pat_def : decl Id (',' Id)* ':' type '=' expression -> ^(RPP_PAT_DEF decl Id+ type expression)
+        ;
 
 literal :
         IntegerLiteral
@@ -278,6 +289,7 @@ primitiveType
     |   'Unit'
     ;
 
+decl : 'val' | 'var';
 
 BooleanLiteral   :  'true' | 'false';
 Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 

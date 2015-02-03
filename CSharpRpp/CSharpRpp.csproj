@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="expr\RppNew.cs" />
     <Compile Include="IRppNode.cs" />
     <Compile Include="native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
@@ -66,9 +67,11 @@
     <Compile Include="RppNamedNode.cs" />
     <Compile Include="native\RppNativeParam.cs" />
     <Compile Include="native\RppNativeFunc.cs" />
+    <Compile Include="RppPatDef.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />
     <Compile Include="RppType.cs" />
+    <Compile Include="RppVar.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
