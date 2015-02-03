@@ -70,12 +70,13 @@ def returns [RppFunc node]
 params returns [IList<RppParam> list]
 @init {
     list = new List<RppParam>();
+    int index = 0;
 }
-    : ^(RPP_PARAMS (param { list.Add($param.node); })*)
+    : ^(RPP_PARAMS (param[index] { list.Add($param.node); index++; })*)
     ;
 
-param returns [RppParam node]
-    : ^(RPP_PARAM id=. t=type {$node = new RppParam($id.Text, $t.node);})
+param[int index] returns [RppParam node]
+    : ^(RPP_PARAM id=. t=type {$node = new RppParam($id.Text, $index, $t.node);})
     ;
 
 type returns [RppType node]
@@ -101,4 +102,5 @@ expression returns [IRppExpr node]
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
     | StringLiteral { node = new RppString($StringLiteral.text); }
     | ^(RPP_BLOCK_EXPR {var exprs = new List<IRppExpr>();} (e=expression {exprs.Add($e.node);} )*) { node = new RppBlockExpr(exprs); }
+    | Id { node = new RppId($Id.text); }
     ;

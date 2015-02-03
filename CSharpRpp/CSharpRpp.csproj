@@ -55,17 +55,17 @@
   <ItemGroup>
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="IRppNode.cs" />
-    <Compile Include="Native\RppNativeClass.cs" />
+    <Compile Include="native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RppClass.cs" />
-    <Compile Include="RppExpr.cs" />
+    <Compile Include="expr\RppExpr.cs" />
     <Compile Include="RppField.cs" />
     <Compile Include="RppFunc.cs" />
     <Compile Include="RppNamedNode.cs" />
-    <Compile Include="Native\RppNativeParam.cs" />
-    <Compile Include="Native\RppNativeFunc.cs" />
+    <Compile Include="native\RppNativeParam.cs" />
+    <Compile Include="native\RppNativeFunc.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />
     <Compile Include="RppType.cs" />

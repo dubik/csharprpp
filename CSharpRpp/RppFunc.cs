@@ -54,6 +54,7 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
 
+            Params.ForEach(scope.Add);
             _expr.PreAnalyze(_scope);
         }
 
@@ -110,28 +111,35 @@ namespace CSharpRpp
         }
     }
 
-    public interface IRppParam : IRppNode
+    public interface IRppParam : IRppNode, IRppNamedNode
     {
-        string Name { get; }
         RppType Type { get; }
         Type RuntimeType { get; }
     }
 
-    [DebuggerDisplay("{_type.ToString()} {Name} [{RuntimeType}]")]
-    public class RppParam : RppNamedNode, IRppParam
+    [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
+    public class RppParam : RppNamedNode, IRppParam, IRppExpr
     {
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
 
-        public RppParam(string name, RppType type) : base(name)
+        private readonly int _index;
+
+        public RppParam(string name, int index, RppType type) : base(name)
         {
             Type = type;
+            _index = index;
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             RuntimeType = Type.Resolve(scope);
             return this;
+        }
+
+        public void Codegen(ILGenerator generator)
+        {
+            generator.Emit(OpCodes.Ldarg, _index);
         }
     }
 }
