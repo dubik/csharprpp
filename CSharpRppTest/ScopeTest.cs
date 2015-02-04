@@ -1,4 +1,6 @@
-﻿using CSharpRpp;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
+using CSharpRpp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -10,7 +12,7 @@ namespace CSharpRppTest
         public void OneLevelLookup()
         {
             RppScope scope = new RppScope(null);
-            RppClass clazz = new RppClass("Array", ClassKind.Class);
+            RppClass clazz = new RppClass("Array", ClassKind.Class, null, null);
             scope.Add(clazz);
 
             Assert.AreEqual(clazz, scope.Lookup("Array"));
@@ -23,7 +25,7 @@ namespace CSharpRppTest
             RppScope parent = new RppScope(null);
             RppScope scope = new RppScope(parent);
 
-            RppClass clazz = new RppClass("Array", ClassKind.Class);
+            RppClass clazz = new RppClass("Array", ClassKind.Class, null, null);
             parent.Add(clazz);
 
             Assert.AreEqual(clazz, scope.Lookup("Array"));

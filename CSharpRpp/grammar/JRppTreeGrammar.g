@@ -24,17 +24,22 @@ programDef returns [RppClass node]: classDef { node = $classDef.node;}
     ;
 
 classDef returns [RppClass node]
-    :   ^(RPP_CLASS id=. { node = new RppClass($id.Text, ClassKind.Class); }
-            ^(RPP_FIELDS (c=classParam { node.AddField($c.node); })*)
-            ^(RPP_EXTENDS (t=. { node.SetExtends($t.Text); })? )
-            ^(RPP_BODY templateBody[node]?)
-            )
+    :   ^(RPP_CLASS id=.
+            ^(RPP_FIELDS c=classParams)
+            ^(RPP_EXTENDS (t=.)? )
+            ^(RPP_BODY b=templateBody?)
+            ) { node = new RppClass($id.Text, ClassKind.Class, $c.list, $b.list); }
     ;
 
 objectDef returns [RppClass node]
-    :   ^(RPP_OBJECT id=. { node = new RppClass($id.Text, ClassKind.Object); }
-            ^(RPP_BODY templateBody[node]?)
-        )
+    :   ^(RPP_OBJECT id=. ^(RPP_BODY b=templateBody?)) { node = new RppClass($id.Text, ClassKind.Object, new List<RppField>(), $b.list); }
+    ;
+
+classParams returns [IList<RppField> list]
+@init {
+    list = new List<RppField>();
+}
+    : (p =classParam { list.Add($p.node); })*
     ;
 
 classParam returns [RppField node]
@@ -52,12 +57,15 @@ modifiers returns [IList<string> list]
     : ^(RPP_MODIFIERS (m =. { list.Add($m.Text); })* )
     ;
 
-templateBody[RppClass node]
-    : templateBodyStat[node]+
+templateBody returns [IList<IRppNode> list]
+@init {
+    list = new List<IRppNode>();
+}
+    : (b=templateBodyStat { list.Add($b.node); })+
     ;
 
-templateBodyStat[RppClass node]
-    : ^(RPP_FUNC func=def { node.AddFunc($func.node); })
+templateBodyStat returns [IRppNode node]
+    : ^(RPP_FUNC func=def { node = $func.node; })
     | ^(RPP_FIELD id=.)
     ;
 

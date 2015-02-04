@@ -17,11 +17,11 @@ namespace CSharpRpp
         IEnumerable<IRppFunc> Functions { get; }
     }
 
-    [DebuggerDisplay("Name = {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
+    [DebuggerDisplay("Name = {Name}, Fields = {_classParams.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppField> _fields = new List<RppField>();
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<IRppFunc> _funcs = new List<IRppFunc>();
+        private IList<RppField> _classParams = new List<RppField>();
+        private IList<IRppFunc> _funcs = new List<IRppFunc>();
         private RppScope _scope;
 
         public ClassKind Kind { get; private set; }
@@ -42,28 +42,20 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppClass(string name, ClassKind kind) : base(name)
+        public RppClass(string name, ClassKind kind, IList<RppField> classParams, IList<IRppNode> classBody) : base(name)
         {
             Kind = kind;
-        }
 
-        public void AddField(RppField field)
-        {
-            _fields.Add(field);
-        }
-
-        public void AddFunc(IRppFunc func)
-        {
-            if (Kind == ClassKind.Object)
+            if (classParams != null && classParams.Count > 0)
             {
-                func.IsStatic = true;
+                _classParams = classParams;
             }
 
-            _funcs.Add(func);
-        }
-
-        public void SetExtends(string name)
-        {
+            if (classBody != null && classBody.Count > 0)
+            {
+                _funcs = classBody.OfType<IRppFunc>().ToList();
+                _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
+            }
         }
 
         #region Semantic
@@ -72,16 +64,16 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
 
-            _fields.ForEach(_scope.Add);
+            _classParams.ForEach(_scope.Add);
             _funcs.ForEach(_scope.Add);
 
-            NodeUtils.PreAnalyze(_scope, _fields);
+            NodeUtils.PreAnalyze(_scope, _classParams);
             NodeUtils.PreAnalyze(_scope, _funcs);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _fields = NodeUtils.Analyze(_scope, _fields);
+            _classParams = NodeUtils.Analyze(_scope, _classParams);
             _funcs = NodeUtils.Analyze(_scope, _funcs);
             return this;
         }
@@ -104,7 +96,7 @@ namespace CSharpRpp
 
         public void Codegen(CodegenContext ctx)
         {
-            _fields.ForEach(field => field.Codegen(ctx));
+            _classParams.ForEach(field => field.Codegen(ctx));
             _funcs.ForEach(func => func.Codegen(ctx));
 
             _typeBuilder.CreateType();
