@@ -96,14 +96,13 @@ namespace CLRCodeGen
 
         public static void Print()
         {
-
             Console.WriteLine("Moika");
 
             string res = "hello";
             Console.WriteLine(res);
         }
 
-        class Moika
+        private class Moika
         {
             private string some;
 
@@ -125,10 +124,32 @@ namespace CLRCodeGen
 
         private static void Main(String[] args)
         {
+            /*
             int l = args.Length;
             String item = args[0];
             CreateObjects();
             CreateCall();
+             */
+            roundToEven();
+        }
+
+        private static void roundToEven()
+        {
+            double k1 = roundToEven(0);
+            double k2 = roundToEven(1);
+            double k3 = roundToEven(2);
+            double k4 = roundToEven(3);
+        }
+
+        private static double roundToEven(double v)
+        {
+            double val = (int) Math.Round(v, MidpointRounding.ToEven);
+            if (val % 2 != 0)
+            {
+                return val + 1;
+            }
+
+            return val;
         }
 
         private static void CreateCall()

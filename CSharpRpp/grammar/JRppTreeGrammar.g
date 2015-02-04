@@ -100,8 +100,14 @@ block returns [List<IRppExpr> list]
 @init {
     list = new List<IRppExpr>();
 }
-    : ( e=expression {list.Add($e.node);} )*
-    | ^(RPP_PAT_DEF decl=. {var varNames = new List<string>();} (name=. {varNames.Add($name.Text);})+ t=type e=expression {list.AddRange(varNames.Select(n => new RppVar($decl.Text, n, $t.node, $e.node)));})
+    : ( ^(RPP_PAT_DEF p=pat_def) { list.AddRange($p.list); } | e=expression {list.Add($e.node);} )*
+    ;
+
+pat_def returns [List<IRppExpr> list]
+@init {
+    list = new List<IRppExpr>();
+}
+    : decl=. {var varNames = new List<string>(); } (name=Id {varNames.Add($name.Text);})+ t=type e=expression {list.AddRange(varNames.Select(n => new RppVar($decl.Text, n, $t.node, $e.node)));}
     ;
 
 expression returns [IRppExpr node]
@@ -110,7 +116,7 @@ expression returns [IRppExpr node]
     | ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
     | StringLiteral { node = new RppString($StringLiteral.text); }
-    | ^(RPP_BLOCK_EXPR  (blck=block)) { node = new RppBlockExpr($blck.list); }
+    | ^(RPP_BLOCK_EXPR  blck=block) { node = new RppBlockExpr($blck.list); }
     | Id { node = new RppId($Id.text); }
     | ^(RPP_NEW id=. ar=args {node = new RppNew($id.Text, $ar.list); })
     ;

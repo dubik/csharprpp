@@ -31,7 +31,7 @@ class Array(k: Int)
 
 class Foo
 {
-    def calculate(k : Int) = 10
+    def calculate(k : Int) : Int = 10
 }
 
 class String(len: Int)

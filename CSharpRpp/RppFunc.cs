@@ -23,7 +23,7 @@ namespace CSharpRpp
         void Codegen(CodegenContext ctx);
     }
 
-    [DebuggerDisplay("Func: {Name}, Return: {_returnType.ToString()}, Params: {_params.Count}")]
+    [DebuggerDisplay("Func: {Name}, Return: {ReturnType.ToString()}, Params: {Params.Length}")]
     public class RppFunc : RppNamedNode, IRppFunc
     {
         private IRppExpr _expr;
