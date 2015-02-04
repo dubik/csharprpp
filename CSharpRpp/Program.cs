@@ -46,6 +46,7 @@ object Main
 
     def main(args: Array[String]) : Int = {
         val k : Foo = new Foo
+        k.mult(10)
         println(""Hello World!!! Moika mo''ika!!!"")
         calculate(10, 5)
     }
