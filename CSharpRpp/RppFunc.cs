@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 
 namespace CSharpRpp
 {
@@ -23,7 +24,6 @@ namespace CSharpRpp
         void Codegen(CodegenContext ctx);
     }
 
-    [DebuggerDisplay("Func: {Name}, Return: {ReturnType.ToString()}, Params: {Params.Length}")]
     public class RppFunc : RppNamedNode, IRppFunc
     {
         private IRppExpr _expr;
@@ -67,6 +67,41 @@ namespace CSharpRpp
 
             return this;
         }
+
+        #region ToString
+
+        public override string ToString()
+        {
+            return string.Format("{0} def {1}({2}) : {3}", ModifiersToString(), Name, ParamsToString(), ReturnType);
+        }
+
+        public string ModifiersToString()
+        {
+            IList<string> builder = new List<string>();
+            if (IsStatic)
+            {
+                builder.Add("static");
+            }
+
+            if (IsPublic)
+            {
+                builder.Add("public");
+            }
+
+            if (IsAbstract)
+            {
+                builder.Add("abstract");
+            }
+
+            return string.Join(" ", builder);
+        }
+
+        private string ParamsToString()
+        {
+            return string.Join(", ", Params.Select(p => p.Name + ": " + p.Type.ToString()));
+        }
+
+        #endregion
 
         #region Codegen
 

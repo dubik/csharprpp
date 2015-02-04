@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CSharpRpp
 {
@@ -122,6 +123,12 @@ namespace CSharpRpp
             }
 
             return null;
+        }
+
+        public override string ToString()
+        {
+            var paramsString = string.Join(", ", _params.Select(p => p.ToString()));
+            return string.Format("{0}[{1}]", _typeName, paramsString);
         }
     }
 
