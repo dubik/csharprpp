@@ -8,7 +8,7 @@ namespace CSharpRpp
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
 
-        private IRppExpr _initExpr;
+        private readonly IRppExpr _initExpr;
 
         private LocalBuilder _builder;
 
