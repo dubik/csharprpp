@@ -121,6 +121,8 @@ pat_def returns [List<IRppExpr> list]
 expression returns [IRppExpr node]
     : ^('+' a=expression b=expression)  { node = new BinOp("+", $a.node, $b.node); }
     | ^('-' a=expression b=expression)  { node = new BinOp("-", $a.node, $b.node); }
+    | ^('*' a=expression b=expression)  { node = new BinOp("*", $a.node, $b.node); }
+    | ^('/' a=expression b=expression)  { node = new BinOp("/", $a.node, $b.node); }
     | ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
     | StringLiteral { node = new RppString($StringLiteral.text); }

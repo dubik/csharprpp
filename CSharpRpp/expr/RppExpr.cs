@@ -73,6 +73,15 @@ namespace CSharpRpp
                 case "+":
                     generator.Emit(OpCodes.Add);
                     break;
+                case "-":
+                    generator.Emit(OpCodes.Sub);
+                    break;
+                case "*":
+                    generator.Emit(OpCodes.Mul);
+                    break;
+                case "/":
+                    generator.Emit(OpCodes.Div);
+                    break;
                 default:
                     Debug.Assert(false, "Don't know how to handle " + _op);
                     break;
