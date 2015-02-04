@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
@@ -11,6 +13,7 @@ namespace CSharpRpp
 
         private readonly string _typeName;
         private readonly IList<IRppExpr> _constructorsParams;
+        private RppClass _clazz;
 
         public RppNew(string typeName, IList<IRppExpr> constructorsParams)
         {
@@ -20,17 +23,22 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
+            NodeUtils.PreAnalyze(scope, _constructorsParams);
+
+            _clazz = scope.Lookup(_typeName) as RppClass;
+            Debug.Assert(_clazz != null);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            IRppNamedNode clazz = scope.Lookup(_typeName);
             return this;
         }
 
         public void Codegen(ILGenerator generator)
         {
-            throw new NotImplementedException();
+            ConstructorInfo constructorInfo = _clazz.RuntimeType.GetConstructor(System.Type.EmptyTypes);
+            Debug.Assert(constructorInfo != null, "constructorInfo != null");
+            generator.Emit(OpCodes.Newobj, constructorInfo);
         }
     }
 }

@@ -10,15 +10,36 @@ namespace CSharpRpp
 
         private IRppExpr _initExpr;
 
+        private LocalBuilder _builder;
+
         public RppVar(string decl, string name, RppType type, IRppExpr initExpr) : base(name)
         {
             Type = type;
-            _initExpr = initExpr;
+
+            _initExpr = initExpr ?? new RppEmptyExpr();
+        }
+
+        public override void PreAnalyze(RppScope scope)
+        {
+            _initExpr.PreAnalyze(scope);
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            _initExpr.Analyze(scope);
+
+            RuntimeType = Type.Resolve(scope);
+            return this;
         }
 
         public void Codegen(ILGenerator generator)
         {
-            throw new NotImplementedException();
+            _builder = generator.DeclareLocal(RuntimeType);
+            if (!(_initExpr is RppEmptyExpr))
+            {
+                _initExpr.Codegen(generator);
+                generator.Emit(OpCodes.Stloc, _builder.LocalIndex);
+            }
         }
     }
 }

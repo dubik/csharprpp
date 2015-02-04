@@ -148,10 +148,10 @@ namespace CSharpRpp
                 return typeof (String);
             }
 
-            scope.Lookup(Name);
-            Debug.Assert(false, "Not implemented yet");
-
-            return null;
+            IRppNamedNode node = scope.Lookup(Name);
+            RppClass clazz = node as RppClass;
+            Debug.Assert(clazz != null);
+            return clazz.RuntimeType;
         }
 
         public override string ToString()

@@ -51,6 +51,8 @@ namespace CSharpRpp
 
             BootstrapRuntime(scope);
 
+            _classes.ForEach(scope.Add);
+
             NodeUtils.PreAnalyze(scope, _classes);
         }
 

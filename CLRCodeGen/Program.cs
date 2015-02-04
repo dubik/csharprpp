@@ -83,7 +83,6 @@ namespace CLRCodeGen
                 typeof (int),
                 new[] {typeof (String[])});
             ILGenerator il = mainMethod.GetILGenerator();
-            il.UsingNamespace("System");
             il.EmitWriteLine("Moikka");
             il.Emit(OpCodes.Ret);
 
@@ -157,6 +156,13 @@ namespace CLRCodeGen
             Moika m = new Moika("Hello");
             m.println();
             Moika.printSomething("Moika");
+            Moika p = new Moika("Wr");
+            {
+                Moika l = new Moika("adf");
+            }
+            {
+                int l = 10;
+            }
         }
     }
 }

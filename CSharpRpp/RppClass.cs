@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
@@ -28,6 +29,11 @@ namespace CSharpRpp
         public IEnumerable<IRppFunc> Functions
         {
             get { return _funcs.AsEnumerable(); }
+        }
+
+        public Type RuntimeType
+        {
+            get { return _typeBuilder; }
         }
 
         #region Codegen
