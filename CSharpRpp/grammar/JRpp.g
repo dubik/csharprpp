@@ -97,6 +97,10 @@ tokens
 
 @parser::members
 {
+        public override void ReportError(RecognitionException e) {
+            throw new System.Exception(string.Format("{0} line: {1}, token: {2}", e.Message, e.Line, e.Token));
+        }
+
         bool isRightToLeft(int type)
         {
             // return true here for any operators that are right-to-left associative

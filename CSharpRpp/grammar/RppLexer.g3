@@ -1,0 +1,73 @@
+﻿lexer grammar RppLexer;
+
+options {
+    language=CSharp3;
+    TokenLabelType=CommonToken;
+}
+
+@namespace{CSharpRpp}
+
+KW_Package : 'package';
+KW_Abstract : 'abstract';
+KW_Case : 'case';
+KW_Catch : 'catch';
+KW_Class : 'class';
+KW_Def : 'def';
+KW_Do : 'do';
+KW_Else : 'else';
+KW_Extends : 'extends';
+KW_Final : 'final';
+KW_For : 'for';
+KW_ForSome : 'forSome';
+KW_If : 'if';
+KW_Implicit : 'implicit';
+KW_Import : 'import';
+KW_Lazy : 'lazy';
+KW_Match : 'match';
+KW_New : 'new';
+KW_Null : 'null';
+KW_Object : 'object';
+KW_Override : 'override';
+KW_Private : 'private';
+KW_Protected: 'protected';
+KW_Return : 'return';
+KW_Sealed : 'sealed';
+KW_Super : 'super';
+KW_This : 'this';
+KW_Throw : 'throw';
+KW_Trait : 'trait';
+KW_Try : 'try';
+KW_Type : 'type';
+KW_Val : 'val';
+KW_Var : 'var';
+KW_While : 'while';
+KW_With : 'with';
+KW_Yield : 'yield';
+OP_Semi : ';';
+
+BooleanLiteral   :  'true' | 'false';
+Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 
+
+NewLine               :  '\r'? '\n';
+IntegerLiteral : (DecimalNumber) ('L' | 'l')?;
+FloatingPointLiteral
+                 :  Digit+ '.' Digit+ ExponentPart? FloatType?
+                 |  '.' Digit+ ExponentPart? FloatType?
+                 ;
+StringLiteral :
+              '"' StringElement* '"'
+              ;
+
+fragment StringElement : '\u0020'| '\u0021'|'\u0023' .. '\u007F' | CharEscapeSeq;
+
+fragment DecimalNumber: Digit+;
+fragment HexNumeral : '0' 'x' HexDigit+;
+fragment HexDigit :  '0' .. '9'  |  'A' .. 'F'  |  'a' .. 'f' ;
+fragment FloatType        :  'F' | 'f' | 'D' | 'd';
+fragment ExponentPart     :  ('E' | 'e') ('+' | '-')? Digit+;
+fragment Digit : '0' | NonZeroDigit;
+fragment NonZeroDigit : '1' .. '9';
+fragment PrintableChar    : '\u0020' .. '\u007F' ;
+fragment CharEscapeSeq    : '\\' ('b' | 't' | 'n' | 'f' | 'r' | '"' | '\'' | '\\');
+
+WS : ( '\t' | ' ' | '\u000C' )+ { Skip(); } ;

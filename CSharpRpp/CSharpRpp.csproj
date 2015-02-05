@@ -55,6 +55,9 @@
   <ItemGroup>
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="expr\RppNew.cs" />
+    <Compile Include="grammar\RppLexer.g3.cs">
+      <DependentUpon>RppLexer.g3</DependentUpon>
+    </Compile>
     <Compile Include="IRppNode.cs" />
     <Compile Include="native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
@@ -67,6 +70,7 @@
     <Compile Include="RppNamedNode.cs" />
     <Compile Include="native\RppNativeParam.cs" />
     <Compile Include="native\RppNativeFunc.cs" />
+    <Compile Include="RppParser.cs" />
     <Compile Include="RppPatDef.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />
@@ -80,6 +84,10 @@
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>
     <Antlr3 Include="grammar\JRppTreeGrammar.g">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
+    </Antlr3>
+    <Antlr3 Include="grammar\RppLexer.g3">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>
