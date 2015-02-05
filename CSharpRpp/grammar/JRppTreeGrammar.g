@@ -46,7 +46,7 @@ classParam returns [RppField node]
     :   ^(RPP_CLASSPARAM
             id=.
             m=modifiers
-            t=type { node = new RppField($id.Text, $m.list, $t.node); }
+            t=type { node = new RppField(MutabilityFlag.MF_Val, $id.Text, $m.list, $t.node); }
          )
     ;
 
