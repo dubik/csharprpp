@@ -130,6 +130,41 @@ namespace CSharpRpp
             var paramsString = string.Join(", ", _params.Select(p => p.ToString()));
             return string.Format("{0}[{1}]", _typeName, paramsString);
         }
+
+        #region Equality
+
+        protected bool Equals(RppGenericType other)
+        {
+            return _params.SequenceEqual(other._params) && Equals(_typeName, other._typeName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((RppGenericType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_params != null ? _params.GetHashCode() : 0) * 397) ^ (_typeName != null ? _typeName.GetHashCode() : 0);
+            }
+        }
+
+        #endregion
     }
 
     [DebuggerDisplay("{Name}")]
@@ -165,5 +200,36 @@ namespace CSharpRpp
         {
             return Name;
         }
+
+        #region Equality
+
+        protected bool Equals(RppTypeName other)
+        {
+            return string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+            return Equals((RppTypeName) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Name != null ? Name.GetHashCode() : 0);
+        }
+
+        #endregion
     }
 }

@@ -164,7 +164,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 }
 */
         // ClassDef ::= id [TypeParamClause] {Annotation} [AccessModifier] ClassParamClauses ClassTemplateOpt
-        private void ParseClassDef()
+        public void ParseClassDef()
         {
             if (Require(RppLexer.Id))
             {
@@ -179,7 +179,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
         }
 
         // ClassParamClause ::= '(' [ClassParams] ')'
-        private IList<RppField> ParseClassParamClause()
+        public IList<RppField> ParseClassParamClause()
         {
             var classParams = new List<RppField>();
             if (Require(RppLexer.OP_LParen))
@@ -200,7 +200,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
         }
 
         // ClassParams ::= {Annotation} [{Modifier} (‘val’ | ‘var’)] id [‘:’ ParamType] [‘=’ Expr]
-        private bool ParseClassParam(out RppField classParam)
+        public bool ParseClassParam(out RppField classParam)
         {
             classParam = null;
 
@@ -257,7 +257,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return typeParams;
         }
 
-        private bool ParseType(out RppType type)
+        public bool ParseType(out RppType type)
         {
             if (Require(RppLexer.Id))
             {
