@@ -29,6 +29,8 @@ namespace CSharpRpp
         private IRppExpr _expr;
         private RppScope _scope;
 
+        public static IList<IRppParam> EmptyParams = new List<IRppParam>();
+
         public RppType ReturnType { get; private set; }
         public Type RuntimeReturnType { get; private set; }
         public IRppParam[] Params { get; private set; }

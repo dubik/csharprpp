@@ -52,6 +52,7 @@ OP_Comma : ',';
 OP_LParen : '(';
 OP_RParen : ')';
 OP_Colon : ':';
+OP_Eq : '=';
 
 BooleanLiteral   :  'true' | 'false';
 Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 

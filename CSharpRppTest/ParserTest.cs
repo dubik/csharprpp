@@ -7,6 +7,21 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
+    internal class SimpleNodeContainer : INodeContainer
+    {
+        public IList<IRppNode> Nodes { get; private set; }
+
+        public SimpleNodeContainer()
+        {
+            Nodes = new List<IRppNode>();
+        }
+
+        public void Add(IRppNode node)
+        {
+            Nodes.Add(node);
+        }
+    }
+
     [TestClass]
     public class ParserTest
     {
@@ -33,9 +48,9 @@ object Main";
             const string code1 = code + "\n";
             const string code2 = code1 + "\n";
 
-            RppProgram program = Parse(code);
-            Assert.IsNotNull(program);
-            //Assert.AreEqual(1, program.Classes.Count());
+            // RppProgram program = Parse(code);
+            // Assert.IsNotNull(program);
+            // Assert.AreEqual(1, program.Classes.Count());
         }
 
         [TestMethod]
@@ -79,6 +94,13 @@ object Main";
             TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
         }
 
+        private static void TestClassParam(string code, RppField expected)
+        {
+            RppField field;
+            Assert.IsTrue(CreateParser(code).ParseClassParam(out field));
+            Assert.AreEqual(expected, field);
+        }
+
         [TestMethod]
         public void TestVarDef()
         {
@@ -90,34 +112,20 @@ object Main";
             });
         }
 
-        private class SimpleNodeContainer : INodeContainer
-        {
-            public IList<IRppNode> Nodes { get; set; }
-
-            public SimpleNodeContainer()
-            {
-                Nodes = new List<IRppNode>();
-            }
-
-            public void Add(IRppNode node)
-            {
-                Nodes.Add(node);
-            }
-        }
-
         private static void TestVarDef(string code, IEnumerable<RppField> expected)
         {
-            RppField actual;
             SimpleNodeContainer container = new SimpleNodeContainer();
             Assert.IsTrue(CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val, container));
             Assert.IsTrue(expected.SequenceEqual(container.Nodes));
         }
 
-        private static void TestClassParam(string code, RppField expected)
+        [TestMethod]
+        public void ParamClaus()
         {
-            RppField field;
-            Assert.IsTrue(CreateParser(code).ParseClassParam(out field));
-            Assert.AreEqual(expected, field);
+            Assert.AreEqual(0, CreateParser("").ParseParamClauses().Count());
+            Assert.AreEqual(0, CreateParser("()").ParseParamClauses().Count());
+            Assert.AreEqual(1, CreateParser("(k : Int)").ParseParamClauses().Count());
+            Assert.AreEqual(2, CreateParser("(k : Int, j : String)").ParseParamClauses().Count());
         }
     }
 }

@@ -306,15 +306,88 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 
             if (Require(RppLexer.KW_Def))
             {
-                return ParseFunDef(container);
+                ParseFunDef(container);
             }
 
             return true;
         }
 
-        private bool ParseFunDef(INodeContainer container)
+        // FunSig [‘:’ Type] ‘=’ Expr
+        // FunSig ::= id [FunTypeParamClause] ParamClauses
+
+        private void ParseFunDef(INodeContainer container)
         {
-            return false;
+            Expect(RppLexer.Id);
+            string name = _lastToken.Text;
+            IList<RppType> typeParams = ParseTypeParamClause();
+            IEnumerable<IRppParam> funcParams = ParseParamClauses();
+            RppType funcReturnType;
+            if (!ParseType(out funcReturnType))
+            {
+                throw new Exception("Expecting type but got " + _lastToken);
+            }
+
+            Expect(RppLexer.OP_Eq);
+            IRppExpr expr = ParseExpr();
+
+            RppFunc func = new RppFunc(name, funcParams, funcReturnType, expr);
+            container.Add(func);
+        }
+
+
+        public IEnumerable<IRppParam> ParseParamClauses()
+        {
+            if (Require(RppLexer.OP_LParen))
+            {
+                var res = ParseParams();
+                Expect(RppLexer.OP_RParen);
+                return res;
+            }
+
+            return RppFunc.EmptyParams;
+        }
+
+        // param {, param}
+        public IEnumerable<IRppParam> ParseParams()
+        {
+            IList<IRppParam> funcParams = new List<IRppParam>();
+            int paramIndex = 0;
+            while (true)
+            {
+                RppParam funcParam;
+                if (ParseParam(paramIndex, out funcParam))
+                {
+                    paramIndex++;
+                    funcParams.Add(funcParam);
+                }
+                if (!Require(RppLexer.OP_Comma))
+                {
+                    break;
+                }
+            }
+
+            return funcParams;
+        }
+
+
+        //param ::= {Annotation} id [‘:’ ParamType] [‘=’ Expr]
+        private bool ParseParam(int paramIndex, out RppParam funcParam)
+        {
+            funcParam = null;
+            if (!Require(RppLexer.Id))
+            {
+                return false;
+            }
+            string name = _lastToken.Text;
+            Expect(RppLexer.OP_Colon);
+            RppType type;
+            if (!ParseType(out type))
+            {
+                throw new Exception("Expected type but got " + _lastToken.Text);
+            }
+
+            funcParam = new RppParam(name, paramIndex, type);
+            return true;
         }
 
         // PatDef ::= Pattern2 {',' Pattern2} [':' Type] '=' Expr
