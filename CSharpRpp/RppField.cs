@@ -34,5 +34,35 @@ namespace CSharpRpp
         public void Codegen(CodegenContext ctx)
         {
         }
+
+        protected bool Equals(RppField other)
+        {
+            return Equals(Name, other.Name) && Equals(_type, other._type);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+            return Equals((RppField) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_modifiers != null ? _modifiers.GetHashCode() : 0) * 397) ^ (_type != null ? _type.GetHashCode() : 0);
+            }
+        }
     }
 }

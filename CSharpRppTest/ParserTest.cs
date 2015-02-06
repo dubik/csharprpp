@@ -61,13 +61,27 @@ object Main";
             TestType("Array[String, Int]", expected);
         }
 
-
         private static void TestType<T>(string code, T expectedType)
         {
             RppType type;
             Assert.IsTrue(CreateParser(code).ParseType(out type));
             Assert.IsInstanceOfType(type, typeof (T));
             Assert.AreEqual(expectedType, type);
+        }
+
+        [TestMethod]
+        public void TestParseClassParam()
+        {
+            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
+            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new RppTypeName("Int")));
+            TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
+        }
+
+        private static void TestClassParam(string code, RppField expected)
+        {
+            RppField field;
+            Assert.IsTrue(CreateParser(code).ParseClassParam(out field));
+            Assert.AreEqual(expected, field);
         }
     }
 }
