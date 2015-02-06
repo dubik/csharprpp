@@ -15,11 +15,20 @@ namespace CSharpRpp
     {
         private readonly IList<string> _modifiers;
         private readonly RppType _type;
+        private readonly IRppExpr _initExpr;
 
         public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type) : base(name)
         {
             _modifiers = modifiers;
             _type = type;
+        }
+
+        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type, IRppExpr initExpr)
+            : base(name)
+        {
+            _modifiers = modifiers;
+            _type = type;
+            _initExpr = initExpr;
         }
 
         public override void PreAnalyze(RppScope scope)

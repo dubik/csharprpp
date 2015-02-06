@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -75,6 +77,40 @@ object Main";
             TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
             TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new RppTypeName("Int")));
             TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
+        }
+
+        [TestMethod]
+        public void TestVarDef()
+        {
+            TestVarDef("k : Int", new[] {new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int"))});
+            TestVarDef("k, j : Int", new[]
+            {
+                new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")),
+                new RppField(MutabilityFlag.MF_Val, "j", null, new RppTypeName("Int"))
+            });
+        }
+
+        private class SimpleNodeContainer : INodeContainer
+        {
+            public IList<IRppNode> Nodes { get; set; }
+
+            public SimpleNodeContainer()
+            {
+                Nodes = new List<IRppNode>();
+            }
+
+            public void Add(IRppNode node)
+            {
+                Nodes.Add(node);
+            }
+        }
+
+        private static void TestVarDef(string code, IEnumerable<RppField> expected)
+        {
+            RppField actual;
+            SimpleNodeContainer container = new SimpleNodeContainer();
+            Assert.IsTrue(CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val, container));
+            Assert.IsTrue(expected.SequenceEqual(container.Nodes));
         }
 
         private static void TestClassParam(string code, RppField expected)

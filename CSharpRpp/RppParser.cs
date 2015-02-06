@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using Antlr.Runtime;
 
 namespace CSharpRpp
 {
-    class QualifiedId
+    internal class QualifiedId
     {
         private string _text;
 
@@ -16,7 +17,7 @@ namespace CSharpRpp
         }
     }
 
-    enum ObjectModifier
+    internal enum ObjectModifier
     {
         OmNone,
         OmPrivate,
@@ -255,6 +256,114 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             }
 
             return typeParams;
+        }
+
+        public void ParseClassTemplateOpt()
+        {
+            if (Require(RppLexer.KW_Extends))
+            {
+                throw new Exception("Extending a class is not implemented yet");
+            }
+        }
+
+        public void ParseTemplateBody(RppClass clazz)
+        {
+            Require(RppLexer.NewLine);
+
+            if (Require(RppLexer.OP_LBrace))
+            {
+                while (ParseSemi() && ParseTemplateStat(clazz))
+                {
+                }
+
+                Expect(RppLexer.OP_RBrace);
+            }
+        }
+
+        public bool ParseTemplateStat(RppClass clazz)
+        {
+            ParseModifier();
+
+            return ParseDef(clazz) || ParseDcl(clazz) || ParseExpr1();
+        }
+
+        private static bool ParseDcl(INodeContainer container)
+        {
+            return false;
+        }
+
+        private bool ParseDef(INodeContainer container)
+        {
+            if (Require(RppLexer.KW_Val))
+            {
+                return ParsePatDef(MutabilityFlag.MF_Val, container);
+            }
+
+            if (Require(RppLexer.KW_Var))
+            {
+                return ParsePatDef(MutabilityFlag.MF_Var, container);
+            }
+
+            if (Require(RppLexer.KW_Def))
+            {
+                return ParseFunDef(container);
+            }
+
+            return true;
+        }
+
+        private bool ParseFunDef(INodeContainer container)
+        {
+            return false;
+        }
+
+        // PatDef ::= Pattern2 {',' Pattern2} [':' Type] '=' Expr
+        public bool ParsePatDef(MutabilityFlag mutabilityFlag, INodeContainer container)
+        {
+            Expect(RppLexer.Id);
+            IList<string> varIds = new List<string>();
+            varIds.Add(_lastToken.Text);
+            while (Require(RppLexer.OP_Comma))
+            {
+                Expect(RppLexer.Id);
+                varIds.Add(_lastToken.Text);
+            }
+
+            Expect(RppLexer.OP_Colon);
+            RppType type;
+            if (!ParseType(out type))
+            {
+                throw new Exception("Expected type after ':' but got " + _lastToken.Text);
+            }
+
+            IRppExpr expr = ParseExpr();
+            varIds.ForEach(id => container.Add(new RppField(mutabilityFlag, id, null, type, expr)));
+            return true;
+        }
+
+        private static IRppExpr ParseExpr()
+        {
+            return null;
+        }
+
+        private bool ParseExpr1()
+        {
+            return false;
+        }
+
+        public bool ParseModifier()
+        {
+            return ParseLocalModifier() && ParseAccessModifier();
+        }
+
+        private bool ParseAccessModifier()
+        {
+            return false;
+        }
+
+        private bool ParseLocalModifier()
+        {
+            return false;
         }
 
         public bool ParseType(out RppType type)
