@@ -87,6 +87,32 @@ namespace CSharpRpp
                     break;
             }
         }
+
+        #region Equality
+
+        protected bool Equals(BinOp other)
+        {
+            return string.Equals(_op, other._op) && Equals(_left, other._left) && Equals(_right, other._right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((BinOp) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (_op != null ? _op.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
+        #endregion
     }
 
     [DebuggerDisplay("Int: {_value}")]
@@ -109,6 +135,28 @@ namespace CSharpRpp
         {
             generator.Emit(OpCodes.Ldc_I4, _value);
         }
+
+        #region Equality
+
+        protected bool Equals(RppInteger other)
+        {
+            return _value == other._value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppInteger) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _value;
+        }
+
+        #endregion
     }
 
     [DebuggerDisplay("String: {_value}")]

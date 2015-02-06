@@ -54,6 +54,8 @@ OP_RParen : ')';
 OP_Colon : ':';
 OP_Eq : '=';
 
+OP_Ops : '+' | '-' | '/' | '%';
+
 BooleanLiteral   :  'true' | 'false';
 Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 
 

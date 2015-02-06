@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    internal class SimpleNodeContainer : INodeContainer
+    class SimpleNodeContainer : INodeContainer
     {
         public IList<IRppNode> Nodes { get; private set; }
 
@@ -36,6 +36,7 @@ namespace CSharpRppTest
             ANTLRStringStream input = new ANTLRStringStream(code);
             RppLexer lexer = new RppLexer(input);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+            var k = tokenStream.GetTokens();
             RppParser parser = new RppParser(tokenStream);
             return parser;
         }
@@ -120,12 +121,28 @@ object Main";
         }
 
         [TestMethod]
-        public void ParamClaus()
+        public void ParamClause()
         {
             Assert.AreEqual(0, CreateParser("").ParseParamClauses().Count());
             Assert.AreEqual(0, CreateParser("()").ParseParamClauses().Count());
             Assert.AreEqual(1, CreateParser("(k : Int)").ParseParamClauses().Count());
             Assert.AreEqual(2, CreateParser("(k : Int, j : String)").ParseParamClauses().Count());
+        }
+
+        [TestMethod]
+        public void ParseSimpleIntExpr()
+        {
+            var parser = CreateParser("10");
+            IRppExpr expr = parser.ParseExpr();
+            Assert.AreEqual(new RppInteger("10"), expr);
+        }
+
+        [TestMethod]
+        public void ParseSimplePlusExpr()
+        {
+            var parser = CreateParser("10 + 5");
+            IRppExpr expr = parser.ParseExpr();
+            Assert.AreEqual(new BinOp("+", new RppInteger("10"), new RppInteger("5")), expr);
         }
     }
 }
