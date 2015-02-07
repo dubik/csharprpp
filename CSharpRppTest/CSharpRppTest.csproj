@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserExprTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="ScopeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

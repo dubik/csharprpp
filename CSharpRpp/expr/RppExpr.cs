@@ -276,7 +276,7 @@ namespace CSharpRpp
         }
     }
 
-    class RppId : RppNode, IRppExpr
+    public class RppId : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
@@ -307,5 +307,27 @@ namespace CSharpRpp
         {
             _ref.Codegen(generator);
         }
+
+        #region Equality
+
+        protected bool Equals(RppId other)
+        {
+            return string.Equals(_id, other._id);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppId) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (_id != null ? _id.GetHashCode() : 0);
+        }
+
+        #endregion
     }
 }

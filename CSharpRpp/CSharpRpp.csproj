@@ -61,6 +61,7 @@
     <Compile Include="IRppNode.cs" />
     <Compile Include="native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
+    <Compile Include="parser\RppParserExpr.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RppClass.cs" />
@@ -70,7 +71,7 @@
     <Compile Include="RppNamedNode.cs" />
     <Compile Include="native\RppNativeParam.cs" />
     <Compile Include="native\RppNativeFunc.cs" />
-    <Compile Include="RppParser.cs" />
+    <Compile Include="parser\RppParser.cs" />
     <Compile Include="RppPatDef.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />

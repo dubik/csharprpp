@@ -31,7 +31,7 @@ namespace CSharpRppTest
             return parser.CompilationUnit();
         }
 
-        private static RppParser CreateParser(string code)
+        internal static RppParser CreateParser(string code)
         {
             ANTLRStringStream input = new ANTLRStringStream(code);
             RppLexer lexer = new RppLexer(input);
@@ -127,22 +127,6 @@ object Main";
             Assert.AreEqual(0, CreateParser("()").ParseParamClauses().Count());
             Assert.AreEqual(1, CreateParser("(k : Int)").ParseParamClauses().Count());
             Assert.AreEqual(2, CreateParser("(k : Int, j : String)").ParseParamClauses().Count());
-        }
-
-        [TestMethod]
-        public void ParseSimpleIntExpr()
-        {
-            var parser = CreateParser("10");
-            IRppExpr expr = parser.ParseExpr();
-            Assert.AreEqual(new RppInteger("10"), expr);
-        }
-
-        [TestMethod]
-        public void ParseSimplePlusExpr()
-        {
-            var parser = CreateParser("10 + 5");
-            IRppExpr expr = parser.ParseExpr();
-            Assert.AreEqual(new BinOp("+", new RppInteger("10"), new RppInteger("5")), expr);
         }
     }
 }
