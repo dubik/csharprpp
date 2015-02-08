@@ -147,27 +147,62 @@ namespace CSharpRpp
 
         private IRppExpr ParseSimpleExpr1()
         {
+            IRppExpr expr = null;
             if (Require(RppLexer.IntegerLiteral))
             {
-                return new RppInteger(_lastToken.Text);
+                expr = new RppInteger(_lastToken.Text);
             }
-
-            if (Require(RppLexer.StringLiteral))
+            else if (Require(RppLexer.StringLiteral))
             {
-                return new RppString(_lastToken.Text);
+                expr = new RppString(_lastToken.Text);
             }
-
-            if (Require(RppLexer.KW_Null))
+            else if (Require(RppLexer.KW_Null))
             {
                 throw new Exception("Null is not implemented yet");
             }
+            else if (Require(RppLexer.Id))
+            {
+                expr = new RppId(_lastToken.Text);
+            }
+
+            return ParseSimpleExprRest(expr);
+        }
+
+        public bool ParsePath(out IRppExpr path)
+        {
+            path = null;
 
             if (Require(RppLexer.Id))
             {
-                return new RppId(_lastToken.Text);
+                RppId target = new RppId(_lastToken.Text);
+                if (Require(RppLexer.OP_Dot))
+                {
+                    IRppExpr nextId;
+                    if (ParsePath(out nextId))
+                    {
+                        path = new RppSelector(target, new RppId(_lastToken.Text));
+                        return true;
+                    }
+
+                    throw new Exception("Expecting identifier of function call after '.' but got: " + _lastToken.Text);
+                }
+
+                path = target;
+                return true;
             }
 
-            return null;
+            return false;
+        }
+
+        // clazz.myField
+        // class.Func()
+        private IRppExpr ParseSimpleExprRest(IRppExpr expr)
+        {
+            if (Require(RppLexer.OP_Dot))
+            {
+            }
+
+            return expr;
         }
     }
 }

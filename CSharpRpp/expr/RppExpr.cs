@@ -276,6 +276,26 @@ namespace CSharpRpp
         }
     }
 
+    public class RppSelector : RppNode, IRppExpr
+    {
+        public RppType Type { get; private set; }
+        public Type RuntimeType { get; private set; }
+
+        private IRppExpr _target;
+        private RppId _fieldName;
+
+        public RppSelector(IRppExpr target, RppId fieldName)
+        {
+            _target = target;
+            _fieldName = fieldName;
+        }
+
+        public void Codegen(ILGenerator generator)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class RppId : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
