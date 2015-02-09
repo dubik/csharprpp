@@ -131,14 +131,13 @@ namespace CSharpRpp
             {
                 throw new Exception("New is not implemented yet");
             }
-            else if (_stream.LA(1) == RppLexer.OP_LBrace)
+
+            if (Peek(RppLexer.OP_LBrace))
             {
                 return ParseBlockExpr();
             }
-            else
-            {
-                return ParseSimpleExpr1();
-            }
+
+            return ParseSimpleExpr1();
         }
 
         private IRppExpr ParseBlockExpr()

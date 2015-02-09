@@ -54,7 +54,7 @@ namespace CSharpRpp
         {
             if (!Require(token))
             {
-                throw new Exception("Expected token : " + token + " but got " + _stream.LA(1));
+                throw new Exception("Expected token : " + token + " but got " + _stream.LT(1).Text);
             }
         }
 
@@ -485,6 +485,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 
         private void ParseObjectDef()
         {
+
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()
