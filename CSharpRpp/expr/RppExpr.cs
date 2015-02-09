@@ -13,6 +13,19 @@ namespace CSharpRpp
         void Codegen(ILGenerator generator);
     }
 
+    // Base class for RppId and RppFuncCall
+    public abstract class RppMember : RppNamedNode, IRppExpr
+    {
+        public abstract RppType Type { get; protected set; }
+        public abstract Type RuntimeType { get; protected set; }
+
+        protected RppMember(string name) : base(name)
+        {
+        }
+
+        public abstract void Codegen(ILGenerator generator);
+    }
+
     public class RppEmptyExpr : RppNode, IRppExpr
     {
         public RppType Type
@@ -192,40 +205,63 @@ namespace CSharpRpp
     }
 
     [DebuggerDisplay("FuncCall - Name: {_funcName}, Params: {_paramList.Count}")]
-    public class RppFuncCall : RppNode, IRppExpr
+    public class RppFuncCall : RppMember
     {
-        public RppType Type
-        {
-            get { return _func.ReturnType; }
-        }
+        public override RppType Type { get; protected set; }
+        public override Type RuntimeType { get; protected set; }
 
-        public Type RuntimeType
-        {
-            get { return _func.RuntimeReturnType; }
-        }
-
-        private readonly string _funcName;
         private readonly IList<IRppExpr> _paramList;
         private IRppFunc _func;
 
-        public RppFuncCall(string funcName, IList<IRppExpr> paramList)
+        public RppFuncCall(string name, IList<IRppExpr> paramList) : base(name)
         {
-            _funcName = funcName;
             _paramList = paramList;
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _func = scope.Lookup(_funcName) as IRppFunc;
+            _func = scope.Lookup(Name) as IRppFunc;
             Debug.Assert(_func != null);
+            Type = _func.ReturnType;
+            RuntimeType = _func.RuntimeReturnType;
             return this;
         }
 
-        public void Codegen(ILGenerator generator)
+        public override void Codegen(ILGenerator generator)
         {
             _paramList.ForEach(p => p.Codegen(generator));
             generator.Emit(OpCodes.Call, _func.RuntimeFuncInfo);
         }
+
+        public override string ToString()
+        {
+            return string.Format("Call: \"{0}\"", Name);
+        }
+
+        #region Equality
+
+        protected bool Equals(RppFuncCall other)
+        {
+            return _paramList.SequenceEqual(other._paramList) && Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppFuncCall) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_paramList != null ? _paramList.GetHashCode() : 0) * 397) ^ (_func != null ? _func.GetHashCode() : 0);
+            }
+        }
+
+        #endregion
     }
 
     public class RppBlockExpr : RppNode, IRppExpr
@@ -281,37 +317,65 @@ namespace CSharpRpp
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
 
-        private IRppExpr _target;
-        private RppId _fieldName;
+        public IRppExpr Target { get; private set; }
+        public RppMember Path { get; private set; }
 
-        public RppSelector(IRppExpr target, RppId fieldName)
+        public RppSelector(IRppExpr target, RppMember path)
         {
-            _target = target;
-            _fieldName = fieldName;
+            Target = target;
+            Path = path;
         }
 
         public void Codegen(ILGenerator generator)
         {
             throw new NotImplementedException();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{{ {0} -> {1} }}", Target, Path);
+        }
+
+        #region Equality
+
+        protected bool Equals(RppSelector other)
+        {
+            return Equals(Target, other.Target) && Equals(Path, other.Path);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppSelector) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Target != null ? Target.GetHashCode() : 0) * 397) ^ (Path != null ? Path.GetHashCode() : 0);
+            }
+        }
+
+        #endregion
     }
 
-    public class RppId : RppNode, IRppExpr
+    public class RppId : RppMember
     {
-        public RppType Type { get; private set; }
-        public Type RuntimeType { get; private set; }
+        public override RppType Type { get; protected set; }
+        public override Type RuntimeType { get; protected set; }
 
-        private readonly string _id;
         private IRppExpr _ref;
 
-        public RppId(string id)
+        public RppId(string name) : base(name)
         {
-            _id = id;
         }
 
         public override void PreAnalyze(RppScope scope)
         {
-            _ref = scope.Lookup(_id) as IRppExpr;
+            _ref = scope.Lookup(Name) as IRppExpr;
             Debug.Assert(_ref != null);
         }
 
@@ -323,16 +387,21 @@ namespace CSharpRpp
             return this;
         }
 
-        public void Codegen(ILGenerator generator)
+        public override void Codegen(ILGenerator generator)
         {
             _ref.Codegen(generator);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Id: \"{0}\"", Name);
         }
 
         #region Equality
 
         protected bool Equals(RppId other)
         {
-            return string.Equals(_id, other._id);
+            return string.Equals(Name, other.Name);
         }
 
         public override bool Equals(object obj)
@@ -345,7 +414,7 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            return (_id != null ? _id.GetHashCode() : 0);
+            return (Name != null ? Name.GetHashCode() : 0);
         }
 
         #endregion

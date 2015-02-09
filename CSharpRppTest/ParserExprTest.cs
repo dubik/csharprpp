@@ -54,9 +54,22 @@ namespace CSharpRppTest
         public void ParseSimplePath()
         {
             var parser = ParserTest.CreateParser("foo.bar");
-            IRppExpr selector;
-            Assert.IsTrue(parser.ParsePath(out selector));
-            Assert.IsNotNull(selector);
+            IRppExpr actual;
+            Assert.IsTrue(parser.ParsePath(out actual));
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(Selector(Id("foo"), Id("bar")), actual);
+        }
+
+        [TestMethod]
+        public void ParseMethodCall()
+        {
+            TestExpr("foo.MyFunc()", Selector(Id("foo"), Call("MyFunc")));
+        }
+
+        [TestMethod]
+        public void ParseLongChainOfFieldsAndMethods()
+        {
+            TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), Call("MyFunc")), Id("bar")), Call("Length")));
         }
 
         private static void TestExpr(string code, IRppExpr expected)
@@ -88,14 +101,19 @@ namespace CSharpRppTest
             return new BinOp("*", left, right);
         }
 
-        private IRppExpr Id(string id)
+        private static RppId Id(string id)
         {
             return new RppId(id);
         }
 
-        private IRppExpr Call(string id)
+        private static RppFuncCall Call(string id)
         {
             return new RppFuncCall(id, new List<IRppExpr>());
+        }
+
+        private static RppSelector Selector(IRppExpr expr, RppMember member)
+        {
+            return new RppSelector(expr, member);
         }
 
         #endregion

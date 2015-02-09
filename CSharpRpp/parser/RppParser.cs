@@ -58,6 +58,11 @@ namespace CSharpRpp
             }
         }
 
+        private bool Peek(int token)
+        {
+            return _stream.LA(1) == token;
+        }
+
         private bool ParseSemi()
         {
             if (Require(RppLexer.OP_Semi) || Require(RppLexer.EOF))

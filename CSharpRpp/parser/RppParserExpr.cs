@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -147,7 +148,7 @@ namespace CSharpRpp
 
         private IRppExpr ParseSimpleExpr1()
         {
-            IRppExpr expr = null;
+            IRppExpr expr;
             if (Require(RppLexer.IntegerLiteral))
             {
                 expr = new RppInteger(_lastToken.Text);
@@ -160,9 +161,9 @@ namespace CSharpRpp
             {
                 throw new Exception("Null is not implemented yet");
             }
-            else if (Require(RppLexer.Id))
+            else
             {
-                expr = new RppId(_lastToken.Text);
+                ParsePath(out expr);
             }
 
             return ParseSimpleExprRest(expr);
@@ -174,20 +175,13 @@ namespace CSharpRpp
 
             if (Require(RppLexer.Id))
             {
-                RppId target = new RppId(_lastToken.Text);
-                if (Require(RppLexer.OP_Dot))
+                path = new RppId(_lastToken.Text);
+                while (Require(RppLexer.OP_Dot))
                 {
-                    IRppExpr nextId;
-                    if (ParsePath(out nextId))
-                    {
-                        path = new RppSelector(target, new RppId(_lastToken.Text));
-                        return true;
-                    }
-
-                    throw new Exception("Expecting identifier of function call after '.' but got: " + _lastToken.Text);
+                    Expect(RppLexer.Id);
+                    path = new RppSelector(path, new RppId(_lastToken.Text));
                 }
 
-                path = target;
                 return true;
             }
 
@@ -196,13 +190,61 @@ namespace CSharpRpp
 
         // clazz.myField
         // class.Func()
+        // TODO should handle '.' for integers, 10.toString
         private IRppExpr ParseSimpleExprRest(IRppExpr expr)
         {
             if (Require(RppLexer.OP_Dot))
             {
+                if (Require(RppLexer.Id))
+                {
+                    return ParseSimpleExprRest(new RppSelector(expr, new RppId(_lastToken.Text)));
+                }
+
+                throw new Exception("After . identifier is expected " + _lastToken);
+            }
+
+            if (Peek(RppLexer.OP_LParen))
+            {
+                IList<IRppExpr> args = ParseArgs();
+                return ParseSimpleExprRest(MakeCall(expr, args));
             }
 
             return expr;
+        }
+
+        private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args)
+        {
+            if (expr is RppId)
+            {
+                RppId id = expr as RppId;
+                return new RppFuncCall(id.Name, args);
+            }
+
+            if (expr is RppSelector)
+            {
+                RppSelector selector = expr as RppSelector;
+                return new RppSelector(selector.Target, new RppFuncCall(selector.Path.Name, args));
+            }
+
+            return expr;
+        }
+
+        private IList<IRppExpr> ParseArgs()
+        {
+            Expect(RppLexer.OP_LParen);
+            List<IRppExpr> exprs = new List<IRppExpr>();
+            while (!Require(RppLexer.OP_RParen))
+            {
+                IRppExpr expr = ParseExpr();
+                if (expr == null)
+                {
+                    throw new Exception("Expected argument or )");
+                }
+
+                exprs.Add(expr);
+            }
+
+            return exprs;
         }
     }
 }
