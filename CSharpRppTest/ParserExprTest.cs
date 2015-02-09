@@ -45,6 +45,18 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
+        public void ParseFuncCallOneArg()
+        {
+            TestExpr("func(10)", Call("func", new IRppExpr[] {Int(10)}));
+        }
+
+        [TestMethod]
+        public void ParseFuncCallTwoArgs()
+        {
+            TestExpr("func(10, x)", Call("func", new IRppExpr[] {Int(10), Id("x")}));
+        }
+
+        [TestMethod]
         public void ParseSubWithIntAndId()
         {
             TestExpr("10 - x", Sub(Int(10), Id("x")));
@@ -109,6 +121,11 @@ namespace CSharpRppTest
         private static RppFuncCall Call(string id)
         {
             return new RppFuncCall(id, new List<IRppExpr>());
+        }
+
+        private static RppFuncCall Call(string id, IList<IRppExpr> args)
+        {
+            return new RppFuncCall(id, args);
         }
 
         private static RppSelector Selector(IRppExpr expr, RppMember member)

@@ -232,12 +232,24 @@ namespace CSharpRpp
         {
             Expect(RppLexer.OP_LParen);
             List<IRppExpr> exprs = new List<IRppExpr>();
+
+            IRppExpr expr = ParseExpr();
+            if (expr == null)
+            {
+                Expect(RppLexer.OP_RParen);
+                return exprs;
+            }
+
+            exprs.Add(expr);
+
             while (!Require(RppLexer.OP_RParen))
             {
-                IRppExpr expr = ParseExpr();
+                Expect(RppLexer.OP_Comma);
+
+                expr = ParseExpr();
                 if (expr == null)
                 {
-                    throw new Exception("Expected argument or )");
+                    throw new Exception("Expected argument");
                 }
 
                 exprs.Add(expr);
