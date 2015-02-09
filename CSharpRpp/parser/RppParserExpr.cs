@@ -190,7 +190,6 @@ namespace CSharpRpp
 
         // clazz.myField
         // class.Func()
-        // TODO should handle '.' for integers, 10.toString
         private IRppExpr ParseSimpleExprRest(IRppExpr expr)
         {
             if (Require(RppLexer.OP_Dot))
