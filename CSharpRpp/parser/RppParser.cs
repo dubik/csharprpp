@@ -260,64 +260,84 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return typeParams;
         }
 
-        public void ParseClassTemplateOpt()
+        public void ParseClassTemplateOpt(string name)
         {
             if (Require(RppLexer.KW_Extends))
             {
                 throw new Exception("Extending a class is not implemented yet");
             }
+
+            ParseTemplateBody();
         }
 
-        public void ParseTemplateBody(RppClass clazz)
+        public IList<IRppNode> ParseTemplateBody()
         {
             Require(RppLexer.NewLine);
 
+            List<IRppNode> stats = new List<IRppNode>();
             if (Require(RppLexer.OP_LBrace))
             {
-                while (ParseSemi() && ParseTemplateStat(clazz))
+                IRppNode stat;
+                while (ParseSemi() && (stat = ParseTemplateStat()) != null)
                 {
+                    stats.Add(stat);
                 }
 
                 Expect(RppLexer.OP_RBrace);
             }
+
+            return stats;
         }
 
-        public bool ParseTemplateStat(RppClass clazz)
+        public IRppNode ParseTemplateStat()
         {
-            ParseModifier();
+            ParseModifier(); // TODO handle modifiers
 
-            return ParseDef(clazz) || ParseDcl(clazz) || ParseExpr1() == null;
+            IRppNode stat = ParseDef();
+            if (stat != null)
+            {
+                return stat;
+            }
+
+            stat = ParseDcl();
+            if (stat != null)
+            {
+                return stat;
+            }
+
+            stat = ParseExpr1();
+            return stat;
         }
 
-        private static bool ParseDcl(INodeContainer container)
+        private static IRppNode ParseDcl()
         {
-            return false;
+            return null;
         }
 
-        private bool ParseDef(INodeContainer container)
+        private IRppNode ParseDef()
         {
             if (Require(RppLexer.KW_Val))
             {
-                return ParsePatDef(MutabilityFlag.MF_Val, container);
+                return ParsePatDef(MutabilityFlag.MF_Val);
             }
 
             if (Require(RppLexer.KW_Var))
             {
-                return ParsePatDef(MutabilityFlag.MF_Var, container);
+                return ParsePatDef(MutabilityFlag.MF_Var);
             }
 
             if (Require(RppLexer.KW_Def))
             {
-                ParseFunDef(container);
+                return ParseFunDef();
             }
 
-            return true;
+            return null;
         }
 
         // FunSig [‘:’ Type] ‘=’ Expr
         // FunSig ::= id [FunTypeParamClause] ParamClauses
 
-        private void ParseFunDef(INodeContainer container)
+        private RppFunc ParseFunDef()
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
@@ -332,8 +352,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             Expect(RppLexer.OP_Eq);
             IRppExpr expr = ParseExpr();
 
-            RppFunc func = new RppFunc(name, funcParams, funcReturnType, expr);
-            container.Add(func);
+            return new RppFunc(name, funcParams, funcReturnType, expr);
         }
 
 
@@ -371,7 +390,6 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return funcParams;
         }
 
-
         //param ::= {Annotation} id [‘:’ ParamType] [‘=’ Expr]
         private bool ParseParam(int paramIndex, out RppParam funcParam)
         {
@@ -393,16 +411,10 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
         }
 
         // PatDef ::= Pattern2 {',' Pattern2} [':' Type] '=' Expr
-        public bool ParsePatDef(MutabilityFlag mutabilityFlag, INodeContainer container)
+        public RppField ParsePatDef(MutabilityFlag mutabilityFlag)
         {
             Expect(RppLexer.Id);
-            IList<string> varIds = new List<string>();
-            varIds.Add(_lastToken.Text);
-            while (Require(RppLexer.OP_Comma))
-            {
-                Expect(RppLexer.Id);
-                varIds.Add(_lastToken.Text);
-            }
+            string varId = _lastToken.Text;
 
             Expect(RppLexer.OP_Colon);
             RppType type;
@@ -412,8 +424,8 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             }
 
             IRppExpr expr = ParseExpr();
-            varIds.ForEach(id => container.Add(new RppField(mutabilityFlag, id, null, type, expr)));
-            return true;
+            RppField var = new RppField(mutabilityFlag, varId, null, type, expr);
+            return var;
         }
 
 
@@ -485,7 +497,9 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 
         private void ParseObjectDef()
         {
-
+            Expect(RppLexer.Id);
+            string objectName = _lastToken.Text;
+            ParseClassTemplateOpt(objectName);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

@@ -1,27 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    class SimpleNodeContainer : INodeContainer
-    {
-        public IList<IRppNode> Nodes { get; private set; }
-
-        public SimpleNodeContainer()
-        {
-            Nodes = new List<IRppNode>();
-        }
-
-        public void Add(IRppNode node)
-        {
-            Nodes.Add(node);
-        }
-    }
-
     [TestClass]
     public class ParserTest
     {
@@ -105,19 +88,14 @@ class Main";
         [TestMethod]
         public void TestVarDef()
         {
-            TestVarDef("k : Int", new[] {new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int"))});
-            TestVarDef("k, j : Int", new[]
-            {
-                new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")),
-                new RppField(MutabilityFlag.MF_Val, "j", null, new RppTypeName("Int"))
-            });
+            TestVarDef("k : Int", new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")));
         }
 
-        private static void TestVarDef(string code, IEnumerable<RppField> expected)
+        private static void TestVarDef(string code, RppField expected)
         {
-            SimpleNodeContainer container = new SimpleNodeContainer();
-            Assert.IsTrue(CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val, container));
-            Assert.IsTrue(expected.SequenceEqual(container.Nodes));
+            var var = CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val);
+            Assert.IsNotNull(var);
+            Assert.AreEqual(expected, var);
         }
 
         [TestMethod]
