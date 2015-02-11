@@ -160,27 +160,6 @@ namespace CSharpRpp
             return false;
         }
 
-/*
- 
-    ClassDef ::= id [TypeParamClause] {Annotation} [AccessModifier] ClassParamClauses ClassTemplateOpt
- 
-bool RppParser::parse_class_def(ObjectNode * objectNode)
-{
-    if (require(ID_Ident)) {
-        objectNode->setNameToken(lastToken);
-        vector<string> typeParams;
-        if (parse_type_param_clause(typeParams))
-        {
-            objectNode->setGenericsTypes(typeParams);
-        }
-
-        parse_class_param_clauses(objectNode);
-        return parse_class_template_opt(objectNode);
-    } else {
-        throw UnexpectedTokenException(lastToken, ID_Ident);
-    }
-}
-*/
         // ClassDef ::= id [TypeParamClause] {Annotation} [AccessModifier] ClassParamClauses ClassTemplateOpt
         public RppClass ParseClassDef()
         {
@@ -306,6 +285,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 
         public IRppNode ParseTemplateStat()
         {
+            SkipNewLines();
             ParseModifier(); // TODO handle modifiers
 
             IRppNode stat = ParseDef();

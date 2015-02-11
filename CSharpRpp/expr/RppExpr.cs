@@ -297,9 +297,9 @@ namespace CSharpRpp
 
         public Type RuntimeType { get; private set; }
 
-        private IList<IRppExpr> _exprs;
+        private IList<IRppNode> _exprs;
 
-        public RppBlockExpr(IList<IRppExpr> exprs)
+        public RppBlockExpr(IList<IRppNode> exprs)
         {
             _exprs = exprs;
         }
@@ -320,11 +320,14 @@ namespace CSharpRpp
 
         private void InitializeType()
         {
-            if (_exprs.Any())
+            if (_exprs.Any() && _exprs.Last() is IRppExpr)
             {
-                var lastExpr = _exprs.Last();
-                Type = lastExpr.Type;
-                RuntimeType = lastExpr.RuntimeType;
+                var lastExpr = _exprs.Last() as IRppExpr;
+                if (lastExpr != null)
+                {
+                    Type = lastExpr.Type;
+                    RuntimeType = lastExpr.RuntimeType;
+                }
             }
             else
             {
@@ -335,7 +338,7 @@ namespace CSharpRpp
 
         public void Codegen(ILGenerator generator)
         {
-            _exprs.ForEach(e => e.Codegen(generator));
+            //_exprs.ForEach(e => e.Codegen(generator));
         }
 
         #region Equality

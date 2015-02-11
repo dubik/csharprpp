@@ -87,7 +87,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseEmptyBlockExpr()
         {
-            TestExpr("{}", new RppBlockExpr(new List<IRppExpr>()));
+            TestExpr("{}", new RppBlockExpr(Collections.NoNodes));
         }
 
         private static void TestExpr(string code, IRppExpr expected)

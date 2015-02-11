@@ -126,7 +126,7 @@ expression returns [IRppExpr node]
     | ^(RPP_FUNC_CALL id=. ar=args {node = new RppFuncCall($id.Text, $ar.list); })
     | IntegerLiteral { node = new RppInteger($IntegerLiteral.text); }
     | StringLiteral { node = new RppString($StringLiteral.text); }
-    | ^(RPP_BLOCK_EXPR  blck=block) { node = new RppBlockExpr($blck.list); }
+    | ^(RPP_BLOCK_EXPR  blck=block) { node = new RppBlockExpr(null /*$blck.list*/); }
     | Id { node = new RppId($Id.text); }
     | ^(RPP_NEW id=. ar=args {node = new RppNew($id.Text, $ar.list); })
     ;

@@ -140,18 +140,36 @@ namespace CSharpRpp
             return ParseSimpleExpr1();
         }
 
+        /*
+    Block ::= {BlockStat semi} [ResultExpr]
+
+    BlockStat ::= Import
+                | {Annotation} [‘implicit’ | ‘lazy’] Def
+                | {Annotation} {LocalModifier} TmplDef
+                | Expr1
+                |
+        */
+
         public RppBlockExpr ParseBlockExpr()
         {
             Expect(RppLexer.OP_LBrace);
-            SkipNewLines();
-            IList<IRppExpr> exprs = new List<IRppExpr>();
+            IList<IRppNode> exprs = new List<IRppNode>();
             while (true)
             {
+                SkipNewLines();
+                IRppNode defNode = ParseDef();
+                if (defNode != null)
+                {
+                    exprs.Add(defNode);
+                    continue;
+                }
+
                 IRppExpr expr = ParseExpr();
                 if (expr == null)
                 {
                     break;
                 }
+
                 exprs.Add(expr);
                 SkipNewLines();
             }
