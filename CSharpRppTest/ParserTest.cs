@@ -36,7 +36,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void OneFunObject()
         {
-            string code = @"object Main {
+            const string code = @"object Main {
     def main(args: Array[String]) : Unit = {
     }
 }";

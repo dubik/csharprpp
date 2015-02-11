@@ -52,10 +52,10 @@ object Main
     }
 }
 ";
-            RppProgram runtime = Compile(runtimeCode);
+            RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);
-            RppProgram program = Compile(code);
+            RppProgram program = Parse(code);
             program.Name = "Sample";
             RppScope scope = new RppScope(runtimeScope);
             CodegenContext codegenContext = new CodegenContext();
@@ -113,17 +113,20 @@ object Main
             return Assembly.GetAssembly(typeof (Runtime));
         }
 
-        private static RppProgram Compile(string code)
+        private static RppProgram Parse(string code)
+        {
+            RppParser parser = CreateParser(code);
+            return parser.CompilationUnit();
+        }
+
+        private static RppParser CreateParser(string code)
         {
             ANTLRStringStream input = new ANTLRStringStream(code);
-            JRppLexer lexer = new JRppLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            JRppParser parser = new JRppParser(tokens);
-            var result = parser.compilationUnit();
-            var s = ((CommonTree) result.Tree).ToStringTree();
-            CommonTreeNodeStream treeNodeStream = new CommonTreeNodeStream(result.Tree);
-            JRppTreeGrammar walker = new JRppTreeGrammar(treeNodeStream);
-            return walker.walk();
+            RppLexer lexer = new RppLexer(input);
+            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+            var k = tokenStream.GetTokens();
+            RppParser parser = new RppParser(tokenStream);
+            return parser;
         }
     }
 }

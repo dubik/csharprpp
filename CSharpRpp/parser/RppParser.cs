@@ -104,7 +104,11 @@ namespace CSharpRpp
                 ExpectSemi();
             }
 
+            SkipNewLines();
+
             ParseTopStatSeq(program);
+
+            SkipNewLines();
 
             Expect(RppLexer.EOF);
 
