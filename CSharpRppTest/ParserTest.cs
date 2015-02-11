@@ -8,7 +8,7 @@ namespace CSharpRppTest
     [TestClass]
     public class ParserTest
     {
-        private static RppProgram Parse(string code)
+        internal static RppProgram Parse(string code)
         {
             RppParser parser = CreateParser(code);
             return parser.CompilationUnit();
@@ -27,14 +27,17 @@ namespace CSharpRppTest
         [TestMethod]
         public void EmptyObject()
         {
-            const string code = @"package Hello
-object Main";
+            SimpleTestObjectParsing("object Main", 1);
+            SimpleTestObjectParsing("object Main\n", 1);
+            SimpleTestObjectParsing("object Main\n\n", 1);
+            SimpleTestObjectParsing("object Main{}", 1);
+        }
 
-            //const string code1 = code + "\n";
-            //const string code2 = code1 + "\n";
+        private static void SimpleTestObjectParsing(string code, int expectedClassesCount)
+        {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-            Assert.AreEqual(1, program.Classes.Count());
+            Assert.AreEqual(expectedClassesCount, program.Classes.Count());
         }
 
         [TestMethod]
