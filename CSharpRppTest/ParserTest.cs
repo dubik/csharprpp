@@ -33,6 +33,18 @@ namespace CSharpRppTest
             SimpleTestObjectParsing("object Main{}", 1);
         }
 
+        [TestMethod]
+        public void OneFunObject()
+        {
+            string code = @"object Main {
+    def Main(args: Array[String]) : Unit = {
+    }
+}";
+            RppProgram program = Parse(code);
+            Assert.IsNotNull(program);
+
+        }
+
         private static void SimpleTestObjectParsing(string code, int expectedClassesCount)
         {
             RppProgram program = Parse(code);

@@ -140,9 +140,25 @@ namespace CSharpRpp
             return ParseSimpleExpr1();
         }
 
-        private IRppExpr ParseBlockExpr()
+        public RppBlockExpr ParseBlockExpr()
         {
-            throw new Exception("Block is not implemented yet");
+            Expect(RppLexer.OP_LBrace);
+            SkipNewLines();
+            IList<IRppExpr> exprs = new List<IRppExpr>();
+            while (true)
+            {
+                IRppExpr expr = ParseExpr();
+                if (expr == null)
+                {
+                    break;
+                }
+                exprs.Add(expr);
+                SkipNewLines();
+            }
+
+            Expect(RppLexer.OP_RBrace);
+
+            return new RppBlockExpr(exprs);
         }
 
         private IRppExpr ParseSimpleExpr1()

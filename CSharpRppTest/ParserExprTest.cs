@@ -84,6 +84,12 @@ namespace CSharpRppTest
             TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), Call("MyFunc")), Id("bar")), Call("Length")));
         }
 
+        [TestMethod]
+        public void ParseEmptyBlockExpr()
+        {
+            TestExpr("{}", new RppBlockExpr(new List<IRppExpr>()));
+        }
+
         private static void TestExpr(string code, IRppExpr expected)
         {
             var parser = ParserTest.CreateParser(code);

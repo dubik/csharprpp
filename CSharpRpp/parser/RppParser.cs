@@ -79,6 +79,13 @@ namespace CSharpRpp
             return ok;
         }
 
+        private void SkipNewLines()
+        {
+            while (Require(RppLexer.NewLine))
+            {
+            }
+        }
+
         private void ExpectSemi()
         {
             if (!ParseSemi())
@@ -345,6 +352,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             string name = _lastToken.Text;
             IList<RppType> typeParams = ParseTypeParamClause();
             IEnumerable<IRppParam> funcParams = ParseParamClauses();
+            Expect(RppLexer.OP_Colon);
             RppType funcReturnType;
             if (!ParseType(out funcReturnType))
             {
