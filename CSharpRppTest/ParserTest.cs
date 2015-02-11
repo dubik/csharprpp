@@ -46,6 +46,29 @@ namespace CSharpRppTest
             Assert.AreEqual("main", program.Classes.First().Functions.First().Name);
         }
 
+        [TestMethod]
+        public void ParseEmptyClass()
+        {
+            RppClass expected = new RppClass(ClassKind.Class, "String", Collections.NoFields, Collections.NoNodes);
+            Assert.AreEqual(ParseClass("class String"), expected);
+        }
+
+        [TestMethod]
+        public void ParseEmptyClassWithOneField()
+        {
+            RppField field = new RppField(MutabilityFlag.MF_Val, "length", Collections.NoStrings, new RppTypeName("Int"));
+            RppClass expected = new RppClass(ClassKind.Class, "String", new[] {field}, Collections.NoNodes);
+            Assert.AreEqual(ParseClass("class String(length: Int)"), expected);
+        }
+
+        private RppClass ParseClass(string code)
+        {
+            RppProgram program = Parse(code);
+            Assert.IsNotNull(program);
+            Assert.AreEqual(1, program.Classes.Count());
+            return program.Classes.First();
+        }
+
         private static void SimpleTestObjectParsing(string code, int expectedClassesCount)
         {
             RppProgram program = Parse(code);

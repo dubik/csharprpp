@@ -21,8 +21,8 @@ namespace CSharpRpp
     [DebuggerDisplay("{Kind} {Name}, Fields = {_classParams.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
-        private IList<RppField> _classParams = new List<RppField>();
-        private IList<IRppFunc> _funcs = new List<IRppFunc>();
+        private IList<RppField> _classParams;
+        private IList<IRppFunc> _funcs;
         private RppScope _scope;
 
         public ClassKind Kind { get; private set; }
@@ -43,20 +43,21 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppClass(string name, ClassKind kind, IList<RppField> classParams, IList<IRppNode> classBody) : base(name)
+        public RppClass(ClassKind kind, string name) : base(name)
+        {
+            Kind = kind;
+            _classParams = Collections.NoFields;
+            _funcs = Collections.NoFuncs;
+        }
+
+        public RppClass(ClassKind kind, string name, IList<RppField> classParams, IEnumerable<IRppNode> classBody) : base(name)
         {
             Kind = kind;
 
-            if (classParams != null && classParams.Count > 0)
-            {
-                _classParams = classParams;
-            }
+            _classParams = classParams;
 
-            if (classBody != null && classBody.Count > 0)
-            {
-                _funcs = classBody.OfType<IRppFunc>().ToList();
-                _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
-            }
+            _funcs = classBody.OfType<IRppFunc>().ToList();
+            _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
         }
 
         #region Semantic
@@ -101,6 +102,33 @@ namespace CSharpRpp
             _funcs.ForEach(func => func.Codegen(ctx));
 
             _typeBuilder.CreateType();
+        }
+
+        #endregion
+
+        #region Equality
+
+        protected bool Equals(RppClass other)
+        {
+            return Kind == other.Kind && _funcs.SequenceEqual(other._funcs) && _classParams.SequenceEqual(other._classParams) && Name == other.Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppClass) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int) Kind;
+                return hashCode;
+            }
         }
 
         #endregion

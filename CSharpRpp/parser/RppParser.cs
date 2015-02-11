@@ -140,12 +140,14 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_Trait))
             {
-                return true;
+                throw new Exception("Traits are not implemented");
             }
 
             if (Require(RppLexer.KW_Class))
             {
-                ParseClassDef();
+                RppClass obj = ParseClassDef();
+                program.Add(obj);
+                return true;
             }
 
             if (Require(RppLexer.KW_Object))
@@ -180,18 +182,18 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
 }
 */
         // ClassDef ::= id [TypeParamClause] {Annotation} [AccessModifier] ClassParamClauses ClassTemplateOpt
-        public void ParseClassDef()
+        public RppClass ParseClassDef()
         {
             if (Require(RppLexer.Id))
             {
                 string name = _lastToken.Text;
                 IList<RppType> typeParams = ParseTypeParamClause();
                 IList<RppField> classParams = ParseClassParamClause();
+                IList<IRppNode> nodes = ParseClassTemplateOpt();
+                return new RppClass(ClassKind.Class, name, classParams, nodes);
             }
-            else
-            {
-                throw new Exception("Expected identifier but got : " + _lastToken.Text);
-            }
+
+            throw new Exception("Expected identifier but got : " + _lastToken.Text);
         }
 
         // ClassParamClause ::= '(' [ClassParams] ')'
@@ -273,7 +275,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return typeParams;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt(string name)
+        public IList<IRppNode> ParseClassTemplateOpt()
         {
             if (Require(RppLexer.KW_Extends))
             {
@@ -514,8 +516,8 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             Expect(RppLexer.Id);
             string objectName = _lastToken.Text;
 
-            IList<IRppNode> stats = ParseClassTemplateOpt(objectName);
-            return new RppClass(objectName, ClassKind.Object, new List<RppField>(), stats);
+            IList<IRppNode> stats = ParseClassTemplateOpt();
+            return new RppClass(ClassKind.Object, objectName, new List<RppField>(), stats);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

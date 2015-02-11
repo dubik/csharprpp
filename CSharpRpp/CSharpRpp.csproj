@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">

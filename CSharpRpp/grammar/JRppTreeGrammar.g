@@ -28,11 +28,11 @@ classDef returns [RppClass node]
             ^(RPP_FIELDS c=classParams)
             ^(RPP_EXTENDS (t=.)? )
             ^(RPP_BODY b=templateBody?)
-            ) { node = new RppClass($id.Text, ClassKind.Class, $c.list, $b.list); }
+            ) { node = new RppClass(ClassKind.Class, $id.Text, $c.list, $b.list); }
     ;
 
 objectDef returns [RppClass node]
-    :   ^(RPP_OBJECT id=. ^(RPP_BODY b=templateBody?)) { node = new RppClass($id.Text, ClassKind.Object, new List<RppField>(), $b.list); }
+    :   ^(RPP_OBJECT id=. ^(RPP_BODY b=templateBody?)) { node = new RppClass(ClassKind.Object, $id.Text, new List<RppField>(), $b.list); }
     ;
 
 classParams returns [IList<RppField> list]

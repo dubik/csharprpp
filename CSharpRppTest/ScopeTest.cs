@@ -10,7 +10,7 @@ namespace CSharpRppTest
         public void OneLevelLookup()
         {
             RppScope scope = new RppScope(null);
-            RppClass clazz = new RppClass("Array", ClassKind.Class, null, null);
+            RppClass clazz = new RppClass(ClassKind.Class, "Array");
             scope.Add(clazz);
 
             Assert.AreEqual(clazz, scope.Lookup("Array"));
@@ -23,7 +23,7 @@ namespace CSharpRppTest
             RppScope parent = new RppScope(null);
             RppScope scope = new RppScope(parent);
 
-            RppClass clazz = new RppClass("Array", ClassKind.Class, null, null);
+            RppClass clazz = new RppClass(ClassKind.Class, "Array");
             parent.Add(clazz);
 
             Assert.AreEqual(clazz, scope.Lookup("Array"));
