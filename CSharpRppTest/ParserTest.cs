@@ -37,12 +37,13 @@ namespace CSharpRppTest
         public void OneFunObject()
         {
             string code = @"object Main {
-    def Main(args: Array[String]) : Unit = {
+    def main(args: Array[String]) : Unit = {
     }
 }";
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-
+            Assert.AreEqual(1, program.Classes.First().Functions.Count());
+            Assert.AreEqual("main", program.Classes.First().Functions.First().Name);
         }
 
         private static void SimpleTestObjectParsing(string code, int expectedClassesCount)
