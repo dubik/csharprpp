@@ -1,10 +1,5 @@
 ﻿namespace CSharpRpp
 {
-    public interface INodeContainer
-    {
-        void Add(IRppNode node);
-    }
-
     public interface IRppNode
     {
         void PreAnalyze(RppScope scope);

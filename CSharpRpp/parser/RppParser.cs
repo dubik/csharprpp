@@ -139,7 +139,9 @@ namespace CSharpRpp
 
             if (Require(RppLexer.KW_Object))
             {
-                ParseObjectDef();
+                RppClass obj = ParseObjectDef();
+                program.Add(obj);
+                return true;
             }
 
             return false;
@@ -260,14 +262,14 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return typeParams;
         }
 
-        public void ParseClassTemplateOpt(string name)
+        public IList<IRppNode> ParseClassTemplateOpt(string name)
         {
             if (Require(RppLexer.KW_Extends))
             {
                 throw new Exception("Extending a class is not implemented yet");
             }
 
-            ParseTemplateBody();
+            return ParseTemplateBody();
         }
 
         public IList<IRppNode> ParseTemplateBody()
@@ -495,11 +497,13 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             return false;
         }
 
-        private void ParseObjectDef()
+        private RppClass ParseObjectDef()
         {
             Expect(RppLexer.Id);
             string objectName = _lastToken.Text;
-            ParseClassTemplateOpt(objectName);
+
+            IList<IRppNode> stats = ParseClassTemplateOpt(objectName);
+            return new RppClass(objectName, ClassKind.Object, new List<RppField>(), stats);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()
@@ -509,6 +513,7 @@ bool RppParser::parse_class_def(ObjectNode * objectNode)
             {
                 modifiers.Add(ObjectModifier.OmLazy);
             }
+
             return modifiers;
         }
     }

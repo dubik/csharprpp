@@ -28,7 +28,7 @@ namespace CSharpRppTest
         public void EmptyObject()
         {
             const string code = @"package Hello
-class Main";
+object Main";
 
             //const string code1 = code + "\n";
             //const string code2 = code1 + "\n";

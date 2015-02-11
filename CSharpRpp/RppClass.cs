@@ -19,7 +19,7 @@ namespace CSharpRpp
     }
 
     [DebuggerDisplay("{Kind} {Name}, Fields = {_classParams.Count}, Funcs = {_funcs.Count}")]
-    public class RppClass : RppNamedNode, IRppClass, INodeContainer
+    public class RppClass : RppNamedNode, IRppClass
     {
         private IList<RppField> _classParams = new List<RppField>();
         private IList<IRppFunc> _funcs = new List<IRppFunc>();
@@ -57,11 +57,6 @@ namespace CSharpRpp
                 _funcs = classBody.OfType<IRppFunc>().ToList();
                 _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
             }
-        }
-
-        public void Add(IRppNode node)
-        {
-
         }
 
         #region Semantic
