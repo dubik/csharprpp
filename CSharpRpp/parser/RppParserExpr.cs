@@ -129,7 +129,7 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_New))
             {
-                throw new Exception("New is not implemented yet");
+                return ParseNewExpr();
             }
 
             if (Peek(RppLexer.OP_LBrace))
@@ -138,6 +138,15 @@ namespace CSharpRpp
             }
 
             return ParseSimpleExpr1();
+        }
+
+        private RppNew ParseNewExpr()
+        {
+            Expect(RppLexer.Id);
+            string name = _lastToken.Text;
+
+            IList<IRppExpr> args = ParseArgsOpt();
+            return new RppNew(name, args);
         }
 
         /*
@@ -242,6 +251,16 @@ namespace CSharpRpp
             }
 
             return expr;
+        }
+
+        private IList<IRppExpr> ParseArgsOpt()
+        {
+            if (Peek(RppLexer.OP_LParen))
+            {
+                return ParseArgs();
+            }
+
+            return Collections.NoExprs;
         }
 
         private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Antlr.Runtime;
 
 namespace CSharpRpp
@@ -346,6 +347,9 @@ namespace CSharpRpp
             }
 
             Expect(RppLexer.OP_Eq);
+
+            SkipNewLines();
+
             IRppExpr expr = ParseExpr();
 
             return new RppFunc(name, funcParams, funcReturnType, expr);
@@ -419,9 +423,10 @@ namespace CSharpRpp
                 throw new Exception("Expected type after ':' but got " + _lastToken.Text);
             }
 
+            Expect(RppLexer.OP_Eq);
+
             IRppExpr expr = ParseExpr();
-            RppField var = new RppField(mutabilityFlag, varId, null, type, expr);
-            return var;
+            return new RppField(mutabilityFlag, varId, null, type, expr);
         }
 
 

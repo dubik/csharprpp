@@ -47,6 +47,16 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
+        public void VarInBlockExpr()
+        {
+            RppBlockExpr blockExpr = CreateParser(@"{
+        val k : String = new String
+    }").ParseBlockExpr();
+
+            Assert.IsNotNull(blockExpr);
+        }
+
+        [TestMethod]
         public void ParseEmptyClass()
         {
             RppClass expected = new RppClass(ClassKind.Class, "String", Collections.NoFields, Collections.NoNodes);
@@ -127,7 +137,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestVarDef()
         {
-            TestVarDef("k : Int", new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")));
+            TestVarDef("k : Int = 10", new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")));
         }
 
         private static void TestVarDef(string code, RppField expected)
