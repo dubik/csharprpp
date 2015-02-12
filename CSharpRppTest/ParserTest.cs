@@ -47,16 +47,6 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
-        public void VarInBlockExpr()
-        {
-            RppBlockExpr blockExpr = CreateParser(@"{
-        val k : String = new String
-    }").ParseBlockExpr();
-
-            Assert.IsNotNull(blockExpr);
-        }
-
-        [TestMethod]
         public void ParseEmptyClass()
         {
             RppClass expected = new RppClass(ClassKind.Class, "String", Collections.NoFields, Collections.NoNodes);

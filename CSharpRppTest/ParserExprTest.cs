@@ -90,6 +90,16 @@ namespace CSharpRppTest
             TestExpr("{}", new RppBlockExpr(Collections.NoNodes));
         }
 
+        [TestMethod]
+        public void VarInBlockExpr()
+        {
+            RppBlockExpr blockExpr = ParserTest.CreateParser(@"{
+        val k : String = new String
+    }").ParseBlockExpr();
+
+            Assert.IsNotNull(blockExpr);
+        }
+
         private static void TestExpr(string code, IRppExpr expected)
         {
             var parser = ParserTest.CreateParser(code);
