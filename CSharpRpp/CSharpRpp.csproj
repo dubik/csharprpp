@@ -81,15 +81,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Antlr3 Include="grammar\RppLexer.g3">
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
+    </Antlr3>
     <Antlr3 Include="grammar\JRpp.g">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>
     <Antlr3 Include="grammar\JRppTreeGrammar.g">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
-    </Antlr3>
-    <Antlr3 Include="grammar\RppLexer.g3">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>

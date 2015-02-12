@@ -168,7 +168,7 @@ namespace CSharpRpp
             {
                 string name = _lastToken.Text;
                 IList<RppType> typeParams = ParseTypeParamClause();
-                IList<RppField> classParams = ParseClassParamClause();
+                IList<RppVar> classParams = ParseClassParamClause();
                 IList<IRppNode> nodes = ParseClassTemplateOpt();
                 return new RppClass(ClassKind.Class, name, classParams, nodes);
             }
@@ -177,14 +177,14 @@ namespace CSharpRpp
         }
 
         // ClassParamClause ::= '(' [ClassParams] ')'
-        public IList<RppField> ParseClassParamClause()
+        public IList<RppVar> ParseClassParamClause()
         {
-            var classParams = new List<RppField>();
+            var classParams = new List<RppVar>();
             if (Require(RppLexer.OP_LParen))
             {
                 while (!Require(RppLexer.OP_RParen))
                 {
-                    RppField classParam;
+                    RppVar classParam;
                     if (!ParseClassParam(out classParam))
                     {
                         throw new Exception("Class param was expected but got " + _lastToken.Text);
@@ -198,7 +198,7 @@ namespace CSharpRpp
         }
 
         // ClassParams ::= {Annotation} [{Modifier} (‘val’ | ‘var’)] id [‘:’ ParamType] [‘=’ Expr]
-        public bool ParseClassParam(out RppField classParam)
+        public bool ParseClassParam(out RppVar classParam)
         {
             classParam = null;
 
@@ -225,7 +225,7 @@ namespace CSharpRpp
                 throw new Exception("Expected type but found: " + _lastToken.Text);
             }
 
-            classParam = new RppField(mutability, name, new List<string>(), paramType);
+            classParam = new RppVar(mutability, name, paramType, new RppEmptyExpr());
             return true;
         }
 
@@ -502,7 +502,7 @@ namespace CSharpRpp
             string objectName = _lastToken.Text;
 
             IList<IRppNode> stats = ParseClassTemplateOpt();
-            return new RppClass(ClassKind.Object, objectName, new List<RppField>(), stats);
+            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

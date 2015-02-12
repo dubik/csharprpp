@@ -28,11 +28,11 @@ classDef returns [RppClass node]
             ^(RPP_FIELDS c=classParams)
             ^(RPP_EXTENDS (t=.)? )
             ^(RPP_BODY b=templateBody?)
-            ) { node = new RppClass(ClassKind.Class, $id.Text, $c.list, $b.list); }
+            ) { /*node = new RppClass(ClassKind.Class, $id.Text, $c.list, $b.list);*/ }
     ;
 
 objectDef returns [RppClass node]
-    :   ^(RPP_OBJECT id=. ^(RPP_BODY b=templateBody?)) { node = new RppClass(ClassKind.Object, $id.Text, new List<RppField>(), $b.list); }
+    :   ^(RPP_OBJECT id=. ^(RPP_BODY b=templateBody?)) { /*node = new RppClass(ClassKind.Object, $id.Text, new List<RppVar>(), $b.list); */}
     ;
 
 classParams returns [IList<RppField> list]
@@ -115,7 +115,7 @@ pat_def returns [List<IRppExpr> list]
 @init {
     list = new List<IRppExpr>();
 }
-    : decl=. {var varNames = new List<string>(); } (name=Id {varNames.Add($name.Text);})+ t=type e=expression {list.AddRange(varNames.Select(n => new RppVar($decl.Text, n, $t.node, $e.node)));}
+    : decl=. {var varNames = new List<string>(); } (name=Id {varNames.Add($name.Text);})+ t=type e=expression {/*list.AddRange(varNames.Select(n => new RppVar($decl.Text, n, $t.node, $e.node)));*/}
     ;
 
 expression returns [IRppExpr node]

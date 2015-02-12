@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace CSharpRpp
@@ -21,7 +22,7 @@ namespace CSharpRpp
     [DebuggerDisplay("{Kind} {Name}, Fields = {_classParams.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
-        private IList<RppField> _classParams;
+        private IList<RppVar> _classParams;
         private IList<IRppFunc> _funcs;
         private RppScope _scope;
 
@@ -50,7 +51,7 @@ namespace CSharpRpp
             _funcs = Collections.NoFuncs;
         }
 
-        public RppClass(ClassKind kind, string name, IList<RppField> classParams, IEnumerable<IRppNode> classBody) : base(name)
+        public RppClass(ClassKind kind, string name, IList<RppVar> classParams, IEnumerable<IRppNode> classBody) : base(name)
         {
             Kind = kind;
 
@@ -87,6 +88,7 @@ namespace CSharpRpp
         public void CodegenType(RppScope scope, ModuleBuilder moduleBuilder)
         {
             _typeBuilder = moduleBuilder.DefineType(Name);
+            
         }
 
         public void CodegenMethodStubs(RppScope scope)
@@ -98,9 +100,9 @@ namespace CSharpRpp
 
         public void Codegen(CodegenContext ctx)
         {
-            _classParams.ForEach(field => field.Codegen(ctx));
+            // TODO define fields in here
+            // _classParams.ForEach(field => field.Codegen(ctx));
             _funcs.ForEach(func => func.Codegen(ctx));
-
             _typeBuilder.CreateType();
         }
 

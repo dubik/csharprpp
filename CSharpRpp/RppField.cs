@@ -42,6 +42,7 @@ namespace CSharpRpp
 
         public void Codegen(CodegenContext ctx)
         {
+            
         }
 
         protected bool Equals(RppField other)

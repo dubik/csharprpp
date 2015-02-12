@@ -6,13 +6,6 @@ using System.Reflection.Emit;
 
 namespace CSharpRpp
 {
-    public interface IRppExpr : IRppNode
-    {
-        RppType Type { get; }
-        Type RuntimeType { get; }
-        void Codegen(ILGenerator generator);
-    }
-
     // Base class for RppId and RppFuncCall
     public abstract class RppMember : RppNamedNode, IRppExpr
     {
@@ -222,7 +215,6 @@ namespace CSharpRpp
         }
     }
 
-    [DebuggerDisplay("FuncCall - Name: {_funcName}, Params: {_paramList.Count}")]
     public class RppFuncCall : RppMember
     {
         public override RppType Type { get; protected set; }
