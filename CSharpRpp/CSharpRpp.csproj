@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codegen\ClrCodegen.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="expr\RppNew.cs" />
@@ -60,6 +61,7 @@
       <DependentUpon>RppLexer.g3</DependentUpon>
     </Compile>
     <Compile Include="IRppNode.cs" />
+    <Compile Include="IRppNodeVisitor.cs" />
     <Compile Include="native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
     <Compile Include="parser\RppParserExpr.cs" />

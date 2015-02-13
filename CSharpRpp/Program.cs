@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Antlr.Runtime;
+using CSharpRpp.Codegen;
 using CSharpRpp.Native;
 using RppRuntime;
 
@@ -64,6 +65,9 @@ object Main
             program.Analyze(scope);
             program.Codegen(codegenContext);
             program.Save();
+
+            ClrCodegen codegen = new ClrCodegen();
+            program.Accept(codegen);
 
             /*
              * Array[String]

@@ -8,7 +8,14 @@ namespace RppRuntime
         public int _field;
         public static void println(string line)
         {
-            Console.WriteLine(line);
+            if (line != null)
+            {
+                Console.WriteLine(line);
+            }
+            else
+            {
+                Console.WriteLine("Moika");
+            }
         }
     }
 

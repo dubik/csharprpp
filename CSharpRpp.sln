@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLRCodeGen", "CLRCodeGen\CL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RppRuntime", "RppRuntime\RppRuntime.csproj", "{05D46799-2874-40DE-966B-A49B50EEB74E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisitorThingy", "VisitorThingy\VisitorThingy.csproj", "{FD614959-CD30-46F2-A6A1-9FD046E305CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{05D46799-2874-40DE-966B-A49B50EEB74E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05D46799-2874-40DE-966B-A49B50EEB74E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05D46799-2874-40DE-966B-A49B50EEB74E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD614959-CD30-46F2-A6A1-9FD046E305CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD614959-CD30-46F2-A6A1-9FD046E305CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD614959-CD30-46F2-A6A1-9FD046E305CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD614959-CD30-46F2-A6A1-9FD046E305CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

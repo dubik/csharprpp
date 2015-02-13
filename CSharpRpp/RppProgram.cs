@@ -56,6 +56,12 @@ namespace CSharpRpp
             NodeUtils.PreAnalyze(scope, _classes);
         }
 
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+            _classes.ForEach(clazz => clazz.Accept(visitor));
+        }
+
         public void AddRuntime()
         {
         }

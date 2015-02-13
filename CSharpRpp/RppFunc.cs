@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using Antlr3.ST.Language;
 
 namespace CSharpRpp
 {
@@ -52,6 +53,12 @@ namespace CSharpRpp
             _expr = expr ?? new RppEmptyExpr();
         }
 
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+            _expr.Accept(visitor);
+        }
+
         public override void PreAnalyze(RppScope scope)
         {
             _scope = new RppScope(scope);
@@ -68,6 +75,33 @@ namespace CSharpRpp
             RuntimeReturnType = ReturnType.Resolve(_scope);
 
             return this;
+        }
+
+        protected bool Equals(RppFunc other)
+        {
+            return Equals(Name, other.Name) && Equals(ReturnType, other.ReturnType) && Equals(Params, other.Params) && IsStatic.Equals(other.IsStatic) &&
+                   IsPublic.Equals(other.IsPublic) && IsAbstract.Equals(other.IsAbstract);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppFunc) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (ReturnType != null ? ReturnType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Params != null ? Params.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsAbstract.GetHashCode();
+                return hashCode;
+            }
         }
 
         #region ToString

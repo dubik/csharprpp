@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -20,19 +21,21 @@ namespace CSharpRpp
 
     public abstract class RppType
     {
-        public abstract Type Resolve(RppScope scope);
+        [CanBeNull]
+        public abstract Type Resolve([NotNull] RppScope scope);
     }
 
     public class RppNativeType : RppType
     {
         private readonly Type _type;
 
-        public static RppNativeType Create(Type type)
+        [NotNull]
+        public static RppNativeType Create([NotNull] Type type)
         {
             return new RppNativeType(type);
         }
 
-        public RppNativeType(Type type)
+        public RppNativeType([NotNull] Type type)
         {
             _type = type;
         }
@@ -77,7 +80,7 @@ namespace CSharpRpp
             PrimitiveType = primitiveType;
         }
 
-        public static bool IsPrimitive(string name, out RppPrimitiveType type)
+        public static bool IsPrimitive([NotNull] string name, out RppPrimitiveType type)
         {
             return PrimitiveTypesMap.TryGetValue(name, out type);
         }
@@ -102,12 +105,12 @@ namespace CSharpRpp
 
         private readonly RppTypeName _typeName;
 
-        public RppGenericType(string typeName)
+        public RppGenericType([NotNull] string typeName)
         {
             _typeName = new RppTypeName(typeName);
         }
 
-        public void AddParam(RppType param)
+        public void AddParam([NotNull] RppType param)
         {
             _params.Add(param);
         }
@@ -160,24 +163,26 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((_params != null ? _params.GetHashCode() : 0) * 397) ^ (_typeName != null ? _typeName.GetHashCode() : 0);
+                return ((_params != null ? _params.GetHashCode() : 0) * 397) ^ _typeName.GetHashCode();
             }
         }
 
         #endregion
     }
 
+
     [DebuggerDisplay("{Name}")]
     public class RppTypeName : RppType
     {
         public readonly string Name;
 
-        public RppTypeName(string name)
+        public RppTypeName([NotNull] string name)
         {
             Name = name;
         }
 
-        public override Type Resolve(RppScope scope)
+        [CanBeNull]
+        public override Type Resolve([NotNull] RppScope scope)
         {
             RppPrimitiveType primitiveType;
             if (RppPrimitiveType.IsPrimitive(Name, out primitiveType))
@@ -227,7 +232,7 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            return (Name != null ? Name.GetHashCode() : 0);
+            return Name.GetHashCode();
         }
 
         #endregion

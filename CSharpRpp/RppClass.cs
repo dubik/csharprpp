@@ -61,6 +61,12 @@ namespace CSharpRpp
             _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
         }
 
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+            _funcs.ForEach(clazz => clazz.Accept(visitor));
+        }
+
         #region Semantic
 
         public override void PreAnalyze(RppScope scope)
@@ -88,7 +94,6 @@ namespace CSharpRpp
         public void CodegenType(RppScope scope, ModuleBuilder moduleBuilder)
         {
             _typeBuilder = moduleBuilder.DefineType(Name);
-            
         }
 
         public void CodegenMethodStubs(RppScope scope)

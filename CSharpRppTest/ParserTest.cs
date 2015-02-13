@@ -112,12 +112,12 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestParseClassParam()
         {
-            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
-            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new RppTypeName("Int")));
-            TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
+            TestClassParam("val foo : Int", new RppVar(MutabilityFlag.MF_Val, "foo", new RppTypeName("Int"), new RppEmptyExpr()));
+            TestClassParam("var foo : Int", new RppVar(MutabilityFlag.MF_Var, "foo", new RppTypeName("Int"), new RppEmptyExpr()));
+            TestClassParam("foo : Int", new RppVar(MutabilityFlag.MF_Val, "foo", new RppTypeName("Int"), new RppEmptyExpr()));
         }
 
-        private static void TestClassParam(string code, RppField expected)
+        private static void TestClassParam(string code, RppVar expected)
         {
             RppVar field;
             Assert.IsTrue(CreateParser(code).ParseClassParam(out field));
