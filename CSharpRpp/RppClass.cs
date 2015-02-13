@@ -63,8 +63,9 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            visitor.Visit(this);
-            _funcs.ForEach(clazz => clazz.Accept(visitor));
+            visitor.VisitEnter(this);
+            _funcs.ForEach(func => func.Accept(visitor));
+            visitor.VisitExit(this);
         }
 
         #region Semantic

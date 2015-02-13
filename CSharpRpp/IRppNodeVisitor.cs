@@ -1,18 +1,22 @@
-﻿namespace CSharpRpp
+﻿using JetBrains.Annotations;
+
+namespace CSharpRpp
 {
     public interface IRppNodeVisitor
     {
-        void Visit(RppVar node);
-        void Visit(RppFunc node);
-        void Visit(RppClass node);
-        void Visit(BinOp node);
-        void Visit(RppInteger node);
-        void Visit(RppString node);
-        void Visit(RppFuncCall node);
-        void Visit(RppBlockExpr node);
-        void Visit(RppSelector node);
-        void Visit(RppId node);
-        void Visit(RppProgram node);
+        void Visit([NotNull] RppVar node);
+        void VisitEnter([NotNull] RppFunc node);
+        void VisitExit([NotNull] RppFunc node);
+        void VisitEnter([NotNull] RppClass node);
+        void VisitExit([NotNull] RppClass node);
+        void Visit([NotNull] BinOp node);
+        void Visit([NotNull] RppInteger node);
+        void Visit([NotNull] RppString node);
+        void Visit([NotNull] RppFuncCall node);
+        void Visit([NotNull] RppBlockExpr node);
+        void Visit([NotNull] RppSelector node);
+        void Visit([NotNull] RppId node);
+        void Visit([NotNull] RppProgram node);
     }
 
     class RppNodeVisitor : IRppNodeVisitor
@@ -21,11 +25,19 @@
         {
         }
 
-        public void Visit(RppFunc node)
+        public void VisitEnter(RppFunc node)
         {
         }
 
-        public void Visit(RppClass node)
+        public void VisitExit(RppFunc node)
+        {
+        }
+
+        public void VisitEnter(RppClass node)
+        {
+        }
+
+        public void VisitExit(RppClass node)
         {
         }
 

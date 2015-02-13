@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 using RppRuntime;
 
 namespace CSharpRpp
@@ -66,7 +67,7 @@ namespace CSharpRpp
         {
         }
 
-        private void BootstrapRuntime(RppScope scope)
+        private void BootstrapRuntime([NotNull] RppScope scope)
         {
             foreach (MethodInfo methodInfo in typeof (Runtime).GetMethods(BindingFlags.Static))
             {

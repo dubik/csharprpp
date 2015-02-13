@@ -4,30 +4,35 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using Antlr3.ST.Language;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
     public interface IRppFunc : IRppNode, IRppNamedNode
     {
+        [NotNull]
         MethodInfo RuntimeFuncInfo { get; }
 
+        [NotNull]
         RppType ReturnType { get; }
+
+        [NotNull]
         Type RuntimeReturnType { get; }
+
+        [NotNull]
         IRppParam[] Params { get; }
 
         bool IsStatic { get; set; }
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
 
-        void CodegenMethodStubs(TypeBuilder typeBuilder);
-        void Codegen(CodegenContext ctx);
+        void CodegenMethodStubs([NotNull] TypeBuilder typeBuilder);
+        void Codegen([NotNull] CodegenContext ctx);
     }
 
     public class RppFunc : RppNamedNode, IRppFunc
     {
-        private IRppExpr _expr;
+        public IRppExpr Expr;
         private RppScope _scope;
 
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
@@ -46,17 +51,29 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppFunc(string name, IEnumerable<IRppParam> funcParams, RppType returnType, IRppExpr expr) : base(name)
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType)
+            : base(name)
+        {
+            Initialize(funcParams, returnType, RppEmptyExpr.Instance);
+        }
+
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr) : base(name)
+        {
+            Initialize(funcParams, returnType, expr);
+        }
+
+        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr)
         {
             Params = funcParams.ToArray();
             ReturnType = returnType;
-            _expr = expr ?? new RppEmptyExpr();
+            Expr = expr;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            visitor.Visit(this);
-            _expr.Accept(visitor);
+            visitor.VisitEnter(this);
+            Expr.Accept(visitor);
+            visitor.VisitExit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
@@ -64,15 +81,19 @@ namespace CSharpRpp
             _scope = new RppScope(scope);
 
             Params.ForEach(scope.Add);
-            _expr.PreAnalyze(_scope);
+            Expr.PreAnalyze(_scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            Params = NodeUtils.Analyze(_scope, Params).ToArray();
-            _expr = NodeUtils.AnalyzeNode(_scope, _expr);
+            NodeUtils.Analyze(_scope, Params);
+            Expr = NodeUtils.AnalyzeNode(_scope, Expr);
 
-            RuntimeReturnType = ReturnType.Resolve(_scope);
+            var runtimeReturnType = ReturnType.Resolve(_scope);
+            Debug.Assert(runtimeReturnType != null);
+
+            RuntimeReturnType = runtimeReturnType;
+            
 
             return this;
         }
@@ -95,7 +116,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                var hashCode = (ReturnType != null ? ReturnType.GetHashCode() : 0);
+                var hashCode = ReturnType.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Params != null ? Params.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
@@ -157,9 +178,9 @@ namespace CSharpRpp
             CodegenParams(Params, _methodBuilder);
 
             ILGenerator generator = _methodBuilder.GetILGenerator();
-            _expr.Codegen(generator);
+            Expr.Codegen(generator);
 
-            if (RuntimeReturnType == typeof (void) && _expr.RuntimeType != typeof (void))
+            if (RuntimeReturnType == typeof (void) && Expr.RuntimeType != typeof (void))
             {
                 generator.Emit(OpCodes.Pop);
             }

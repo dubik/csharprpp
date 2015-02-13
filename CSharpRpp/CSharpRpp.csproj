@@ -80,6 +80,8 @@
     <Compile Include="RppScope.cs" />
     <Compile Include="RppType.cs" />
     <Compile Include="RppVar.cs" />
+    <Compile Include="Utils\Annotations.cs" />
+    <Compile Include="Utils\Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

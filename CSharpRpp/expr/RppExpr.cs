@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -21,6 +22,8 @@ namespace CSharpRpp
 
     public class RppEmptyExpr : RppNode, IRppExpr
     {
+        public static RppEmptyExpr Instance = new RppEmptyExpr();
+
         public RppType Type
         {
             get { return RppPrimitiveType.RppUnit; }
@@ -291,9 +294,15 @@ namespace CSharpRpp
 
         private IList<IRppNode> _exprs;
 
-        public RppBlockExpr(IList<IRppNode> exprs)
+        public RppBlockExpr([NotNull] IList<IRppNode> exprs)
         {
             _exprs = exprs;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+            _exprs.ForEach(expr => expr.Accept(visitor));
         }
 
         public override void PreAnalyze(RppScope scope)
