@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -15,10 +16,15 @@ namespace CSharpRpp
         private readonly IList<IRppExpr> _constructorsParams;
         private RppClass _clazz;
 
-        public RppNew(string typeName, IList<IRppExpr> constructorsParams)
+        public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
         {
             _typeName = typeName;
             _constructorsParams = constructorsParams;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)

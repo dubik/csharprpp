@@ -19,6 +19,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppId node);
         void Visit([NotNull] RppProgram node);
         void Visit([NotNull] RppParam node);
+        void Visit([NotNull] RppNew node);
     }
 
     class RppNodeVisitor : IRppNodeVisitor
@@ -80,6 +81,10 @@ namespace CSharpRpp
         }
 
         public void Visit(RppParam node)
+        {
+        }
+
+        public void Visit(RppNew node)
         {
         }
     }

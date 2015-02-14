@@ -13,7 +13,8 @@ namespace CSharpRpp
         [NotNull]
         public Type RuntimeType { get; private set; }
 
-        private readonly IRppExpr _initExpr;
+        [NotNull]
+        public IRppExpr InitExpr { get; private set; }
 
         private LocalBuilder _builder;
 
@@ -21,22 +22,23 @@ namespace CSharpRpp
         {
             Type = type;
 
-            _initExpr = initExpr;
+            InitExpr = initExpr;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
+            InitExpr.Accept(visitor);
             visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
         {
-            _initExpr.PreAnalyze(scope);
+            InitExpr.PreAnalyze(scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _initExpr.Analyze(scope);
+            InitExpr.Analyze(scope);
 
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null);
@@ -49,9 +51,9 @@ namespace CSharpRpp
         {
             _builder = generator.DeclareLocal(RuntimeType);
 
-            if (!(_initExpr is RppEmptyExpr))
+            if (!(InitExpr is RppEmptyExpr))
             {
-                _initExpr.Codegen(generator);
+                InitExpr.Codegen(generator);
                 generator.Emit(OpCodes.Stloc, _builder.LocalIndex);
             }
         }

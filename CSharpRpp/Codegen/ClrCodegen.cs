@@ -97,10 +97,14 @@ namespace CSharpRpp.Codegen
             generator.Emit(OpCodes.Ret);
         }
 
-
         public void Visit(RppVar node)
         {
-            throw new NotImplementedException();
+            LocalBuilder localVar = _currentGenerator.DeclareLocal(node.RuntimeType);
+
+            if (!(node.InitExpr is RppEmptyExpr))
+            {
+                _currentGenerator.Emit(OpCodes.Stloc, localVar);
+            }
         }
 
         public void VisitEnter(RppBlockExpr node)

@@ -411,7 +411,7 @@ namespace CSharpRpp
         }
 
         // PatDef ::= Pattern2 {',' Pattern2} [':' Type] '=' Expr
-        public RppField ParsePatDef(MutabilityFlag mutabilityFlag)
+        public RppVar ParsePatDef(MutabilityFlag mutabilityFlag)
         {
             Expect(RppLexer.Id);
             string varId = _lastToken.Text;
@@ -426,7 +426,7 @@ namespace CSharpRpp
             Expect(RppLexer.OP_Eq);
 
             IRppExpr expr = ParseExpr();
-            return new RppField(mutabilityFlag, varId, null, type, expr);
+            return new RppVar(mutabilityFlag, varId, type, expr);
         }
 
 
