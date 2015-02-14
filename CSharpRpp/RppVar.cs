@@ -1,23 +1,32 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
     public class RppVar : RppNamedNode, IRppStatementExpr
     {
+        [NotNull]
         public RppType Type { get; private set; }
+
+        [NotNull]
         public Type RuntimeType { get; private set; }
 
         private readonly IRppExpr _initExpr;
 
         private LocalBuilder _builder;
 
-        public RppVar(MutabilityFlag mutability, string name, RppType type, IRppExpr initExpr) : base(name)
+        public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
         {
             Type = type;
 
-            _initExpr = initExpr ?? new RppEmptyExpr();
+            _initExpr = initExpr;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
@@ -29,7 +38,10 @@ namespace CSharpRpp
         {
             _initExpr.Analyze(scope);
 
-            RuntimeType = Type.Resolve(scope);
+            var resolvedType = Type.Resolve(scope);
+            Debug.Assert(resolvedType != null);
+            RuntimeType = resolvedType;
+
             return this;
         }
 

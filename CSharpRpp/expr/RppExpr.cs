@@ -39,22 +39,31 @@ namespace CSharpRpp
         }
     }
 
-    [DebuggerDisplay("Op = {_op}")]
+    [DebuggerDisplay("Op = {Op}")]
     public class BinOp : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
 
         public Type RuntimeType { get; private set; }
 
-        private readonly string _op;
+        [NotNull]
+        public string Op { get; private set; }
+
         private IRppExpr _left;
         private IRppExpr _right;
 
-        public BinOp(string op, IRppExpr left, IRppExpr right)
+        public BinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
-            _op = op;
+            Op = op;
             _left = left;
             _right = right;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            _left.Accept(visitor);
+            _right.Accept(visitor);
+            visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
@@ -77,7 +86,7 @@ namespace CSharpRpp
         {
             _left.Codegen(generator);
             _right.Codegen(generator);
-            switch (_op)
+            switch (Op)
             {
                 case "+":
                     generator.Emit(OpCodes.Add);
@@ -92,7 +101,7 @@ namespace CSharpRpp
                     generator.Emit(OpCodes.Div);
                     break;
                 default:
-                    Debug.Assert(false, "Don't know how to handle " + _op);
+                    Debug.Assert(false, "Don't know how to handle " + Op);
                     break;
             }
         }
@@ -101,7 +110,7 @@ namespace CSharpRpp
 
         protected bool Equals(BinOp other)
         {
-            return string.Equals(_op, other._op) && Equals(_left, other._left) && Equals(_right, other._right);
+            return string.Equals(Op, other.Op) && Equals(_left, other._left) && Equals(_right, other._right);
         }
 
         public override bool Equals(object obj)
@@ -125,7 +134,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                var hashCode = (_op != null ? _op.GetHashCode() : 0);
+                var hashCode = (Op != null ? Op.GetHashCode() : 0);
                 return hashCode;
             }
         }
@@ -136,7 +145,7 @@ namespace CSharpRpp
     [DebuggerDisplay("Int: {_value}")]
     public class RppInteger : RppNode, IRppExpr
     {
-        private readonly int _value;
+        public int Value { get; private set; }
 
         public RppType Type { get; private set; }
 
@@ -144,21 +153,21 @@ namespace CSharpRpp
 
         public RppInteger(string valueStr)
         {
-            _value = int.Parse(valueStr);
+            Value = int.Parse(valueStr);
             RuntimeType = typeof (int);
             Type = new RppNativeType(RuntimeType);
         }
 
         public void Codegen(ILGenerator generator)
         {
-            generator.Emit(OpCodes.Ldc_I4, _value);
+            generator.Emit(OpCodes.Ldc_I4, Value);
         }
 
         #region Equality
 
         protected bool Equals(RppInteger other)
         {
-            return _value == other._value;
+            return Value == other.Value;
         }
 
         public override bool Equals(object obj)
@@ -180,34 +189,41 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            return _value;
+            return Value.GetHashCode();
         }
 
         #endregion
     }
 
-    [DebuggerDisplay("String: {_value}")]
+    [DebuggerDisplay("String: {Value}")]
     public class RppString : RppNode, IRppExpr
     {
-        private readonly string _value;
+        [NotNull]
+        public string Value { get; private set; }
 
         public RppType Type { get; private set; }
 
         public Type RuntimeType { get; private set; }
 
-        public RppString(string valueStr)
+        public RppString([NotNull] string valueStr)
         {
-            _value = stripQuotes(valueStr);
+            Value = stripQuotes(valueStr);
             RuntimeType = typeof (string);
             Type = new RppNativeType(RuntimeType);
         }
 
-        public void Codegen(ILGenerator generator)
+        public override void Accept(IRppNodeVisitor visitor)
         {
-            generator.Emit(OpCodes.Ldstr, _value);
+            visitor.Visit(this);
         }
 
-        private string stripQuotes(string str)
+        public void Codegen(ILGenerator generator)
+        {
+            generator.Emit(OpCodes.Ldstr, Value);
+        }
+
+        [NotNull]
+        private static string stripQuotes([NotNull] string str)
         {
             if (str.Length > 1 && str[0] == '"' && str[str.Length - 1] == '"')
             {
@@ -224,26 +240,34 @@ namespace CSharpRpp
         public override Type RuntimeType { get; protected set; }
 
         private readonly IList<IRppExpr> _paramList;
-        private IRppFunc _func;
 
-        public RppFuncCall(string name, IList<IRppExpr> paramList) : base(name)
+        [NotNull]
+        public IRppFunc Function { get; private set; }
+
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> paramList) : base(name)
         {
             _paramList = paramList;
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _func = scope.Lookup(Name) as IRppFunc;
-            Debug.Assert(_func != null);
-            Type = _func.ReturnType;
-            RuntimeType = _func.RuntimeReturnType;
+            var resolvedFunc = scope.Lookup(Name) as IRppFunc;
+            Debug.Assert(resolvedFunc != null);
+            Function = resolvedFunc;
+            Type = Function.ReturnType;
+            RuntimeType = Function.RuntimeReturnType;
             return this;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override void Codegen(ILGenerator generator)
         {
             _paramList.ForEach(p => p.Codegen(generator));
-            generator.Emit(OpCodes.Call, _func.RuntimeFuncInfo);
+            generator.Emit(OpCodes.Call, Function.RuntimeFuncInfo);
         }
 
         public override string ToString()
@@ -279,7 +303,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((_paramList != null ? _paramList.GetHashCode() : 0) * 397) ^ (_func != null ? _func.GetHashCode() : 0);
+                return ((_paramList != null ? _paramList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
             }
         }
 
@@ -301,8 +325,9 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            visitor.Visit(this);
+            visitor.VisitEnter(this);
             _exprs.ForEach(expr => expr.Accept(visitor));
+            visitor.VisitExit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
@@ -441,29 +466,36 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
         public override Type RuntimeType { get; protected set; }
 
-        private IRppExpr _ref;
+        [NotNull]
+        public IRppExpr Ref { get; private set; }
 
-        public RppId(string name) : base(name)
+        public RppId([NotNull] string name) : base(name)
         {
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
         {
-            _ref = scope.Lookup(Name) as IRppExpr;
-            Debug.Assert(_ref != null);
+            var rppExpr = scope.Lookup(Name) as IRppExpr;
+            Debug.Assert(rppExpr != null);
+            Ref = rppExpr;
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            Type = _ref.Type;
-            RuntimeType = _ref.RuntimeType;
+            Type = Ref.Type;
+            RuntimeType = Ref.RuntimeType;
 
             return this;
         }
 
         public override void Codegen(ILGenerator generator)
         {
-            _ref.Codegen(generator);
+            Ref.Codegen(generator);
         }
 
         public override string ToString()

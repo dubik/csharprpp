@@ -94,7 +94,6 @@ namespace CSharpRpp
 
             RuntimeReturnType = runtimeReturnType;
 
-
             return this;
         }
 
@@ -217,12 +216,17 @@ namespace CSharpRpp
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
 
-        private readonly int _index;
+        public int Index { get; private set; }
 
         public RppParam([NotNull] string name, int index, [NotNull] RppType type) : base(name)
         {
             Type = type;
-            _index = index;
+            Index = index;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override IRppNode Analyze(RppScope scope)
@@ -235,7 +239,7 @@ namespace CSharpRpp
 
         public void Codegen(ILGenerator generator)
         {
-            generator.Emit(OpCodes.Ldarg, _index);
+            generator.Emit(OpCodes.Ldarg, Index);
         }
     }
 }

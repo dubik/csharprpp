@@ -17,7 +17,7 @@ namespace CSharpRpp.Codegen
         private TypeBuilder _currentClass;
         private RppClass _currentRppClass;
         private ILGenerator _currentGenerator;
-        private RppFunc _mainFunc;
+        private MethodInfo _mainFunc;
 
         public void Visit(RppProgram node)
         {
@@ -46,11 +46,6 @@ namespace CSharpRpp.Codegen
         {
             Console.WriteLine("Generating func: " + node.Name);
 
-            if (node.Name == "main")
-            {
-                _mainFunc = node;
-            }
-
             MethodAttributes attrs = MethodAttributes.Private;
 
             if (node.IsPublic)
@@ -69,6 +64,11 @@ namespace CSharpRpp.Codegen
             CodegenParams(node.Params, builder);
 
             _currentGenerator = builder.GetILGenerator();
+
+            if (node.Name == "main")
+            {
+                _mainFunc = builder.GetBaseDefinition();
+            }
         }
 
         private static void CodegenParams([NotNull] IEnumerable<IRppParam> paramList, [NotNull] MethodBuilder methodBuilder)
@@ -80,6 +80,7 @@ namespace CSharpRpp.Codegen
         public void VisitExit(RppFunc node)
         {
             GenerateRet(node, _currentGenerator);
+
 
             Console.WriteLine("Func generated");
         }
@@ -102,47 +103,73 @@ namespace CSharpRpp.Codegen
             throw new NotImplementedException();
         }
 
-        public void Visit(RppBlockExpr node)
+        public void VisitEnter(RppBlockExpr node)
         {
             Console.WriteLine("Block expr");
         }
 
+        public void VisitExit(RppBlockExpr node)
+        {
+        }
+
+        private readonly Dictionary<string, OpCode> OpToIL = new Dictionary<string, OpCode>
+        {
+            {"+", OpCodes.Add},
+            {"-", OpCodes.Sub},
+            {"*", OpCodes.Mul},
+            {"/", OpCodes.Div}
+        };
+
         public void Visit(BinOp node)
         {
-            throw new System.NotImplementedException();
+            OpCode opCode;
+            if (OpToIL.TryGetValue(node.Op, out opCode))
+            {
+                _currentGenerator.Emit(opCode);
+            }
+            else
+            {
+                throw new Exception("Can't generate code for: " + node.Op);
+            }
         }
 
         public void Visit(RppInteger node)
         {
-            throw new System.NotImplementedException();
+            _currentGenerator.Emit(OpCodes.Ldc_I4, node.Value);
         }
 
         public void Visit(RppString node)
         {
-            throw new System.NotImplementedException();
+            _currentGenerator.Emit(OpCodes.Ldstr, node.Value);
         }
 
         public void Visit(RppFuncCall node)
         {
-            throw new System.NotImplementedException();
+            // TODO we should keep references to functions by making another pass of code gen before
+            // real code generation
+            _currentGenerator.Emit(OpCodes.Call, node.Function.RuntimeFuncInfo);
         }
 
         public void Visit(RppSelector node)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Visit(RppId node)
         {
-            throw new System.NotImplementedException();
+            node.Ref.Accept(this);
+        }
+
+        public void Visit(RppParam node)
+        {
+            _currentGenerator.Emit(OpCodes.Ldarg, node.Index);
         }
 
         public void Save()
         {
-            IRppFunc func = _mainFunc;
-            if (func != null)
+            if (_mainFunc != null)
             {
-                _assemblyBuilder.SetEntryPoint(func.RuntimeFuncInfo, PEFileKinds.ConsoleApplication);
+                _assemblyBuilder.SetEntryPoint(_mainFunc, PEFileKinds.ConsoleApplication);
                 _assemblyBuilder.Save(_assemblyName.Name + ".exe");
             }
             else

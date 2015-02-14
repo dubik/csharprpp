@@ -13,10 +13,12 @@ namespace CSharpRpp
         void Visit([NotNull] RppInteger node);
         void Visit([NotNull] RppString node);
         void Visit([NotNull] RppFuncCall node);
-        void Visit([NotNull] RppBlockExpr node);
+        void VisitEnter([NotNull] RppBlockExpr node);
+        void VisitExit([NotNull] RppBlockExpr node);
         void Visit([NotNull] RppSelector node);
         void Visit([NotNull] RppId node);
         void Visit([NotNull] RppProgram node);
+        void Visit([NotNull] RppParam node);
     }
 
     class RppNodeVisitor : IRppNodeVisitor
@@ -57,7 +59,11 @@ namespace CSharpRpp
         {
         }
 
-        public void Visit(RppBlockExpr node)
+        public void VisitEnter(RppBlockExpr node)
+        {
+        }
+
+        public void VisitExit(RppBlockExpr node)
         {
         }
 
@@ -70,6 +76,10 @@ namespace CSharpRpp
         }
 
         public void Visit(RppProgram node)
+        {
+        }
+
+        public void Visit(RppParam node)
         {
         }
     }
