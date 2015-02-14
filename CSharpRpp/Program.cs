@@ -24,8 +24,6 @@ object Runtime
             const string code = @"
 class Array(k: Int)
 {
-   def apply(index: Int, value: Int) : Unit = 10 + 3
-
    def length: Int = 10
 }
 
@@ -63,11 +61,12 @@ object Main
             program.CodegenType(scope);
             program.CodegenMethodStubs(scope, codegenContext);
             program.Analyze(scope);
-            program.Codegen(codegenContext);
-            program.Save();
+            // program.Codegen(codegenContext);
+            // program.Save();
 
             ClrCodegen codegen = new ClrCodegen();
             program.Accept(codegen);
+            codegen.Save();
 
             /*
              * Array[String]

@@ -63,10 +63,6 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.Accept(visitor));
         }
 
-        public void AddRuntime()
-        {
-        }
-
         private void BootstrapRuntime([NotNull] RppScope scope)
         {
             foreach (MethodInfo methodInfo in typeof (Runtime).GetMethods(BindingFlags.Static))
@@ -94,28 +90,6 @@ namespace CSharpRpp
         public void Codegen(CodegenContext ctx)
         {
             _classes.ForEach(clazz => clazz.Codegen(ctx));
-        }
-
-        public IRppFunc FindMain()
-        {
-            return
-                _classes.Where(clazz => clazz.Kind == ClassKind.Object)
-                    .SelectMany(obj => obj.Functions)
-                    .First(func => func.Name == "main");
-        }
-
-        public void Save()
-        {
-            IRppFunc func = FindMain();
-            if (func != null)
-            {
-                _context.AssemblyBuilder.SetEntryPoint(func.RuntimeFuncInfo, PEFileKinds.ConsoleApplication);
-                _context.AssemblyBuilder.Save(Name + ".exe");
-            }
-            else
-            {
-                _context.AssemblyBuilder.Save(Name + ".dll");
-            }
         }
     }
 }

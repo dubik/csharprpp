@@ -93,10 +93,12 @@ namespace CSharpRpp
             Debug.Assert(runtimeReturnType != null);
 
             RuntimeReturnType = runtimeReturnType;
-            
+
 
             return this;
         }
+
+        #region Equality
 
         protected bool Equals(RppFunc other)
         {
@@ -124,6 +126,8 @@ namespace CSharpRpp
                 return hashCode;
             }
         }
+
+        #endregion
 
         #region ToString
 
@@ -215,7 +219,7 @@ namespace CSharpRpp
 
         private readonly int _index;
 
-        public RppParam(string name, int index, RppType type) : base(name)
+        public RppParam([NotNull] string name, int index, [NotNull] RppType type) : base(name)
         {
             Type = type;
             _index = index;
@@ -223,7 +227,9 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            RuntimeType = Type.Resolve(scope);
+            var resolvedType = Type.Resolve(scope);
+            Debug.Assert(resolvedType != null, "Can't resolve type");
+            RuntimeType = resolvedType;
             return this;
         }
 

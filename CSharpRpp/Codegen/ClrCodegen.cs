@@ -17,16 +17,20 @@ namespace CSharpRpp.Codegen
         private TypeBuilder _currentClass;
         private RppClass _currentRppClass;
         private ILGenerator _currentGenerator;
+        private RppFunc _mainFunc;
 
         public void Visit(RppProgram node)
         {
             _assemblyName = new AssemblyName(node.Name);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.Save);
             _moduleBuilder = _assemblyBuilder.DefineDynamicModule(node.Name, node.Name + ".exe");
+
+            Console.WriteLine("RppProgram: " + node.Name);
         }
 
         public void VisitEnter(RppClass node)
         {
+            Console.WriteLine("Genering class: " + node.Name);
             _currentRppClass = node;
             _currentClass = _moduleBuilder.DefineType(node.Name);
             _typeMap.Add(node.Name, _currentClass);
@@ -34,11 +38,19 @@ namespace CSharpRpp.Codegen
 
         public void VisitExit(RppClass node)
         {
-            _currentClass.CreateType();
+            var t = _currentClass.CreateType();
+            Console.WriteLine("Generated class");
         }
 
         public void VisitEnter(RppFunc node)
         {
+            Console.WriteLine("Generating func: " + node.Name);
+
+            if (node.Name == "main")
+            {
+                _mainFunc = node;
+            }
+
             MethodAttributes attrs = MethodAttributes.Private;
 
             if (node.IsPublic)
@@ -68,10 +80,14 @@ namespace CSharpRpp.Codegen
         public void VisitExit(RppFunc node)
         {
             GenerateRet(node, _currentGenerator);
+
+            Console.WriteLine("Func generated");
         }
 
         private static void GenerateRet([NotNull] RppFunc node, [NotNull] ILGenerator generator)
         {
+            generator.Emit(OpCodes.Ldc_I4, 10);
+
             if (node.RuntimeReturnType == typeof (void) && node.Expr.RuntimeType != typeof (void))
             {
                 generator.Emit(OpCodes.Pop);
@@ -88,6 +104,7 @@ namespace CSharpRpp.Codegen
 
         public void Visit(RppBlockExpr node)
         {
+            Console.WriteLine("Block expr");
         }
 
         public void Visit(BinOp node)
@@ -118,6 +135,20 @@ namespace CSharpRpp.Codegen
         public void Visit(RppId node)
         {
             throw new System.NotImplementedException();
+        }
+
+        public void Save()
+        {
+            IRppFunc func = _mainFunc;
+            if (func != null)
+            {
+                _assemblyBuilder.SetEntryPoint(func.RuntimeFuncInfo, PEFileKinds.ConsoleApplication);
+                _assemblyBuilder.Save(_assemblyName.Name + ".exe");
+            }
+            else
+            {
+                _assemblyBuilder.Save(_assemblyName.Name + ".dll");
+            }
         }
     }
 }
