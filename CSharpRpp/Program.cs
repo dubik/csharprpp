@@ -21,7 +21,7 @@ object Runtime
     def println(line: String) : Unit = { }
 }
 ";
-            const string code = @"
+            const  string code = @"
 class Array(k: Int)
 {
    def length: Int = 10

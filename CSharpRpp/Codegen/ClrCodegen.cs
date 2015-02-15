@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -7,6 +8,34 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
+    class CodeGenerator
+    {
+        public static void Generate()
+        {
+
+            //TypeCreator creator = new TypeCreator();
+            ClrCodegen codegen = new ClrCodegen();
+        }
+    }
+
+    class TypeCreator : RppNodeVisitor
+    {
+        private ModuleBuilder _module;
+        private Dictionary<RppClass, TypeBuilder> _typeBuilders;
+
+        public TypeCreator([NotNull] ModuleBuilder module, [NotNull] Dictionary<RppClass, TypeBuilder> typeBuilders)
+        {
+            _module = module;
+            _typeBuilders = typeBuilders;
+        }
+
+        public override void VisitEnter(RppClass node)
+        {
+            _typeBuilders.Add(node, _module.DefineType(node.Name));
+            
+        }
+    }
+
     class ClrCodegen : IRppNodeVisitor
     {
         private AssemblyName _assemblyName;
@@ -16,7 +45,7 @@ namespace CSharpRpp.Codegen
 
         private TypeBuilder _currentClass;
         private RppClass _currentRppClass;
-        private ILGenerator _currentGenerator;
+        private ILGenerator _il;
         private MethodInfo _mainFunc;
 
         public void Visit(RppProgram node)
@@ -63,7 +92,7 @@ namespace CSharpRpp.Codegen
 
             CodegenParams(node.Params, builder);
 
-            _currentGenerator = builder.GetILGenerator();
+            _il = builder.GetILGenerator();
 
             if (node.Name == "main")
             {
@@ -79,7 +108,7 @@ namespace CSharpRpp.Codegen
 
         public void VisitExit(RppFunc node)
         {
-            GenerateRet(node, _currentGenerator);
+            GenerateRet(node, _il);
 
 
             Console.WriteLine("Func generated");
@@ -99,11 +128,11 @@ namespace CSharpRpp.Codegen
 
         public void Visit(RppVar node)
         {
-            LocalBuilder localVar = _currentGenerator.DeclareLocal(node.RuntimeType);
+            LocalBuilder localVar = _il.DeclareLocal(node.RuntimeType);
 
             if (!(node.InitExpr is RppEmptyExpr))
             {
-                _currentGenerator.Emit(OpCodes.Stloc, localVar);
+                _il.Emit(OpCodes.Stloc, localVar);
             }
         }
 
@@ -129,7 +158,7 @@ namespace CSharpRpp.Codegen
             OpCode opCode;
             if (OpToIL.TryGetValue(node.Op, out opCode))
             {
-                _currentGenerator.Emit(opCode);
+                _il.Emit(opCode);
             }
             else
             {
@@ -139,19 +168,19 @@ namespace CSharpRpp.Codegen
 
         public void Visit(RppInteger node)
         {
-            _currentGenerator.Emit(OpCodes.Ldc_I4, node.Value);
+            _il.Emit(OpCodes.Ldc_I4, node.Value);
         }
 
         public void Visit(RppString node)
         {
-            _currentGenerator.Emit(OpCodes.Ldstr, node.Value);
+            _il.Emit(OpCodes.Ldstr, node.Value);
         }
 
         public void Visit(RppFuncCall node)
         {
             // TODO we should keep references to functions by making another pass of code gen before
             // real code generation
-            _currentGenerator.Emit(OpCodes.Call, node.Function.RuntimeFuncInfo);
+            _il.Emit(OpCodes.Call, node.Function.RuntimeFuncInfo);
         }
 
         public void Visit(RppSelector node)
@@ -166,7 +195,14 @@ namespace CSharpRpp.Codegen
 
         public void Visit(RppParam node)
         {
-            _currentGenerator.Emit(OpCodes.Ldarg, node.Index);
+            _il.Emit(OpCodes.Ldarg, node.Index);
+        }
+
+        public void Visit(RppNew node)
+        {
+            ConstructorInfo constructorInfo = node.RefClass.RuntimeType.GetConstructor(Type.EmptyTypes);
+            Debug.Assert(constructorInfo != null, "constructorInfo != null");
+            _il.Emit(OpCodes.Newobj, constructorInfo);
         }
 
         public void Save()

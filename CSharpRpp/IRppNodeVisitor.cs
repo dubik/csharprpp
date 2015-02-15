@@ -24,67 +24,67 @@ namespace CSharpRpp
 
     class RppNodeVisitor : IRppNodeVisitor
     {
-        public void Visit(RppVar node)
+        public virtual void Visit(RppVar node)
         {
         }
 
-        public void VisitEnter(RppFunc node)
+        public virtual void VisitEnter(RppFunc node)
         {
         }
 
-        public void VisitExit(RppFunc node)
+        public virtual void VisitExit(RppFunc node)
         {
         }
 
-        public void VisitEnter(RppClass node)
+        public virtual void VisitEnter(RppClass node)
         {
         }
 
-        public void VisitExit(RppClass node)
+        public virtual void VisitExit(RppClass node)
         {
         }
 
-        public void Visit(BinOp node)
+        public virtual void Visit(BinOp node)
         {
         }
 
-        public void Visit(RppInteger node)
+        public virtual void Visit(RppInteger node)
         {
         }
 
-        public void Visit(RppString node)
+        public virtual void Visit(RppString node)
         {
         }
 
-        public void Visit(RppFuncCall node)
+        public virtual void Visit(RppFuncCall node)
         {
         }
 
-        public void VisitEnter(RppBlockExpr node)
+        public virtual void VisitEnter(RppBlockExpr node)
         {
         }
 
-        public void VisitExit(RppBlockExpr node)
+        public virtual void VisitExit(RppBlockExpr node)
         {
         }
 
-        public void Visit(RppSelector node)
+        public virtual void Visit(RppSelector node)
         {
         }
 
-        public void Visit(RppId node)
+        public virtual void Visit(RppId node)
         {
         }
 
-        public void Visit(RppProgram node)
+        public virtual void Visit(RppProgram node)
         {
         }
 
-        public void Visit(RppParam node)
+        public virtual void Visit(RppParam node)
         {
         }
 
-        public void Visit(RppNew node)
+        public virtual void Visit(RppNew node)
         {
         }
     }

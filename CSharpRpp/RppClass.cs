@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -28,11 +29,19 @@ namespace CSharpRpp
 
         public ClassKind Kind { get; private set; }
 
+        [NotNull]
         public IEnumerable<IRppFunc> Functions
         {
             get { return _funcs.AsEnumerable(); }
         }
 
+        [NotNull]
+        public IEnumerable<IRppFunc> Constructors
+        {
+            get { return Collections.NoFuncs; }
+        }
+
+        [NotNull]
         public Type RuntimeType
         {
             get { return _typeBuilder; }
@@ -44,14 +53,14 @@ namespace CSharpRpp
 
         #endregion
 
-        public RppClass(ClassKind kind, string name) : base(name)
+        public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
             _classParams = Collections.NoFields;
             _funcs = Collections.NoFuncs;
         }
 
-        public RppClass(ClassKind kind, string name, IList<RppVar> classParams, IEnumerable<IRppNode> classBody) : base(name)
+        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppVar> classParams, [NotNull] IEnumerable<IRppNode> classBody) : base(name)
         {
             Kind = kind;
 

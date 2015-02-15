@@ -4,11 +4,11 @@ using System.Reflection.Emit;
 
 namespace CLRCodeGen
 {
-    internal class ICodegenContext
+    class ICodegenContext
     {
     }
 
-    internal class Node
+    class Node
     {
         public void Analyze()
         {
@@ -19,7 +19,7 @@ namespace CLRCodeGen
         }
     }
 
-    internal class Program
+    class Program
     {
         private static void DoSomething()
         {
@@ -64,6 +64,11 @@ namespace CLRCodeGen
         private class Bar
         {
             public Foo _parent;
+
+            public Foo Create()
+            {
+                return new Foo();
+            }
         }
 
         private static void CreateObjects()
@@ -79,18 +84,40 @@ namespace CLRCodeGen
 
             fooTypeBuilder.DefineField("_child", barTypeBuilder, FieldAttributes.Public);
 
+            var method = CreateMethod(fooTypeBuilder, barTypeBuilder);
+            var mainMethod = CreateMainMethod(fooTypeBuilder);
+
+            barTypeBuilder.CreateType();
+            fooTypeBuilder.CreateType();
+
+            GenCode(mainMethod, barTypeBuilder);
+
+            assemblyBuilder.SetEntryPoint(mainMethod.GetBaseDefinition());
+            assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
+        private static void GenCode(MethodBuilder builder, Type objectToCreate)
+        {
+            ILGenerator il = builder.GetILGenerator();
+            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructor(new Type[]{}));
+            il.Emit(OpCodes.Ret);
+        }
+
+        private static MethodBuilder CreateMethod(TypeBuilder builder, Type objectToCreate)
+        {
+            MethodBuilder method = builder.DefineMethod("Create", MethodAttributes.Public, CallingConventions.Standard, objectToCreate, new Type[] {});
+            return method;
+        }
+
+        private static MethodBuilder CreateMainMethod(TypeBuilder fooTypeBuilder)
+        {
             MethodBuilder mainMethod = fooTypeBuilder.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard,
                 typeof (int),
                 new[] {typeof (String[])});
             ILGenerator il = mainMethod.GetILGenerator();
             il.EmitWriteLine("Moikka");
             il.Emit(OpCodes.Ret);
-
-            fooTypeBuilder.CreateType();
-            barTypeBuilder.CreateType();
-
-            assemblyBuilder.SetEntryPoint(mainMethod.GetBaseDefinition());
-            assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+            return mainMethod;
         }
 
         public static void Print()
@@ -129,7 +156,8 @@ namespace CLRCodeGen
             CreateObjects();
             CreateCall();
              */
-            roundToEven();
+            //roundToEven();
+            CreateObjects();
         }
 
         private static void roundToEven()
