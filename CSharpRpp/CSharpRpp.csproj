@@ -68,6 +68,7 @@
     <Compile Include="Codegen\ClrCodegen.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="RppAssignOp.cs" />
     <Compile Include="expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">
       <DependentUpon>RppLexer.g3</DependentUpon>

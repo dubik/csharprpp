@@ -15,6 +15,8 @@ namespace CSharpRpp
         [NotNull]
         public RppClass RefClass { get; private set; }
 
+        public IEnumerable<RppType> ArgumentTypes { get; private set; }
+
         private readonly string _typeName;
         private readonly IList<IRppExpr> _constructorsParams;
 
@@ -40,6 +42,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
+
             return this;
         }
 

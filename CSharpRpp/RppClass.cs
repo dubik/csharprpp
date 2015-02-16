@@ -97,6 +97,26 @@ namespace CSharpRpp
             return this;
         }
 
+        private void CreateConstructor()
+        {
+            int index = 1;
+            var p = _classParams.Select(rppVar => new RppParam(rppVar.Name, index++, rppVar.Type));
+            List<IRppNode> assignExprs = new List<IRppNode>();
+            assignExprs.Add(CreateParentConstructorCall());
+            foreach (var classParam in _classParams)
+            {
+                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name, classParam), new RppId(classParam.Name));
+                assignExprs.Add(assign);
+            }
+
+            RppFunc constructor = new RppFunc(Name, p, new RppObjectType(this), new RppBlockExpr(assignExprs));
+        }
+
+        private IRppExpr CreateParentConstructorCall()
+        {
+            
+        }
+
         #endregion
 
         #region Codegen

@@ -201,8 +201,14 @@ namespace CSharpRpp.Codegen
         public void Visit(RppNew node)
         {
             ConstructorInfo constructorInfo = node.RefClass.RuntimeType.GetConstructor(Type.EmptyTypes);
+            node.RefClass.GetConstructor();
             Debug.Assert(constructorInfo != null, "constructorInfo != null");
             _il.Emit(OpCodes.Newobj, constructorInfo);
+        }
+
+        public void Visit(RppAssignOp node)
+        {
+            
         }
 
         public void Save()

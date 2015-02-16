@@ -93,9 +93,16 @@ namespace CSharpRpp
 
     public class RppObjectType : RppType
     {
+        private readonly RppClass _class;
+
+        public RppObjectType([NotNull] RppClass claz)
+        {
+            _class = claz;
+        }
+
         public override Type Resolve(RppScope scope)
         {
-            return null;
+            return _class.RuntimeType;
         }
     }
 

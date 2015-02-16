@@ -5,13 +5,11 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    public class RppVar : RppNamedNode, IRppStatementExpr
+    public class RppVar : RppMember
     {
-        [NotNull]
-        public RppType Type { get; private set; }
+        public override RppType Type { get; protected set; }
 
-        [NotNull]
-        public Type RuntimeType { get; private set; }
+        public override Type RuntimeType { get; protected set; }
 
         [NotNull]
         public IRppExpr InitExpr { get; private set; }
@@ -47,7 +45,7 @@ namespace CSharpRpp
             return this;
         }
 
-        public void Codegen(ILGenerator generator)
+        public override void Codegen(ILGenerator generator)
         {
             _builder = generator.DeclareLocal(RuntimeType);
 

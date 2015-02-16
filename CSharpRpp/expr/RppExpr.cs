@@ -466,11 +466,17 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
         public override Type RuntimeType { get; protected set; }
 
-        [NotNull]
-        public IRppExpr Ref { get; private set; }
+
+        [CanBeNull]
+        public RppMember Ref { get; private set; }
 
         public RppId([NotNull] string name) : base(name)
         {
+        }
+
+        public RppId([NotNull] string name, [NotNull] RppMember targetRef) : base(name)
+        {
+            Ref = targetRef;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -480,9 +486,12 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            var rppExpr = scope.Lookup(Name) as IRppExpr;
-            Debug.Assert(rppExpr != null);
-            Ref = rppExpr;
+            if (Ref == null)
+            {
+                var rppExpr = scope.Lookup(Name) as RppMember;
+                Debug.Assert(rppExpr != null);
+                Ref = rppExpr;
+            }
         }
 
         public override IRppNode Analyze(RppScope scope)
