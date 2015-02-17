@@ -39,12 +39,6 @@ namespace CSharpRpp
         [NotNull]
         public Type RuntimeType { get; set; }
 
-        #region Codegen
-
-        private TypeBuilder _typeBuilder;
-
-        #endregion
-
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -80,14 +74,16 @@ namespace CSharpRpp
             _funcs.ForEach(_scope.Add);
 
             NodeUtils.PreAnalyze(_scope, _classParams);
-            Constructor.PreAnalyze(_scope);
             NodeUtils.PreAnalyze(_scope, _funcs);
+
+
+            Constructor.PreAnalyze(_scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             _classParams = NodeUtils.Analyze(_scope, _classParams);
-            Constructor.Analyze(_scope);
+            //Constructor.Analyze(_scope);
             _funcs = NodeUtils.Analyze(_scope, _funcs);
 
             return this;

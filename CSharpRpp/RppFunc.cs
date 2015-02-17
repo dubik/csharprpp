@@ -19,6 +19,8 @@ namespace CSharpRpp
         [NotNull]
         IRppParam[] Params { get; }
 
+        IRppExpr Expr { get; }
+
         MethodInfo RuntimeType { get; set; }
 
         MethodBuilder Builder { get; set; }
@@ -30,7 +32,7 @@ namespace CSharpRpp
 
     public class RppFunc : RppNamedNode, IRppFunc
     {
-        public IRppExpr Expr;
+        public IRppExpr Expr { get; private set; }
         private RppScope _scope;
 
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
@@ -39,7 +41,13 @@ namespace CSharpRpp
         public IRppParam[] Params { get; private set; }
 
         public Type RuntimeReturnType { get; private set; }
-        public MethodInfo RuntimeType { get; set; }
+
+        public MethodInfo RuntimeType
+        {
+            get { return Builder.GetBaseDefinition(); }
+            set { throw new NotImplementedException(); }
+        }
+
         public MethodBuilder Builder { get; set; }
 
         public bool IsStatic { get; set; }
@@ -75,7 +83,7 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
 
-            Params.ForEach(scope.Add);
+            Params.ForEach(_scope.Add);
             Expr.PreAnalyze(_scope);
         }
 
@@ -173,10 +181,10 @@ namespace CSharpRpp
     }
 
     [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
-    public class RppParam : RppNamedNode, IRppParam
+    public sealed class RppParam : RppMember, IRppParam
     {
-        public RppType Type { get; private set; }
-        public Type RuntimeType { get; private set; }
+        public override RppType Type { get; protected set; }
+        public override Type RuntimeType { get; protected set; }
 
         public int Index { get; private set; }
 
@@ -197,11 +205,6 @@ namespace CSharpRpp
             Debug.Assert(resolvedType != null, "Can't resolve type");
             RuntimeType = resolvedType;
             return this;
-        }
-
-        public void Codegen(ILGenerator generator)
-        {
-            generator.Emit(OpCodes.Ldarg, Index);
         }
     }
 }

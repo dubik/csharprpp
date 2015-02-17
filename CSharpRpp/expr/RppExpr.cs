@@ -225,11 +225,21 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            var resolvedFunc = scope.Lookup(Name) as IRppFunc;
-            Debug.Assert(resolvedFunc != null);
-            Function = resolvedFunc;
-            Type = Function.ReturnType;
-            RuntimeType = Function.RuntimeReturnType;
+            if (Name != "ctor()")
+            {
+                var resolvedFunc = scope.Lookup(Name) as IRppFunc;
+                Debug.Assert(resolvedFunc != null);
+                Function = resolvedFunc;
+                Type = Function.ReturnType;
+                RuntimeType = Function.RuntimeReturnType;
+            }
+            else
+            {
+                // parent constructor is a special case, so don't resolve function
+                Type = RppPrimitiveType.UnitTy;
+                RuntimeType = typeof (void);
+            }
+
             return this;
         }
 

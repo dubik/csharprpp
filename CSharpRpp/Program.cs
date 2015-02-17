@@ -21,7 +21,7 @@ object Runtime
     def println(line: String) : Unit = { }
 }
 ";
-            const  string code = @"
+            const string code = @"
 class Array(k: Int)
 {
    def length: Int = 10
@@ -56,16 +56,13 @@ object Main
             RppProgram program = Parse(code);
             program.Name = "Sample";
             RppScope scope = new RppScope(runtimeScope);
-            CodegenContext codegenContext = new CodegenContext();
+
+            CodeGenerator generator = new CodeGenerator(program);
             program.PreAnalyze(scope);
-
+            generator.PreGenerate();
             program.Analyze(scope);
-            // program.Codegen(codegenContext);
-            // program.Save();
-
-            ClrCodegen codegen = new ClrCodegen();
-            program.Accept(codegen);
-            codegen.Save();
+            generator.Generate();
+            generator.Save();
 
             /*
              * Array[String]

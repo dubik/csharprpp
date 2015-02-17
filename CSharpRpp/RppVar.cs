@@ -7,14 +7,12 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public override RppType Type { get; protected set; }
+        public override sealed RppType Type { get; protected set; }
 
         public override Type RuntimeType { get; protected set; }
 
         [NotNull]
         public IRppExpr InitExpr { get; private set; }
-
-        private LocalBuilder _builder;
 
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
         {
