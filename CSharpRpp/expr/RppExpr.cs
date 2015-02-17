@@ -16,8 +16,6 @@ namespace CSharpRpp
         protected RppMember(string name) : base(name)
         {
         }
-
-        public abstract void Codegen(ILGenerator generator);
     }
 
     public class RppEmptyExpr : RppNode, IRppExpr
@@ -26,7 +24,7 @@ namespace CSharpRpp
 
         public RppType Type
         {
-            get { return RppPrimitiveType.RppUnit; }
+            get { return RppPrimitiveType.UnitTy; }
         }
 
         public Type RuntimeType
@@ -80,30 +78,6 @@ namespace CSharpRpp
             Debug.Assert(_right != null);
 
             return this;
-        }
-
-        public void Codegen(ILGenerator generator)
-        {
-            _left.Codegen(generator);
-            _right.Codegen(generator);
-            switch (Op)
-            {
-                case "+":
-                    generator.Emit(OpCodes.Add);
-                    break;
-                case "-":
-                    generator.Emit(OpCodes.Sub);
-                    break;
-                case "*":
-                    generator.Emit(OpCodes.Mul);
-                    break;
-                case "/":
-                    generator.Emit(OpCodes.Div);
-                    break;
-                default:
-                    Debug.Assert(false, "Don't know how to handle " + Op);
-                    break;
-            }
         }
 
         #region Equality
@@ -262,12 +236,6 @@ namespace CSharpRpp
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public override void Codegen(ILGenerator generator)
-        {
-            _paramList.ForEach(p => p.Codegen(generator));
-            generator.Emit(OpCodes.Call, Function.RuntimeFuncInfo);
         }
 
         public override string ToString()
@@ -500,11 +468,6 @@ namespace CSharpRpp
             RuntimeType = Ref.RuntimeType;
 
             return this;
-        }
-
-        public override void Codegen(ILGenerator generator)
-        {
-            Ref.Codegen(generator);
         }
 
         public override string ToString()

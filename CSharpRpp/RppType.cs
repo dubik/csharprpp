@@ -49,7 +49,7 @@ namespace CSharpRpp
     public class RppPrimitiveType : RppType
     {
         public readonly ERppPrimitiveType PrimitiveType;
-        public static RppPrimitiveType RppUnit = new RppPrimitiveType(ERppPrimitiveType.EUnit);
+        public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
 
         private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
         {
@@ -60,7 +60,7 @@ namespace CSharpRpp
             {"Long", new RppPrimitiveType(ERppPrimitiveType.ELong)},
             {"Float", new RppPrimitiveType(ERppPrimitiveType.EFloat)},
             {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)},
-            {"Unit", RppUnit}
+            {"Unit", UnitTy}
         };
 
         private static readonly Dictionary<ERppPrimitiveType, Type> SystemTypesMap = new Dictionary<ERppPrimitiveType, Type>

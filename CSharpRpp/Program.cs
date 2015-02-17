@@ -58,8 +58,7 @@ object Main
             RppScope scope = new RppScope(runtimeScope);
             CodegenContext codegenContext = new CodegenContext();
             program.PreAnalyze(scope);
-            program.CodegenType(scope);
-            program.CodegenMethodStubs(scope, codegenContext);
+
             program.Analyze(scope);
             // program.Codegen(codegenContext);
             // program.Save();

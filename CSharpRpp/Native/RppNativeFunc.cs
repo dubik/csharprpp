@@ -12,23 +12,25 @@ namespace CSharpRpp.Native
         public RppType ReturnType { get; private set; }
         public Type RuntimeReturnType { get; private set; }
         public IRppParam[] Params { get; private set; }
+        public MethodInfo RuntimeType { get; set; }
+        public MethodBuilder Builder { get; set; }
 
         public bool IsStatic
         {
             get { return RuntimeFuncInfo.IsStatic; }
-            set { throw new System.NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public bool IsPublic
         {
             get { return RuntimeFuncInfo.IsPublic; }
-            set { throw new System.NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public bool IsAbstract
         {
             get { return RuntimeFuncInfo.IsAbstract; }
-            set { throw new System.NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)

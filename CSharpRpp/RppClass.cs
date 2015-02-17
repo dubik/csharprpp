@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
 
@@ -36,16 +34,10 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public IEnumerable<IRppFunc> Constructors
-        {
-            get { return Collections.NoFuncs; }
-        }
+        public IRppFunc Constructor { get; private set; }
 
         [NotNull]
-        public Type RuntimeType
-        {
-            get { return _typeBuilder; }
-        }
+        public Type RuntimeType { get; set; }
 
         #region Codegen
 
@@ -68,6 +60,7 @@ namespace CSharpRpp
 
             _funcs = classBody.OfType<IRppFunc>().ToList();
             _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
+            Constructor = CreateConstructor();
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -87,58 +80,37 @@ namespace CSharpRpp
             _funcs.ForEach(_scope.Add);
 
             NodeUtils.PreAnalyze(_scope, _classParams);
+            Constructor.PreAnalyze(_scope);
             NodeUtils.PreAnalyze(_scope, _funcs);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             _classParams = NodeUtils.Analyze(_scope, _classParams);
+            Constructor.Analyze(_scope);
             _funcs = NodeUtils.Analyze(_scope, _funcs);
+
             return this;
         }
 
-        private void CreateConstructor()
+        private RppFunc CreateConstructor()
         {
             int index = 1;
             var p = _classParams.Select(rppVar => new RppParam(rppVar.Name, index++, rppVar.Type));
-            List<IRppNode> assignExprs = new List<IRppNode>();
-            assignExprs.Add(CreateParentConstructorCall());
+            List<IRppNode> assignExprs = new List<IRppNode> {CreateParentConstructorCall()};
+
             foreach (var classParam in _classParams)
             {
                 RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name, classParam), new RppId(classParam.Name));
                 assignExprs.Add(assign);
             }
 
-            RppFunc constructor = new RppFunc(Name, p, new RppObjectType(this), new RppBlockExpr(assignExprs));
+            return new RppFunc(Name, p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
         }
 
-        private IRppExpr CreateParentConstructorCall()
+        private static IRppExpr CreateParentConstructorCall()
         {
-            
-        }
-
-        #endregion
-
-        #region Codegen
-
-        public void CodegenType(RppScope scope, ModuleBuilder moduleBuilder)
-        {
-            _typeBuilder = moduleBuilder.DefineType(Name);
-        }
-
-        public void CodegenMethodStubs(RppScope scope)
-        {
-            Debug.Assert(_typeBuilder != null);
-
-            _funcs.ForEach(func => func.CodegenMethodStubs(_typeBuilder));
-        }
-
-        public void Codegen(CodegenContext ctx)
-        {
-            // TODO define fields in here
-            // _classParams.ForEach(field => field.Codegen(ctx));
-            _funcs.ForEach(func => func.Codegen(ctx));
-            _typeBuilder.CreateType();
+            return new RppFuncCall("ctor()", Collections.NoExprs);
         }
 
         #endregion
@@ -152,9 +124,18 @@ namespace CSharpRpp
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
             return Equals((RppClass) obj);
         }
 

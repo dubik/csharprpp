@@ -11,9 +11,6 @@ namespace CSharpRpp
     public interface IRppFunc : IRppNode, IRppNamedNode
     {
         [NotNull]
-        MethodInfo RuntimeFuncInfo { get; }
-
-        [NotNull]
         RppType ReturnType { get; }
 
         [NotNull]
@@ -22,12 +19,13 @@ namespace CSharpRpp
         [NotNull]
         IRppParam[] Params { get; }
 
+        MethodInfo RuntimeType { get; set; }
+
+        MethodBuilder Builder { get; set; }
+
         bool IsStatic { get; set; }
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
-
-        void CodegenMethodStubs([NotNull] TypeBuilder typeBuilder);
-        void Codegen([NotNull] CodegenContext ctx);
     }
 
     public class RppFunc : RppNamedNode, IRppFunc
@@ -38,18 +36,15 @@ namespace CSharpRpp
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
 
         public RppType ReturnType { get; private set; }
-        public Type RuntimeReturnType { get; private set; }
         public IRppParam[] Params { get; private set; }
+
+        public Type RuntimeReturnType { get; private set; }
+        public MethodInfo RuntimeType { get; set; }
+        public MethodBuilder Builder { get; set; }
 
         public bool IsStatic { get; set; }
         public bool IsPublic { get; set; }
         public bool IsAbstract { get; set; }
-
-        #region Codegen
-
-        private MethodBuilder _methodBuilder;
-
-        #endregion
 
         public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType)
             : base(name)
@@ -107,9 +102,18 @@ namespace CSharpRpp
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
             return Equals((RppFunc) obj);
         }
 
@@ -162,48 +166,6 @@ namespace CSharpRpp
         }
 
         #endregion
-
-        #region Codegen
-
-        public MethodInfo RuntimeFuncInfo
-        {
-            get { return _methodBuilder.GetBaseDefinition(); }
-        }
-
-        public void CodegenMethodStubs(TypeBuilder typeBuilder)
-        {
-            _methodBuilder = typeBuilder.DefineMethod(Name, MethodAttributes.Public | MethodAttributes.Static);
-        }
-
-        public void Codegen(CodegenContext ctx)
-        {
-            _methodBuilder.SetReturnType(RuntimeReturnType);
-            CodegenParams(Params, _methodBuilder);
-
-            ILGenerator generator = _methodBuilder.GetILGenerator();
-            Expr.Codegen(generator);
-
-            if (RuntimeReturnType == typeof (void) && Expr.RuntimeType != typeof (void))
-            {
-                generator.Emit(OpCodes.Pop);
-            }
-
-            generator.Emit(OpCodes.Ret);
-        }
-
-        private static void CodegenParams(IEnumerable<IRppParam> paramList, MethodBuilder methodBuilder)
-        {
-            Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
-            methodBuilder.SetParameters(parameterTypes);
-            // paramList.ForEachWithIndex((index, param) => methodBuilder.DefineParameter(index, ParameterAttributes.In, param.Name));
-        }
-
-        #endregion
-
-        public MethodInfo NativeMethodInfo()
-        {
-            return _methodBuilder.GetBaseDefinition();
-        }
     }
 
     public interface IRppParam : IRppNamedNode, IRppExpr

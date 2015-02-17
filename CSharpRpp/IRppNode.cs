@@ -16,7 +16,6 @@ namespace CSharpRpp
 
     public interface IRppStatementExpr : IRppNode
     {
-        void Codegen([NotNull] ILGenerator generator);
     }
 
     public interface IRppExpr : IRppStatementExpr

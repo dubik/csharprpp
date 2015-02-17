@@ -76,20 +76,5 @@ namespace CSharpRpp
             _classes = NodeUtils.Analyze(scope, _classes);
             return this;
         }
-
-        public void CodegenType(RppScope scope)
-        {
-            _classes.ForEach(clazz => clazz.CodegenType(scope, _context.ModuleBuilder));
-        }
-
-        public void CodegenMethodStubs(RppScope scope, CodegenContext ctx)
-        {
-            _classes.ForEach(clazz => clazz.CodegenMethodStubs(scope));
-        }
-
-        public void Codegen(CodegenContext ctx)
-        {
-            _classes.ForEach(clazz => clazz.Codegen(ctx));
-        }
     }
 }

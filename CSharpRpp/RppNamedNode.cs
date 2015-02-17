@@ -1,7 +1,10 @@
-﻿namespace CSharpRpp
+﻿using JetBrains.Annotations;
+
+namespace CSharpRpp
 {
     public interface IRppNamedNode
     {
+        [NotNull]
         string Name { get; }
     }
 
@@ -9,7 +12,7 @@
     {
         public string Name { get; private set; }
 
-        protected RppNamedNode(string name)
+        protected RppNamedNode([NotNull] string name)
         {
             Name = name;
         }

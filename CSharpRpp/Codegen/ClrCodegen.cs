@@ -8,20 +8,71 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class CodeGenerator
+    internal class CodeGenerator
     {
-        public static void Generate()
-        {
+        private readonly RppProgram _program;
+        private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
+        private Dictionary<RppFunc, MethodBuilder> _funcBuilders;
+        private AssemblyName _assemblyName;
+        private AssemblyBuilder _assemblyBuilder;
+        private ModuleBuilder _moduleBuilder;
 
-            //TypeCreator creator = new TypeCreator();
+        public CodeGenerator(RppProgram program)
+        {
+            _program = program;
+
+            _typeBuilders = new Dictionary<RppClass, TypeBuilder>();
+            _funcBuilders = new Dictionary<RppFunc, MethodBuilder>();
+
+            CreateModule();
+        }
+
+        public void PreGenerate()
+        {
+            TypeCreator creatorCreator = new TypeCreator(_moduleBuilder, _typeBuilders);
+            _program.Accept(creatorCreator);
+
+            StubsCreator stubsCreator = new StubsCreator(_typeBuilders);
+            _program.Accept(stubsCreator);
+        }
+
+        public void Generate()
+        {
+            ConstructorGenerator.GenerateConstructors(_typeBuilders);
             ClrCodegen codegen = new ClrCodegen();
+        }
+
+        private void CreateModule()
+        {
+            _assemblyName = new AssemblyName(_program.Name);
+            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.Save);
+            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(_program.Name, _program.Name + ".exe");
+        }
+
+        public void Save()
+        {
+            var mainFunc = FindMain();
+            if (mainFunc != null)
+            {
+                _assemblyBuilder.SetEntryPoint(mainFunc, PEFileKinds.ConsoleApplication);
+                _assemblyBuilder.Save(_assemblyName.Name + ".exe");
+            }
+            else
+            {
+                _assemblyBuilder.Save(_assemblyName.Name + ".dll");
+            }
+        }
+
+        private MethodInfo FindMain()
+        {
+            return _funcBuilders.Values.First(func => func.Name == "main").GetBaseDefinition();
         }
     }
 
-    class TypeCreator : RppNodeVisitor
+    internal class TypeCreator : RppNodeVisitor
     {
-        private ModuleBuilder _module;
-        private Dictionary<RppClass, TypeBuilder> _typeBuilders;
+        private readonly ModuleBuilder _module;
+        private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
 
         public TypeCreator([NotNull] ModuleBuilder module, [NotNull] Dictionary<RppClass, TypeBuilder> typeBuilders)
         {
@@ -31,16 +82,78 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppClass node)
         {
-            _typeBuilders.Add(node, _module.DefineType(node.Name));
-            
+            TypeBuilder classType = _module.DefineType(node.Name);
+            _typeBuilders.Add(node, classType);
+            node.RuntimeType = classType;
         }
     }
 
-    class ClrCodegen : IRppNodeVisitor
+    internal class StubsCreator : RppNodeVisitor
     {
-        private AssemblyName _assemblyName;
-        private AssemblyBuilder _assemblyBuilder;
-        private ModuleBuilder _moduleBuilder;
+        private RppClass _class;
+        private Dictionary<RppFunc, MethodBuilder> _funcBuilders;
+
+        public StubsCreator(Dictionary<RppFunc, MethodBuilder> funcBuilders)
+        {
+            _funcBuilders = funcBuilders;
+        }
+
+        public override void VisitEnter(RppClass node)
+        {
+            _class = node;
+        }
+
+        public override void VisitExit(RppClass node)
+        {
+            _class = null;
+        }
+
+        public override void VisitEnter(RppFunc node)
+        {
+            TypeBuilder builder = _class.RuntimeType as TypeBuilder;
+            Debug.Assert(builder != null, "builder != null");
+
+            MethodAttributes attrs = MethodAttributes.Private;
+
+            if (node.IsPublic)
+            {
+                attrs = MethodAttributes.Public;
+            }
+
+            if (node.IsStatic)
+            {
+                attrs |= MethodAttributes.Static;
+            }
+
+            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs);
+            node.Builder = methodBuilder;
+            _funcBuilders.Add(node, methodBuilder);
+        }
+    }
+
+    internal class ConstructorGenerator
+    {
+        public static void GenerateConstructors(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
+        {
+            ClrCodegen codegen = new ClrCodegen();
+            foreach (var pair in classes)
+            {
+                RppClass clazz = pair.Key;
+                TypeBuilder typeBuilder = pair.Value;
+                ConstructorBuilder builder = GenerateConstructor(typeBuilder);
+                ILGenerator body = builder.GetILGenerator();
+            }
+        }
+
+        private static ConstructorBuilder GenerateConstructor(TypeBuilder typeBuilder)
+        {
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
+            return constructorBuilder;
+        }
+    }
+
+    internal class ClrCodegen : RppNodeVisitor
+    {
         private readonly Dictionary<string, TypeBuilder> _typeMap = new Dictionary<string, TypeBuilder>();
 
         private TypeBuilder _currentClass;
@@ -48,30 +161,21 @@ namespace CSharpRpp.Codegen
         private ILGenerator _il;
         private MethodInfo _mainFunc;
 
-        public void Visit(RppProgram node)
-        {
-            _assemblyName = new AssemblyName(node.Name);
-            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.Save);
-            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(node.Name, node.Name + ".exe");
-
-            Console.WriteLine("RppProgram: " + node.Name);
-        }
-
-        public void VisitEnter(RppClass node)
+        public override void VisitEnter(RppClass node)
         {
             Console.WriteLine("Genering class: " + node.Name);
             _currentRppClass = node;
-            _currentClass = _moduleBuilder.DefineType(node.Name);
+            _currentClass = node.RuntimeType as TypeBuilder;
             _typeMap.Add(node.Name, _currentClass);
         }
 
-        public void VisitExit(RppClass node)
+        public override void VisitExit(RppClass node)
         {
             var t = _currentClass.CreateType();
             Console.WriteLine("Generated class");
         }
 
-        public void VisitEnter(RppFunc node)
+        public override void VisitEnter(RppFunc node)
         {
             Console.WriteLine("Generating func: " + node.Name);
 
@@ -106,7 +210,7 @@ namespace CSharpRpp.Codegen
             methodBuilder.SetParameters(parameterTypes);
         }
 
-        public void VisitExit(RppFunc node)
+        public override void VisitExit(RppFunc node)
         {
             GenerateRet(node, _il);
 
@@ -180,7 +284,7 @@ namespace CSharpRpp.Codegen
         {
             // TODO we should keep references to functions by making another pass of code gen before
             // real code generation
-            _il.Emit(OpCodes.Call, node.Function.RuntimeFuncInfo);
+            _il.Emit(OpCodes.Call, node.Function.RuntimeType);
         }
 
         public void Visit(RppSelector node)
@@ -200,28 +304,14 @@ namespace CSharpRpp.Codegen
 
         public void Visit(RppNew node)
         {
-            ConstructorInfo constructorInfo = node.RefClass.RuntimeType.GetConstructor(Type.EmptyTypes);
-            node.RefClass.GetConstructor();
-            Debug.Assert(constructorInfo != null, "constructorInfo != null");
-            _il.Emit(OpCodes.Newobj, constructorInfo);
+            // ConstructorInfo constructorInfo = node.RefClass.RuntimeType.GetConstructor(Type.EmptyTypes);
+            // node.RefClass.GetConstructor();
+            // Debug.Assert(constructorInfo != null, "constructorInfo != null");
+            // _il.Emit(OpCodes.Newobj, constructorInfo);
         }
 
         public void Visit(RppAssignOp node)
         {
-            
-        }
-
-        public void Save()
-        {
-            if (_mainFunc != null)
-            {
-                _assemblyBuilder.SetEntryPoint(_mainFunc, PEFileKinds.ConsoleApplication);
-                _assemblyBuilder.Save(_assemblyName.Name + ".exe");
-            }
-            else
-            {
-                _assemblyBuilder.Save(_assemblyName.Name + ".dll");
-            }
         }
     }
 }

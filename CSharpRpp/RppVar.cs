@@ -45,17 +45,6 @@ namespace CSharpRpp
             return this;
         }
 
-        public override void Codegen(ILGenerator generator)
-        {
-            _builder = generator.DeclareLocal(RuntimeType);
-
-            if (!(InitExpr is RppEmptyExpr))
-            {
-                InitExpr.Codegen(generator);
-                generator.Emit(OpCodes.Stloc, _builder.LocalIndex);
-            }
-        }
-
         #region Equality
 
         protected bool Equals(RppVar other)
