@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using Mono.Cecil.Cil;
+using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace CSharpRpp.Codegen
 {
-    class ConstructorGenerator
+    internal class ConstructorGenerator
     {
         public static void GenerateConstructors(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
         {
@@ -18,6 +18,7 @@ namespace CSharpRpp.Codegen
                 ILGenerator body = builder.GetILGenerator();
                 ClrCodegen codegen = new ClrCodegen(body);
                 clazz.Constructor.Expr.Accept(codegen);
+                body.Emit(OpCodes.Ret);
             }
         }
 

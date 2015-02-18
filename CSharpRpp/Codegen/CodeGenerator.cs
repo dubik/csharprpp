@@ -8,6 +8,11 @@ namespace CSharpRpp.Codegen
 {
     public sealed class CodeGenerator
     {
+        public Assembly Assembly
+        {
+            get { return _assemblyBuilder; }
+        }
+
         private readonly RppProgram _program;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
         private readonly Dictionary<RppFunc, MethodBuilder> _funcBuilders;
@@ -45,7 +50,7 @@ namespace CSharpRpp.Codegen
         private void CreateModule()
         {
             _assemblyName = new AssemblyName(_program.Name);
-            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.Save);
+            _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
             _moduleBuilder = _assemblyBuilder.DefineDynamicModule(_program.Name, _program.Name + ".exe");
         }
 
@@ -65,7 +70,13 @@ namespace CSharpRpp.Codegen
 
         private MethodInfo FindMain()
         {
-            return _funcBuilders.Values.First(func => func.Name == "main").GetBaseDefinition();
+            MethodBuilder mainFunc = _funcBuilders.Values.FirstOrDefault(func => func.Name == "main");
+            if (mainFunc != null)
+            {
+                return mainFunc.GetBaseDefinition();
+            }
+
+            return null;
         }
     }
 }

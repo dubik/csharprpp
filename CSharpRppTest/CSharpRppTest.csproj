@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGenTest.cs" />
     <Compile Include="ParserExprTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="ScopeTest.cs" />

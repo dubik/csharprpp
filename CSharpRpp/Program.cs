@@ -22,11 +22,9 @@ object Runtime
 }
 ";
             const string code = @"
-class Array
+class Foo
 {
-    def length : Int = 10
 }
-
 ";
             /*
              class Array(k: Int)
@@ -57,22 +55,22 @@ class Array
                 }
             }
              */
-            
-                        RppProgram runtime = Parse(runtimeCode);
-                        RppScope runtimeScope = new RppScope(null);
-                        WireRuntime(runtime.Classes, runtimeScope);
-                        RppProgram program = Parse(code);
-                        program.Name = "Sample";
-                        RppScope scope = new RppScope(runtimeScope);
 
-                        CodeGenerator generator = new CodeGenerator(program);
-                        program.PreAnalyze(scope);
-                        generator.PreGenerate();
-                        program.Analyze(scope);
-                        generator.Generate();
-                        generator.Save();
+            RppProgram runtime = Parse(runtimeCode);
+            RppScope runtimeScope = new RppScope(null);
+            WireRuntime(runtime.Classes, runtimeScope);
+            RppProgram program = Parse(code);
+            program.Name = "Sample";
+            RppScope scope = new RppScope(runtimeScope);
 
-                        /*
+            CodeGenerator generator = new CodeGenerator(program);
+            program.PreAnalyze(scope);
+            generator.PreGenerate();
+            program.Analyze(scope);
+            generator.Generate();
+            generator.Save();
+
+            /*
                          * Array[String]
                          * Array[Array[String]]
                          * Pair[String, Int]

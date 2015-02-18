@@ -134,6 +134,7 @@ namespace CSharpRpp.Codegen
             // real code generation
             if (node.Name == "ctor()")
             {
+                _body.Emit(OpCodes.Ldarg_0);
                 ConstructorInfo constructor = typeof (Object).GetConstructor(Type.EmptyTypes);
                 Debug.Assert(constructor != null, "constructor != null");
                 _body.Emit(OpCodes.Call, constructor);
