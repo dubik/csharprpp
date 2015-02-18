@@ -39,6 +39,7 @@ class Foo(val k: Int)
             var fooTy = CodeGenAndGetType(program, "Foo");
             object foo = Activator.CreateInstance(fooTy, new object[] {10});
             Assert.IsNotNull(foo);
+            Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
         }
 
         private static Type CodeGenAndGetType(RppProgram program, string typeName)
