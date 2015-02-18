@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -42,7 +43,7 @@ namespace CSharpRpp.Codegen
                 attrs |= MethodAttributes.Static;
             }
 
-            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs);
+            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs, typeof(void), new Type[]{typeof(int)});
             node.Builder = methodBuilder;
             _funcBuilders.Add(node, methodBuilder);
         }

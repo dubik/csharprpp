@@ -22,8 +22,10 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo(val k: Int)
+object Foo
 {
+    def main(args: Array[String]) : Unit = {
+    }
 }
 ";
             /*
@@ -69,18 +71,6 @@ class Foo(val k: Int)
             program.Analyze(scope);
             generator.Generate();
             generator.Save();
-
-            /*
-                         * Array[String]
-                         * Array[Array[String]]
-                         * Pair[String, Int]
-                         * Pair[String, Array[String]]
-                        RppProgram  p = new RppProgram();
-                        RppClass c = new RppClass("Array");
-                        RppFunc f = new RppFunc();
-                        c.AddFunc();
-                        p.Add();
-                         */
         }
 
         private static void WireRuntime(IEnumerable<RppClass> classes, RppScope scope)

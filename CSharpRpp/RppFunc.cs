@@ -67,6 +67,7 @@ namespace CSharpRpp
 
         private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr)
         {
+            IsPublic = true;
             Params = funcParams.ToArray();
             ReturnType = returnType;
             Expr = expr;

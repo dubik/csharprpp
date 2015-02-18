@@ -18,10 +18,7 @@ class Foo
 {
 }
 ";
-            RppProgram program = Parse(code);
-            Assert.IsNotNull(program);
-
-            var fooTy = CodeGenAndGetType(program, "Foo");
+            var fooTy = ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy);
             Assert.IsNotNull(foo);
         }
@@ -34,12 +31,35 @@ class Foo(val k: Int)
 {
 }
 ";
-            RppProgram program = Parse(code);
-            Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, "Foo");
+            var fooTy = ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy, new object[] {10});
             Assert.IsNotNull(foo);
             Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
+        }
+
+        [TestMethod]
+        public void TestMainFunc()
+        {
+            const string code = @"
+object Foo
+{
+    def main(args: Array[String]) : Unit = {
+    }
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo");
+            MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            Assert.IsNotNull(mainMethod);
+            ParameterInfo[] p = mainMethod.GetParameters();
+            Assert.AreEqual(1, p.Length);
+        }
+
+        private static Type ParseAndCreateType(string code, string typeName)
+        {
+            RppProgram program = Parse(code);
+            Assert.IsNotNull(program);
+            var fooTy = CodeGenAndGetType(program, typeName);
+            return fooTy;
         }
 
         private static Type CodeGenAndGetType(RppProgram program, string typeName)

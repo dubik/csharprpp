@@ -44,10 +44,8 @@ namespace CSharpRpp.Codegen
             Console.WriteLine("Generating func: " + node.Name);
 
             MethodBuilder builder = node.Builder;
-            Debug.Assert(builder != null, "builder != null");
-            builder.SetReturnType(node.RuntimeReturnType);
-
             CodegenParams(node.Params, builder);
+            builder.SetReturnType(node.RuntimeReturnType);
 
             _body = builder.GetILGenerator();
         }
