@@ -42,6 +42,7 @@ namespace CSharpRpp.Codegen
 
         public void Generate()
         {
+            ConstructorGenerator.GenerateFields(_typeBuilders);
             ConstructorGenerator.GenerateConstructors(_typeBuilders);
             ClrCodegen codegen = new ClrCodegen();
             _program.Accept(codegen);

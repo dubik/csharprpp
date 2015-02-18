@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection.Emit;
 
 
 namespace CSharpRpp
@@ -26,6 +27,13 @@ namespace CSharpRpp
             : base(mutabilityFlag, name, type, initExpr)
         {
             _modifiers = modifiers;
+        }
+
+        public FieldBuilder Builder { get; set; }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         #region Equality

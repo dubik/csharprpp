@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using OpCodes = System.Reflection.Emit.OpCodes;
@@ -8,13 +9,17 @@ namespace CSharpRpp.Codegen
 {
     internal class ConstructorGenerator
     {
-        public static void GenerateFields(IEnumerable<KeyValuePair<RppClass, TypeBuilder>>  classes)
+        public static void GenerateFields(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
         {
             foreach (var pair in classes)
             {
                 RppClass clazz = pair.Key;
                 TypeBuilder typeBuilder = pair.Value;
-                //FieldBuilder builder = typeBuilder.DefineField("", typeof (int), FieldAttributes.Public);
+                foreach (var field in clazz.Fields)
+                {
+                    FieldBuilder builder = typeBuilder.DefineField(field.Name, field.RuntimeType, FieldAttributes.Public);
+                    field.Builder = builder;
+                }
             }
         }
 
@@ -24,7 +29,8 @@ namespace CSharpRpp.Codegen
             {
                 RppClass clazz = pair.Key;
                 TypeBuilder typeBuilder = pair.Value;
-                ConstructorBuilder builder = GenerateConstructor(typeBuilder);
+                var fieldsType = clazz.Fields.Select(f => f.RuntimeType);
+                ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
                 ILGenerator body = builder.GetILGenerator();
                 ClrCodegen codegen = new ClrCodegen(body);
                 clazz.Constructor.Expr.Accept(codegen);
@@ -32,9 +38,9 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        private static ConstructorBuilder GenerateConstructor(TypeBuilder typeBuilder)
+        private static ConstructorBuilder GenerateConstructor(TypeBuilder typeBuilder, IEnumerable<Type> fieldsType)
         {
-            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, fieldsType.ToArray());
             return constructorBuilder;
         }
     }

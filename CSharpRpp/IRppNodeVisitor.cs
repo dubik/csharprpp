@@ -5,6 +5,7 @@ namespace CSharpRpp
     public interface IRppNodeVisitor
     {
         void Visit([NotNull] RppVar node);
+        void Visit([NotNull] RppField node);
         void VisitEnter([NotNull] RppFunc node);
         void VisitExit([NotNull] RppFunc node);
         void VisitEnter([NotNull] RppClass node);
@@ -26,6 +27,10 @@ namespace CSharpRpp
     class RppNodeVisitor : IRppNodeVisitor
     {
         public virtual void Visit(RppVar node)
+        {
+        }
+
+        public virtual void Visit(RppField node)
         {
         }
 

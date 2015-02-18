@@ -18,7 +18,6 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            Right.Accept(visitor);
             visitor.Visit(this);
         }
 

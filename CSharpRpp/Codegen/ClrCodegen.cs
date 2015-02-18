@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class ClrCodegen : RppNodeVisitor
+    internal class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -157,7 +157,24 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppParam node)
         {
-            _body.Emit(OpCodes.Ldarg, node.Index);
+            switch (node.Index)
+            {
+                case 0:
+                    _body.Emit(OpCodes.Ldarg_0);
+                    break;
+                case 1:
+                    _body.Emit(OpCodes.Ldarg_1);
+                    break;
+                case 2:
+                    _body.Emit(OpCodes.Ldarg_2);
+                    break;
+                case 3:
+                    _body.Emit(OpCodes.Ldarg_3);
+                    break;
+                default:
+                    _body.Emit(OpCodes.Ldarg, (short) node.Index);
+                    break;
+            }
         }
 
         public override void Visit(RppNew node)
@@ -170,7 +187,25 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppAssignOp node)
         {
-            Console.WriteLine(node.Left);
+            if (node.Left.Ref is RppField)
+            {
+                RppField field = (RppField) node.Left.Ref;
+                _body.Emit(OpCodes.Ldarg_0);
+                node.Right.Accept(this);
+                _body.Emit(OpCodes.Stfld, field.Builder);
+            }
+            else if (node.Left.Ref is RppVar)
+            {
+            }
+            else if (node.Left.Ref is RppParam)
+            {
+            }
+        }
+
+        public override void Visit(RppField node)
+        {
+            _body.Emit(OpCodes.Ldarg_0);
+            _body.Emit(OpCodes.Ldfld, node.Builder);
         }
     }
 }
