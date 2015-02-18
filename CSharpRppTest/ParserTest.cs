@@ -127,10 +127,10 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestVarDef()
         {
-            TestVarDef("k : Int = 10", new RppField(MutabilityFlag.MF_Val, "k", null, new RppTypeName("Int")));
+            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MF_Val, "k", new RppTypeName("Int"), RppEmptyExpr.Instance));
         }
 
-        private static void TestVarDef(string code, RppField expected)
+        private static void TestVarDef(string code, RppVar expected)
         {
             var var = CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val);
             Assert.IsNotNull(var);

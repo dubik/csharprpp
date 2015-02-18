@@ -22,59 +22,67 @@ object Runtime
 }
 ";
             const string code = @"
-class Array(k: Int)
+class Array
 {
-   def length: Int = 10
+    def length : Int = 10
 }
 
-class Foo
-{
-    def calculate : Int = 10
-
-    def mult(x : Int) : Int = x * 2
-}
-
-class String(len: Int)
-{
-}
-
-object Main
-{
-    def calculate(x : Int, y : Int) : Int = x + y
-
-    def main(args: Array[String]) : Int = {
-        val k : Foo = new Foo
-        k.mult(10)
-        println(""Hello World!!! Moika mo''ika!!!"")
-        calculate(10, 5)
-    }
-}
 ";
-            RppProgram runtime = Parse(runtimeCode);
-            RppScope runtimeScope = new RppScope(null);
-            WireRuntime(runtime.Classes, runtimeScope);
-            RppProgram program = Parse(code);
-            program.Name = "Sample";
-            RppScope scope = new RppScope(runtimeScope);
-
-            CodeGenerator generator = new CodeGenerator(program);
-            program.PreAnalyze(scope);
-            generator.PreGenerate();
-            program.Analyze(scope);
-            generator.Generate();
-            generator.Save();
-
             /*
-             * Array[String]
-             * Array[Array[String]]
-             * Pair[String, Int]
-             * Pair[String, Array[String]]
-            RppProgram  p = new RppProgram();
-            RppClass c = new RppClass("Array");
-            RppFunc f = new RppFunc();
-            c.AddFunc();
-            p.Add();
+             class Array(k: Int)
+            {
+               def length: Int = 10
+            }
+
+            class Foo
+            {
+                def calculate : Int = 10
+
+                def mult(x : Int) : Int = x * 2
+            }
+
+            class String(len: Int)
+            {
+            }
+
+            object Main
+            {
+                def calculate(x : Int, y : Int) : Int = x + y
+
+                def main(args: Array[String]) : Int = {
+                    val k : Foo = new Foo
+                    k.mult(10)
+                    println(""Hello World!!! Moika mo''ika!!!"")
+                    calculate(10, 5)
+                }
+            }
              */
+            
+                        RppProgram runtime = Parse(runtimeCode);
+                        RppScope runtimeScope = new RppScope(null);
+                        WireRuntime(runtime.Classes, runtimeScope);
+                        RppProgram program = Parse(code);
+                        program.Name = "Sample";
+                        RppScope scope = new RppScope(runtimeScope);
+
+                        CodeGenerator generator = new CodeGenerator(program);
+                        program.PreAnalyze(scope);
+                        generator.PreGenerate();
+                        program.Analyze(scope);
+                        generator.Generate();
+                        generator.Save();
+
+                        /*
+                         * Array[String]
+                         * Array[Array[String]]
+                         * Pair[String, Int]
+                         * Pair[String, Array[String]]
+                        RppProgram  p = new RppProgram();
+                        RppClass c = new RppClass("Array");
+                        RppFunc f = new RppFunc();
+                        c.AddFunc();
+                        p.Add();
+                         */
         }
 
         private static void WireRuntime(IEnumerable<RppClass> classes, RppScope scope)
