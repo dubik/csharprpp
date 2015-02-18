@@ -26,6 +26,21 @@ class Foo
             Assert.IsNotNull(foo);
         }
 
+        [TestMethod]
+        public void OneClassParamConstructor()
+        {
+            const string code = @"
+class Foo(val k: Int)
+{
+}
+";
+            RppProgram program = Parse(code);
+            Assert.IsNotNull(program);
+            var fooTy = CodeGenAndGetType(program, "Foo");
+            object foo = Activator.CreateInstance(fooTy, new object[] {10});
+            Assert.IsNotNull(foo);
+        }
+
         private static Type CodeGenAndGetType(RppProgram program, string typeName)
         {
             var assembly = CodeGen(program);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 
@@ -10,44 +11,28 @@ namespace CSharpRpp
         MF_Var
     }
 
-    [DebuggerDisplay("{_type.ToString()} {Name}")]
-    public class RppField : RppNamedNode
+    [DebuggerDisplay("Field: {Type.ToString()} {Name}")]
+    public class RppField : RppVar
     {
         private readonly IList<string> _modifiers;
-        private readonly RppType _type;
-        private readonly IRppExpr _initExpr;
 
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type) : base(name)
+        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type)
+            : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
         {
             _modifiers = modifiers;
-            _type = type;
         }
 
         public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type, IRppExpr initExpr)
-            : base(name)
+            : base(mutabilityFlag, name, type, initExpr)
         {
             _modifiers = modifiers;
-            _type = type;
-            _initExpr = initExpr;
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-        }
-
-        public override IRppNode Analyze(RppScope scope)
-        {
-            return this;
-        }
-
-        public void Codegen(CodegenContext ctx)
-        {
-            
-        }
+        #region Equality
 
         protected bool Equals(RppField other)
         {
-            return Equals(Name, other.Name) && Equals(_type, other._type);
+            return Equals(Name, other.Name) && Equals(Type, other.Type) && Equals(_modifiers, other._modifiers);
         }
 
         public override bool Equals(object obj)
@@ -72,10 +57,9 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((_modifiers != null ? _modifiers.GetHashCode() : 0) * 397) ^ (_type != null ? _type.GetHashCode() : 0);
-            }
+            throw new NotImplementedException();
         }
+
+        #endregion
     }
 }

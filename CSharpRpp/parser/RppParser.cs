@@ -5,7 +5,7 @@ using Antlr.Runtime;
 
 namespace CSharpRpp
 {
-    class QualifiedId
+    internal class QualifiedId
     {
         private string _text;
 
@@ -15,7 +15,7 @@ namespace CSharpRpp
         }
     }
 
-    enum ObjectModifier
+    internal enum ObjectModifier
     {
         OmNone,
         OmPrivate,
@@ -168,7 +168,7 @@ namespace CSharpRpp
             {
                 string name = _lastToken.Text;
                 IList<RppType> typeParams = ParseTypeParamClause();
-                IList<RppVar> classParams = ParseClassParamClause();
+                IList<RppField> classParams = ParseClassParamClause();
                 IList<IRppNode> nodes = ParseClassTemplateOpt();
                 return new RppClass(ClassKind.Class, name, classParams, nodes);
             }
@@ -177,14 +177,14 @@ namespace CSharpRpp
         }
 
         // ClassParamClause ::= '(' [ClassParams] ')'
-        public IList<RppVar> ParseClassParamClause()
+        public IList<RppField> ParseClassParamClause()
         {
-            var classParams = new List<RppVar>();
+            var classParams = new List<RppField>();
             if (Require(RppLexer.OP_LParen))
             {
                 while (!Require(RppLexer.OP_RParen))
                 {
-                    RppVar classParam;
+                    RppField classParam;
                     if (!ParseClassParam(out classParam))
                     {
                         throw new Exception("Class param was expected but got " + _lastToken.Text);
@@ -198,7 +198,7 @@ namespace CSharpRpp
         }
 
         // ClassParams ::= {Annotation} [{Modifier} (‘val’ | ‘var’)] id [‘:’ ParamType] [‘=’ Expr]
-        public bool ParseClassParam(out RppVar classParam)
+        public bool ParseClassParam(out RppField classParam)
         {
             classParam = null;
 
@@ -225,7 +225,7 @@ namespace CSharpRpp
                 throw new Exception("Expected type but found: " + _lastToken.Text);
             }
 
-            classParam = new RppVar(mutability, name, paramType, new RppEmptyExpr());
+            classParam = new RppField(mutability, name, null, paramType);
             return true;
         }
 

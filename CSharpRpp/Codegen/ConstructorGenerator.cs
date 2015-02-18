@@ -8,6 +8,16 @@ namespace CSharpRpp.Codegen
 {
     internal class ConstructorGenerator
     {
+        public static void GenerateFields(IEnumerable<KeyValuePair<RppClass, TypeBuilder>>  classes)
+        {
+            foreach (var pair in classes)
+            {
+                RppClass clazz = pair.Key;
+                TypeBuilder typeBuilder = pair.Value;
+                //FieldBuilder builder = typeBuilder.DefineField("", typeof (int), FieldAttributes.Public);
+            }
+        }
+
         public static void GenerateConstructors(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
         {
             foreach (var pair in classes)

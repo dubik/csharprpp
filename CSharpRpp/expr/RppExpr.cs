@@ -31,10 +31,6 @@ namespace CSharpRpp
         {
             get { return typeof (void); }
         }
-
-        public void Codegen(ILGenerator generator)
-        {
-        }
     }
 
     [DebuggerDisplay("Op = {Op}")]

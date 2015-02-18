@@ -22,7 +22,7 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo
+class Foo(val k: Int)
 {
 }
 ";

@@ -15,6 +15,11 @@ namespace RppRuntime
     {
         public int _field;
 
+        public Foor(int field)
+        {
+            _field = field;
+        }
+
         public int calculate(int k)
         {
             return _field + k;
