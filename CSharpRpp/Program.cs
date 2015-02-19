@@ -24,8 +24,7 @@ object Runtime
             const string code = @"
 object Foo
 {
-    def main(args: Array[String]) : Unit = {
-    }
+    def calculate(x : Int, y : Int) : Int = x + y
 }
 ";
             /*

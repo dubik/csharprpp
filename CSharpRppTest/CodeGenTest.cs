@@ -56,6 +56,22 @@ object Foo
             Assert.AreEqual(typeof (String[]), p[0].ParameterType);
         }
 
+        [TestMethod]
+        public void TestSimpleExpression()
+        {
+            const string code = @"
+object Foo
+{
+    def calculate(x : Int, y : Int) : Int = x + y
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo");
+            MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
+            Assert.IsNotNull(calculate);
+            object res = calculate.Invoke(null,  new object[]{2, 7});
+            Assert.IsNotNull(res);
+        }
+
         private static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);

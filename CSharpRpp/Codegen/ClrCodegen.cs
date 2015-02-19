@@ -65,8 +65,6 @@ namespace CSharpRpp.Codegen
 
         private static void GenerateRet([NotNull] RppFunc node, [NotNull] ILGenerator generator)
         {
-            generator.Emit(OpCodes.Ldc_I4, 10);
-
             if (node.RuntimeReturnType == typeof (void) && node.Expr.RuntimeType != typeof (void))
             {
                 generator.Emit(OpCodes.Pop);
