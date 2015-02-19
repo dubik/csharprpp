@@ -76,7 +76,6 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
 
-            _fields.ForEach(_scope.Add);
             _funcs.ForEach(_scope.Add);
 
             NodeUtils.PreAnalyze(_scope, _fields);

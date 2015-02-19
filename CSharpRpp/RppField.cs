@@ -29,7 +29,7 @@ namespace CSharpRpp
             _modifiers = modifiers;
         }
 
-        public FieldBuilder Builder { get; set; }
+        public new FieldBuilder Builder { get; set; }
 
         public override void Accept(IRppNodeVisitor visitor)
         {

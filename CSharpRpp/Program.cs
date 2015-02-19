@@ -21,6 +21,16 @@ object Runtime
     def println(line: String) : Unit = { }
 }
 ";
+            /*
+            const string code = @"
+object Foo
+{
+    def calculate : Int = {
+        var k : Int = 10
+        k
+    }
+}
+";*/
             const string code = @"
 object Foo
 {

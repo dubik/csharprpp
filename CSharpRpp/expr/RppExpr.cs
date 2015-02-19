@@ -128,6 +128,11 @@ namespace CSharpRpp
             Type = new RppNativeType(RuntimeType);
         }
 
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
         public void Codegen(ILGenerator generator)
         {
             generator.Emit(OpCodes.Ldc_I4, Value);

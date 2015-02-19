@@ -17,8 +17,7 @@ namespace CSharpRpp
         {
             foreach (var node in nodes)
             {
-                RppScope scope = new RppScope(parentScope);
-                node.PreAnalyze(scope);
+                node.PreAnalyze(parentScope);
             }
         }
 
@@ -26,8 +25,7 @@ namespace CSharpRpp
         {
             return nodes.Select(rppClass =>
             {
-                RppScope scope = new RppScope(parentScope);
-                T analyzedNode = rppClass.Analyze(scope) as T;
+                T analyzedNode = rppClass.Analyze(parentScope) as T;
                 Debug.Assert(analyzedNode != null);
                 return analyzedNode;
             }).ToList();

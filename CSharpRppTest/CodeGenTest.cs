@@ -70,7 +70,29 @@ object Foo
             Assert.IsNotNull(calculate);
             object res = calculate.Invoke(null,  new object[]{2, 7});
             Assert.IsNotNull(res);
+            Assert.AreEqual(9, res);
         }
+
+        [TestMethod]
+        public void TestVarDecl()
+        {
+            const string code = @"
+object Foo
+{
+    def calculate : Int = {
+        var k : Int = 13
+        k
+    }
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo");
+            MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
+            Assert.IsNotNull(calculate);
+            object res = calculate.Invoke(null, null);
+            Assert.IsNotNull(res);
+            Assert.AreEqual(13, res);
+        }
+
 
         private static Type ParseAndCreateType(string code, string typeName)
         {

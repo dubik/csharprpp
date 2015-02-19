@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection.Emit;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -13,6 +14,8 @@ namespace CSharpRpp
         [NotNull]
         public IRppExpr InitExpr { get; private set; }
 
+        public LocalBuilder Builder { get; set; }
+
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
         {
             Type = type;
@@ -22,12 +25,12 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            InitExpr.Accept(visitor);
             visitor.Visit(this);
         }
 
         public override void PreAnalyze(RppScope scope)
         {
+            scope.Add(this);
             InitExpr.PreAnalyze(scope);
         }
 

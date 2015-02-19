@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class ClrCodegen : RppNodeVisitor
+    class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -42,18 +42,7 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppFunc node)
         {
             Console.WriteLine("Generating func: " + node.Name);
-
-            MethodBuilder builder = node.Builder;
-            CodegenParams(node.Params, builder);
-            builder.SetReturnType(typeof(int));
-
-            _body = builder.GetILGenerator();
-        }
-
-        private static void CodegenParams([NotNull] IEnumerable<IRppParam> paramList, [NotNull] MethodBuilder methodBuilder)
-        {
-            Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
-            methodBuilder.SetParameters(parameterTypes);
+            _body = node.Builder.GetILGenerator();
         }
 
         public override void VisitExit(RppFunc node)
@@ -75,11 +64,12 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppVar node)
         {
-            LocalBuilder localVar = _body.DeclareLocal(node.RuntimeType);
+            node.Builder = _body.DeclareLocal(node.RuntimeType);
 
             if (!(node.InitExpr is RppEmptyExpr))
             {
-                _body.Emit(OpCodes.Stloc, localVar);
+                node.InitExpr.Accept(this);
+                _body.Emit(OpCodes.Stloc, node.Builder);
             }
         }
 
@@ -147,7 +137,15 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppId node)
         {
-            node.Ref.Accept(this);
+            //node.Ref.Accept(this);
+            if (node.Ref is RppVar)
+            {
+                _body.Emit(OpCodes.Ldloc, ((RppVar) node.Ref).Builder);
+            }
+            else if (node.Ref is RppParam)
+            {
+                node.Ref.Accept(this);
+            }
         }
 
         public override void Visit(RppParam node)
