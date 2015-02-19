@@ -51,7 +51,9 @@ object Foo
             MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(mainMethod);
             ParameterInfo[] p = mainMethod.GetParameters();
+            Assert.AreEqual(typeof(void), mainMethod.ReturnType);
             Assert.AreEqual(1, p.Length);
+            Assert.AreEqual(typeof (String[]), p[0].ParameterType);
         }
 
         private static Type ParseAndCreateType(string code, string typeName)
@@ -78,8 +80,7 @@ object Foo
             generator.PreGenerate();
             program.Analyze(scope);
             generator.Generate();
-            Assembly assembly = generator.Assembly;
-            return assembly;
+            return generator.Assembly;
         }
 
         private static RppProgram Parse(string code)

@@ -56,6 +56,9 @@ namespace CLRCodeGen
             assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
 
+        private static void CreateObjects()
+        {
+            /*
         private class Foo
         {
             public Bar _child;
@@ -70,9 +73,7 @@ namespace CLRCodeGen
                 return new Foo();
             }
         }
-
-        private static void CreateObjects()
-        {
+            */
             AssemblyName assemblyName = new AssemblyName("sampleAssembl");
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
@@ -96,10 +97,27 @@ namespace CLRCodeGen
             assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
 
+        private static void CreateMethodSlowely()
+        {
+            AssemblyName assemblyName = new AssemblyName("methodSlowely");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
+
+            TypeBuilder fooTypeBuilder = moduleBuilder.DefineType("Foo", TypeAttributes.Public);
+
+            MethodBuilder methodBuilder = fooTypeBuilder.DefineMethod("MyMethod", MethodAttributes.Public, CallingConventions.Standard);
+            methodBuilder.SetReturnType(typeof (int));
+            methodBuilder.SetParameters(new[] {typeof (string)});
+
+            methodBuilder.GetILGenerator().Emit(OpCodes.Ret);
+            fooTypeBuilder.CreateType();
+            assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
         private static void GenCode(MethodBuilder builder, Type objectToCreate)
         {
             ILGenerator il = builder.GetILGenerator();
-            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructor(new Type[]{}));
+            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructor(new Type[] {}));
             il.Emit(OpCodes.Ret);
         }
 
@@ -157,7 +175,7 @@ namespace CLRCodeGen
             CreateCall();
              */
             //roundToEven();
-            CreateObjects();
+            CreateMethodSlowely();
         }
 
         private static void roundToEven()

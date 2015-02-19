@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
@@ -43,9 +45,20 @@ namespace CSharpRpp.Codegen
                 attrs |= MethodAttributes.Static;
             }
 
-            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs, typeof(void), new Type[]{typeof(int)});
+            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
+
+            CodegenParams(node.Params, methodBuilder);
+            methodBuilder.SetReturnType(node.RuntimeReturnType);
             node.Builder = methodBuilder;
-            _funcBuilders.Add(node, methodBuilder);
+            //node.Builder.SetReturnType(typeof(int));
+            //_funcBuilders.Add(node, methodBuilder);
         }
+
+        private static void CodegenParams([NotNull] IEnumerable<IRppParam> paramList, [NotNull] MethodBuilder methodBuilder)
+        {
+            Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
+            methodBuilder.SetParameters(parameterTypes);
+        }
+
     }
 }

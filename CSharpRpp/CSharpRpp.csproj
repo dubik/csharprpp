@@ -73,25 +73,25 @@
     <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="RppAssignOp.cs" />
-    <Compile Include="expr\RppNew.cs" />
+    <Compile Include="Expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">
       <DependentUpon>RppLexer.g3</DependentUpon>
     </Compile>
     <Compile Include="IRppNode.cs" />
     <Compile Include="IRppNodeVisitor.cs" />
-    <Compile Include="native\RppNativeClass.cs" />
+    <Compile Include="Native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
-    <Compile Include="parser\RppParserExpr.cs" />
+    <Compile Include="Parser\RppParserExpr.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RppClass.cs" />
-    <Compile Include="expr\RppExpr.cs" />
+    <Compile Include="Expr\RppExpr.cs" />
     <Compile Include="RppField.cs" />
     <Compile Include="RppFunc.cs" />
     <Compile Include="RppNamedNode.cs" />
-    <Compile Include="native\RppNativeParam.cs" />
-    <Compile Include="native\RppNativeFunc.cs" />
-    <Compile Include="parser\RppParser.cs" />
+    <Compile Include="Native\RppNativeParam.cs" />
+    <Compile Include="Native\RppNativeFunc.cs" />
+    <Compile Include="Parser\RppParser.cs" />
     <Compile Include="RppPatDef.cs" />
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppScope.cs" />

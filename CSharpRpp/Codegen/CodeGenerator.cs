@@ -35,17 +35,28 @@ namespace CSharpRpp.Codegen
         {
             TypeCreator creatorCreator = new TypeCreator(_moduleBuilder, _typeBuilders);
             _program.Accept(creatorCreator);
-
-            StubsCreator stubsCreator = new StubsCreator(_funcBuilders);
-            _program.Accept(stubsCreator);
         }
 
         public void Generate()
         {
+            GenerateMethodStubs();
+
             ConstructorGenerator.GenerateFields(_typeBuilders);
             ConstructorGenerator.GenerateConstructors(_typeBuilders);
+
+            GenerateMethodBodies();
+        }
+
+        private void GenerateMethodBodies()
+        {
             ClrCodegen codegen = new ClrCodegen();
             _program.Accept(codegen);
+        }
+
+        private void GenerateMethodStubs()
+        {
+            StubsCreator stubsCreator = new StubsCreator(_funcBuilders);
+            _program.Accept(stubsCreator);
         }
 
         private void CreateModule()

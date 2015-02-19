@@ -45,7 +45,7 @@ namespace CSharpRpp.Codegen
 
             MethodBuilder builder = node.Builder;
             CodegenParams(node.Params, builder);
-            builder.SetReturnType(node.RuntimeReturnType);
+            builder.SetReturnType(typeof(int));
 
             _body = builder.GetILGenerator();
         }
@@ -59,7 +59,6 @@ namespace CSharpRpp.Codegen
         public override void VisitExit(RppFunc node)
         {
             GenerateRet(node, _body);
-
 
             Console.WriteLine("Func generated");
         }
