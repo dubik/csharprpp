@@ -7,6 +7,7 @@ namespace CSharpRpp.Native
     {
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
+        public int Index { get; set; }
 
         public RppNativeParam(string name, Type paramType) : base(name)
         {

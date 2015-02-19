@@ -96,8 +96,7 @@ namespace CSharpRpp
 
         private RppFunc CreateConstructor()
         {
-            int index = 1;
-            var p = _fields.Select(rppVar => new RppParam(rppVar.Name, index++, rppVar.Type));
+            var p = _fields.Select(rppVar => new RppParam(rppVar.Name, rppVar.Type));
             List<IRppNode> assignExprs = new List<IRppNode> {CreateParentConstructorCall()};
 
             foreach (var classParam in _fields)

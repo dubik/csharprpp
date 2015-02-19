@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp.Codegen
 {
@@ -45,20 +47,25 @@ namespace CSharpRpp.Codegen
                 attrs |= MethodAttributes.Static;
             }
 
-            MethodBuilder methodBuilder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
-
-            CodegenParams(node.Params, methodBuilder);
-            methodBuilder.SetReturnType(node.RuntimeReturnType);
-            node.Builder = methodBuilder;
-            //node.Builder.SetReturnType(typeof(int));
-            //_funcBuilders.Add(node, methodBuilder);
+            Type[] paramTypes = ParamTypes(node.Params);
+            node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.RuntimeReturnType, paramTypes);
+            DefineParams(node.Builder, node.Params, node.IsStatic);
         }
 
-        private static void CodegenParams([NotNull] IEnumerable<IRppParam> paramList, [NotNull] MethodBuilder methodBuilder)
+        private static Type[] ParamTypes([NotNull] IEnumerable<IRppParam> paramList)
         {
-            Type[] parameterTypes = paramList.Select(param => param.RuntimeType).ToArray();
-            methodBuilder.SetParameters(parameterTypes);
+            return paramList.Select(param => param.RuntimeType).ToArray();
         }
 
+        private static void DefineParams(MethodBuilder methodBuilder, IEnumerable<IRppParam> rppParams, bool isStatic)
+        {
+            int index = isStatic ? 0 : 1;
+            foreach (var param in rppParams)
+            {
+                param.Index = index;
+                methodBuilder.DefineParameter(index, ParameterAttributes.None, param.Name);
+                index++;
+            }
+        }
     }
 }

@@ -26,5 +26,22 @@ namespace RppRuntime
         }
     }
 
+
+    public class Foo
+    {
+        public int calculate(int x, int y)
+        {
+            return x + y;
+        }
+    }
+
+    public class Boo
+    {
+        public static int calculate(int x, int y)
+        {
+            return x + y;
+        }
+    }
+
     // ReSharper restore InconsistentNaming
 }

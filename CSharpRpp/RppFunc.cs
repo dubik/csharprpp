@@ -83,7 +83,6 @@ namespace CSharpRpp
         public override void PreAnalyze(RppScope scope)
         {
             _scope = new RppScope(scope);
-
             Params.ForEach(_scope.Add);
             Expr.PreAnalyze(_scope);
         }
@@ -179,6 +178,7 @@ namespace CSharpRpp
 
     public interface IRppParam : IRppNamedNode, IRppExpr
     {
+        int Index { get; set; }
     }
 
     [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
@@ -187,12 +187,11 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
         public override Type RuntimeType { get; protected set; }
 
-        public int Index { get; private set; }
+        public int Index { get; set; }
 
-        public RppParam([NotNull] string name, int index, [NotNull] RppType type) : base(name)
+        public RppParam([NotNull] string name, [NotNull] RppType type) : base(name)
         {
             Type = type;
-            Index = index;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

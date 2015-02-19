@@ -85,7 +85,7 @@ params returns [IList<RppParam> list]
     ;
 
 param[int index] returns [RppParam node]
-    : ^(RPP_PARAM id=. t=type {$node = new RppParam($id.Text, $index, $t.node);})
+    : ^(RPP_PARAM id=. t=type {$node = new RppParam($id.Text, $t.node);})
     ;
 
 type returns [RppType node]

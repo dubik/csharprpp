@@ -372,13 +372,11 @@ namespace CSharpRpp
         public IEnumerable<IRppParam> ParseParams()
         {
             IList<IRppParam> funcParams = new List<IRppParam>();
-            int paramIndex = 0;
             while (true)
             {
                 RppParam funcParam;
-                if (ParseParam(paramIndex, out funcParam))
+                if (ParseParam(out funcParam))
                 {
-                    paramIndex++;
                     funcParams.Add(funcParam);
                 }
                 if (!Require(RppLexer.OP_Comma))
@@ -391,7 +389,7 @@ namespace CSharpRpp
         }
 
         //param ::= {Annotation} id [‘:’ ParamType] [‘=’ Expr]
-        private bool ParseParam(int paramIndex, out RppParam funcParam)
+        private bool ParseParam(out RppParam funcParam)
         {
             funcParam = null;
             if (!Require(RppLexer.Id))
@@ -406,7 +404,7 @@ namespace CSharpRpp
                 throw new Exception("Expected type but got " + _lastToken.Text);
             }
 
-            funcParam = new RppParam(name, paramIndex, type);
+            funcParam = new RppParam(name, type);
             return true;
         }
 

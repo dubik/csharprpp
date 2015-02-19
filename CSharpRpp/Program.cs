@@ -32,9 +32,8 @@ object Foo
 }
 ";*/
             const string code = @"
-object Foo
+class Foo(val k: Int)
 {
-    def calculate(x : Int, y : Int) : Int = x + y
 }
 ";
             /*

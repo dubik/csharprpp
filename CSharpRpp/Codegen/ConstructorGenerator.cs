@@ -31,10 +31,22 @@ namespace CSharpRpp.Codegen
                 TypeBuilder typeBuilder = pair.Value;
                 var fieldsType = clazz.Fields.Select(f => f.RuntimeType);
                 ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
+
+                AssignConstructorParamIndex(clazz.Constructor);
+
                 ILGenerator body = builder.GetILGenerator();
                 ClrCodegen codegen = new ClrCodegen(body);
                 clazz.Constructor.Expr.Accept(codegen);
                 body.Emit(OpCodes.Ret);
+            }
+        }
+
+        private static void AssignConstructorParamIndex(IRppFunc constructor)
+        {
+            int index = 1;
+            foreach (var param in constructor.Params)
+            {
+                param.Index = index++;
             }
         }
 
