@@ -51,7 +51,7 @@ object Foo
             MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(mainMethod);
             ParameterInfo[] p = mainMethod.GetParameters();
-            Assert.AreEqual(typeof(void), mainMethod.ReturnType);
+            Assert.AreEqual(typeof (void), mainMethod.ReturnType);
             Assert.AreEqual(1, p.Length);
             Assert.AreEqual(typeof (String[]), p[0].ParameterType);
         }
@@ -68,7 +68,7 @@ object Foo
             var fooTy = ParseAndCreateType(code, "Foo");
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(calculate);
-            object res = calculate.Invoke(null,  new object[]{2, 7});
+            object res = calculate.Invoke(null, new object[] {2, 7});
             Assert.IsNotNull(res);
             Assert.AreEqual(9, res);
         }
@@ -93,6 +93,23 @@ object Foo
             Assert.AreEqual(13, res);
         }
 
+        [TestMethod]
+        public void TestReturnField()
+        {
+            const string code = @"
+class Foo(val k: Int)
+{
+    def readK() : Int = {
+        k
+    }
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo");
+            MethodInfo readK = fooTy.GetMethod("readK", BindingFlags.Public | BindingFlags.Instance);
+            object foo = Activator.CreateInstance(fooTy, new object[] {27});
+            object res = readK.Invoke(foo, null);
+            Assert.AreEqual(27, res);
+        }
 
         private static Type ParseAndCreateType(string code, string typeName)
         {

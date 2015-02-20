@@ -34,6 +34,9 @@ object Foo
             const string code = @"
 class Foo(val k: Int)
 {
+    def readK() : Int = {
+        k
+    }
 }
 ";
             /*

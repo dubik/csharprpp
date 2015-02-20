@@ -138,7 +138,12 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppId node)
         {
             //node.Ref.Accept(this);
-            if (node.Ref is RppVar)
+            if (node.Ref is RppField)
+            {
+                _body.Emit(OpCodes.Ldarg_0);
+                _body.Emit(OpCodes.Ldfld, ((RppField) node.Ref).Builder);
+            }
+            else if (node.Ref is RppVar)
             {
                 _body.Emit(OpCodes.Ldloc, ((RppVar) node.Ref).Builder);
             }
