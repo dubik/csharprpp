@@ -111,6 +111,27 @@ class Foo(val k: Int)
             Assert.AreEqual(27, res);
         }
 
+        [TestMethod]
+        public void TestInstanceMethodInvocation()
+        {
+            const string code = @"
+class Foo
+{
+    def power(k : Int) : Int = {
+        k * k
+    }
+
+    def calculate(k : Int) : Int = {
+        power(k) + 10
+    }
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo");
+            object foo = Activator.CreateInstance(fooTy, null);
+            MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Public | BindingFlags.Instance);
+            object res = calculate.Invoke(foo, new object[] {3});
+            Assert.AreEqual(19, res);
+        }
         private static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);

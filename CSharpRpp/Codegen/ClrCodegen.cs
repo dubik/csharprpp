@@ -126,6 +126,13 @@ namespace CSharpRpp.Codegen
             }
             else
             {
+                if (!node.Function.IsStatic)
+                {
+                    _body.Emit(OpCodes.Ldarg_0); // push this
+                }
+
+                node.Args.ForEach(arg => arg.Accept(this));
+
                 _body.Emit(OpCodes.Call, node.Function.RuntimeType);
             }
         }
@@ -137,7 +144,6 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppId node)
         {
-            //node.Ref.Accept(this);
             if (node.Ref is RppField)
             {
                 _body.Emit(OpCodes.Ldarg_0);

@@ -214,18 +214,30 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
         public override Type RuntimeType { get; protected set; }
 
-        private readonly IList<IRppExpr> _paramList;
+        public IEnumerable<IRppExpr> Args
+        {
+            get { return _argList.AsEnumerable(); }
+        }
+
+        private readonly IList<IRppExpr> _argList;
 
         [NotNull]
         public IRppFunc Function { get; private set; }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> paramList) : base(name)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name)
         {
-            _paramList = paramList;
+            _argList = argList;
+        }
+
+        public override void PreAnalyze(RppScope scope)
+        {
+            NodeUtils.PreAnalyze(scope, _argList);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
+            NodeUtils.Analyze(scope, _argList);
+
             if (Name != "ctor()")
             {
                 var resolvedFunc = scope.Lookup(Name) as IRppFunc;
@@ -258,7 +270,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppFuncCall other)
         {
-            return _paramList.SequenceEqual(other._paramList) && Equals(Name, other.Name);
+            return _argList.SequenceEqual(other._argList) && Equals(Name, other.Name);
         }
 
         public override bool Equals(object obj)
@@ -282,7 +294,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((_paramList != null ? _paramList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
+                return ((_argList != null ? _argList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
             }
         }
 
