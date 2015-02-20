@@ -31,7 +31,7 @@ namespace CSharpRpp.Codegen
                 TypeBuilder typeBuilder = pair.Value;
                 var fieldsType = clazz.Fields.Select(f => f.RuntimeType);
                 ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
-
+                clazz.Constructor.ConstructorBuilder = builder;
                 AssignConstructorParamIndex(clazz.Constructor);
 
                 ILGenerator body = builder.GetILGenerator();

@@ -19,6 +19,7 @@ namespace CSharpRpp.Native
 
         public MethodInfo RuntimeType { get; set; }
         public MethodBuilder Builder { get; set; }
+        public ConstructorBuilder ConstructorBuilder { get; set; }
 
         public bool IsStatic
         {

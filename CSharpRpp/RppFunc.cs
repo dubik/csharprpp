@@ -25,6 +25,8 @@ namespace CSharpRpp
 
         MethodBuilder Builder { get; set; }
 
+        ConstructorBuilder ConstructorBuilder { get; set; }
+
         bool IsStatic { get; set; }
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
@@ -49,6 +51,7 @@ namespace CSharpRpp
         }
 
         public MethodBuilder Builder { get; set; }
+        public ConstructorBuilder ConstructorBuilder { get; set; }
 
         public bool IsStatic { get; set; }
         public bool IsPublic { get; set; }

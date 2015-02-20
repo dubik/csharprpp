@@ -132,6 +132,28 @@ class Foo
             object res = calculate.Invoke(foo, new object[] {3});
             Assert.AreEqual(19, res);
         }
+
+        [TestMethod]
+        public void TestNewOperator()
+        {
+            const string code = @"
+class Foo
+{
+}
+
+object Bar
+{
+    def create : Foo = {
+        new Foo
+    }
+}
+";
+            var barTy = ParseAndCreateType(code, "Bar");
+            MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
+            object res = create.Invoke(null, null);
+            Assert.IsNotNull(res);
+        }
+
         private static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);

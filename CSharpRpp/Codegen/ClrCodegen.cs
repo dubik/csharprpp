@@ -183,10 +183,8 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppNew node)
         {
-            // ConstructorInfo constructorInfo = node.RefClass.RuntimeType.GetConstructor(Type.EmptyTypes);
-            // node.RefClass.GetConstructor();
-            // Debug.Assert(constructorInfo != null, "constructorInfo != null");
-            // _body.Emit(OpCodes.Newobj, constructorInfo);
+            node.Args.ForEach(arg => arg.Accept(this));
+            _body.Emit(OpCodes.Newobj, node.RefClass.Constructor.ConstructorBuilder);
         }
 
         public override void Visit(RppAssignOp node)

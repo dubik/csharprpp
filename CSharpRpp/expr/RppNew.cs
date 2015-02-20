@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
@@ -18,6 +19,12 @@ namespace CSharpRpp
         public IEnumerable<RppType> ArgumentTypes { get; private set; }
 
         private readonly string _typeName;
+
+        public IEnumerable<IRppExpr> Args
+        {
+            get { return _constructorsParams.AsEnumerable(); }
+        }
+
         private readonly IList<IRppExpr> _constructorsParams;
 
         public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
@@ -42,15 +49,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-
             return this;
-        }
-
-        public void Codegen(ILGenerator generator)
-        {
-            ConstructorInfo constructorInfo = RefClass.RuntimeType.GetConstructor(System.Type.EmptyTypes);
-            Debug.Assert(constructorInfo != null, "constructorInfo != null");
-            generator.Emit(OpCodes.Newobj, constructorInfo);
         }
     }
 }
