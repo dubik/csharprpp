@@ -154,6 +154,29 @@ object Bar
             Assert.IsNotNull(res);
         }
 
+        [TestMethod]
+        public void TestNewOperatorWithArgs()
+        {
+            const string code = @"
+class Foo(k : Int)
+{
+}
+
+object Bar
+{
+    def create : Foo = {
+        new Foo(10)
+    }
+}
+";
+            var barTy = ParseAndCreateType(code, "Bar");
+            MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
+            object fooInstance = create.Invoke(null, null);
+            Assert.IsNotNull(fooInstance);
+            object res = fooInstance.GetType().GetField("k").GetValue(fooInstance);
+            Assert.AreEqual(10, res);
+        }
+
         private static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);

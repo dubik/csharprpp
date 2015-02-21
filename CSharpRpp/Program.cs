@@ -32,14 +32,14 @@ object Foo
 }
 ";*/
             const string code = @"
-class Foo
+class Foo(k : Int)
 {
 }
 
 object Bar
 {
     def create : Foo = {
-        new Foo
+        new Foo(10)
     }
 }
 ";
