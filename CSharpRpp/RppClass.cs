@@ -18,7 +18,7 @@ namespace CSharpRpp
         IEnumerable<IRppFunc> Functions { get; }
     }
 
-    [DebuggerDisplay("{Kind} {Name}, Fields = {_classParams.Count}, Funcs = {_funcs.Count}")]
+    [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
         private IList<IRppFunc> _funcs;

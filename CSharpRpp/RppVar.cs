@@ -9,8 +9,6 @@ namespace CSharpRpp
     {
         public override sealed RppType Type { get; protected set; }
 
-        public override Type RuntimeType { get; protected set; }
-
         [NotNull]
         public IRppExpr InitExpr { get; private set; }
 
@@ -40,7 +38,7 @@ namespace CSharpRpp
 
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null);
-            RuntimeType = resolvedType;
+            Type = resolvedType;
 
             return this;
         }

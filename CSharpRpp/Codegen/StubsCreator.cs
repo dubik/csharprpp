@@ -48,13 +48,13 @@ namespace CSharpRpp.Codegen
             }
 
             Type[] paramTypes = ParamTypes(node.Params);
-            node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.RuntimeReturnType, paramTypes);
+            node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.ReturnType.Runtime, paramTypes);
             DefineParams(node.Builder, node.Params, node.IsStatic);
         }
 
         private static Type[] ParamTypes([NotNull] IEnumerable<IRppParam> paramList)
         {
-            return paramList.Select(param => param.RuntimeType).ToArray();
+            return paramList.Select(param => param.Type.Runtime).ToArray();
         }
 
         private static void DefineParams(MethodBuilder methodBuilder, IEnumerable<IRppParam> rppParams, bool isStatic)

@@ -75,13 +75,13 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseMethodCall()
         {
-            TestExpr("foo.MyFunc()", Selector(Id("foo"), Call("MyFunc")));
+            TestExpr("foo.MyFunc()", Selector(Id("foo"), FollowedCall("MyFunc")));
         }
 
         [TestMethod]
         public void ParseLongChainOfFieldsAndMethods()
         {
-            TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), Call("MyFunc")), Id("bar")), Call("Length")));
+            TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), FollowedCall("MyFunc")), Id("bar")), FollowedCall("Length")));
         }
 
         [TestMethod]
@@ -142,6 +142,16 @@ namespace CSharpRppTest
         private static RppFuncCall Call(string id, IList<IRppExpr> args)
         {
             return new RppFuncCall(id, args);
+        }
+
+        private static RppFollowedFuncCall FollowedCall(string id)
+        {
+            return new RppFollowedFuncCall(id, new List<IRppExpr>());
+        }
+
+        private static RppFollowedFuncCall FollowedCall(string id, IList<IRppExpr> args)
+        {
+            return new RppFollowedFuncCall(id, args);
         }
 
         private static RppSelector Selector(IRppExpr expr, RppMember member)

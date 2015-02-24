@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using Antlr.Runtime;
-using CSharpRpp;
-using CSharpRpp.Codegen;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -18,7 +15,7 @@ class Foo
 {
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy);
             Assert.IsNotNull(foo);
         }
@@ -31,7 +28,7 @@ class Foo(val k: Int)
 {
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy, new object[] {10});
             Assert.IsNotNull(foo);
             Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
@@ -47,7 +44,7 @@ object Foo
     }
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(mainMethod);
             ParameterInfo[] p = mainMethod.GetParameters();
@@ -65,7 +62,7 @@ object Foo
     def calculate(x : Int, y : Int) : Int = x + y
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(calculate);
             object res = calculate.Invoke(null, new object[] {2, 7});
@@ -85,7 +82,7 @@ object Foo
     }
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(calculate);
             object res = calculate.Invoke(null, null);
@@ -104,7 +101,7 @@ class Foo(val k: Int)
     }
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             MethodInfo readK = fooTy.GetMethod("readK", BindingFlags.Public | BindingFlags.Instance);
             object foo = Activator.CreateInstance(fooTy, new object[] {27});
             object res = readK.Invoke(foo, null);
@@ -126,7 +123,7 @@ class Foo
     }
 }
 ";
-            var fooTy = ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy, null);
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Public | BindingFlags.Instance);
             object res = calculate.Invoke(foo, new object[] {3});
@@ -148,7 +145,7 @@ object Bar
     }
 }
 ";
-            var barTy = ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
             MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
             object res = create.Invoke(null, null);
             Assert.IsNotNull(res);
@@ -169,7 +166,7 @@ object Bar
     }
 }
 ";
-            var barTy = ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
             MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
             object fooInstance = create.Invoke(null, null);
             Assert.IsNotNull(fooInstance);
@@ -177,48 +174,29 @@ object Bar
             Assert.AreEqual(10, res);
         }
 
-        private static Type ParseAndCreateType(string code, string typeName)
+        [TestMethod]
+        public void CallFuncOfInstance()
         {
-            RppProgram program = Parse(code);
-            Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, typeName);
-            return fooTy;
-        }
+            const string code = @"
+class Foo(k : Int)
+{
+    def calculate(x : Int) : Int = {
+        k + x
+    }
+}
 
-        private static Type CodeGenAndGetType(RppProgram program, string typeName)
-        {
-            var assembly = CodeGen(program);
-            Type arrayTy = assembly.GetType(typeName);
-            Assert.IsNotNull(arrayTy);
-            return arrayTy;
-        }
-
-        private static Assembly CodeGen(RppProgram program)
-        {
-            RppScope scope = new RppScope(null);
-            CodeGenerator generator = new CodeGenerator(program);
-            program.PreAnalyze(scope);
-            generator.PreGenerate();
-            program.Analyze(scope);
-            generator.Generate();
-            return generator.Assembly;
-        }
-
-        private static RppProgram Parse(string code)
-        {
-            RppParser parser = CreateParser(code);
-            RppProgram compilationUnit = parser.CompilationUnit();
-            compilationUnit.Name = "TestedAssembly";
-            return compilationUnit;
-        }
-
-        private static RppParser CreateParser(string code)
-        {
-            ANTLRStringStream input = new ANTLRStringStream(code);
-            RppLexer lexer = new RppLexer(input);
-            CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            RppParser parser = new RppParser(tokenStream);
-            return parser;
+object Bar
+{
+    def create : Int = {
+        val p : Foo = new Foo(10)
+        p.calculate(13)
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
+            object fooInstance = create.Invoke(null, null);
+            Assert.IsNotNull(fooInstance);
         }
     }
 }

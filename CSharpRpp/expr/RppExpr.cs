@@ -11,7 +11,6 @@ namespace CSharpRpp
     public abstract class RppMember : RppNamedNode, IRppExpr
     {
         public abstract RppType Type { get; protected set; }
-        public abstract Type RuntimeType { get; protected set; }
 
         protected RppMember(string name) : base(name)
         {
@@ -119,13 +118,10 @@ namespace CSharpRpp
 
         public RppType Type { get; private set; }
 
-        public Type RuntimeType { get; private set; }
-
         public RppInteger(string valueStr)
         {
             Value = int.Parse(valueStr);
-            RuntimeType = typeof (int);
-            Type = new RppNativeType(RuntimeType);
+            Type = RppNativeType.Create(typeof (int));
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -178,23 +174,15 @@ namespace CSharpRpp
 
         public RppType Type { get; private set; }
 
-        public Type RuntimeType { get; private set; }
-
         public RppString([NotNull] string valueStr)
         {
             Value = stripQuotes(valueStr);
-            RuntimeType = typeof (string);
-            Type = new RppNativeType(RuntimeType);
+            Type = RppNativeType.Create(typeof (string));
         }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public void Codegen(ILGenerator generator)
-        {
-            generator.Emit(OpCodes.Ldstr, Value);
         }
 
         [NotNull]
@@ -212,7 +200,6 @@ namespace CSharpRpp
     public class RppFuncCall : RppMember
     {
         public override RppType Type { get; protected set; }
-        public override Type RuntimeType { get; protected set; }
 
         public IEnumerable<IRppExpr> Args
         {
@@ -244,13 +231,11 @@ namespace CSharpRpp
                 Debug.Assert(resolvedFunc != null);
                 Function = resolvedFunc;
                 Type = Function.ReturnType;
-                RuntimeType = Function.RuntimeReturnType;
             }
             else
             {
                 // parent constructor is a special case, so don't resolve function
-                Type = RppPrimitiveType.UnitTy;
-                RuntimeType = typeof (void);
+                Type = RppNativeType.Create(typeof (void));
             }
 
             return this;
@@ -301,11 +286,21 @@ namespace CSharpRpp
         #endregion
     }
 
+    public class RppFollowedFuncCall : RppFuncCall
+    {
+        public RppFollowedFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name, argList)
+        {
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
     public class RppBlockExpr : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-
-        public Type RuntimeType { get; private set; }
 
         private IList<IRppNode> _exprs;
 
@@ -343,19 +338,12 @@ namespace CSharpRpp
                 if (lastExpr != null)
                 {
                     Type = lastExpr.Type;
-                    RuntimeType = lastExpr.RuntimeType;
                 }
             }
             else
             {
-                RuntimeType = typeof (void);
-                Type = new RppNativeType(RuntimeType);
+                Type = RppNativeType.Create(typeof (void));
             }
-        }
-
-        public void Codegen(ILGenerator generator)
-        {
-            //_exprs.ForEach(e => e.Codegen(generator));
         }
 
         #region Equality
@@ -407,9 +395,31 @@ namespace CSharpRpp
             Path = path;
         }
 
-        public void Codegen(ILGenerator generator)
+        public override void Accept(IRppNodeVisitor visitor)
         {
-            throw new NotImplementedException();
+            visitor.Visit(this);
+        }
+
+        public override void PreAnalyze(RppScope scope)
+        {
+            Target.PreAnalyze(scope);
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            Target.Analyze(scope);
+            RppObjectType targetType = Target.Type as RppObjectType;
+
+            Debug.Assert(targetType != null, "targetType != null");
+
+            RppScope classScope = new RppScope(null);
+
+            targetType.Class.Functions.ForEach(classScope.Add);
+            targetType.Class.Fields.ForEach(classScope.Add);
+
+            Path.Analyze(classScope);
+
+            return this;
         }
 
         public override string ToString()
@@ -455,8 +465,6 @@ namespace CSharpRpp
     public class RppId : RppMember
     {
         public override RppType Type { get; protected set; }
-        public override Type RuntimeType { get; protected set; }
-
 
         [CanBeNull]
         public RppMember Ref { get; private set; }
@@ -488,7 +496,6 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             Type = Ref.Type;
-            RuntimeType = Ref.RuntimeType;
 
             return this;
         }

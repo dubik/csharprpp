@@ -14,9 +14,6 @@ namespace CSharpRpp
         RppType ReturnType { get; }
 
         [NotNull]
-        Type RuntimeReturnType { get; }
-
-        [NotNull]
         IRppParam[] Params { get; }
 
         IRppExpr Expr { get; }
@@ -41,8 +38,6 @@ namespace CSharpRpp
 
         public RppType ReturnType { get; private set; }
         public IRppParam[] Params { get; private set; }
-
-        public Type RuntimeReturnType { get; private set; }
 
         public MethodInfo RuntimeType
         {
@@ -97,8 +92,7 @@ namespace CSharpRpp
 
             var runtimeReturnType = ReturnType.Resolve(_scope);
             Debug.Assert(runtimeReturnType != null);
-
-            RuntimeReturnType = runtimeReturnType;
+            ReturnType = runtimeReturnType;
 
             return this;
         }
@@ -188,7 +182,6 @@ namespace CSharpRpp
     public sealed class RppParam : RppMember, IRppParam
     {
         public override RppType Type { get; protected set; }
-        public override Type RuntimeType { get; protected set; }
 
         public int Index { get; set; }
 
@@ -206,7 +199,7 @@ namespace CSharpRpp
         {
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null, "Can't resolve type");
-            RuntimeType = resolvedType;
+            Type = resolvedType;
             return this;
         }
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection.Emit;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -22,9 +20,6 @@ namespace CSharpRpp
     {
         [NotNull]
         RppType Type { get; }
-
-        [NotNull]
-        Type RuntimeType { get; }
     }
 
     public class RppNode : IRppNode
@@ -33,7 +28,6 @@ namespace CSharpRpp
         {
         }
 
-        [NotNull]
         public virtual IRppNode Analyze(RppScope scope)
         {
             return this;

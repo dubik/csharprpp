@@ -21,28 +21,30 @@ namespace CSharpRpp
 
     public abstract class RppType
     {
+        public virtual Type Runtime { get; protected set; }
+
         [CanBeNull]
-        public abstract Type Resolve([NotNull] RppScope scope);
+        public abstract ResolvedType Resolve([NotNull] RppScope scope);
     }
 
-    public class RppNativeType : RppType
+    public class ResolvedType : RppType
     {
-        private readonly Type _type;
+        public override ResolvedType Resolve(RppScope scope)
+        {
+            return this;
+        }
+    }
 
+    public sealed class RppNativeType : ResolvedType
+    {
         [NotNull]
         public static RppNativeType Create([NotNull] Type type)
         {
-            return new RppNativeType(type);
+            return new RppNativeType {Runtime = type};
         }
 
-        public RppNativeType([NotNull] Type type)
+        private RppNativeType()
         {
-            _type = type;
-        }
-
-        public override Type Resolve(RppScope scope)
-        {
-            return _type;
         }
     }
 
@@ -63,16 +65,16 @@ namespace CSharpRpp
             {"Unit", UnitTy}
         };
 
-        private static readonly Dictionary<ERppPrimitiveType, Type> SystemTypesMap = new Dictionary<ERppPrimitiveType, Type>
+        private static readonly Dictionary<ERppPrimitiveType, ResolvedType> SystemTypesMap = new Dictionary<ERppPrimitiveType, ResolvedType>
         {
-            {ERppPrimitiveType.EBool, typeof (bool)},
-            {ERppPrimitiveType.EChar, typeof (char)},
-            {ERppPrimitiveType.EShort, typeof (short)},
-            {ERppPrimitiveType.EInt, typeof (int)},
-            {ERppPrimitiveType.ELong, typeof (long)},
-            {ERppPrimitiveType.EFloat, typeof (float)},
-            {ERppPrimitiveType.EDouble, typeof (double)},
-            {ERppPrimitiveType.EUnit, typeof (void)}
+            {ERppPrimitiveType.EBool, RppNativeType.Create(typeof (bool))},
+            {ERppPrimitiveType.EChar, RppNativeType.Create(typeof (char))},
+            {ERppPrimitiveType.EShort, RppNativeType.Create(typeof (short))},
+            {ERppPrimitiveType.EInt, RppNativeType.Create(typeof (int))},
+            {ERppPrimitiveType.ELong, RppNativeType.Create(typeof (long))},
+            {ERppPrimitiveType.EFloat, RppNativeType.Create(typeof (float))},
+            {ERppPrimitiveType.EDouble, RppNativeType.Create(typeof (double))},
+            {ERppPrimitiveType.EUnit, RppNativeType.Create(typeof (void))}
         };
 
         public RppPrimitiveType(ERppPrimitiveType primitiveType)
@@ -85,24 +87,24 @@ namespace CSharpRpp
             return PrimitiveTypesMap.TryGetValue(name, out type);
         }
 
-        public override Type Resolve(RppScope scope)
+        public override ResolvedType Resolve(RppScope scope)
         {
             return SystemTypesMap[PrimitiveType];
         }
     }
 
-    public class RppObjectType : RppType
+    public sealed class RppObjectType : ResolvedType
     {
-        private readonly RppClass _class;
+        public RppClass Class { get; private set; }
 
-        public RppObjectType([NotNull] RppClass claz)
+        public RppObjectType([NotNull] RppClass clazz)
         {
-            _class = claz;
+            Class = clazz;
         }
 
-        public override Type Resolve(RppScope scope)
+        public override Type Runtime
         {
-            return _class.RuntimeType;
+            get { return Class.RuntimeType; }
         }
     }
 
@@ -122,14 +124,15 @@ namespace CSharpRpp
             _params.Add(param);
         }
 
-        public override Type Resolve(RppScope scope)
+        public override ResolvedType Resolve(RppScope scope)
         {
             // var paramsType = _params.Select(par => par.Resolve(scope)).ToList();
             // RppNamedNode genericType = scope.Lookup(_typeName.Name);
             if (_typeName.Name == "Array")
             {
-                Type subType = _params[0].Resolve(scope);
-                return subType.MakeArrayType();
+                ResolvedType subType = _params[0].Resolve(scope);
+                Debug.Assert(subType != null, "subType != null");
+                return RppNativeType.Create(subType.Runtime.MakeArrayType());
             }
 
             return null;
@@ -188,8 +191,7 @@ namespace CSharpRpp
             Name = name;
         }
 
-        [CanBeNull]
-        public override Type Resolve([NotNull] RppScope scope)
+        public override ResolvedType Resolve(RppScope scope)
         {
             RppPrimitiveType primitiveType;
             if (RppPrimitiveType.IsPrimitive(Name, out primitiveType))
@@ -199,13 +201,13 @@ namespace CSharpRpp
 
             if (Name == "String")
             {
-                return typeof (String);
+                return RppNativeType.Create(typeof (String));
             }
 
             IRppNamedNode node = scope.Lookup(Name);
             RppClass clazz = node as RppClass;
             Debug.Assert(clazz != null);
-            return clazz.RuntimeType;
+            return new RppObjectType(clazz);
         }
 
         public override string ToString()

@@ -54,7 +54,7 @@ namespace CSharpRpp.Codegen
 
         private static void GenerateRet([NotNull] RppFunc node, [NotNull] ILGenerator generator)
         {
-            if (node.RuntimeReturnType == typeof (void) && node.Expr.RuntimeType != typeof (void))
+            if (node.ReturnType.Runtime == typeof (void) && node.Expr.Type.Runtime != typeof (void))
             {
                 generator.Emit(OpCodes.Pop);
             }
@@ -64,7 +64,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppVar node)
         {
-            node.Builder = _body.DeclareLocal(node.RuntimeType);
+            node.Builder = _body.DeclareLocal(node.Type.Runtime);
 
             if (!(node.InitExpr is RppEmptyExpr))
             {
@@ -132,14 +132,20 @@ namespace CSharpRpp.Codegen
                 }
 
                 node.Args.ForEach(arg => arg.Accept(this));
-
                 _body.Emit(OpCodes.Call, node.Function.RuntimeType);
             }
         }
 
+        public override void Visit(RppFollowedFuncCall node)
+        {
+            node.Args.ForEach(arg => arg.Accept(this));
+            _body.Emit(OpCodes.Call, node.Function.RuntimeType);
+        }
+
         public override void Visit(RppSelector node)
         {
-            throw new NotImplementedException();
+            node.Target.Accept(this);
+            node.Path.Accept(this);
         }
 
         public override void Visit(RppId node)

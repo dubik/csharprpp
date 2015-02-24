@@ -34,12 +34,16 @@ object Foo
             const string code = @"
 class Foo(k : Int)
 {
+    def calculate(x : Int) : Int = {
+        k + x
+    }
 }
 
 object Bar
 {
-    def create : Foo = {
-        new Foo(10)
+    def create : Int = {
+        val p : Foo = new Foo(10)
+        p.calculate(13)
     }
 }
 ";

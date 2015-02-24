@@ -7,7 +7,7 @@ using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace CSharpRpp.Codegen
 {
-    internal class ConstructorGenerator
+    class ConstructorGenerator
     {
         public static void GenerateFields(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
         {
@@ -17,7 +17,7 @@ namespace CSharpRpp.Codegen
                 TypeBuilder typeBuilder = pair.Value;
                 foreach (var field in clazz.Fields)
                 {
-                    FieldBuilder builder = typeBuilder.DefineField(field.Name, field.RuntimeType, FieldAttributes.Public);
+                    FieldBuilder builder = typeBuilder.DefineField(field.Name, field.Type.Runtime, FieldAttributes.Public);
                     field.Builder = builder;
                 }
             }
@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
             {
                 RppClass clazz = pair.Key;
                 TypeBuilder typeBuilder = pair.Value;
-                var fieldsType = clazz.Fields.Select(f => f.RuntimeType);
+                var fieldsType = clazz.Fields.Select(f => f.Type.Runtime);
                 ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
                 clazz.Constructor.ConstructorBuilder = builder;
                 AssignConstructorParamIndex(clazz.Constructor);
