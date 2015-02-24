@@ -50,6 +50,7 @@ namespace CSharpRpp.Codegen
             Type[] paramTypes = ParamTypes(node.Params);
             node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.ReturnType.Runtime, paramTypes);
             DefineParams(node.Builder, node.Params, node.IsStatic);
+            _funcBuilders.Add(node, node.Builder);
         }
 
         private static Type[] ParamTypes([NotNull] IEnumerable<IRppParam> paramList)

@@ -41,9 +41,11 @@ class Foo(k : Int)
 
 object Bar
 {
-    def create : Int = {
+    def main(argc: Array[String]) : Int = {
         val p : Foo = new Foo(10)
         p.calculate(13)
+        val msg : String = ""Hello""
+        println(msg)
     }
 }
 ";
