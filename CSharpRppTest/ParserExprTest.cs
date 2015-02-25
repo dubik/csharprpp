@@ -144,14 +144,14 @@ namespace CSharpRppTest
             return new RppFuncCall(id, args);
         }
 
-        private static RppFollowedFuncCall FollowedCall(string id)
+        private static RppMessage FollowedCall(string id)
         {
-            return new RppFollowedFuncCall(id, new List<IRppExpr>());
+            return new RppMessage(id, new List<IRppExpr>());
         }
 
-        private static RppFollowedFuncCall FollowedCall(string id, IList<IRppExpr> args)
+        private static RppMessage FollowedCall(string id, IList<IRppExpr> args)
         {
-            return new RppFollowedFuncCall(id, args);
+            return new RppMessage(id, args);
         }
 
         private static RppSelector Selector(IRppExpr expr, RppMember member)

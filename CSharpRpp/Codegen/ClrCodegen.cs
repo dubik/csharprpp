@@ -136,7 +136,7 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        public override void Visit(RppFollowedFuncCall node)
+        public override void Visit(RppMessage node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
             _body.Emit(OpCodes.Call, node.Function.RuntimeType);

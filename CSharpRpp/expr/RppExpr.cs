@@ -286,9 +286,9 @@ namespace CSharpRpp
         #endregion
     }
 
-    public class RppFollowedFuncCall : RppFuncCall
+    public class RppMessage : RppFuncCall
     {
-        public RppFollowedFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name, argList)
+        public RppMessage([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name, argList)
         {
         }
 
