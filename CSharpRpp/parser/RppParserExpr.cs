@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpRpp
 {
@@ -199,6 +200,10 @@ namespace CSharpRpp
             {
                 expr = new RppString(_lastToken.Text);
             }
+            else if (Require(RppLexer.InterpolatedStringLiteral))
+            {
+                expr = new RppString(_lastToken.Text);
+            }
             else if (Require(RppLexer.KW_Null))
             {
                 throw new Exception("Null is not implemented yet");
@@ -209,6 +214,58 @@ namespace CSharpRpp
             }
 
             return ParseSimpleExprRest(expr);
+        }
+
+        // Creating expressions which can process s"..."
+        private IRppExpr ProcessInterpolatedString(string str)
+        {
+            // s"My $p"
+            // s"my ${p.Text}"
+            // s"My ${p.Calculate() - 10}"
+            string s = str.Substring(2, str.Length - 3);
+            int index = 0;
+            StringBuilder builder = new StringBuilder();
+            while (true)
+            {
+                if (index == s.Length)
+                {
+                    break;
+                }
+
+                if (s[index] == '$')
+                {
+                    index++;
+                    if (index == s.Length)
+                    {
+                        throw new Exception("id or $ or { should follow single $");
+                    }
+
+                    if (s[index] == '$')
+                    {
+                        builder.Append('$');
+                        index++;
+                    }
+                    else
+                    {
+                        if (s[index] == '{')
+                        {
+                            index++;
+                            StringBuilder exprStr = new StringBuilder();
+                            while (s[index] != '}')
+                            {
+                                if (index + 1 == s.Length)
+                                {
+                                    throw new Exception("{ should be closed with }");
+                                }
+
+                                exprStr.Append(s[index]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         public bool ParsePath(out IRppExpr path)

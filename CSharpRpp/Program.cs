@@ -43,6 +43,7 @@ object Bar
 {
     def main(argc: Array[String]) : Int = {
         Foo.calculate(13)
+        var l: String = s""Hello""
     }
 }
 ";

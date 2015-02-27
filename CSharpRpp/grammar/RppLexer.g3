@@ -66,6 +66,9 @@ FloatingPointLiteral
                  :  Digit+ '.' Digit+ ExponentPart? FloatType?
                  |  '.' Digit+ ExponentPart? FloatType?
                  ;
+InterpolatedStringLiteral :
+              's' '"' StringElement* '"'
+              ;
 StringLiteral :
               '"' StringElement* '"'
               ;

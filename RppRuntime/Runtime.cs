@@ -41,6 +41,12 @@ namespace RppRuntime
         {
             return x + y;
         }
+
+        public static void printsomething(float p)
+        {
+            int k = 10;
+            Console.Write("Hello $p");
+        }
     }
 
     // ReSharper restore InconsistentNaming
