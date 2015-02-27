@@ -32,20 +32,17 @@ object Foo
 }
 ";*/
             const string code = @"
-class Foo(k : Int)
+object Foo
 {
     def calculate(x : Int) : Int = {
-        k + x
+        x + 10
     }
 }
 
 object Bar
 {
     def main(argc: Array[String]) : Int = {
-        val p : Foo = new Foo(10)
-        p.calculate(13)
-        val msg : String = ""Hello""
-        println(msg)
+        Foo.calculate(13)
     }
 }
 ";

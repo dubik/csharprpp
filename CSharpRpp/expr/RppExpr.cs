@@ -381,6 +381,12 @@ namespace CSharpRpp
         #endregion
     }
 
+    /*
+     * Utils.size(a)
+     * Utils.field
+     * Utils.inst.name()
+     */
+
     public class RppSelector : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
@@ -462,6 +468,16 @@ namespace CSharpRpp
         #endregion
     }
 
+    internal sealed class ClassAsMemberAdapter : RppMember
+    {
+        public override RppType Type { get; protected set; }
+
+        public ClassAsMemberAdapter(RppClass clazz) : base(clazz.Name)
+        {
+            Type = new RppObjectType(clazz);
+        }
+    }
+
     public class RppId : RppMember
     {
         public override RppType Type { get; protected set; }
@@ -487,9 +503,28 @@ namespace CSharpRpp
         {
             if (Ref == null)
             {
-                var rppExpr = scope.Lookup(Name) as RppMember;
-                Debug.Assert(rppExpr != null);
-                Ref = rppExpr;
+                var node = scope.Lookup(Name);
+                RppMember member = null;
+
+                // Reference to object, e.g. String.isNull(..)
+                if (node is RppClass)
+                {
+                    RppClass clazz = (RppClass) node;
+                    if (clazz.Kind != ClassKind.Object)
+                    {
+                        throw new Exception("Only objects are supported");
+                    }
+
+                    member = new ClassAsMemberAdapter(clazz);
+                }
+                else if (node is RppMember) // localVar, field
+                {
+                    member = node as RppMember;
+                }
+
+                Debug.Assert(member != null);
+
+                Ref = member;
             }
         }
 
