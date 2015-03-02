@@ -47,6 +47,16 @@ namespace RppRuntime
             int k = 10;
             Console.Write("Hello $p");
         }
+
+        public static void Println(string format, params object[] args)
+        {
+            Console.Write(format, args);
+        }
+
+        public static void PrintlnSomething()
+        {
+            Println("{0}, {1}", 10, 20);
+        }
     }
 
     // ReSharper restore InconsistentNaming

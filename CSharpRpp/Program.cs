@@ -44,7 +44,7 @@ object Foo
 
 object Bar
 {
-    def main(argc: Array[String]) : Int = {
+    def main(argc: Array[String],asd) : Int = {
         Foo.calculate(13)
         var l: String = ""Hello""
     }

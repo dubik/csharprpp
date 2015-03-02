@@ -115,6 +115,18 @@ namespace VisitorThingy
             Node program = new VarNode {Name = "x", InitExpr = new PlusNode(new NumberNode(5), new NumberNode(10))};
             INodeVisitor codegen = new Codegen();
             program.Accept(codegen);
+
+            PrintlnSomething();
+        }
+
+        public static void Println(string format, params object[] args)
+        {
+            Console.WriteLine(format, args);
+        }
+
+        public static void PrintlnSomething()
+        {
+            Println("{0}, {1}", 10, 20);
         }
     }
 }
