@@ -142,24 +142,13 @@ object Bar
             {
                 var lines = GetLines(code);
                 var line = lines[e.Actual.Line - 1];
-                Console.WriteLine("Systax error at line: {0}, unexpected token \"{1}\"", e.Actual.Line, e.Actual.Text);
+                Console.WriteLine("Systax error at line: {0}, unexpected token '{1}'", e.Actual.Line, e.Actual.Text);
                 Console.WriteLine(line);
                 Console.WriteLine("{0}^ Found '{1}', but expected '{2}'", Ident(e.Actual.CharPositionInLine), e.Actual.Text, e.Expected);
                 Environment.Exit(-1);
             }
 
             return null;
-        }
-
-        private static string Ident(int ident)
-        {
-            StringBuilder res = new StringBuilder();
-            while (ident-- > 0)
-            {
-                res.Append(" ");
-            }
-
-            return res.ToString();
         }
 
         private static RppParser CreateParser(string code)
@@ -184,6 +173,17 @@ object Bar
             }
 
             return lines;
+        }
+
+        private static string Ident(int ident)
+        {
+            StringBuilder res = new StringBuilder();
+            while (ident-- > 0)
+            {
+                res.Append(" ");
+            }
+
+            return res.ToString();
         }
     }
 }
