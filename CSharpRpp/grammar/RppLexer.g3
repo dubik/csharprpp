@@ -54,8 +54,9 @@ OP_RParen : ')';
 OP_Colon : ':';
 OP_Eq : '=';
 OP_Dot : '.';
+OP_Star : '*';
 
-OP_Ops : '+' | '-' | '/' | '*' | '%';
+OP_Ops : '+' | '-' | '/' | OP_Star | '%';
 
 BooleanLiteral   :  'true' | 'false';
 Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 

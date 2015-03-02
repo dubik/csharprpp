@@ -403,7 +403,9 @@ namespace CSharpRpp
                 throw new Exception("Expected type but got " + _lastToken.Text);
             }
 
-            funcParam = new RppParam(name, type);
+            bool variadic = Require(RppLexer.OP_Star);
+
+            funcParam = new RppParam(name, type, variadic);
             return true;
         }
 

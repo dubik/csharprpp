@@ -37,13 +37,16 @@ object Foo
     def calculate(x : Int) : Int = {
         x + 10
     }
+
+    def prin(fmt : String, args: Any*) : Unit = {
+    }
 }
 
 object Bar
 {
     def main(argc: Array[String]) : Int = {
         Foo.calculate(13)
-        var l: String = s""Hello""
+        var l: String = ""Hello""
     }
 }
 ";

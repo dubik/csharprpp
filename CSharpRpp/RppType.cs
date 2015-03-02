@@ -204,6 +204,11 @@ namespace CSharpRpp
                 return RppNativeType.Create(typeof (String));
             }
 
+            if (Name == "Any")
+            {
+                return RppNativeType.Create(typeof (Object));
+            }
+
             IRppNamedNode node = scope.Lookup(Name);
             RppClass clazz = node as RppClass;
             Debug.Assert(clazz != null);

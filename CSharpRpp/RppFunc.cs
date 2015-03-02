@@ -185,9 +185,12 @@ namespace CSharpRpp
 
         public int Index { get; set; }
 
-        public RppParam([NotNull] string name, [NotNull] RppType type) : base(name)
+        public bool Variadic { get; set; }
+
+        public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
             Type = type;
+            Variadic = variadic;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
