@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Antlr.Runtime;
 
 namespace CSharpRpp
 {
-    internal class QualifiedId
+    class QualifiedId
     {
         private string _text;
 
@@ -14,7 +15,7 @@ namespace CSharpRpp
         }
     }
 
-    internal enum ObjectModifier
+    enum ObjectModifier
     {
         OmNone,
         OmPrivate,
@@ -24,6 +25,18 @@ namespace CSharpRpp
         OmSealed,
         OmImplicit,
         OmLazy
+    }
+
+    class SystaxError : Exception
+    {
+        public IToken Actual { get; set; }
+        public string Expected { get; set; }
+
+        public SystaxError(string message, IToken actual, string expected) : base(message)
+        {
+            Actual = actual;
+            Expected = expected;
+        }
     }
 
     public partial class RppParser
@@ -54,7 +67,9 @@ namespace CSharpRpp
         {
             if (!Require(token))
             {
-                throw new Exception("Expected token : " + token + " but got " + _stream.LT(1).Text);
+                IToken actual = _stream.LT(1);
+                string expected = RppLexer.TokenToString(token);
+                throw new SystaxError("Unexpected token", actual, expected);
             }
         }
 

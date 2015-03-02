@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
@@ -131,8 +133,33 @@ object Bar
 
         private static RppProgram Parse(string code)
         {
-            RppParser parser = CreateParser(code);
-            return parser.CompilationUnit();
+            try
+            {
+                RppParser parser = CreateParser(code);
+                return parser.CompilationUnit();
+            }
+            catch (SystaxError e)
+            {
+                var lines = GetLines(code);
+                var line = lines[e.Actual.Line - 1];
+                Console.WriteLine("Systax error at line: {0}, unexpected token \"{1}\"", e.Actual.Line, e.Actual.Text);
+                Console.WriteLine(line);
+                Console.WriteLine("{0}^ Found '{1}', but expected '{2}'", Ident(e.Actual.CharPositionInLine), e.Actual.Text, e.Expected);
+                Environment.Exit(-1);
+            }
+
+            return null;
+        }
+
+        private static string Ident(int ident)
+        {
+            StringBuilder res = new StringBuilder();
+            while (ident-- > 0)
+            {
+                res.Append(" ");
+            }
+
+            return res.ToString();
         }
 
         private static RppParser CreateParser(string code)
@@ -140,9 +167,23 @@ object Bar
             ANTLRStringStream input = new ANTLRStringStream(code);
             RppLexer lexer = new RppLexer(input);
             CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-            var k = tokenStream.GetTokens();
             RppParser parser = new RppParser(tokenStream);
             return parser;
+        }
+
+        private static IList<string> GetLines(string text)
+        {
+            List<string> lines = new List<string>();
+            using (var reader = new StringReader(text))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    lines.Add(line);
+                }
+            }
+
+            return lines;
         }
     }
 }
