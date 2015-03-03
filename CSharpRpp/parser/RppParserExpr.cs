@@ -34,7 +34,7 @@ namespace CSharpRpp
         private bool ParseOperator(out string op, out int precedence, out bool leftAssoc)
         {
             leftAssoc = false;
-            if (Require(RppLexer.OP_Ops))
+            if (Require(RppLexer.OP_Ops) || Require(RppLexer.OP_Star))
             {
                 var token = _lastToken;
                 op = token.Text;
