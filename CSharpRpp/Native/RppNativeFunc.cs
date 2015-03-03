@@ -39,6 +39,8 @@ namespace CSharpRpp.Native
             set { throw new NotImplementedException(); }
         }
 
+        public RppClass Class { get; set; }
+
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)
         {
             RuntimeType = methodInfo;

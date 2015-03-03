@@ -206,7 +206,7 @@ object Bar
 object Bar
 {
     def concat(args: Int*) : Int = {
-        args.length
+        args.length()
     }
 }
 ";

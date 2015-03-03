@@ -59,8 +59,14 @@ namespace CSharpRpp
             _fields = fields;
 
             _funcs = classBody.OfType<IRppFunc>().ToList();
-            _funcs.ForEach(func => func.IsStatic = kind == ClassKind.Object);
+            _funcs.ForEach(DefineFunc);
             Constructor = CreateConstructor();
+        }
+
+        private void DefineFunc(IRppFunc func)
+        {
+            func.IsStatic = Kind == ClassKind.Object;
+            func.Class = this;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

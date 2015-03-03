@@ -27,6 +27,8 @@ namespace CSharpRpp
         bool IsStatic { get; set; }
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
+
+        RppClass Class { get; set; }
     }
 
     public class RppFunc : RppNamedNode, IRppFunc
@@ -41,7 +43,7 @@ namespace CSharpRpp
 
         public MethodInfo RuntimeType
         {
-            get { return Builder.GetBaseDefinition(); }
+            get { return Builder != null ? Builder.GetBaseDefinition() : null; }
             set { throw new NotImplementedException(); }
         }
 
@@ -51,6 +53,7 @@ namespace CSharpRpp
         public bool IsStatic { get; set; }
         public bool IsPublic { get; set; }
         public bool IsAbstract { get; set; }
+        public RppClass Class { get; set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {

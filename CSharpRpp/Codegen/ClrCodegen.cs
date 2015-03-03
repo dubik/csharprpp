@@ -139,7 +139,27 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppMessage node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            _body.Emit(OpCodes.Call, node.Function.RuntimeType);
+
+            // Normal function call
+            if (node.Function.RuntimeType != null)
+            {
+                _body.Emit(OpCodes.Call, node.Function.RuntimeType);
+            }
+            else
+            {
+                // TODO fix this, identify stubs by some other means
+                // Function calls for stubs don't have RuntimeType because they are defined dynamically
+                if (node.Function.Class != null)
+                {
+                    if (node.Function.Class.Name == "Array")
+                    {
+                        if (node.Name == "length")
+                        {
+                            _body.Emit(OpCodes.Ldlen);
+                        }
+                    }
+                }
+            }
         }
 
         public override void Visit(RppSelector node)
