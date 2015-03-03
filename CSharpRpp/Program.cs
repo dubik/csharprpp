@@ -34,21 +34,10 @@ object Foo
 }
 ";*/
             const string code = @"
-object Foo
-{
-    def calculate(x : Int) : Int = {
-        x + 10
-    }
-
-    def prin(fmt : String, args: Any*) : Unit = {
-    }
-}
-
 object Bar
 {
-    def main(argc: Array[String],asd) : Int = {
-        Foo.calculate(13)
-        var l: String = ""Hello""
+    def concat(args: Int*) : Int = {
+        args.length()
     }
 }
 ";

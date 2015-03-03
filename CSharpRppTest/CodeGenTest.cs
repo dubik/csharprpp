@@ -206,17 +206,14 @@ object Bar
 object Bar
 {
     def concat(args: Int*) : Int = {
-        10
+        args.length
     }
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar");
             MethodInfo concat = barTy.GetMethod("concat", BindingFlags.Static | BindingFlags.Public);
-            ParameterInfo[] paramsInfo = concat.GetParameters();
-            Type paramType = paramsInfo[0].ParameterType;
-            Assert.AreEqual(typeof (int[]), paramType);
             object res = concat.Invoke(null, new object[] {new[] {10, 20}});
-            Assert.AreEqual(10, res);
+            Assert.AreEqual(2, res);
         }
     }
 }

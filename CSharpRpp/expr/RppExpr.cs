@@ -423,6 +423,7 @@ namespace CSharpRpp
             targetType.Class.Functions.ForEach(classScope.Add);
             targetType.Class.Fields.ForEach(classScope.Add);
 
+            Path.PreAnalyze(classScope);
             Path.Analyze(classScope);
 
             return this;

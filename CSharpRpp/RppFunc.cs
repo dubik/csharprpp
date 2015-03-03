@@ -52,6 +52,16 @@ namespace CSharpRpp
         public bool IsPublic { get; set; }
         public bool IsAbstract { get; set; }
 
+        public RppFunc([NotNull] string name) : base(name)
+        {
+            Initialize(EmptyParams, RppPrimitiveType.UnitTy, RppEmptyExpr.Instance);
+        }
+
+        public RppFunc([NotNull] string name, [NotNull] RppType returnType) : base(name)
+        {
+            Initialize(EmptyParams, returnType, RppEmptyExpr.Instance);
+        }
+
         public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType)
             : base(name)
         {

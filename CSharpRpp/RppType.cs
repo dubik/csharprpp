@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Emit;
 using JetBrains.Annotations;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -52,13 +54,14 @@ namespace CSharpRpp
     {
         public readonly ERppPrimitiveType PrimitiveType;
         public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
+        public static RppPrimitiveType IntTy = new RppPrimitiveType(ERppPrimitiveType.EInt);
 
         private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
         {
             {"Bool", new RppPrimitiveType(ERppPrimitiveType.EBool)},
             {"Char", new RppPrimitiveType(ERppPrimitiveType.EChar)},
             {"Short", new RppPrimitiveType(ERppPrimitiveType.EShort)},
-            {"Int", new RppPrimitiveType(ERppPrimitiveType.EInt)},
+            {"Int", IntTy},
             {"Long", new RppPrimitiveType(ERppPrimitiveType.ELong)},
             {"Float", new RppPrimitiveType(ERppPrimitiveType.EFloat)},
             {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)},
@@ -93,9 +96,9 @@ namespace CSharpRpp
         }
     }
 
-    public sealed class RppObjectType : ResolvedType
+    public class RppObjectType : ResolvedType
     {
-        public RppClass Class { get; private set; }
+        public RppClass Class { get; protected set; }
 
         public RppObjectType([NotNull] RppClass clazz)
         {
@@ -108,21 +111,53 @@ namespace CSharpRpp
         }
     }
 
-    public sealed class RppArrayType : ResolvedType
+    public sealed class RppArrayType : RppObjectType
     {
         public RppType SubType { get; set; }
 
-        public RppArrayType([NotNull] RppType subType)
+        public override Type Runtime { get; protected set; }
+
+        public RppArrayType([NotNull] RppType subType) : base(CreateWrappedClass(subType))
         {
             SubType = subType;
+        }
+
+        private static RppClass CreateWrappedClass([NotNull] RppType subType)
+        {
+            var funcs = new[]
+            {
+                new RppFunc("length", RppPrimitiveType.IntTy),
+                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, subType),
+                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy)
+            };
+
+            return new RppClass(ClassKind.Class, "Array", Collections.NoFields, funcs);
         }
 
         public override ResolvedType Resolve(RppScope scope)
         {
             SubType = SubType.Resolve(scope);
             Debug.Assert(SubType != null, "resolvedSubType != null");
-            Runtime = SubType.Runtime.MakeArrayType();
+            Class = CreateWrappedClass(SubType);
+            var runtime = SubType.Runtime;
+            var makeArrayType = runtime.MakeArrayType();
+            Runtime = makeArrayType;
             return this;
+        }
+    }
+
+    internal class RppClassBuilder
+    {
+        private string _name;
+
+        public RppClassBuilder(string name)
+        {
+            _name = name;
+        }
+
+        public static RppClassBuilder Create(string name)
+        {
+            return new RppClassBuilder(name);
         }
     }
 

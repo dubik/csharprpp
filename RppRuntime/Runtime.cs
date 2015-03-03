@@ -50,7 +50,8 @@ namespace RppRuntime
 
         public static void Println(string format, params object[] args)
         {
-            Console.Write(format, args);
+            int len = args.Length;
+            Console.Write(format, len);
         }
 
         public static void PrintlnSomething()
