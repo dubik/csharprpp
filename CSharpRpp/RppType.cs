@@ -108,6 +108,24 @@ namespace CSharpRpp
         }
     }
 
+    public sealed class RppArrayType : ResolvedType
+    {
+        public RppType SubType { get; set; }
+
+        public RppArrayType([NotNull] RppType subType)
+        {
+            SubType = subType;
+        }
+
+        public override ResolvedType Resolve(RppScope scope)
+        {
+            SubType = SubType.Resolve(scope);
+            Debug.Assert(SubType != null, "resolvedSubType != null");
+            Runtime = SubType.Runtime.MakeArrayType();
+            return this;
+        }
+    }
+
     public class RppGenericType : RppType
     {
         private readonly IList<RppType> _params = new List<RppType>();

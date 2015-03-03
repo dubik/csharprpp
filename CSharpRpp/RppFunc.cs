@@ -189,7 +189,7 @@ namespace CSharpRpp
 
         public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
-            Type = type;
+            Type = variadic ? new RppArrayType(type) : type;
             Variadic = variadic;
         }
 

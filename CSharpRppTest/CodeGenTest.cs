@@ -198,5 +198,25 @@ object Bar
             object fooInstance = create.Invoke(null, null);
             Assert.IsNotNull(fooInstance);
         }
+
+        [TestMethod]
+        public void CallVarargFunction()
+        {
+            const string code = @"
+object Bar
+{
+    def concat(args: Int*) : Int = {
+        10
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("concat", BindingFlags.Static | BindingFlags.Public);
+            ParameterInfo[] paramsInfo = concat.GetParameters();
+            Type paramType = paramsInfo[0].ParameterType;
+            Assert.AreEqual(typeof (int[]), paramType);
+            object res = concat.Invoke(null, new object[] {new[] {10, 20}});
+            Assert.AreEqual(10, res);
+        }
     }
 }
