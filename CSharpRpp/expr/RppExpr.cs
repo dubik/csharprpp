@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -229,6 +230,15 @@ namespace CSharpRpp
             {
                 var resolvedFunc = scope.Lookup(Name) as IRppFunc;
                 Debug.Assert(resolvedFunc != null);
+
+                if (resolvedFunc.IsVariadic)
+                {
+                    List<IRppParam> funcParams = resolvedFunc.Params.ToList();
+                    int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
+                    var args = _argList.Take(variadicIndex);
+                    var variadicParams = _argList.TakeWhile((arg, index) => index > variadicIndex);
+                }
+
                 Function = resolvedFunc;
                 Type = Function.ReturnType;
             }
@@ -284,6 +294,13 @@ namespace CSharpRpp
         }
 
         #endregion
+    }
+
+    public class RppCreateArray : RppNode, IRppExpr
+    {
+        public RppType Type { get; private set; }
+
+
     }
 
     public class RppMessage : RppFuncCall
@@ -469,7 +486,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
