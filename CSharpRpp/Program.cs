@@ -39,6 +39,10 @@ object Bar
     def concat(args: Int*) : Int = {
         args.length()
     }
+
+    def invokeConcat() : Int = {
+        concat(10, 20)
+    }
 }
 ";
             /*

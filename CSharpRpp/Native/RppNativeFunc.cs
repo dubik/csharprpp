@@ -39,11 +39,14 @@ namespace CSharpRpp.Native
             set { throw new NotImplementedException(); }
         }
 
+        public bool IsVariadic { get; set; }
+
         public RppClass Class { get; set; }
 
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)
         {
             RuntimeType = methodInfo;
+
             ReturnType = RppNativeType.Create(methodInfo.ReturnType);
             Params = methodInfo.GetParameters().Select(CreateRppParam).ToArray();
             RuntimeReturnType = methodInfo.ReturnType;
@@ -51,17 +54,8 @@ namespace CSharpRpp.Native
 
         private static IRppParam CreateRppParam(ParameterInfo paramInfo)
         {
-            return new RppNativeParam(paramInfo.Name, paramInfo.ParameterType);
-        }
-
-        public void CodegenMethodStubs(TypeBuilder typeBuilder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Codegen(CodegenContext ctx)
-        {
-            throw new NotImplementedException();
+            var variadic = paramInfo.GetCustomAttributes(typeof (ParamArrayAttribute), false).Length != 0;
+            return new RppNativeParam(paramInfo.Name, paramInfo.ParameterType, variadic);
         }
     }
 }

@@ -6,10 +6,12 @@ namespace CSharpRpp.Native
     {
         public RppType Type { get; private set; }
         public int Index { get; set; }
+        public bool IsVariadic { get; set; }
 
-        public RppNativeParam(string name, Type paramType) : base(name)
+        public RppNativeParam(string name, Type paramType, bool variadic = false) : base(name)
         {
             Type = RppNativeType.Create(paramType);
+            IsVariadic = variadic;
         }
     }
 }

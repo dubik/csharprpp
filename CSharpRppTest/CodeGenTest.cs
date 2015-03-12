@@ -200,7 +200,7 @@ object Bar
         }
 
         [TestMethod]
-        public void CallVarargFunction()
+        public void LengthOfVarArgArg()
         {
             const string code = @"
 object Bar
@@ -214,6 +214,26 @@ object Bar
             MethodInfo concat = barTy.GetMethod("concat", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, new object[] {new[] {10, 20}});
             Assert.AreEqual(2, res);
+        }
+
+        [TestMethod]
+        public void CallVarArgFunction()
+        {
+            const string code = @"
+object Bar
+{
+    def concat(args: Int*) : Int = {
+        args.length()
+    }
+
+    def invokeConcat() : Int = {
+        concat(10, 20)
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invokeConcat", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
         }
     }
 }

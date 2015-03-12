@@ -27,6 +27,7 @@ namespace CSharpRpp
         bool IsStatic { get; set; }
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
+        bool IsVariadic { get; set; }
 
         RppClass Class { get; set; }
     }
@@ -53,6 +54,7 @@ namespace CSharpRpp
         public bool IsStatic { get; set; }
         public bool IsPublic { get; set; }
         public bool IsAbstract { get; set; }
+        public bool IsVariadic { get; set; }
         public RppClass Class { get; set; }
 
         public RppFunc([NotNull] string name) : base(name)
@@ -82,6 +84,7 @@ namespace CSharpRpp
             Params = funcParams.ToArray();
             ReturnType = returnType;
             Expr = expr;
+            IsVariadic = Params.Any(param => param.IsVariadic);
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -189,6 +192,7 @@ namespace CSharpRpp
     public interface IRppParam : IRppNamedNode, IRppExpr
     {
         int Index { get; set; }
+        bool IsVariadic { get; set; }
     }
 
     [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
@@ -198,12 +202,12 @@ namespace CSharpRpp
 
         public int Index { get; set; }
 
-        public bool Variadic { get; set; }
+        public bool IsVariadic { get; set; }
 
         public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
             Type = variadic ? new RppArrayType(type) : type;
-            Variadic = variadic;
+            IsVariadic = variadic;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
