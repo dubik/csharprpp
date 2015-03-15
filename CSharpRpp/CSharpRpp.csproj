@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Codegen\ClrCodegen.cs" />
+    <Compile Include="Codegen\ClrCodegenUtils.cs" />
     <Compile Include="Codegen\CodeGenerator.cs" />
     <Compile Include="Codegen\ConstructorGenerator.cs" />
     <Compile Include="Codegen\StubsCreator.cs" />

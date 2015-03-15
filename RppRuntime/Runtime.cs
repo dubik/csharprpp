@@ -16,32 +16,13 @@ namespace RppRuntime
         }
     }
 
-    public class Foor
-    {
-        public int _field;
-
-        public Foor(int field)
-        {
-            _field = field;
-        }
-
-        public int calculate(int k)
-        {
-            return _field + k;
-        }
-    }
-
-
-    public class Foo
-    {
-        public int calculate(int x, int y)
-        {
-            return x + y;
-        }
-    }
-
     public class Boo
     {
+        public static int calc(params bool[] args)
+        {
+            return args.Length;
+        }
+
         public static int calculate(int x, int y)
         {
             return x + y;
@@ -61,6 +42,7 @@ namespace RppRuntime
         public static void PrintlnSomething()
         {
             Println("{0}, {1}", 10, 20);
+            calc(true, false);
         }
 
 

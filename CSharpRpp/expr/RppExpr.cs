@@ -207,7 +207,7 @@ namespace CSharpRpp
             get { return _argList.AsEnumerable(); }
         }
 
-        private readonly IList<IRppExpr> _argList;
+        private IList<IRppExpr> _argList;
 
         [NotNull]
         public IRppFunc Function { get; private set; }
@@ -235,8 +235,17 @@ namespace CSharpRpp
                 {
                     List<IRppParam> funcParams = resolvedFunc.Params.ToList();
                     int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
-                    var args = _argList.Take(variadicIndex);
-                    var variadicParams = _argList.TakeWhile((arg, index) => index > variadicIndex);
+                    var args = _argList.Take(variadicIndex).ToList();
+                    var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
+                    _argList = args;
+
+                    IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
+                    var varidadicType = variadicParam.Type as RppArrayType;
+                    Debug.Assert(varidadicType != null, "varidadicType != null");
+                    RppArray variadicArgsArray = new RppArray(varidadicType.SubType, variadicParams);
+                    variadicArgsArray.PreAnalyze(scope);
+                    variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+                    _argList.Add(variadicArgsArray);
                 }
 
                 Function = resolvedFunc;
@@ -296,11 +305,34 @@ namespace CSharpRpp
         #endregion
     }
 
-    public class RppCreateArray : RppNode, IRppExpr
+    public class RppArray : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
 
+        public IEnumerable<IRppExpr> Initializers { get; private set; }
 
+        public int Size { get; private set; }
+
+        public RppArray(RppType type, IEnumerable<IRppExpr> initializers)
+        {
+            Type = new RppArrayType(type);
+            Initializers = initializers;
+            Size = Initializers.Count();
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            var resolvedType = Type.Resolve(scope);
+            Debug.Assert(resolvedType != null);
+            Type = resolvedType;
+
+            return this;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 
     public class RppMessage : RppFuncCall

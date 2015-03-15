@@ -113,6 +113,33 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Ldstr, node.Value);
         }
 
+        public override void Visit(RppArray node)
+        {
+            var arrayType = node.Type.Runtime.GetElementType();
+            Debug.Assert(arrayType == typeof (int));
+
+            LocalBuilder arrVar = _body.DeclareLocal(node.Type.Runtime);
+            ClrCodegenUtils.LoadInt(node.Size, _body);
+            _body.Emit(OpCodes.Newarr, arrayType);
+
+            ClrCodegenUtils.StoreLocal(arrVar, _body);
+
+            // only int8, int16, int32 are supported as primitive types everything else should be boxed
+            bool isElementTypeRef = arrayType != typeof (int);
+            OpCode storingOpCode = isElementTypeRef ? OpCodes.Stelem_Ref : OpCodes.Stelem_I4;
+            int index = 0;
+            foreach (var initializer in node.Initializers)
+            {
+                ClrCodegenUtils.LoadLocal(arrVar, _body);
+                ClrCodegenUtils.LoadInt(index, _body);
+                initializer.Accept(this);
+                _body.Emit(storingOpCode);
+                index++;
+            }
+
+            ClrCodegenUtils.LoadLocal(arrVar, _body);
+        }
+
         public override void Visit(RppFuncCall node)
         {
             // TODO we should keep references to functions by making another pass of code gen before

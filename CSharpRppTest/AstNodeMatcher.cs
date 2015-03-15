@@ -106,5 +106,9 @@ namespace CSharpRppTest
         public void Visit(RppAssignOp node)
         {
         }
+
+        public void Visit(RppArray node)
+        {
+        }
     }
 }
