@@ -253,7 +253,7 @@ object Bar
             var barTy = Utils.ParseAndCreateType(code, "Bar");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
-            Assert.AreEqual(2, res);
+            Assert.AreEqual(10, res);
         }
     }
 }

@@ -43,6 +43,11 @@ object Bar
     def invokeConcat() : Int = {
         concat(10, 20)
     }
+
+    def invoke() : Any = {
+        val p : Any = 10
+        p
+    }
 }
 ";
             /*

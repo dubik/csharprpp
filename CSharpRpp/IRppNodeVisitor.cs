@@ -24,6 +24,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppNew node);
         void Visit([NotNull] RppAssignOp node);
         void Visit([NotNull] RppArray node);
+        void Visit([NotNull] RppBox node);
     }
 
     class RppNodeVisitor : IRppNodeVisitor
@@ -105,6 +106,10 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppArray node)
+        {
+        }
+
+        public virtual void Visit(RppBox node)
         {
         }
     }

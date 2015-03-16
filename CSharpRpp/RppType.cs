@@ -25,6 +25,28 @@ namespace CSharpRpp
 
         [CanBeNull]
         public abstract ResolvedType Resolve([NotNull] RppScope scope);
+
+        #region Eqaulity
+
+        protected bool Equals(RppType other)
+        {
+            return Runtime == other.Runtime;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Runtime != null ? Runtime.GetHashCode() : 0);
+        }
+
+        #endregion
     }
 
     public class ResolvedType : RppType
@@ -144,7 +166,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class RppClassBuilder
+    class RppClassBuilder
     {
         private string _name;
 

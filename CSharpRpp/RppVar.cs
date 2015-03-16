@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using CSharpRpp.Expr;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -40,17 +41,12 @@ namespace CSharpRpp
             Debug.Assert(resolvedType != null);
             Type = resolvedType;
 
-            return this;
-        }
-
-        private IRppExpr CastIfNeeded(IRppExpr sourceExpr, Type targetType)
-        {
-            if (sourceExpr.Type.Runtime == targetType)
+            if (!(InitExpr is RppEmptyExpr))
             {
-                return sourceExpr;
+                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type.Runtime);
             }
 
-            return null;
+            return this;
         }
 
         #region Equality

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
@@ -261,6 +260,12 @@ namespace CSharpRpp.Codegen
         {
             _body.Emit(OpCodes.Ldarg_0);
             _body.Emit(OpCodes.Ldfld, node.Builder);
+        }
+
+        public override void Visit(RppBox node)
+        {
+            node.Expression.Accept(this);
+            _body.Emit(OpCodes.Box, node.Expression.Type.Runtime);
         }
     }
 }

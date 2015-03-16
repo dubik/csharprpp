@@ -110,5 +110,9 @@ namespace CSharpRppTest
         public void Visit(RppArray node)
         {
         }
+
+        public void Visit(RppBox node)
+        {
+        }
     }
 }

@@ -112,7 +112,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    [DebuggerDisplay("Int: {_value}")]
+    [DebuggerDisplay("Int: {Value}")]
     public class RppInteger : RppNode, IRppExpr
     {
         public int Value { get; private set; }
@@ -528,7 +528,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
@@ -643,6 +643,32 @@ namespace CSharpRpp
             Expression = expr;
             Debug.Assert(expr.Type.Runtime.IsValueType);
             Type = RppNativeType.Create(typeof (object));
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        protected bool Equals(RppBox other)
+        {
+            return Type.Equals(other.Type) && Equals(Expression, other.Expression);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppBox) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Type.GetHashCode() * 397) ^ (Expression != null ? Expression.GetHashCode() : 0);
+            }
         }
     }
 }

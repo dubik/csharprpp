@@ -6,12 +6,18 @@ namespace CSharpRpp.Expr
     {
         public static IRppExpr CastIfNeeded(IRppExpr sourceExpr, Type targetType)
         {
-            if (sourceExpr.Type.Runtime == targetType)
+            Type sourceType = sourceExpr.Type.Runtime;
+            if (sourceType == targetType)
             {
                 return sourceExpr;
             }
 
-            return null;
+            if (sourceType.IsValueType && targetType == typeof (object))
+            {
+                return new RppBox(sourceExpr);
+            }
+
+            throw new Exception("Can't cast expression to a specific type");
         }
     }
 }

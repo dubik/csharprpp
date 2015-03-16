@@ -49,6 +49,8 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
+            Type = RppNativeType.Create(RefClass.RuntimeType);
+
             return this;
         }
     }
