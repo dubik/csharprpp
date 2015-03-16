@@ -236,5 +236,24 @@ object Bar
             object res = concat.Invoke(null, null);
             Assert.AreEqual(2, res);
         }
+
+
+        [TestMethod]
+        public void ImplicitBoxing()
+        {
+            const string code = @"
+object Bar
+{
+    def invoke() : Any = {
+        val p : Any = 10
+        p
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
+            Assert.AreEqual(2, res);
+        }
     }
 }

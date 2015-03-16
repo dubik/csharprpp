@@ -43,6 +43,16 @@ namespace CSharpRpp
             return this;
         }
 
+        private IRppExpr CastIfNeeded(IRppExpr sourceExpr, Type targetType)
+        {
+            if (sourceExpr.Type.Runtime == targetType)
+            {
+                return sourceExpr;
+            }
+
+            return null;
+        }
+
         #region Equality
 
         protected bool Equals(RppVar other)
@@ -53,9 +63,18 @@ namespace CSharpRpp
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
             return Equals((RppVar) obj);
         }
 

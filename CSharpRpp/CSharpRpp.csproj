@@ -73,6 +73,7 @@
     <Compile Include="Codegen\TypeCreator.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="Expr\ImplicitCast.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">

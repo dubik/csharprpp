@@ -55,6 +55,12 @@ namespace RppRuntime
         {
             
         }
+
+        public static void Cast()
+        {
+            const Int32 k = 10;
+            int p = (int) (object)k + 10;
+        }
     }
 
     // ReSharper restore InconsistentNaming

@@ -119,9 +119,19 @@ namespace CSharpRpp
 
         public RppType Type { get; private set; }
 
+        public RppInteger(int val)
+        {
+            Initialize(val);
+        }
+
         public RppInteger(string valueStr)
         {
-            Value = int.Parse(valueStr);
+            Initialize(int.Parse(valueStr));
+        }
+
+        private void Initialize(int val)
+        {
+            Value = val;
             Type = RppNativeType.Create(typeof (int));
         }
 
@@ -177,7 +187,7 @@ namespace CSharpRpp
 
         public RppString([NotNull] string valueStr)
         {
-            Value = stripQuotes(valueStr);
+            Value = StripQuotes(valueStr);
             Type = RppNativeType.Create(typeof (string));
         }
 
@@ -187,7 +197,7 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        private static string stripQuotes([NotNull] string str)
+        private static string StripQuotes([NotNull] string str)
         {
             if (str.Length > 1 && str[0] == '"' && str[str.Length - 1] == '"')
             {
@@ -518,7 +528,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
@@ -620,5 +630,19 @@ namespace CSharpRpp
         }
 
         #endregion
+    }
+
+    public class RppBox : RppNode, IRppExpr
+    {
+        public RppType Type { get; private set; }
+
+        public IRppExpr Expression { get; private set; }
+
+        public RppBox([NotNull] IRppExpr expr)
+        {
+            Expression = expr;
+            Debug.Assert(expr.Type.Runtime.IsValueType);
+            Type = RppNativeType.Create(typeof (object));
+        }
     }
 }
