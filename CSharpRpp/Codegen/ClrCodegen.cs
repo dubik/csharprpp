@@ -107,6 +107,11 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Ldc_I4, node.Value);
         }
 
+        public override void Visit(RppFloat node)
+        {
+            _body.Emit(OpCodes.Ldc_R4, node.Value);
+        }
+
         public override void Visit(RppString node)
         {
             _body.Emit(OpCodes.Ldstr, node.Value);

@@ -255,5 +255,23 @@ object Bar
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10, res);
         }
+
+        [TestMethod]
+        public void GetFloat()
+        {
+            const string code = @"
+object Bar
+{
+    def invoke() : Float = {
+        val p : Float = 10.10
+        p
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
+            Assert.AreEqual(10.10f, res);
+        }
     }
 }

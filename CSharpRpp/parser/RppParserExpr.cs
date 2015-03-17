@@ -196,6 +196,10 @@ namespace CSharpRpp
             {
                 expr = new RppInteger(_lastToken.Text);
             }
+            else if (Require(RppLexer.FloatingPointLiteral))
+            {
+                expr = new RppFloat(_lastToken.Text);
+            }
             else if (Require(RppLexer.StringLiteral))
             {
                 expr = new RppString(_lastToken.Text);

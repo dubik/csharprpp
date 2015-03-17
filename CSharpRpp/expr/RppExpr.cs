@@ -113,26 +113,14 @@ namespace CSharpRpp
     }
 
     [DebuggerDisplay("Int: {Value}")]
-    public class RppInteger : RppNode, IRppExpr
+    public sealed class RppInteger : RppLiteralBase<int>
     {
-        public int Value { get; private set; }
-
-        public RppType Type { get; private set; }
-
-        public RppInteger(int val)
+        public RppInteger(int val) : base(val)
         {
-            Initialize(val);
         }
 
-        public RppInteger(string valueStr)
+        public RppInteger(string valueStr) : base(valueStr)
         {
-            Initialize(int.Parse(valueStr));
-        }
-
-        private void Initialize(int val)
-        {
-            Value = val;
-            Type = RppNativeType.Create(typeof (int));
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -140,16 +128,42 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public void Codegen(ILGenerator generator)
+        protected override int Parse(string valueStr)
         {
-            generator.Emit(OpCodes.Ldc_I4, Value);
+            return int.Parse(valueStr);
         }
+    }
+
+    public abstract class RppLiteralBase<T> : RppNode, IRppExpr
+    {
+        public T Value { get; private set; }
+
+        public RppType Type { get; private set; }
+
+        protected RppLiteralBase(string valueStr)
+        {
+            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
+            Initialize(Parse(valueStr));
+        }
+
+        private void Initialize(T value)
+        {
+            Value = value;
+            Type = RppNativeType.Create(typeof (T));
+        }
+
+        protected RppLiteralBase(T value)
+        {
+            Initialize(value);
+        }
+
+        protected abstract T Parse(string valueStr);
 
         #region Equality
 
-        protected bool Equals(RppInteger other)
+        protected bool Equals(RppLiteralBase<T> other)
         {
-            return Value == other.Value;
+            return Value.Equals(other.Value) && Type.Equals(other.Type);
         }
 
         public override bool Equals(object obj)
@@ -166,34 +180,57 @@ namespace CSharpRpp
             {
                 return false;
             }
-            return Equals((RppInteger) obj);
+            return Equals((RppLiteralBase<T>) obj);
         }
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            unchecked
+            {
+                return (Value.GetHashCode() * 397) ^ Type.GetHashCode();
+            }
         }
 
         #endregion
     }
 
-    [DebuggerDisplay("String: {Value}")]
-    public class RppString : RppNode, IRppExpr
+    [DebuggerDisplay("Float: {Value}")]
+    public sealed class RppFloat : RppLiteralBase<float>
     {
-        [NotNull]
-        public string Value { get; private set; }
-
-        public RppType Type { get; private set; }
-
-        public RppString([NotNull] string valueStr)
+        public RppFloat(string valueStr) : base(valueStr)
         {
-            Value = StripQuotes(valueStr);
-            Type = RppNativeType.Create(typeof (string));
+        }
+
+        public RppFloat(float value) : base(value)
+        {
+        }
+
+        protected override float Parse(string valueStr)
+        {
+            return float.Parse(valueStr);
         }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.Visit(this);
+        }
+    }
+
+    [DebuggerDisplay("String: {Value}")]
+    public sealed class RppString : RppLiteralBase<string>
+    {
+        public RppString([NotNull] string valueStr) : base(valueStr)
+        {
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        protected override string Parse(string valueStr)
+        {
+            return StripQuotes(valueStr);
         }
 
         [NotNull]
@@ -528,7 +565,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
@@ -657,9 +694,18 @@ namespace CSharpRpp
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
             return Equals((RppBox) obj);
         }
 
