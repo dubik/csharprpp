@@ -273,5 +273,28 @@ object Bar
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10.10f, res);
         }
+
+        [TestMethod]
+        public void SimpleWhile()
+        {
+            const string code = @"
+object Bar
+{
+    def invoke() : Int = {
+        val p : Int = 10
+        var ret : Int = 0
+        while(p > 0)
+        {
+            ret = ret + 1
+        }
+        ret
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
+            Assert.AreEqual(10, res);
+        }
     }
 }

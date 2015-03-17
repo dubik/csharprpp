@@ -36,17 +36,14 @@ object Foo
             const string code = @"
 object Bar
 {
-    def concat(args: Int*) : Int = {
-        args.length()
-    }
-
-    def invokeConcat() : Int = {
-        concat(10, 20)
-    }
-
-    def invoke() : Any = {
-        val p : Any = 10
-        p
+    def invoke() : Int = {
+        val p : Int = 10
+        var ret : Int = 0
+        while(p > 0)
+        {
+            ret = ret + 1
+        }
+        ret
     }
 }
 ";

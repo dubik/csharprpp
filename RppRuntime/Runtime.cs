@@ -61,6 +61,16 @@ namespace RppRuntime
             const Int32 k = 10;
             int p = (int) (object)k + 10;
         }
+
+        public static void DoWhile()
+        {
+            int k = 10;
+            while (k > 0)
+            {
+                Cast();
+                k = k - 1;
+            }
+        }
     }
 
     // ReSharper restore InconsistentNaming

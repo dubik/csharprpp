@@ -272,5 +272,10 @@ namespace CSharpRpp.Codegen
             node.Expression.Accept(this);
             _body.Emit(OpCodes.Box, node.Expression.Type.Runtime);
         }
+
+        public override void Visit(RppWhile node)
+        {
+            
+        }
     }
 }

@@ -118,5 +118,9 @@ namespace CSharpRppTest
         public void Visit(RppFloat node)
         {
         }
+
+        public void Visit(RppWhile node)
+        {
+        }
     }
 }

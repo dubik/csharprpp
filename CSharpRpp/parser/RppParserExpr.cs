@@ -18,9 +18,9 @@ namespace CSharpRpp
                 throw new Exception("If not supported");
             }
 
-            if (Require(RppLexer.KW_While))
+            if (Peek(RppLexer.KW_While))
             {
-                throw new Exception("While not supported");
+                return ParseWhile();
             }
 
             if (Require(RppLexer.KW_Return))
@@ -29,6 +29,26 @@ namespace CSharpRpp
             }
 
             return ParsePostfixExpr(0);
+        }
+
+        private RppWhile ParseWhile()
+        {
+            Expect(RppLexer.KW_While);
+            Expect(RppLexer.OP_LParen);
+            IRppExpr condition = ParseExpr();
+            if (condition == null)
+            {
+                throw new Exception("Expected expression");
+            }
+            Expect(RppLexer.OP_RParen);
+            ParseSemi();
+            IRppExpr body = ParseExpr();
+            if (body == null)
+            {
+                throw new Exception("Expected body");
+            }
+
+            return new RppWhile(condition, body);
         }
 
         private bool ParseOperator(out string op, out int precedence, out bool leftAssoc)
