@@ -108,14 +108,14 @@
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
     </Antlr3>
-    <Antlr3 Include="grammar\JRpp.g">
+    <None Include="grammar\JRpp.g">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
-    </Antlr3>
-    <Antlr3 Include="grammar\JRppTreeGrammar.g">
+    </None>
+    <None Include="grammar\JRppTreeGrammar.g">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
-    </Antlr3>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
