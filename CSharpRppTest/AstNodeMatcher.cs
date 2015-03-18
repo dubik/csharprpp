@@ -3,7 +3,7 @@ using CSharpRpp;
 
 namespace CSharpRppTest
 {
-    class AstNodeMatcher<T> : IRppNodeVisitor where T : class, IRppNamedNode
+    internal class AstNodeMatcher<T> : IRppNodeVisitor where T : class, IRppNamedNode
     {
         public IList<T> Matches = new List<T>();
         private readonly string _name;
@@ -120,6 +120,14 @@ namespace CSharpRppTest
         }
 
         public void Visit(RppWhile node)
+        {
+        }
+
+        public void Visit(RppLogicalBinOp node)
+        {
+        }
+
+        public void Visit(RppArithmBinOp node)
         {
         }
     }

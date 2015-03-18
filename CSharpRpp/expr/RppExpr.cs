@@ -30,8 +30,12 @@ namespace CSharpRpp
 
     public class RppLogicalBinOp : BinOp
     {
+        private static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||"};
+        private static readonly HashSet<string> RelationalOps = new HashSet<string> {"<", ">", "==", "!="};
+
         public RppLogicalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
+            Type = RppNativeType.Create(typeof (bool));
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -39,12 +43,161 @@ namespace CSharpRpp
             base.Accept(visitor);
             visitor.Visit(this);
         }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            base.Analyze(scope);
+
+            // 10 < id
+            // 10 > id
+            // 10 != id
+            // 10 == 10
+            // 10 || left
+            // isOk && notRunning
+
+            if (LogicalOps.Contains(Op))
+            {
+                EnsureType(Left.Type, typeof (bool));
+                EnsureType(Right.Type, typeof (bool));
+            }
+            else if (RelationalOps.Contains(Op))
+            {
+                // TODO check types
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+
+            return this;
+        }
+
+        private void EnsureType(RppType type, Type expectedType)
+        {
+            if (type.Runtime != expectedType)
+            {
+                throw new Exception(string.Format("Expected {0} type but got {1}", expectedType, type.Runtime));
+            }
+        }
+    }
+
+    public class TypeInference
+    {
+        private static Dictionary<Type, Type> ftChar = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Char},
+            {Types.Byte, Types.Int},
+            {Types.Short, Types.Int},
+            {Types.Int, Types.Int},
+            {Types.Long, Types.Long},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftByte = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Int},
+            {Types.Byte, Types.Byte},
+            {Types.Short, Types.Short},
+            {Types.Int, Types.Int},
+            {Types.Long, Types.Long},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftShort = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Int},
+            {Types.Byte, Types.Short},
+            {Types.Short, Types.Short},
+            {Types.Int, Types.Int},
+            {Types.Long, Types.Long},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftInt = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Int},
+            {Types.Byte, Types.Int},
+            {Types.Short, Types.Int},
+            {Types.Int, Types.Int},
+            {Types.Long, Types.Long},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftLong = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Long},
+            {Types.Byte, Types.Long},
+            {Types.Short, Types.Long},
+            {Types.Int, Types.Long},
+            {Types.Long, Types.Long},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftFloat = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Float},
+            {Types.Byte, Types.Float},
+            {Types.Short, Types.Float},
+            {Types.Int, Types.Float},
+            {Types.Long, Types.Float},
+            {Types.Float, Types.Float},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Type> ftDouble = new Dictionary<Type, Type>
+        {
+            {Types.Char, Types.Double},
+            {Types.Byte, Types.Double},
+            {Types.Short, Types.Double},
+            {Types.Int, Types.Double},
+            {Types.Long, Types.Double},
+            {Types.Float, Types.Double},
+            {Types.Double, Types.Double},
+        };
+
+        private static Dictionary<Type, Dictionary<Type, Type>> convTable = new Dictionary<Type, Dictionary<Type, Type>>()
+        {
+            {Types.Char, ftChar},
+            {Types.Byte, ftByte},
+            {Types.Short, ftShort},
+            {Types.Int, ftInt},
+            {Types.Long, ftLong},
+            {Types.Float, ftFloat},
+            {Types.Double, ftDouble},
+        };
+
+        public static Type ResolveCommonType(Type left, Type right)
+        {
+            if (left.IsNumeric() && right.IsNumeric())
+            {
+            }
+            else
+            {
+                Debug.Fail("Not done yet");
+            }
+
+            return null;
+        }
     }
 
     public class RppArithmBinOp : BinOp
     {
         public RppArithmBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            base.Analyze(scope);
+            if (Left.Type.Runtime.IsNumeric())
+            {
+            }
+            return this;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -57,7 +210,7 @@ namespace CSharpRpp
     [DebuggerDisplay("Op = {Op}")]
     public class BinOp : RppNode, IRppExpr
     {
-        public RppType Type { get; private set; }
+        public RppType Type { get; protected set; }
 
         [NotNull]
         public string Op { get; private set; }

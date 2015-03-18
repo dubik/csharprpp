@@ -19,6 +19,27 @@ namespace CSharpRpp
         EUnit
     }
 
+    internal static class TypeExtensions
+    {
+        public static bool IsNumeric(this Type type)
+        {
+            return type == typeof (int) || type == typeof (long) || type == typeof (float) || type == typeof (double) || type == typeof (short) ||
+                   type == typeof (byte) || type == typeof (char);
+        }
+    }
+
+    public class Types
+    {
+        public static Type Int = typeof(int);
+        public static Type Long = typeof(long);
+        public static Type Char = typeof(char);
+        public static Type Short = typeof(short);
+        public static Type Bool = typeof(bool);
+        public static Type Byte = typeof(byte);
+        public static Type Float = typeof(float);
+        public static Type Double = typeof(double);
+    }
+
     public abstract class RppType
     {
         public virtual Type Runtime { get; protected set; }
@@ -35,9 +56,18 @@ namespace CSharpRpp
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
             return Equals((RppType) obj);
         }
 
@@ -166,7 +196,7 @@ namespace CSharpRpp
         }
     }
 
-    class RppClassBuilder
+    internal class RppClassBuilder
     {
         private string _name;
 
