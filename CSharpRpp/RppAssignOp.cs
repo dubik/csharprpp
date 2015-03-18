@@ -2,18 +2,10 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    public class RppAssignOp : RppNode
+    public class RppAssignOp : BinOp
     {
-        [NotNull]
-        public RppId Left { get; private set; }
-
-        [NotNull]
-        public IRppExpr Right { get; private set; }
-
-        public RppAssignOp([NotNull] RppId left, [NotNull] IRppExpr right)
+        public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
-            Left = left;
-            Right = right;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -23,15 +15,12 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            Left.PreAnalyze(scope);
-            Right.PreAnalyze(scope);
+            base.PreAnalyze(scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            Left.Analyze(scope);
-            Right.Analyze(scope);
-
+            base.Analyze(scope);
             return this;
         }
     }

@@ -81,7 +81,66 @@ namespace CSharpRpp.Codegen
         {
         }
 
-        private readonly Dictionary<string, OpCode> OpToIL = new Dictionary<string, OpCode>
+        private readonly Dictionary<string, OpCode> logToIl = new Dictionary<string, OpCode>
+        {
+            {"&&", OpCodes.Ceq},
+            {"||", OpCodes.Sub},
+            {"<", OpCodes.Mul},
+            {">", OpCodes.Div},
+            {"==", OpCodes.Ceq},
+            {"!=", OpCodes.Ceq}
+        };
+
+
+        private bool _logicalGen;
+        private Label _trueLabel;
+        private Label _exitLabel;
+        private LocalBuilder _logicalTemp;
+
+        public override void Visit(RppLogicalBinOp node)
+        {
+            bool firstPass = !_logicalGen;
+
+            if (!_logicalGen)
+            {
+                _logicalGen = true;
+                _trueLabel = _body.DefineLabel();
+                _exitLabel = _body.DefineLabel();
+                _logicalTemp = _body.DeclareLocal(Types.Bool);
+            }
+
+            if (node.Op == "||")
+            {
+                node.Left.Accept(this);
+                if (!(node.Left is RppLogicalBinOp))
+                {
+                    _body.Emit(OpCodes.Brtrue_S, _trueLabel);
+                }
+                node.Right.Accept(this);
+
+                if (firstPass)
+                {
+                    _body.Emit(OpCodes.Br_S, _exitLabel);
+                    _body.MarkLabel(_trueLabel);
+                    _body.Emit(OpCodes.Ldc_I4_1);
+                    _body.MarkLabel(_exitLabel);
+                    ClrCodegenUtils.StoreLocal(_logicalTemp, _body);
+                }
+                else
+                {
+                    _body.Emit(OpCodes.Brtrue_S, _trueLabel);
+                }
+            }
+
+            if (firstPass)
+            {
+                ClrCodegenUtils.LoadLocal(_logicalTemp, _body);
+            }
+
+            _logicalGen = false;
+        }
+
+        private readonly Dictionary<string, OpCode> ArithmToIL = new Dictionary<string, OpCode>
         {
             {"+", OpCodes.Add},
             {"-", OpCodes.Sub},
@@ -89,11 +148,13 @@ namespace CSharpRpp.Codegen
             {"/", OpCodes.Div}
         };
 
-        public override void Visit(BinOp node)
+        public override void Visit(RppArithmBinOp node)
         {
             OpCode opCode;
-            if (OpToIL.TryGetValue(node.Op, out opCode))
+            if (ArithmToIL.TryGetValue(node.Op, out opCode))
             {
+                node.Left.Accept(this);
+                node.Right.Accept(this);
                 _body.Emit(opCode);
             }
             else
@@ -246,17 +307,21 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppAssignOp node)
         {
-            if (node.Left.Ref is RppField)
+            RppId id = node.Left as RppId;
+
+            Debug.Assert(id != null, "id != null");
+
+            if (id.Ref is RppField)
             {
-                RppField field = (RppField) node.Left.Ref;
+                RppField field = (RppField) id.Ref;
                 _body.Emit(OpCodes.Ldarg_0);
                 node.Right.Accept(this);
                 _body.Emit(OpCodes.Stfld, field.Builder);
             }
-            else if (node.Left.Ref is RppVar)
+            else if (id.Ref is RppVar)
             {
             }
-            else if (node.Left.Ref is RppParam)
+            else if (id.Ref is RppParam)
             {
             }
         }

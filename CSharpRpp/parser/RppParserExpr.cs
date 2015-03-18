@@ -60,6 +60,9 @@ namespace CSharpRpp
                 op = token.Text;
                 switch (token.Text)
                 {
+                    case "||":
+                        precedence = 2;
+                        break;
                     case "|":
                         precedence = 2;
                         break;
@@ -117,7 +120,7 @@ namespace CSharpRpp
                     _stream.Release(1);
                     int nextMinPrecedence = precedence + 1;
                     IRppExpr rhs = ParsePostfixExpr(nextMinPrecedence);
-                    expr = new BinOp(op, expr, rhs);
+                    expr = BinOp.Create(op, expr, rhs);
                 }
                 else
                 {

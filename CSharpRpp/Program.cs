@@ -34,17 +34,9 @@ object Foo
 }
 ";*/
             const string code = @"
-object Bar
+object Foo
 {
-    def invoke() : Int = {
-        val p : Int = 10
-        var ret : Int = 0
-        while(p > 0)
-        {
-            ret = ret + 1
-        }
-        ret
-    }
+    def calculate(x : Int, y : Int) : Int = x + y
 }
 ";
             /*

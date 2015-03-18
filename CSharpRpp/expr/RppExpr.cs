@@ -30,8 +30,8 @@ namespace CSharpRpp
 
     public class RppLogicalBinOp : BinOp
     {
-        private static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||"};
-        private static readonly HashSet<string> RelationalOps = new HashSet<string> {"<", ">", "==", "!="};
+        internal static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||"};
+        internal static readonly HashSet<string> RelationalOps = new HashSet<string> {"<", ">", "==", "!="};
 
         public RppLogicalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
@@ -40,7 +40,6 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            base.Accept(visitor);
             visitor.Visit(this);
         }
 
@@ -81,112 +80,10 @@ namespace CSharpRpp
         }
     }
 
-    public class TypeInference
-    {
-        private static Dictionary<Type, Type> ftChar = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Char},
-            {Types.Byte, Types.Int},
-            {Types.Short, Types.Int},
-            {Types.Int, Types.Int},
-            {Types.Long, Types.Long},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftByte = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Int},
-            {Types.Byte, Types.Byte},
-            {Types.Short, Types.Short},
-            {Types.Int, Types.Int},
-            {Types.Long, Types.Long},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftShort = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Int},
-            {Types.Byte, Types.Short},
-            {Types.Short, Types.Short},
-            {Types.Int, Types.Int},
-            {Types.Long, Types.Long},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftInt = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Int},
-            {Types.Byte, Types.Int},
-            {Types.Short, Types.Int},
-            {Types.Int, Types.Int},
-            {Types.Long, Types.Long},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftLong = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Long},
-            {Types.Byte, Types.Long},
-            {Types.Short, Types.Long},
-            {Types.Int, Types.Long},
-            {Types.Long, Types.Long},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftFloat = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Float},
-            {Types.Byte, Types.Float},
-            {Types.Short, Types.Float},
-            {Types.Int, Types.Float},
-            {Types.Long, Types.Float},
-            {Types.Float, Types.Float},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Type> ftDouble = new Dictionary<Type, Type>
-        {
-            {Types.Char, Types.Double},
-            {Types.Byte, Types.Double},
-            {Types.Short, Types.Double},
-            {Types.Int, Types.Double},
-            {Types.Long, Types.Double},
-            {Types.Float, Types.Double},
-            {Types.Double, Types.Double},
-        };
-
-        private static Dictionary<Type, Dictionary<Type, Type>> convTable = new Dictionary<Type, Dictionary<Type, Type>>()
-        {
-            {Types.Char, ftChar},
-            {Types.Byte, ftByte},
-            {Types.Short, ftShort},
-            {Types.Int, ftInt},
-            {Types.Long, ftLong},
-            {Types.Float, ftFloat},
-            {Types.Double, ftDouble},
-        };
-
-        public static Type ResolveCommonType(Type left, Type right)
-        {
-            if (left.IsNumeric() && right.IsNumeric())
-            {
-            }
-            else
-            {
-                Debug.Fail("Not done yet");
-            }
-
-            return null;
-        }
-    }
-
     public class RppArithmBinOp : BinOp
     {
+        internal static readonly HashSet<string> ArithmOps = new HashSet<string> {"+", "-", "/", "*", "%"};
+
         public RppArithmBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
         }
@@ -194,9 +91,9 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             base.Analyze(scope);
-            if (Left.Type.Runtime.IsNumeric())
-            {
-            }
+
+            Type = RppNativeType.Create(TypeInference.ResolveCommonType(Left.Type.Runtime, Right.Type.Runtime));
+
             return this;
         }
 
@@ -218,7 +115,30 @@ namespace CSharpRpp
         public IRppExpr Left { get; private set; }
         public IRppExpr Right { get; private set; }
 
-        public BinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
+        private static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||", ">", "<", "==", "!="};
+
+        public static BinOp Create([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
+        {
+            if (RppArithmBinOp.ArithmOps.Contains(op))
+            {
+                return new RppArithmBinOp(op, left, right);
+            }
+
+            if (RppLogicalBinOp.LogicalOps.Contains(op) || RppLogicalBinOp.RelationalOps.Contains(op))
+            {
+                return new RppLogicalBinOp(op, left, right);
+            }
+
+            if (op == "=")
+            {
+                return new RppAssignOp(left, right);
+            }
+
+            Debug.Fail("Don't know how to handle op: " + op);
+            return null;
+        }
+
+        protected BinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
             Op = op;
             Left = left;
@@ -243,8 +163,6 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            Left.Accept(visitor);
-            Right.Accept(visitor);
         }
 
         #region Equality
@@ -736,7 +654,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

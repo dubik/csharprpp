@@ -18,48 +18,31 @@ namespace RppRuntime
 
     public class Boo
     {
-        public static int calc(params bool[] args)
+
+        public bool LogEq(int p)
         {
-            return args.Length;
+            int k = 10;
+            return k == p;
         }
 
-        public static int calculate(int x, int y)
+        public bool LogEq(bool first, bool second, bool third)
         {
-            return x + y;
+            if (first && second && third)
+            {
+                return true;
+            }
+
+            return false;
         }
 
-        public static void printsomething(float p)
+        public bool LogOr2(bool first, bool second)
         {
-            Console.Write("Hello $p");
+            return first || second;
         }
 
-        public static void Println(string format, params object[] args)
+        public bool LogOr(bool first, bool second, bool third)
         {
-            int len = args.Length;
-            Console.Write(format, len);
-        }
-
-        public static void PrintlnSomething()
-        {
-            Println("{0}, {1}", 10, 20);
-            calc(true, false);
-        }
-
-
-        public static void Some1(params object[] args)
-        {
-            
-        }
-
-        public static void Some2(object[] args)
-        {
-            
-        }
-
-        public static void Cast()
-        {
-            const Int32 k = 10;
-            int p = (int) (object)k + 10;
+            return first || second || third;
         }
 
         public static void DoWhile()
@@ -67,7 +50,7 @@ namespace RppRuntime
             int k = 10;
             while (k > 0)
             {
-                Cast();
+                //Cast();
                 k = k - 1;
             }
         }

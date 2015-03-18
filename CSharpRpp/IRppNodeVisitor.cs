@@ -73,11 +73,11 @@ namespace CSharpRpp
         {
         }
 
-        public void Visit(RppLogicalBinOp node)
+        public virtual void Visit(RppLogicalBinOp node)
         {
         }
 
-        public void Visit(RppArithmBinOp node)
+        public virtual void Visit(RppArithmBinOp node)
         {
         }
 

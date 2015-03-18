@@ -116,17 +116,17 @@ namespace CSharpRppTest
 
         private static BinOp Add(IRppExpr left, IRppExpr right)
         {
-            return new BinOp("+", left, right);
+            return BinOp.Create("+", left, right);
         }
 
         private static BinOp Sub(IRppExpr left, IRppExpr right)
         {
-            return new BinOp("-", left, right);
+            return BinOp.Create("-", left, right);
         }
 
         private static BinOp Mult(IRppExpr left, IRppExpr right)
         {
-            return new BinOp("*", left, right);
+            return BinOp.Create("*", left, right);
         }
 
         private static RppId Id(string id)
