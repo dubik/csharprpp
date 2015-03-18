@@ -275,7 +275,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppWhile node)
         {
-            
+            return;
         }
     }
 }

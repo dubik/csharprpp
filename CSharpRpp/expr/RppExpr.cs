@@ -26,10 +26,31 @@ namespace CSharpRpp
         {
             get { return RppPrimitiveType.UnitTy; }
         }
+    }
 
-        public Type RuntimeType
+    public class RppLogicalBinOp : BinOp
+    {
+        public RppLogicalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
-            get { return typeof (void); }
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            base.Accept(visitor);
+            visitor.Visit(this);
+        }
+    }
+
+    public class RppArithmBinOp : BinOp
+    {
+        public RppArithmBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
+        {
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            base.Accept(visitor);
+            visitor.Visit(this);
         }
     }
 
@@ -38,49 +59,46 @@ namespace CSharpRpp
     {
         public RppType Type { get; private set; }
 
-        public Type RuntimeType { get; private set; }
-
         [NotNull]
         public string Op { get; private set; }
 
-        private IRppExpr _left;
-        private IRppExpr _right;
+        public IRppExpr Left { get; private set; }
+        public IRppExpr Right { get; private set; }
 
         public BinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
             Op = op;
-            _left = left;
-            _right = right;
-        }
-
-        public override void Accept(IRppNodeVisitor visitor)
-        {
-            _left.Accept(visitor);
-            _right.Accept(visitor);
-            visitor.Visit(this);
+            Left = left;
+            Right = right;
         }
 
         public override void PreAnalyze(RppScope scope)
         {
-            _left.PreAnalyze(scope);
-            _right.PreAnalyze(scope);
+            Left.PreAnalyze(scope);
+            Right.PreAnalyze(scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _left = _left.Analyze(scope) as IRppExpr;
-            Debug.Assert(_left != null);
-            _right = _right.Analyze(scope) as IRppExpr;
-            Debug.Assert(_right != null);
+            Left = Left.Analyze(scope) as IRppExpr;
+            Debug.Assert(Left != null);
+            Right = Right.Analyze(scope) as IRppExpr;
+            Debug.Assert(Right != null);
 
             return this;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            Left.Accept(visitor);
+            Right.Accept(visitor);
         }
 
         #region Equality
 
         protected bool Equals(BinOp other)
         {
-            return string.Equals(Op, other.Op) && Equals(_left, other._left) && Equals(_right, other._right);
+            return string.Equals(Op, other.Op) && Equals(Left, other.Left) && Equals(Right, other.Right);
         }
 
         public override bool Equals(object obj)

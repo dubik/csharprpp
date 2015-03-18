@@ -27,6 +27,8 @@ namespace CSharpRpp
         void Visit([NotNull] RppBox node);
         void Visit([NotNull] RppFloat node);
         void Visit([NotNull] RppWhile node);
+        void Visit([NotNull] RppLogicalBinOp node);
+        void Visit([NotNull] RppArithmBinOp node);
     }
 
     class RppNodeVisitor : IRppNodeVisitor
@@ -68,6 +70,14 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppWhile node)
+        {
+        }
+
+        public void Visit(RppLogicalBinOp node)
+        {
+        }
+
+        public void Visit(RppArithmBinOp node)
         {
         }
 
