@@ -130,5 +130,9 @@ namespace CSharpRppTest
         public void Visit(RppArithmBinOp node)
         {
         }
+
+        public void Visit(RppRelationalBinOp node)
+        {
+        }
     }
 }

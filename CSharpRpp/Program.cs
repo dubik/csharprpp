@@ -36,7 +36,7 @@ object Foo
             const string code = @"
 object Foo
 {
-    def calculate(x : Int, y : Int) : Int = x + y
+    def calculate(x : Int, y : Int) : Bool = x < y
 }
 ";
             /*

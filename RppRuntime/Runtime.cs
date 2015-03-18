@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Policy;
 
 namespace RppRuntime
 {
@@ -54,6 +55,37 @@ namespace RppRuntime
                 k = k - 1;
             }
         }
+
+        public static bool less(int x)
+        {
+            return x < 10;
+        }
+
+        public static bool more(int x)
+        {
+            return x > 10;
+        }
+
+        public static bool lessEq(int x)
+        {
+            return x <= 10;
+        }
+
+        public static bool moreEq(int x)
+        {
+            return x >= 10;
+        }
+
+        public static bool eq(int x)
+        {
+            return x == 10;
+        }
+
+        public static bool notEq(int x)
+        {
+            return x != 10;
+        }
+
     }
 
     // ReSharper restore InconsistentNaming

@@ -30,8 +30,7 @@ namespace CSharpRpp
 
     public class RppLogicalBinOp : BinOp
     {
-        internal static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||"};
-        internal static readonly HashSet<string> RelationalOps = new HashSet<string> {"<", ">", "==", "!="};
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"&&", "||"};
 
         public RppLogicalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
@@ -47,26 +46,11 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
-            // 10 < id
-            // 10 > id
-            // 10 != id
-            // 10 == 10
             // 10 || left
             // isOk && notRunning
 
-            if (LogicalOps.Contains(Op))
-            {
-                EnsureType(Left.Type, typeof (bool));
-                EnsureType(Right.Type, typeof (bool));
-            }
-            else if (RelationalOps.Contains(Op))
-            {
-                // TODO check types
-            }
-            else
-            {
-                Debug.Assert(false);
-            }
+            EnsureType(Left.Type, Types.Bool);
+            EnsureType(Right.Type, Types.Bool);
 
             return this;
         }
@@ -75,14 +59,40 @@ namespace CSharpRpp
         {
             if (type.Runtime != expectedType)
             {
-                throw new Exception(string.Format("Expected {0} type but got {1}", expectedType, type.Runtime));
+                throw new Exception(String.Format("Expected {0} type but got {1}", expectedType, type.Runtime));
             }
+        }
+    }
+
+    public class RppRelationalBinOp : BinOp
+    {
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"<", ">", "==", "!="};
+
+        // 10 < id
+        // 10 > id
+        // 10 != id
+        // 10 == 10
+        public RppRelationalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
+        {
+            Type = RppNativeType.Create(Types.Bool);
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            base.Analyze(scope);
+
+            return this;
         }
     }
 
     public class RppArithmBinOp : BinOp
     {
-        internal static readonly HashSet<string> ArithmOps = new HashSet<string> {"+", "-", "/", "*", "%"};
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"+", "-", "/", "*", "%"};
 
         public RppArithmBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
@@ -115,18 +125,21 @@ namespace CSharpRpp
         public IRppExpr Left { get; private set; }
         public IRppExpr Right { get; private set; }
 
-        private static readonly HashSet<string> LogicalOps = new HashSet<string> {"&&", "||", ">", "<", "==", "!="};
-
         public static BinOp Create([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
-            if (RppArithmBinOp.ArithmOps.Contains(op))
+            if (RppArithmBinOp.Ops.Contains(op))
             {
                 return new RppArithmBinOp(op, left, right);
             }
 
-            if (RppLogicalBinOp.LogicalOps.Contains(op) || RppLogicalBinOp.RelationalOps.Contains(op))
+            if (RppLogicalBinOp.Ops.Contains(op))
             {
                 return new RppLogicalBinOp(op, left, right);
+            }
+
+            if (RppRelationalBinOp.Ops.Contains(op))
+            {
+                return new RppRelationalBinOp(op, left, right);
             }
 
             if (op == "=")

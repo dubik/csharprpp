@@ -85,8 +85,8 @@ namespace CSharpRpp.Codegen
         {
             {"&&", OpCodes.Ceq},
             {"||", OpCodes.Sub},
-            {"<", OpCodes.Mul},
-            {">", OpCodes.Div},
+            {"<", OpCodes.Clt},
+            {">", OpCodes.Cgt},
             {"==", OpCodes.Ceq},
             {"!=", OpCodes.Ceq}
         };
@@ -138,6 +138,29 @@ namespace CSharpRpp.Codegen
             }
 
             _logicalGen = false;
+        }
+
+        public override void Visit(RppRelationalBinOp node)
+        {
+            LocalBuilder _tempVar = _body.DeclareLocal(Types.Bool);
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+
+            switch (node.Op)
+            {
+                case "<":
+                    _body.Emit(OpCodes.Clt);
+                    break;
+                case ">":
+                    _body.Emit(OpCodes.Cgt);
+                    break;
+                case "==":
+                    _body.Emit(OpCodes.Ceq);
+                    break;
+            }
+
+            ClrCodegenUtils.StoreLocal(_tempVar, _body);
+            ClrCodegenUtils.LoadLocal(_tempVar, _body);
         }
 
         private readonly Dictionary<string, OpCode> ArithmToIL = new Dictionary<string, OpCode>
