@@ -391,9 +391,14 @@ namespace CSharpRpp
                     IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
                     var varidadicType = variadicParam.Type as RppArrayType;
                     Debug.Assert(varidadicType != null, "varidadicType != null");
+
+                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, varidadicType)).ToList();
+
                     RppArray variadicArgsArray = new RppArray(varidadicType.SubType, variadicParams);
                     variadicArgsArray.PreAnalyze(scope);
                     variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+
+
                     _argList.Add(variadicArgsArray);
                 }
 
@@ -407,6 +412,16 @@ namespace CSharpRpp
             }
 
             return this;
+        }
+
+        private static IRppExpr BoxIfValueType(IRppExpr arg, RppType targetType)
+        {
+            if ((arg.Type.Runtime == Types.Int || arg.Type.Runtime == Types.Float) && targetType.Runtime == typeof (object))
+            {
+                return new RppBox(arg);
+            }
+
+            return arg;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

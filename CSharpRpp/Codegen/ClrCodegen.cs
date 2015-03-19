@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class ClrCodegen : RppNodeVisitor
+    class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -205,14 +205,13 @@ namespace CSharpRpp.Codegen
         {
             var arrayType = node.Type.Runtime.GetElementType();
             Debug.Assert(arrayType == typeof (int));
-
             LocalBuilder arrVar = _body.DeclareLocal(node.Type.Runtime);
             ClrCodegenUtils.LoadInt(node.Size, _body);
             _body.Emit(OpCodes.Newarr, arrayType);
 
             ClrCodegenUtils.StoreLocal(arrVar, _body);
 
-            // only int8, int16, int32 are supported as primitive types everything else should be boxed
+            // only float, double, int are supported as primitive types everything else should be boxed
             bool isElementTypeRef = arrayType != typeof (int);
             OpCode storingOpCode = isElementTypeRef ? OpCodes.Stelem_Ref : OpCodes.Stelem_I4;
             int index = 0;
@@ -226,6 +225,11 @@ namespace CSharpRpp.Codegen
             }
 
             ClrCodegenUtils.LoadLocal(arrVar, _body);
+        }
+
+        private static OpCode StoreElementCodeByType(Type type)
+        {
+            return OpCodes.Stelem_Ref;
         }
 
         public override void Visit(RppFuncCall node)
