@@ -19,7 +19,6 @@ namespace RppRuntime
 
     public class Boo
     {
-
         public bool LogEq(int p)
         {
             int k = 10;
@@ -46,14 +45,16 @@ namespace RppRuntime
             return first || second || third;
         }
 
-        public static void DoWhile()
+        public static int DoWhile()
         {
             int k = 10;
+            int res = 0;
             while (k > 0)
             {
-                //Cast();
                 k = k - 1;
+                res = res + 1;
             }
+            return res;
         }
 
         public static bool less(int x)
@@ -85,7 +86,6 @@ namespace RppRuntime
         {
             return x != 10;
         }
-
     }
 
     // ReSharper restore InconsistentNaming

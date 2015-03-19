@@ -286,6 +286,7 @@ object Bar
         while(p > 0)
         {
             ret = ret + 1
+            p = p - 1
         }
         ret
     }

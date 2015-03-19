@@ -34,9 +34,18 @@ object Foo
 }
 ";*/
             const string code = @"
-object Foo
+object Bar
 {
-    def calculate(x : Int, y : Int) : Bool = x < y
+    def invoke() : Int = {
+        val p : Int = 10
+        var ret : Int = 0
+        while(p > 0)
+        {
+            ret = ret + 1
+            p = p - 1
+        }
+        ret
+    }
 }
 ";
             /*

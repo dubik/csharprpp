@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class ClrCodegen : RppNodeVisitor
+    internal class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -343,6 +343,9 @@ namespace CSharpRpp.Codegen
             }
             else if (id.Ref is RppVar)
             {
+                RppVar var = (RppVar) id.Ref;
+                node.Right.Accept(this);
+                ClrCodegenUtils.StoreLocal(var.Builder, _body);
             }
             else if (id.Ref is RppParam)
             {
@@ -363,7 +366,14 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppWhile node)
         {
-            return;
+            Label enterLoop = _body.DefineLabel();
+            Label exitLoop = _body.DefineLabel();
+            _body.MarkLabel(enterLoop);
+            node.Condition.Accept(this);
+            _body.Emit(OpCodes.Brfalse_S, exitLoop);
+            node.Body.Accept(this);
+            _body.Emit(OpCodes.Br_S, enterLoop);
+            _body.MarkLabel(exitLoop);
         }
     }
 }
