@@ -86,6 +86,18 @@ namespace RppRuntime
         {
             return x != 10;
         }
+
+        public static int varArgs(params bool[] args)
+        {
+            return args.Length;
+        }
+
+        public static bool[] CreateArray()
+        {
+            bool[] a = {true, false};
+            varArgs(false, true);
+            return a;
+        }
     }
 
     // ReSharper restore InconsistentNaming

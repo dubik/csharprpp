@@ -297,5 +297,26 @@ object Bar
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10, res);
         }
+
+        [TestMethod]
+        public void AutoBoxingForVarargs()
+        {
+            const string code = @"
+object Bar
+{
+    def varargs(args: Any) : Int = {
+        args.length()
+    }
+
+    def invoke() : Int = {
+        varargs(10, 3)
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
+            Assert.AreEqual(2, res);
+        }
     }
 }

@@ -203,24 +203,20 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppArray node)
         {
-            var arrayType = node.Type.Runtime.GetElementType();
-            Debug.Assert(arrayType == typeof (int));
+            var elementType = node.Type.Runtime.GetElementType();
             LocalBuilder arrVar = _body.DeclareLocal(node.Type.Runtime);
             ClrCodegenUtils.LoadInt(node.Size, _body);
-            _body.Emit(OpCodes.Newarr, arrayType);
+            _body.Emit(OpCodes.Newarr, elementType);
 
             ClrCodegenUtils.StoreLocal(arrVar, _body);
 
-            // only float, double, int are supported as primitive types everything else should be boxed
-            bool isElementTypeRef = arrayType != typeof (int);
-            OpCode storingOpCode = isElementTypeRef ? OpCodes.Stelem_Ref : OpCodes.Stelem_I4;
             int index = 0;
             foreach (var initializer in node.Initializers)
             {
                 ClrCodegenUtils.LoadLocal(arrVar, _body);
                 ClrCodegenUtils.LoadInt(index, _body);
                 initializer.Accept(this);
-                _body.Emit(storingOpCode);
+                _body.Emit(OpCodes.Stelem, elementType);
                 index++;
             }
 
@@ -229,6 +225,20 @@ namespace CSharpRpp.Codegen
 
         private static OpCode StoreElementCodeByType(Type type)
         {
+            if (type == Types.Int)
+            {
+                return OpCodes.Stelem_I4;
+            }
+
+            if (type == Types.Float)
+            {
+                return OpCodes.Stelem_R4;
+            }
+
+            if (type == Types.Double)
+            {
+                return OpCodes.Stelem_R4;
+            }
             return OpCodes.Stelem_Ref;
         }
 

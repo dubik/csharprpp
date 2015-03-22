@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -33,6 +34,18 @@ namespace CSharpRpp.Codegen
             {6, OpCodes.Ldc_I4_6},
             {7, OpCodes.Ldc_I4_7},
             {8, OpCodes.Ldc_I4_8}
+        };
+
+        private static readonly Dictionary<Type, OpCode> stElemOpCode = new Dictionary<Type, OpCode>()
+        {
+            {Types.Bool, OpCodes.Stelem_I1},
+            {Types.Byte, OpCodes.Stelem_I1},
+            {Types.Char, OpCodes.Stelem_I2},
+            {Types.Short, OpCodes.Stelem_I2},
+            {Types.Int, OpCodes.Stelem_I4},
+            {Types.Long, OpCodes.Stelem_I8},
+            {Types.Float, OpCodes.Stelem_R4},
+            {Types.Double, OpCodes.Stelem_R8},
         };
 
         public static void LoadInt(int val, ILGenerator body)
@@ -74,6 +87,17 @@ namespace CSharpRpp.Codegen
             {
                 body.Emit(generalCode, val);
             }
+        }
+
+        public static OpCode ArrayStoreOpCodeByType(Type type)
+        {
+            OpCode opcode;
+            if (stElemOpCode.TryGetValue(type, out opcode))
+            {
+                return opcode;
+            }
+
+            return OpCodes.Stelem_Ref;
         }
     }
 }
