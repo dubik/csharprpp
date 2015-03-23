@@ -304,7 +304,7 @@ object Bar
             const string code = @"
 object Bar
 {
-    def varargs(args: Any) : Int = {
+    def varargs(args: Any*) : Int = {
         args.length()
     }
 

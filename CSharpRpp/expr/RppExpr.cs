@@ -389,15 +389,13 @@ namespace CSharpRpp
                     _argList = args;
 
                     IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
-                    var varidadicType = variadicParam.Type as RppArrayType;
-                    Debug.Assert(varidadicType != null, "varidadicType != null");
 
-                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, varidadicType)).ToList();
+                    var elementType = GetElementType(variadicParam.Type);
+                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
-                    RppArray variadicArgsArray = new RppArray(varidadicType.SubType, variadicParams);
+                    RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
                     variadicArgsArray.PreAnalyze(scope);
                     variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
-
 
                     _argList.Add(variadicArgsArray);
                 }
@@ -412,6 +410,24 @@ namespace CSharpRpp
             }
 
             return this;
+        }
+
+        private static RppType GetElementType(RppType arrayType)
+        {
+            RppArrayType type = arrayType as RppArrayType;
+            if (type != null)
+            {
+                return type.SubType;
+            }
+
+            if (arrayType is RppNativeType)
+            {
+                Type nativeArrayType = arrayType.Runtime;
+                return RppNativeType.Create(nativeArrayType.GetElementType());
+            }
+
+            Debug.Assert(false, "arrayType is not arraytype ");
+            return null;
         }
 
         private static IRppExpr BoxIfValueType(IRppExpr arg, RppType targetType)

@@ -50,12 +50,19 @@ namespace CSharpRpp.Native
             ReturnType = RppNativeType.Create(methodInfo.ReturnType);
             Params = methodInfo.GetParameters().Select(CreateRppParam).ToArray();
             RuntimeReturnType = methodInfo.ReturnType;
+
+            IsVariadic = methodInfo.GetParameters().Any(IsParamVariadic);
         }
 
         private static IRppParam CreateRppParam(ParameterInfo paramInfo)
         {
-            var variadic = paramInfo.GetCustomAttributes(typeof (ParamArrayAttribute), false).Length != 0;
+            var variadic = IsParamVariadic(paramInfo);
             return new RppNativeParam(paramInfo.Name, paramInfo.ParameterType, variadic);
+        }
+
+        private static bool IsParamVariadic(ICustomAttributeProvider paramInfo)
+        {
+            return paramInfo.GetCustomAttributes(typeof (ParamArrayAttribute), false).Length != 0;
         }
     }
 }

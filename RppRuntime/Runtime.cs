@@ -11,7 +11,7 @@ namespace RppRuntime
             Console.WriteLine(line);
         }
 
-        public static void println_args(string format, params object[] args)
+        public static void printFormat(string format, params object[] args)
         {
             Console.WriteLine(format, args);
         }
@@ -19,6 +19,11 @@ namespace RppRuntime
 
     public class Boo
     {
+        public void Write()
+        {
+            Runtime.printFormat("Hello {0}", 10);
+        }
+
         public bool LogEq(int p)
         {
             int k = 10;

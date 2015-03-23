@@ -30,6 +30,7 @@ namespace CSharpRpp
 object Runtime
 {
     def println(line: String) : Unit = { }
+    def printFormat(format: String, args: Any*) : Unit = { }
 }
 ";
             /*
@@ -45,46 +46,12 @@ object Foo
             const string code = @"
 object Bar
 {
-    def accept(args: Any*) : Int = {
-        args.length()
-    }
-
-    def invoke() : Int = {
-        val p : Int = 10
-        accept(p)
+    def main(args: Array[String]) : Int = {
+        printFormat(""My name is: {0}"", 10)
+        0
     }
 }
 ";
-            /*
-             class Array(k: Int)
-            {
-               def length: Int = 10
-            }
-
-            class Foo
-            {
-                def calculate : Int = 10
-
-                def mult(x : Int) : Int = x * 2
-            }
-
-            class String(len: Int)
-            {
-            }
-
-            object Main
-            {
-                def calculate(x : Int, y : Int) : Int = x + y
-
-                def main(args: Array[String]) : Int = {
-                    val k : Foo = new Foo
-                    k.mult(10)
-                    println(""Hello World!!! Moika mo''ika!!!"")
-                    calculate(10, 5)
-                }
-            }
-             */
-
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);
