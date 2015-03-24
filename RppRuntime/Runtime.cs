@@ -92,7 +92,7 @@ namespace RppRuntime
             return x != 10;
         }
 
-        public static int varArgs(params bool[] args)
+        public static int varArgs(string k, int p, params bool[] args)
         {
             return args.Length;
         }
@@ -100,7 +100,7 @@ namespace RppRuntime
         public static bool[] CreateArray()
         {
             bool[] a = {true, false};
-            varArgs(false, true);
+            varArgs("", 10, false, true);
             return a;
         }
     }

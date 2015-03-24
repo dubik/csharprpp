@@ -46,6 +46,10 @@ object Foo
             const string code = @"
 object Bar
 {
+    def myFunc(args: Int*) : Int = {
+        args.length()
+    }
+
     def main(args: Array[String]) : Int = {
         printFormat(""My name is: {0}"", 10)
         0

@@ -47,6 +47,13 @@ namespace CSharpRpp.Codegen
 
             Type[] paramTypes = ParamTypes(node.Params);
             node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.ReturnType.Runtime, paramTypes);
+            if (node.IsVariadic)
+            {
+                ConstructorInfo constructorInfo = typeof (ParamArrayAttribute).GetConstructor(Type.EmptyTypes);
+                Debug.Assert(constructorInfo != null, "constructorInfo != null");
+                node.Builder.SetCustomAttribute(constructorInfo, new byte[] {1, 0, 0, 0});
+            }
+
             DefineParams(node.Builder, node.Params, node.IsStatic);
             _funcBuilders.Add(node, node.Builder);
         }
