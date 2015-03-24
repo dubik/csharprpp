@@ -318,5 +318,27 @@ object Bar
             object res = concat.Invoke(null, null);
             Assert.AreEqual(2, res);
         }
+
+        [TestMethod]
+        public void InvokeFunctionFromDifferentObject()
+        {
+            const string code = @"
+object Foo
+{
+    def length() : Int = 10
+}
+
+object Bar
+{
+    def invoke() : Int = {
+        Foo.length()
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
+            object res = concat.Invoke(null, null);
+            Assert.AreEqual(10, res);
+        }
     }
 }

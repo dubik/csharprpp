@@ -196,19 +196,5 @@ namespace CLRCodeGen
 
             return val;
         }
-
-        private static void CreateCall()
-        {
-            Moika m = new Moika("Hello");
-            m.println();
-            Moika.printSomething("Moika");
-            Moika p = new Moika("Wr");
-            {
-                Moika l = new Moika("adf");
-            }
-            {
-                int l = 10;
-            }
-        }
     }
 }
