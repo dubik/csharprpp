@@ -35,7 +35,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            InitExpr.Analyze(scope);
+            InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null);

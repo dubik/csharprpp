@@ -301,7 +301,7 @@ namespace CSharpRpp.Codegen
         {
             if (node.Ref is RppField)
             {
-                _body.Emit(OpCodes.Ldarg_0);
+                //_body.Emit(OpCodes.Ldarg_0);
                 _body.Emit(OpCodes.Ldfld, ((RppField) node.Ref).Builder);
             }
             else if (node.Ref is RppVar)

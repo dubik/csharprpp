@@ -15,13 +15,12 @@ namespace CSharpRpp
 {
     public class Program
     {
-        static public void func(object k)
+        public static void func(object k)
         {
-
         }
-        static public void func(int k)
+
+        public static void func(int k)
         {
-            
         }
 
         private static void Main(string[] args)
@@ -33,25 +32,27 @@ object Runtime
     def printFormat(format: String, args: Any*) : Unit = { }
 }
 ";
-            /*
             const string code = @"
+class Foo(id: Int)
+{
+}
+
 object Foo
 {
-    def calculate : Int = {
-        var k : Int = 10
-        k
-    }
+    def apply(id: Int) : Foo = new Foo(id)
 }
-";*/
-            const string code = @"
+
 object Bar
 {
-    def myFunc(args: Int*) : Int = {
-        args.length()
+    def create() : Int = {
+        val foo : Foo = Foo(10)
+        foo.id
     }
+}
 
+object Barak
+{
     def main(args: Array[String]) : Int = {
-        printFormat(""My name is: {0}"", 10)
         0
     }
 }

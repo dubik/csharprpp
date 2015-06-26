@@ -7,7 +7,7 @@ namespace CSharpRppTest
     public class SemanticTest
     {
         [TestMethod]
-        public void IdShouldGetClassType()
+        public void IdShouldResolveToClassType()
         {
             const string code = @"
 class Foo
@@ -26,6 +26,23 @@ object Bar
             RppId id = program.First<RppId>("k");
             RppObjectType objectType = id.Type as RppObjectType;
             Assert.IsNotNull(objectType, "Identifier should have been resolved to RppObjectType");
+        }
+
+        [TestMethod]
+        public void ObjectAndClassWithTheSameNameShouldBeAllowed()
+        {
+            const string code = @"
+class Bar
+{
+}
+
+object Bar
+{
+}
+";
+
+            RppProgram program = Utils.ParseAndAnalyze(code);
+            Assert.IsNotNull(program);
         }
     }
 }

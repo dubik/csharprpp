@@ -378,30 +378,43 @@ namespace CSharpRpp
             if (Name != "ctor()")
             {
                 var resolvedFunc = scope.Lookup(Name) as IRppFunc;
-                Debug.Assert(resolvedFunc != null);
-
-                if (resolvedFunc.IsVariadic)
+                if (resolvedFunc != null)
                 {
-                    List<IRppParam> funcParams = resolvedFunc.Params.ToList();
-                    int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
-                    var args = _argList.Take(variadicIndex).ToList();
-                    var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
-                    _argList = args;
+                    if (resolvedFunc.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
+                    {
+                        List<IRppParam> funcParams = resolvedFunc.Params.ToList();
+                        int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
+                        var args = _argList.Take(variadicIndex).ToList();
+                        var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
+                        _argList = args;
 
-                    IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
+                        IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
 
-                    var elementType = GetElementType(variadicParam.Type);
-                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
+                        var elementType = GetElementType(variadicParam.Type);
+                        variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
-                    RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
-                    variadicArgsArray.PreAnalyze(scope);
-                    variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+                        RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
+                        variadicArgsArray.PreAnalyze(scope);
+                        variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
 
-                    _argList.Add(variadicArgsArray);
+                        _argList.Add(variadicArgsArray);
+                    }
+
+                    Function = resolvedFunc;
+                    Type = Function.ReturnType;
                 }
+                else
+                {
+                    RppClass obj = scope.LookupObject(Name);
+                    var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
+                    if (factoryFuncs.Count == 0)
+                    {
+                        throw new Exception("Companion object doesn't have apply() with required signature");
+                    }
 
-                Function = resolvedFunc;
-                Type = Function.ReturnType;
+                    IRppFunc matchedFunc = factoryFuncs[0];
+                    return new RppFuncCall(matchedFunc.Name, _argList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
+                }
             }
             else
             {
@@ -733,7 +746,9 @@ namespace CSharpRpp
         {
             if (Ref == null)
             {
-                var node = scope.Lookup(Name);
+                // Lookup <name> or <name>$
+                var node = scope.Lookup(Name) ?? scope.LookupObject(Name);
+
                 RppMember member = null;
 
                 // Reference to object, e.g. String.isNull(..)

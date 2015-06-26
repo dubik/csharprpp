@@ -17,7 +17,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppClass node)
         {
-            TypeBuilder classType = _module.DefineType(node.Name);
+            TypeBuilder classType = _module.DefineType(node.GetNativeName());
             _typeBuilders.Add(node, classType);
             node.RuntimeType = classType;
         }

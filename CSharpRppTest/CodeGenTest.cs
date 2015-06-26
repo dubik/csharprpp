@@ -44,7 +44,7 @@ object Foo
     }
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(mainMethod);
             ParameterInfo[] p = mainMethod.GetParameters();
@@ -62,7 +62,7 @@ object Foo
     def calculate(x : Int, y : Int) : Int = x + y
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(calculate);
             object res = calculate.Invoke(null, new object[] {2, 7});
@@ -82,7 +82,7 @@ object Foo
     }
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             MethodInfo calculate = fooTy.GetMethod("calculate", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(calculate);
             object res = calculate.Invoke(null, null);
@@ -145,7 +145,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
             object res = create.Invoke(null, null);
             Assert.IsNotNull(res);
@@ -166,7 +166,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
             object fooInstance = create.Invoke(null, null);
             Assert.IsNotNull(fooInstance);
@@ -193,7 +193,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
             object fooInstance = create.Invoke(null, null);
             Assert.IsNotNull(fooInstance);
@@ -210,7 +210,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("concat", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, new object[] {new[] {10, 20}});
             Assert.AreEqual(2, res);
@@ -231,7 +231,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invokeConcat", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(2, res);
@@ -250,7 +250,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10, res);
@@ -268,7 +268,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10.10f, res);
@@ -292,7 +292,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10, res);
@@ -313,7 +313,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(2, res);
@@ -335,10 +335,64 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo concat = barTy.GetMethod("invoke", BindingFlags.Static | BindingFlags.Public);
             object res = concat.Invoke(null, null);
             Assert.AreEqual(10, res);
         }
+
+        [TestMethod]
+        public void TestCompanionObjectWithoutArgs()
+        {
+            const string code = @"
+class Foo
+{
+}
+
+object Foo
+{
+    def apply() : Foo = new Foo
+}
+
+object Bar
+{
+    def create() : Foo = Foo()
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
+            object res = create.Invoke(null, null);
+            Assert.IsNotNull(res);
+            Assert.AreEqual("Foo", res.GetType().Name);
+        }
+
+        [TestMethod]
+        public void TestCompanionObjectWithOneArg()
+        {
+            const string code = @"
+class Foo(id: Int)
+{
+}
+
+object Foo
+{
+    def apply(id: Int) : Foo = new Foo(id)
+}
+
+object Bar
+{
+    def create() : Int = {
+        val foo : Foo = Foo(10)
+        foo.id
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            MethodInfo create = barTy.GetMethod("create", BindingFlags.Static | BindingFlags.Public);
+            object res = create.Invoke(null, null);
+            Assert.IsNotNull(res);
+            Assert.AreEqual(10, res);
+        }
+
     }
 }
