@@ -49,13 +49,6 @@ object Bar
         foo.id
     }
 }
-
-object Barak
-{
-    def main(args: Array[String]) : Int = {
-        0
-    }
-}
 ";
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);

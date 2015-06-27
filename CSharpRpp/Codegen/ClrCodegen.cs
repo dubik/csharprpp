@@ -11,6 +11,10 @@ namespace CSharpRpp.Codegen
     {
         private ILGenerator _body;
 
+        // inst.myField - selector with RppId, so when it generates field access it wants to
+        // load 'this', which is wrong, because 'inst' already loaded
+        private bool _inSelector;
+
         public ClrCodegen()
         {
         }
@@ -294,14 +298,20 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppSelector node)
         {
             node.Target.Accept(this);
+            _inSelector = true;
             node.Path.Accept(this);
+            _inSelector = false;
         }
 
         public override void Visit(RppId node)
         {
             if (node.Ref is RppField)
             {
-                //_body.Emit(OpCodes.Ldarg_0);
+                if (!_inSelector)
+                {
+                    _body.Emit(OpCodes.Ldarg_0);
+                }
+
                 _body.Emit(OpCodes.Ldfld, ((RppField) node.Ref).Builder);
             }
             else if (node.Ref is RppVar)
