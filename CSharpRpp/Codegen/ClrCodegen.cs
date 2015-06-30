@@ -249,7 +249,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppFuncCall node)
         {
             // TODO we should keep references to functions by making another pass of code gen before
-            // real code generation
+            // real code generationим
             if (node.Name == "ctor()")
             {
                 _body.Emit(OpCodes.Ldarg_0);

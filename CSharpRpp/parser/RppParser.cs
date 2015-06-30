@@ -27,12 +27,12 @@ namespace CSharpRpp
         OmLazy
     }
 
-    class SystaxError : Exception
+    class SyntaxError : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
 
-        public SystaxError(string message, IToken actual, string expected) : base(message)
+        public SyntaxError(string message, IToken actual, string expected) : base(message)
         {
             Actual = actual;
             Expected = expected;
@@ -69,7 +69,7 @@ namespace CSharpRpp
             {
                 IToken actual = _stream.LT(1);
                 string expected = RppLexer.TokenToString(token);
-                throw new SystaxError("Unexpected token", actual, expected);
+                throw new SyntaxError("Unexpected token", actual, expected);
             }
         }
 

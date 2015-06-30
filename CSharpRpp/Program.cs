@@ -33,21 +33,11 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo(id: Int)
-{
-}
-
-object Foo
-{
-    def apply(id: Int) : Foo = new Foo(id)
-}
-
 object Bar
 {
-    def create() : Int = {
-        val foo : Foo = Foo(10)
-        foo.id
-    }
+    def print() : Int = 10
+    def print(k : Int) : Int = 10 + k
+    def print(k : Int, msg : String) : Int = 10 + k + msg.length()
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
@@ -106,7 +96,7 @@ object Bar
                 RppParser parser = CreateParser(code);
                 return parser.CompilationUnit();
             }
-            catch (SystaxError e)
+            catch (SyntaxError e)
             {
                 var lines = GetLines(code);
                 var line = lines[e.Actual.Line - 1];

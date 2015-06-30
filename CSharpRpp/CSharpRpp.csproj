@@ -77,6 +77,7 @@
     <Compile Include="Expr\ImplicitCast.cs" />
     <Compile Include="Expr\TypeInference.cs" />
     <Compile Include="IRppNamedNodeExtensions.cs" />
+    <Compile Include="Parser\FuncValidator.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">
