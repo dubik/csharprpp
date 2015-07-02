@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace CSharpRpp.Parser
 {
-    class FuncValidator
+    public class FuncValidator
     {
         public static void Validate(IList<RppFunc> functions)
         {
             IList<RppFunc> workingSet = new List<RppFunc>();
             foreach (RppFunc function in functions)
             {
-                if (workingSet.Count > 1)
+                if (workingSet.Count > 0)
                 {
                     Validate(workingSet, function);
                 }

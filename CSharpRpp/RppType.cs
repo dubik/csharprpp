@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    internal static class TypeExtensions
+    static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -30,14 +30,14 @@ namespace CSharpRpp
 
     public class Types
     {
-        public static Type Int = typeof(int);
-        public static Type Long = typeof(long);
-        public static Type Char = typeof(char);
-        public static Type Short = typeof(short);
-        public static Type Bool = typeof(bool);
-        public static Type Byte = typeof(byte);
-        public static Type Float = typeof(float);
-        public static Type Double = typeof(double);
+        public static Type Int = typeof (int);
+        public static Type Long = typeof (long);
+        public static Type Char = typeof (char);
+        public static Type Short = typeof (short);
+        public static Type Bool = typeof (bool);
+        public static Type Byte = typeof (byte);
+        public static Type Float = typeof (float);
+        public static Type Double = typeof (double);
     }
 
     public abstract class RppType
@@ -144,6 +144,27 @@ namespace CSharpRpp
         {
             return SystemTypesMap[PrimitiveType];
         }
+
+        protected bool Equals(RppPrimitiveType other)
+        {
+            return base.Equals(other) && PrimitiveType == other.PrimitiveType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppPrimitiveType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (base.GetHashCode() * 397) ^ (int) PrimitiveType;
+            }
+        }
     }
 
     public class RppObjectType : ResolvedType
@@ -196,7 +217,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class RppClassBuilder
+    class RppClassBuilder
     {
         private string _name;
 
