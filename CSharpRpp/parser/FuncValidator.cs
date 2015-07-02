@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Odbc;
 using System.Linq;
 
 namespace CSharpRpp.Parser
@@ -28,6 +29,15 @@ namespace CSharpRpp.Parser
             {
                 CheckReturnValue(function, foundFunc);
                 CheckParams(function, foundFunc);
+                CheckTheSameAmountOfParams(function, foundFunc);
+            }
+        }
+
+        private static void CheckTheSameAmountOfParams(RppFunc function, RppFunc foundFunc)
+        {
+            if (foundFunc.Params.SequenceEqual(function.Params))
+            {
+                throw new Exception("Functions have the same amount of parameters");
             }
         }
 
