@@ -39,10 +39,6 @@ namespace CSharpRpp.Parser
             foreach (var candidate in overloads)
             {
                 Debug.Assert(candidate.Name == name); // We should have candidates only with the same name
-                if (candidate.Params.Length > argTypesArray.Length)
-                {
-                    continue; // Skip candidate, amount of arguments is less the candidate
-                }
 
                 bool castRequired; // Flag if we need to cast any argument
                 IRppParam[] candidateParams = candidate.Params;
@@ -64,6 +60,11 @@ namespace CSharpRpp.Parser
         private static bool SignatureMatched(RppType[] argTypes, IRppParam[] candidateParams, out bool castRequired)
         {
             castRequired = false;
+
+            if (candidateParams.Length < argTypes.Length)
+            {
+                return false;
+            }
 
             for (int i = 0; i < argTypes.Length; i++)
             {
