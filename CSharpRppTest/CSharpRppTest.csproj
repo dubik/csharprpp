@@ -49,7 +49,9 @@
   <ItemGroup>
     <Compile Include="AstNodeMatcher.cs" />
     <Compile Include="CodeGenTest.cs" />
+    <Compile Include="FuncTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />
+    <Compile Include="MethodDispatchTest.cs" />
     <Compile Include="ParserExprTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="RppProgramExtensions.cs" />

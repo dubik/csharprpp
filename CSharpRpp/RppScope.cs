@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -9,11 +11,12 @@ namespace CSharpRpp
         private readonly RppScope _parentScope;
         private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
         private readonly Dictionary<string, RppClass> _objects = new Dictionary<string, RppClass>();
+        private MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
 
         public RppScope(RppScope parentScope)
         {
             _parentScope = parentScope;
-        } 
+        }
 
         public IRppNamedNode Lookup(string name)
         {
@@ -42,17 +45,52 @@ namespace CSharpRpp
         {
             string name = node.Name;
 
-            if (node.IsObject())
+            if (node.IsFunction())
             {
-                name = GetObjectName(name);
+                Add((RppFunc) node);
             }
-            
-            if (_entities.ContainsKey(name))
+            else
             {
-                throw new ArgumentException(string.Format("Already containes {0}", node.Name), "node");
+                if (node.IsObject())
+                {
+                    name = GetObjectName(name);
+                }
+
+                if (_entities.ContainsKey(name))
+                {
+                    throw new ArgumentException(string.Format("Already containes {0}", node.Name), "node");
+                }
+
+                _entities.Add(name, node);
+            }
+        }
+
+        public void Add(RppFunc func)
+        {
+            CheckFunctionAlreadyExists(func);
+            _functions.Add(func.Name, func);
+        }
+
+        private void CheckFunctionAlreadyExists(RppFunc func)
+        {
+            IReadOnlyCollection<RppFunc> funcs;
+
+            if (_functions.TryGetValue(func.Name, out funcs) && funcs.FirstOrDefault(f => f.SignatureMatch(func)) != null)
+            {
+                throw new Exception("Function " + func.Name + " already exists in the scope");
+            }
+        }
+
+        [NotNull]
+        public IReadOnlyCollection<IRppFunc> LookupFunction(string name)
+        {
+            IReadOnlyCollection<RppFunc> node;
+            if (_functions.TryGetValue(name, out node))
+            {
+                return node;
             }
 
-            _entities.Add(name, node);
+            return _parentScope != null ? _parentScope.LookupFunction(name) : Collections.NoFuncsCollection;
         }
     }
 }

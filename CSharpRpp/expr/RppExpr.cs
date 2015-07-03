@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
+using CSharpRpp.Parser;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
@@ -377,12 +378,20 @@ namespace CSharpRpp
 
             if (Name != "ctor()")
             {
-                var resolvedFunc = scope.Lookup(Name) as IRppFunc;
-                if (resolvedFunc != null)
+                IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
+                IEnumerable<IRppFunc> candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads);
+                if (candidates.Count() > 1)
                 {
-                    if (resolvedFunc.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
+                    throw new Exception("Can't figure out which overload to use");
+                }
+
+                IRppFunc candidate = candidates.FirstOrDefault();
+
+                if (candidate != null)
+                {
+                    if (candidate.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
                     {
-                        List<IRppParam> funcParams = resolvedFunc.Params.ToList();
+                        List<IRppParam> funcParams = candidate.Params.ToList();
                         int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
                         var args = _argList.Take(variadicIndex).ToList();
                         var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
@@ -400,7 +409,7 @@ namespace CSharpRpp
                         _argList.Add(variadicArgsArray);
                     }
 
-                    Function = resolvedFunc;
+                    Function = candidate;
                     Type = Function.ReturnType;
                 }
                 else
@@ -711,7 +720,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

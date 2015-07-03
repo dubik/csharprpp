@@ -44,6 +44,9 @@
     <Reference Include="Antlr3.StringTemplate">
       <HintPath>..\packages\StringTemplate3.3.5.0.3-alpha002\lib\net35-client\Antlr3.StringTemplate.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Experimental.Collections">
+      <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -78,6 +81,7 @@
     <Compile Include="Expr\TypeInference.cs" />
     <Compile Include="IRppNamedNodeExtensions.cs" />
     <Compile Include="Parser\FuncValidator.cs" />
+    <Compile Include="Parser\OverloadQuery.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">

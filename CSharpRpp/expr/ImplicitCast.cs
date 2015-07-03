@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpRpp.Expr
 {
@@ -18,6 +19,33 @@ namespace CSharpRpp.Expr
             }
 
             throw new Exception("Can't cast expression to a specific type");
+        }
+
+        private static readonly HashSet<Tuple<RppType, RppType>> _implicitConversions = new HashSet<Tuple<RppType, RppType>>()
+        {
+            Zip(RppPrimitiveType.CharTy, RppPrimitiveType.IntTy),
+            Zip(RppPrimitiveType.ShortTy, RppPrimitiveType.IntTy),
+            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.IntTy),
+            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.FloatTy),
+            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.DoubleTy),
+            Zip(RppPrimitiveType.FloatTy, RppPrimitiveType.DoubleTy),
+        };
+
+        private static Tuple<RppType, RppType> Zip(RppType first, RppType second)
+        {
+            return Tuple.Create<RppType, RppType>(first, second);
+        }
+
+        public static bool CanCast(RppType source, RppType dest)
+        {
+            if (source is RppPrimitiveType && dest is RppPrimitiveType)
+            {
+                RppPrimitiveType sourceType = (RppPrimitiveType) source;
+                RppPrimitiveType destType = (RppPrimitiveType) dest;
+                return _implicitConversions.Contains(Zip(sourceType, destType));
+            }
+
+            return false;
         }
     }
 }

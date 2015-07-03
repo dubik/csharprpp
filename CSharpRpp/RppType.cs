@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -100,24 +100,8 @@ namespace CSharpRpp
         }
     }
 
-    public class RppPrimitiveType : RppType
+    public sealed class RppPrimitiveType : RppType
     {
-        public readonly ERppPrimitiveType PrimitiveType;
-        public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
-        public static RppPrimitiveType IntTy = new RppPrimitiveType(ERppPrimitiveType.EInt);
-
-        private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
-        {
-            {"Bool", new RppPrimitiveType(ERppPrimitiveType.EBool)},
-            {"Char", new RppPrimitiveType(ERppPrimitiveType.EChar)},
-            {"Short", new RppPrimitiveType(ERppPrimitiveType.EShort)},
-            {"Int", IntTy},
-            {"Long", new RppPrimitiveType(ERppPrimitiveType.ELong)},
-            {"Float", new RppPrimitiveType(ERppPrimitiveType.EFloat)},
-            {"Double", new RppPrimitiveType(ERppPrimitiveType.EDouble)},
-            {"Unit", UnitTy}
-        };
-
         private static readonly Dictionary<ERppPrimitiveType, ResolvedType> SystemTypesMap = new Dictionary<ERppPrimitiveType, ResolvedType>
         {
             {ERppPrimitiveType.EBool, RppNativeType.Create(typeof (bool))},
@@ -130,9 +114,33 @@ namespace CSharpRpp
             {ERppPrimitiveType.EUnit, RppNativeType.Create(typeof (void))}
         };
 
+        public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
+        public static RppPrimitiveType CharTy = new RppPrimitiveType(ERppPrimitiveType.EChar);
+        public static RppPrimitiveType BoolTy = new RppPrimitiveType(ERppPrimitiveType.EBool);
+        public static RppPrimitiveType ShortTy = new RppPrimitiveType(ERppPrimitiveType.EShort);
+        public static RppPrimitiveType IntTy = new RppPrimitiveType(ERppPrimitiveType.EInt);
+        public static RppPrimitiveType LongTy = new RppPrimitiveType(ERppPrimitiveType.ELong);
+        public static RppPrimitiveType FloatTy = new RppPrimitiveType(ERppPrimitiveType.EFloat);
+        public static RppPrimitiveType DoubleTy = new RppPrimitiveType(ERppPrimitiveType.EDouble);
+
+        private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
+        {
+            {"Bool", BoolTy},
+            {"Char", CharTy},
+            {"Short", ShortTy},
+            {"Int", IntTy},
+            {"Long", LongTy},
+            {"Float", FloatTy},
+            {"Double", DoubleTy},
+            {"Unit", UnitTy}
+        };
+
+        public readonly ERppPrimitiveType PrimitiveType;
+
         public RppPrimitiveType(ERppPrimitiveType primitiveType)
         {
             PrimitiveType = primitiveType;
+            Runtime = SystemTypesMap[PrimitiveType].Runtime;
         }
 
         public static bool IsPrimitive([NotNull] string name, out RppPrimitiveType type)
@@ -145,16 +153,25 @@ namespace CSharpRpp
             return SystemTypesMap[PrimitiveType];
         }
 
-        protected bool Equals(RppPrimitiveType other)
+        private bool Equals(RppPrimitiveType other)
         {
             return base.Equals(other) && PrimitiveType == other.PrimitiveType;
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
             return Equals((RppPrimitiveType) obj);
         }
 
@@ -217,7 +234,7 @@ namespace CSharpRpp
         }
     }
 
-    class RppClassBuilder
+    internal class RppClassBuilder
     {
         private string _name;
 

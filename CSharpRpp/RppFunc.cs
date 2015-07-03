@@ -78,6 +78,12 @@ namespace CSharpRpp
             Initialize(funcParams, returnType, expr);
         }
 
+        /// Returns <code>true</code> if signatures match
+        public bool SignatureMatch(RppFunc otherFunc)
+        {
+            return Params.SequenceEqual(otherFunc.Params, ParamTypeComparer.Default);
+        }
+
         private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr)
         {
             IsPublic = true;
@@ -187,6 +193,21 @@ namespace CSharpRpp
         }
 
         #endregion
+    }
+
+    public class ParamTypeComparer : IEqualityComparer<IRppParam>
+    {
+        public static readonly ParamTypeComparer Default = new ParamTypeComparer();
+
+        public bool Equals(IRppParam x, IRppParam y)
+        {
+            return x.Type.Equals(y.Type);
+        }
+
+        public int GetHashCode(IRppParam obj)
+        {
+            return obj.GetHashCode();
+        }
     }
 
     public interface IRppParam : IRppNamedNode, IRppExpr
