@@ -57,35 +57,42 @@ namespace CSharpRpp.Parser
             return candidates;
         }
 
-        private static bool SignatureMatched(RppType[] argTypes, IRppParam[] candidateParams, out bool castRequired)
+        private static bool SignatureMatched(IList<RppType> argTypes, IList<IRppParam> candidateParams, out bool castRequired)
         {
             castRequired = false;
 
-            if (candidateParams.Length < argTypes.Length)
+            if (candidateParams.Count == 0 && argTypes.Count > 0)
             {
                 return false;
             }
 
-            for (int i = 0; i < argTypes.Length; i++)
+            if (candidateParams.Count < argTypes.Count && (candidateParams.Count > 0 && !candidateParams.Last().IsVariadic))
             {
-                RppType argType = argTypes[i];
-                IRppParam param = candidateParams[i];
+                return false;
+            }
+
+            int candidateParamIndex = 0;
+            foreach (RppType argType in argTypes)
+            {
+                IRppParam param = candidateParams[candidateParamIndex];
                 RppType paramType = param.Type;
 
                 if (param.IsVariadic)
                 {
-                    RppType baseVariadicParamType = ((RppArrayType) paramType).SubType;
+                    paramType = ((RppArrayType) paramType).SubType;
                 }
                 else
                 {
-                    if (!argType.Equals(paramType))
-                    {
-                        castRequired = true;
+                    candidateParamIndex++;
+                }
 
-                        if (!ImplicitCast.CanCast(argType, paramType))
-                        {
-                            return false;
-                        }
+                if (!argType.Equals(paramType))
+                {
+                    castRequired = true;
+
+                    if (!ImplicitCast.CanCast(argType, paramType))
+                    {
+                        return false;
                     }
                 }
             }

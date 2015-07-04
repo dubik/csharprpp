@@ -379,7 +379,7 @@ namespace CSharpRpp
             if (Name != "ctor()")
             {
                 IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
-                IEnumerable<IRppFunc> candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads);
+                var candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads).ToList();
                 if (candidates.Count() > 1)
                 {
                     throw new Exception("Can't figure out which overload to use");

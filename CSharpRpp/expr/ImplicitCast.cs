@@ -45,6 +45,12 @@ namespace CSharpRpp.Expr
                 return _implicitConversions.Contains(Zip(sourceType, destType));
             }
 
+            // TODO fix this somehow, its quite weird to have RppType and RppNativeType handling
+            if (source is RppNativeType && dest is RppNativeType)
+            {
+                return source.Runtime.IsValueType && dest.Runtime == typeof (object);
+            }
+
             return false;
         }
     }

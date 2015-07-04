@@ -37,7 +37,7 @@ object Bar
 {
     def print() : Int = 10
     def print(k : Int) : Int = 10 + k
-    def print(k : Int, msg : String) : Int = 10 + k + msg.length()
+    def print(k : Int, msg : String) : Int = 10 + k
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
