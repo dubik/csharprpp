@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
@@ -9,6 +11,13 @@ namespace CSharpRppTest
 {
     class Utils
     {
+        public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
+        {
+            RppProgram program = Parse(code);
+            var assembly = CodeGen(program);
+            return typesNames.Select(assembly.GetType);
+        }
+
         public static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);

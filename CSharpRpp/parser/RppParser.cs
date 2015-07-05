@@ -183,8 +183,9 @@ namespace CSharpRpp
                 string name = _lastToken.Text;
                 IList<RppType> typeParams = ParseTypeParamClause();
                 IList<RppField> classParams = ParseClassParamClause();
-                IList<IRppNode> nodes = ParseClassTemplateOpt();
-                return new RppClass(ClassKind.Class, name, classParams, nodes);
+                string baseClassName;
+                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName);
+                return new RppClass(ClassKind.Class, name, classParams, nodes, baseClassName);
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -269,11 +270,19 @@ namespace CSharpRpp
             return typeParams;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt()
+        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName)
         {
+            baseClassName = null;
             if (Require(RppLexer.KW_Extends))
             {
-                throw new Exception("Extending a class is not implemented yet");
+                if (Require(RppLexer.Id))
+                {
+                    baseClassName = _lastToken.Text;
+                }
+                else
+                {
+                    throw new Exception("Expected identifier but got : " + _lastToken.Text);
+                }
             }
 
             return ParseTemplateBody();
@@ -515,8 +524,9 @@ namespace CSharpRpp
             Expect(RppLexer.Id);
             string objectName = _lastToken.Text;
 
-            IList<IRppNode> stats = ParseClassTemplateOpt();
-            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats);
+            string baseClassName;
+            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName);
+            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, baseClassName);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

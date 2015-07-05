@@ -44,6 +44,10 @@ namespace CSharpRpp
         [NotNull]
         public Type RuntimeType { get; set; }
 
+        private readonly string _baseClassName;
+
+        public RppClass BaseClass { get; private set; }
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -51,10 +55,11 @@ namespace CSharpRpp
             _funcs = Collections.NoFuncs;
         }
 
-        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody) : base(name)
+        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody,
+            string baseClass = null) : base(name)
         {
             Kind = kind;
-
+            _baseClassName = baseClass;
             _fields = fields;
 
             _funcs = classBody.OfType<IRppFunc>().ToList();
@@ -79,6 +84,11 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
+            if (_baseClassName != null)
+            {
+                BaseClass = (RppClass) scope.Lookup(_baseClassName);
+            }
+
             _scope = new RppScope(scope);
 
             _funcs.ForEach(_scope.Add);

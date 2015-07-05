@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AstNodeMatcher.cs" />
+    <Compile Include="ClassTest.cs" />
     <Compile Include="CodeGenTest.cs" />
     <Compile Include="FuncTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />

@@ -33,11 +33,12 @@ object Runtime
 }
 ";
             const string code = @"
-object Bar
+class Foo
 {
-    def print() : Int = 10
-    def print(k : Int) : Int = 10 + k
-    def print(k : Int, msg : String) : Int = 10 + k
+}
+
+class Bar extends Foo
+{
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
