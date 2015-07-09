@@ -11,7 +11,7 @@ namespace CSharpRpp
         private readonly RppScope _parentScope;
         private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
         private readonly Dictionary<string, RppClass> _objects = new Dictionary<string, RppClass>();
-        private MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
+        private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
 
         public RppScope(RppScope parentScope)
         {
@@ -82,7 +82,7 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public IReadOnlyCollection<IRppFunc> LookupFunction(string name)
+        public virtual IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)
         {
             IReadOnlyCollection<RppFunc> node;
             if (_functions.TryGetValue(name, out node))
@@ -90,7 +90,7 @@ namespace CSharpRpp
                 return node;
             }
 
-            return _parentScope != null ? _parentScope.LookupFunction(name) : Collections.NoFuncsCollection;
+            return _parentScope != null && searchParentScope ? _parentScope.LookupFunction(name) : Collections.NoFuncsCollection;
         }
     }
 }

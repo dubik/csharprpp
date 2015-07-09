@@ -29,5 +29,15 @@ namespace CSharpRppTest
             Assert.AreEqual(clazz, scope.Lookup("Array"));
             Assert.IsNull(scope.Lookup("somethingmissing"));
         }
+
+        [TestMethod]
+        public void BaseClassLookup()
+        {
+            RppClassScope parent = new RppClassScope(null, null);
+            RppFunc func = new RppFunc("create", RppPrimitiveType.UnitTy);
+            parent.Add(func);
+            RppClassScope scope = new RppClassScope(parent, null);
+            scope.LookupFunction("create");
+        }
     }
 }

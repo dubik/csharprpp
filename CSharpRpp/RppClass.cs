@@ -22,9 +22,11 @@ namespace CSharpRpp
     {
         private IList<IRppFunc> _funcs;
         private IList<RppField> _fields;
-        private RppScope _scope;
 
         public ClassKind Kind { get; private set; }
+
+        [CanBeNull]
+        public RppClassScope Scope { get; private set; }
 
         [NotNull]
         public IEnumerable<IRppFunc> Functions
@@ -87,24 +89,29 @@ namespace CSharpRpp
             if (_baseClassName != null)
             {
                 BaseClass = (RppClass) scope.Lookup(_baseClassName);
+                Scope = new RppClassScope(BaseClass.Scope, scope);
+            }
+            else
+            {
+                Scope = new RppClassScope(null, scope);
             }
 
-            _scope = new RppScope(scope);
+            
 
-            _funcs.ForEach(_scope.Add);
+            _funcs.ForEach(Scope.Add);
 
-            NodeUtils.PreAnalyze(_scope, _fields);
-            NodeUtils.PreAnalyze(_scope, _funcs);
+            NodeUtils.PreAnalyze(Scope, _fields);
+            NodeUtils.PreAnalyze(Scope, _funcs);
 
 
-            Constructor.PreAnalyze(_scope);
+            Constructor.PreAnalyze(Scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            _fields = NodeUtils.Analyze(_scope, _fields);
+            _fields = NodeUtils.Analyze(Scope, _fields);
             //Constructor.Analyze(_scope);
-            _funcs = NodeUtils.Analyze(_scope, _funcs);
+            _funcs = NodeUtils.Analyze(Scope, _funcs);
 
             return this;
         }
