@@ -8,14 +8,13 @@ namespace CSharpRpp
 {
     public class RppScope
     {
-        private readonly RppScope _parentScope;
-        private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
-        private readonly Dictionary<string, RppClass> _objects = new Dictionary<string, RppClass>();
-        private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
+        [CanBeNull] protected readonly RppScope ParentScope;
+        [NotNull] private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
+        [NotNull] private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
 
         public RppScope(RppScope parentScope)
         {
-            _parentScope = parentScope;
+            ParentScope = parentScope;
         }
 
         public IRppNamedNode Lookup(string name)
@@ -26,7 +25,7 @@ namespace CSharpRpp
                 return node;
             }
 
-            return _parentScope != null ? _parentScope.Lookup(name) : null;
+            return ParentScope != null ? ParentScope.Lookup(name) : null;
         }
 
         public RppClass LookupObject(string name)
@@ -84,13 +83,18 @@ namespace CSharpRpp
         [NotNull]
         public virtual IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)
         {
+            return DoLookupFunction(name, searchParentScope);
+        }
+
+        protected IReadOnlyCollection<IRppFunc> DoLookupFunction(string name, bool searchParentScope)
+        {
             IReadOnlyCollection<RppFunc> node;
             if (_functions.TryGetValue(name, out node))
             {
                 return node;
             }
 
-            return _parentScope != null && searchParentScope ? _parentScope.LookupFunction(name) : Collections.NoFuncsCollection;
+            return ParentScope != null && searchParentScope ? ParentScope.LookupFunction(name) : Collections.NoFuncsCollection;
         }
     }
 }

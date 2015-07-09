@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
+    // TODO don't like the way search is done, need to redo
     public class RppClassScope : RppScope
     {
         private readonly RppClassScope _baseClassScope;
@@ -21,7 +22,7 @@ namespace CSharpRpp
                 return members;
             }
 
-            return base.LookupFunction(name);
+            return searchParentScope && ParentScope != null ? ParentScope.LookupFunction(name) : Collections.NoFuncsCollection;
         }
 
         /// <summary>
@@ -32,13 +33,10 @@ namespace CSharpRpp
         [NotNull]
         protected IReadOnlyCollection<IRppFunc> LookupMember(string name)
         {
-            var members = LookupFunction(name, false);
-            if (members.Count != 0)
-            {
-                return members;
-            }
-
-            return _baseClassScope != null ? _baseClassScope.LookupMember(name) : Collections.NoFuncsCollection;
+            var current = DoLookupFunction(name, false).ToList();
+            var baseMembers = _baseClassScope != null ? _baseClassScope.LookupMember(name) : Collections.NoFuncsCollection;
+            current.AddRange(baseMembers);
+            return current;
         }
     }
 }

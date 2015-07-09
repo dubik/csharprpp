@@ -1,4 +1,6 @@
-﻿using CSharpRpp;
+﻿using System.Collections.Generic;
+using System.Linq;
+using CSharpRpp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -6,6 +8,11 @@ namespace CSharpRppTest
     [TestClass]
     public class ScopeTest
     {
+        private readonly RppParam _intX = new RppParam("x", RppPrimitiveType.IntTy);
+        private readonly RppParam _intY = new RppParam("y", RppPrimitiveType.IntTy);
+        private readonly RppParam _floatY = new RppParam("y", RppPrimitiveType.FloatTy);
+        private readonly RppParam _varArgIntX = new RppParam("x", RppPrimitiveType.IntTy, true);
+
         [TestMethod]
         public void OneLevelLookup()
         {
@@ -37,7 +44,25 @@ namespace CSharpRppTest
             RppFunc func = new RppFunc("create", RppPrimitiveType.UnitTy);
             parent.Add(func);
             RppClassScope scope = new RppClassScope(parent, null);
-            scope.LookupFunction("create");
+            var res = scope.LookupFunction("create").ToList();
+            Assert.AreEqual(1, res.Count);
+            Assert.AreSame(func, res[0]);
+        }
+
+        [TestMethod]
+        public void TwoFuncsMatchInCurrentAndBase()
+        {
+            RppClassScope parent = new RppClassScope(null, null);
+            RppFunc func = new RppFunc("create", RppPrimitiveType.UnitTy);
+            parent.Add(func);
+            RppClassScope scope = new RppClassScope(parent, null);
+
+            RppFunc func1 = new RppFunc("create", new List<IRppParam> {_intX}, RppPrimitiveType.UnitTy);
+            scope.Add(func1);
+            var res = scope.LookupFunction("create").ToList();
+            Assert.AreEqual(2, res.Count);
+            Assert.AreSame(func1, res[0]); // Order is important
+            Assert.AreSame(func, res[1]);
         }
     }
 }
