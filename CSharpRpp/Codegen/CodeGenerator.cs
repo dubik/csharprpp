@@ -35,6 +35,9 @@ namespace CSharpRpp.Codegen
         {
             TypeCreator creatorCreator = new TypeCreator(_moduleBuilder, _typeBuilders);
             _program.Accept(creatorCreator);
+            // Setup parent classes
+            InheritanceConfigurator configurator = new InheritanceConfigurator();
+            _program.Accept(configurator);
         }
 
         public void Generate()

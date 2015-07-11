@@ -21,12 +21,6 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             _class = node;
-            if (_class.BaseClass != null)
-            {
-                TypeBuilder builder = _class.RuntimeType as TypeBuilder;
-                Debug.Assert(builder != null, "builder != null");
-                builder.SetParent(_class.BaseClass.RuntimeType);
-            }
         }
 
         public override void VisitExit(RppClass node)

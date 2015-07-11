@@ -18,6 +18,11 @@ namespace CSharpRpp.Expr
                 return new RppBox(sourceExpr);
             }
 
+            if (sourceExpr.Type.Runtime.IsSubclassOf(targetType))
+            {
+                return sourceExpr;
+            }
+
             throw new Exception("Can't cast expression to a specific type");
         }
 

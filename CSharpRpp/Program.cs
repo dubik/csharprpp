@@ -40,6 +40,14 @@ class Foo
 class Bar extends Foo
 {
 }
+
+object Main
+{
+    def main(args: Array[String]) : Unit = {
+        val k : Foo = new Bar
+        19
+    }
+}
 ";
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);

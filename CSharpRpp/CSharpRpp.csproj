@@ -73,6 +73,7 @@
     <Compile Include="Codegen\ClrCodegenUtils.cs" />
     <Compile Include="Codegen\CodeGenerator.cs" />
     <Compile Include="Codegen\ConstructorGenerator.cs" />
+    <Compile Include="Codegen\InheritanceConfigurator.cs" />
     <Compile Include="Codegen\StubsCreator.cs" />
     <Compile Include="Codegen\TypeCreator.cs" />
     <Compile Include="Collections.cs" />
