@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Antlr.Runtime;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -184,8 +185,9 @@ namespace CSharpRpp
                 IList<RppType> typeParams = ParseTypeParamClause();
                 IList<RppField> classParams = ParseClassParamClause();
                 string baseClassName;
-                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName);
-                return new RppClass(ClassKind.Class, name, classParams, nodes, baseClassName);
+                IList<IRppExpr> baseClassArgs;
+                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
+                return new RppClass(ClassKind.Class, name, classParams, nodes, baseClassName, baseClassArgs);
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -270,9 +272,10 @@ namespace CSharpRpp
             return typeParams;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName)
+        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs)
         {
             baseClassName = null;
+            baseClassArgs = ReadOnlyCollection<IRppExpr>.Empty;
             if (Require(RppLexer.KW_Extends))
             {
                 if (Require(RppLexer.Id))
@@ -283,6 +286,9 @@ namespace CSharpRpp
                 {
                     throw new Exception("Expected identifier but got : " + _lastToken.Text);
                 }
+
+                var args = ParseArgsOpt();
+                baseClassArgs = args;
             }
 
             return ParseTemplateBody();
@@ -526,7 +532,7 @@ namespace CSharpRpp
 
             string baseClassName;
             IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName);
-            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, baseClassName);
+            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, baseClass: baseClassName);
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

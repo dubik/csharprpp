@@ -57,11 +57,12 @@ namespace CSharpRpp
             _funcs = Collections.NoFuncs;
         }
 
-        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody,
-            string baseClass = null) : base(name)
+        private RppBaseClass _baseClass;
+
+        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody, RppBaseClass baseClass): base(name)
         {
             Kind = kind;
-            _baseClassName = baseClass;
+            _baseClass = baseClass;
             _fields = fields;
 
             _funcs = classBody.OfType<IRppFunc>().ToList();

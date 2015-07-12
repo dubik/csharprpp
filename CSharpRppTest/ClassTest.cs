@@ -95,5 +95,24 @@ object Main
             var k = fieldInfo.GetValue(res);
             Assert.AreEqual(13, k);
         }
+
+
+        [TestMethod]
+        public void InheritingClassWithClassParams()
+        {
+            const string code = @"
+class Foo(var k : Int)
+{
+}
+
+class Bar(var k: Int) extends Foo(k)
+{
+}
+
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar");
+            Assert.IsNotNull(barTy);
+        }
+
     }
 }

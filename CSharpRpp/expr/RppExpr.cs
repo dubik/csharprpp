@@ -507,6 +507,16 @@ namespace CSharpRpp
         #endregion
     }
 
+    public class RppBaseClass : RppFuncCall
+    {
+        public string BaseClassName { get; private set; }
+
+        public RppBaseClass([NotNull] string baseClassName, [NotNull] IList<IRppExpr> argList) : base("ctor()", argList)
+        {
+            BaseClassName = baseClassName;
+        }
+    }
+
     public class RppArray : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
@@ -720,7 +730,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

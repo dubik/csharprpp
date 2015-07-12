@@ -38,6 +38,10 @@ class Foo(var k : Int)
     k = 13
 }
 
+class Bar extends Foo
+{
+}
+
 object Main
 {
     def main() : Foo = new Foo(1)
