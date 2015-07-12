@@ -66,7 +66,8 @@ namespace CSharpRpp
 
             _funcs = classBody.OfType<IRppFunc>().ToList();
             _funcs.ForEach(DefineFunc);
-            Constructor = CreateConstructor();
+            var exprs = classBody.OfType<IRppExpr>().ToList();
+            Constructor = CreateConstructor(exprs);
         }
 
         private void DefineFunc(IRppFunc func)
@@ -96,13 +97,10 @@ namespace CSharpRpp
                 Scope = new RppClassScope(null, scope);
             }
 
-            
-
             _funcs.ForEach(Scope.Add);
 
             NodeUtils.PreAnalyze(Scope, _fields);
             NodeUtils.PreAnalyze(Scope, _funcs);
-
 
             Constructor.PreAnalyze(Scope);
         }
@@ -110,24 +108,38 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             _fields = NodeUtils.Analyze(Scope, _fields);
-            //Constructor.Analyze(_scope);
+            Constructor.Analyze(Scope);
             _funcs = NodeUtils.Analyze(Scope, _funcs);
 
             return this;
         }
 
-        private RppFunc CreateConstructor()
+        private RppFunc CreateConstructor(IEnumerable<IRppExpr> exprs)
         {
-            var p = _fields.Select(rppVar => new RppParam(rppVar.Name, rppVar.Type));
+            var p = _fields.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type));
             List<IRppNode> assignExprs = new List<IRppNode> {CreateParentConstructorCall()};
 
             foreach (var classParam in _fields)
             {
-                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name, classParam), new RppId(classParam.Name));
+                string argName = MakeConstructorArgName(classParam.Name);
+                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name, classParam), new RppId(argName));
                 assignExprs.Add(assign);
             }
 
+            assignExprs.AddRange(exprs);
+
             return new RppFunc(Name, p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
+        }
+
+
+        /// <summary>
+        /// renaming constructor parameter names so that custom constructor which
+        /// refers to fields would be resolved to field and not to param
+        /// </summary>
+        /// <param name="baseName">name of the argument</param>
+        private string MakeConstructorArgName(string baseName)
+        {
+            return "constrparam" + baseName;
         }
 
         private static IRppExpr CreateParentConstructorCall()

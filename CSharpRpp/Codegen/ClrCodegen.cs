@@ -373,6 +373,7 @@ namespace CSharpRpp.Codegen
             }
             else if (id.Ref is RppParam)
             {
+                throw new Exception("Not implemented");
             }
         }
 

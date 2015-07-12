@@ -72,5 +72,28 @@ object Main
             Assert.IsNotNull(res);
             Assert.AreEqual("Bar", res.GetType().Name);
         }
+
+        [TestMethod]
+        public void NonTrivialConstructor()
+        {
+            const string code = @"
+class Foo(var k : Int)
+{
+    k = 13
+}
+
+object Main
+{
+    def main() : Foo = new Foo(1)
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.IsNotNull(res);
+            var fieldInfo = res.GetType().GetField("k");
+            var k = fieldInfo.GetValue(res);
+            Assert.AreEqual(13, k);
+        }
     }
 }

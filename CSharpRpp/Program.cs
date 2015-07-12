@@ -33,20 +33,14 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo
+class Foo(var k : Int)
 {
-}
-
-class Bar extends Foo
-{
+    k = 13
 }
 
 object Main
 {
-    def main(args: Array[String]) : Unit = {
-        val k : Foo = new Bar
-        19
-    }
+    def main() : Foo = new Foo(1)
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
