@@ -187,7 +187,7 @@ namespace CSharpRpp
                 string baseClassName;
                 IList<IRppExpr> baseClassArgs;
                 IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-                return new RppClass(ClassKind.Class, name, classParams, nodes, baseClassName, baseClassArgs);
+                return new RppClass(ClassKind.Class, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs));
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -531,8 +531,9 @@ namespace CSharpRpp
             string objectName = _lastToken.Text;
 
             string baseClassName;
-            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName);
-            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, baseClass: baseClassName);
+            IList<IRppExpr> baseClassArgs;
+            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
+            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
         }
 
         private HashSet<ObjectModifier> ParseObjectModifier()

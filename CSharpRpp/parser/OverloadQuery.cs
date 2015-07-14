@@ -57,7 +57,7 @@ namespace CSharpRpp.Parser
             return candidates;
         }
 
-        private static bool SignatureMatched(IList<RppType> argTypes, IList<IRppParam> candidateParams, out bool castRequired)
+        public static bool SignatureMatched(IList<RppType> argTypes, IList<IRppParam> candidateParams, out bool castRequired)
         {
             castRequired = false;
 

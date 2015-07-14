@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
+using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
@@ -376,59 +377,51 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, _argList);
 
-            if (Name != "ctor()")
+            IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
+            var candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads).ToList();
+            if (candidates.Count() > 1)
             {
-                IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
-                var candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads).ToList();
-                if (candidates.Count() > 1)
+                throw new Exception("Can't figure out which overload to use");
+            }
+
+            IRppFunc candidate = candidates.FirstOrDefault();
+
+            if (candidate != null)
+            {
+                if (candidate.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
                 {
-                    throw new Exception("Can't figure out which overload to use");
+                    List<IRppParam> funcParams = candidate.Params.ToList();
+                    int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
+                    var args = _argList.Take(variadicIndex).ToList();
+                    var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
+                    _argList = args;
+
+                    IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
+
+                    var elementType = GetElementType(variadicParam.Type);
+                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
+
+                    RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
+                    variadicArgsArray.PreAnalyze(scope);
+                    variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+
+                    _argList.Add(variadicArgsArray);
                 }
 
-                IRppFunc candidate = candidates.FirstOrDefault();
-
-                if (candidate != null)
-                {
-                    if (candidate.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
-                    {
-                        List<IRppParam> funcParams = candidate.Params.ToList();
-                        int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
-                        var args = _argList.Take(variadicIndex).ToList();
-                        var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
-                        _argList = args;
-
-                        IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
-
-                        var elementType = GetElementType(variadicParam.Type);
-                        variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
-
-                        RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
-                        variadicArgsArray.PreAnalyze(scope);
-                        variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
-
-                        _argList.Add(variadicArgsArray);
-                    }
-
-                    Function = candidate;
-                    Type = Function.ReturnType;
-                }
-                else
-                {
-                    RppClass obj = scope.LookupObject(Name);
-                    var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
-                    if (factoryFuncs.Count == 0)
-                    {
-                        throw new Exception("Companion object doesn't have apply() with required signature");
-                    }
-
-                    IRppFunc matchedFunc = factoryFuncs[0];
-                    return new RppFuncCall(matchedFunc.Name, _argList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
-                }
+                Function = candidate;
+                Type = Function.ReturnType;
             }
             else
             {
-                // parent constructor is a special case, so don't resolve function
-                Type = RppNativeType.Create(typeof (void));
+                RppClass obj = scope.LookupObject(Name);
+                var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
+                if (factoryFuncs.Count == 0)
+                {
+                    throw new Exception("Companion object doesn't have apply() with required signature");
+                }
+
+                IRppFunc matchedFunc = factoryFuncs[0];
+                return new RppFuncCall(matchedFunc.Name, _argList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
             }
 
             return this;
@@ -507,13 +500,55 @@ namespace CSharpRpp
         #endregion
     }
 
-    public class RppBaseClass : RppFuncCall
+    public class RppBaseConstructorCall : RppFuncCall
     {
         public string BaseClassName { get; private set; }
 
-        public RppBaseClass([NotNull] string baseClassName, [NotNull] IList<IRppExpr> argList) : base("ctor()", argList)
+        public RppClass BaseClass { get; private set; }
+
+        public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs);
+
+        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList) : base("ctor()", argList)
         {
-            BaseClassName = baseClassName;
+            BaseClassName = baseClassName ?? "Object";
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public override void PreAnalyze(RppScope scope)
+        {
+            base.PreAnalyze(scope);
+
+            if (BaseClassName == "Object")
+            {
+                BaseClass = new RppClass(ClassKind.Class, "Object");
+            }
+            else
+            {
+                BaseClass = (RppClass)scope.Lookup(BaseClassName);
+                if (BaseClass == null)
+                {
+                    throw new Exception(string.Format("Can't find {0} class", BaseClassName));
+                }
+            }
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
+            bool castRequired;
+            List<IRppParam> constructorParams = BaseClass.Constructor.Params.ToList();
+            List<RppType> args = Args.Select(a => a.Type).ToList();
+            if (!OverloadQuery.SignatureMatched(args, constructorParams, out castRequired))
+            {
+                throw new Exception("Can't find correct constructor");
+            }
+
+            // parent constructor is a special case, so don't resolve function
+            Type = RppNativeType.Create(typeof (void));
+            return this;
         }
     }
 

@@ -46,23 +46,21 @@ namespace CSharpRpp
         [NotNull]
         public Type RuntimeType { get; set; }
 
-        private readonly string _baseClassName;
-
-        public RppClass BaseClass { get; private set; }
-
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
             _fields = Collections.NoFields;
             _funcs = Collections.NoFuncs;
+            Constructor = CreateConstructor(Collections.NoExprs);
         }
 
-        private RppBaseClass _baseClass;
+        public RppBaseConstructorCall BaseConstructorCall { get; set; }
 
-        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody, RppBaseClass baseClass): base(name)
+        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody,
+            RppBaseConstructorCall baseConstructorCall) : base(name)
         {
             Kind = kind;
-            _baseClass = baseClass;
+            BaseConstructorCall = baseConstructorCall;
             _fields = fields;
 
             _funcs = classBody.OfType<IRppFunc>().ToList();
@@ -88,15 +86,11 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            if (_baseClassName != null)
-            {
-                BaseClass = (RppClass) scope.Lookup(_baseClassName);
-                Scope = new RppClassScope(BaseClass.Scope, scope);
-            }
-            else
-            {
-                Scope = new RppClassScope(null, scope);
-            }
+            Debug.Assert(scope != null, "scope != null");
+
+            BaseConstructorCall.PreAnalyze(scope);
+
+            Scope = new RppClassScope(BaseConstructorCall.BaseClass.Scope, scope);
 
             _funcs.ForEach(Scope.Add);
 
@@ -108,8 +102,11 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
+            Debug.Assert(Scope != null, "Scope != null");
+
             _fields = NodeUtils.Analyze(Scope, _fields);
             Constructor.Analyze(Scope);
+            BaseConstructorCall.Analyze(Scope);
             _funcs = NodeUtils.Analyze(Scope, _funcs);
 
             return this;
@@ -143,9 +140,9 @@ namespace CSharpRpp
             return "constrparam" + baseName;
         }
 
-        private static IRppExpr CreateParentConstructorCall()
+        private IRppExpr CreateParentConstructorCall()
         {
-            return new RppFuncCall("ctor()", Collections.NoExprs);
+            return BaseConstructorCall;
         }
 
         #endregion

@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    internal static class TypeExtensions
+    static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -219,7 +219,7 @@ namespace CSharpRpp
                 new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy)
             };
 
-            return new RppClass(ClassKind.Class, "Array", Collections.NoFields, funcs);
+            return new RppClass(ClassKind.Class, "Array", Collections.NoFields, funcs, RppBaseConstructorCall.Object);
         }
 
         public override ResolvedType Resolve(RppScope scope)
@@ -234,7 +234,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class RppClassBuilder
+    class RppClassBuilder
     {
         private string _name;
 

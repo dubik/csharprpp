@@ -68,6 +68,11 @@ namespace CSharpRppTest
             AddIfMatch(node);
         }
 
+        public void Visit(RppBaseConstructorCall node)
+        {
+            AddIfMatch(node);
+        }
+
         public void Visit(RppMessage node)
         {
             AddIfMatch(node);

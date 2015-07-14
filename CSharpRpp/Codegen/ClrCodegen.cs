@@ -249,7 +249,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppFuncCall node)
         {
             // TODO we should keep references to functions by making another pass of code gen before
-            // real code generationим
+            // real code generation
             if (node.Name == "ctor()")
             {
                 _body.Emit(OpCodes.Ldarg_0);
@@ -267,6 +267,18 @@ namespace CSharpRpp.Codegen
                 node.Args.ForEach(arg => arg.Accept(this));
                 _body.Emit(OpCodes.Call, node.Function.RuntimeType);
             }
+        }
+
+        public override void Visit(RppBaseConstructorCall node)
+        {
+            _body.Emit(OpCodes.Ldarg_0);
+            node.Args.ForEach(arg => arg.Accept(this));
+            ConstructorInfo constructor = node.BaseClassName == "Object"
+                ? typeof (Object).GetConstructor(Type.EmptyTypes)
+                : node.BaseClass.Constructor.ConstructorBuilder;
+
+            Debug.Assert(constructor != null, "constructor != null");
+            _body.Emit(OpCodes.Call, constructor);
         }
 
         public override void Visit(RppMessage node)
