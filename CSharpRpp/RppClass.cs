@@ -88,7 +88,12 @@ namespace CSharpRpp
         {
             Debug.Assert(scope != null, "scope != null");
 
-            BaseConstructorCall.PreAnalyze(scope);
+
+            // fields should be available to constructor
+            RppScope constructorScope = new RppScope(scope);
+            _fields.ForEach(constructorScope.Add);
+
+            BaseConstructorCall.PreAnalyze(constructorScope);
 
             Scope = new RppClassScope(BaseConstructorCall.BaseClass.Scope, scope);
 
@@ -115,7 +120,7 @@ namespace CSharpRpp
         private RppFunc CreateConstructor(IEnumerable<IRppExpr> exprs)
         {
             var p = _fields.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type));
-            List<IRppNode> assignExprs = new List<IRppNode> {CreateParentConstructorCall()};
+            List<IRppNode> assignExprs = new List<IRppNode>();
 
             foreach (var classParam in _fields)
             {
@@ -125,6 +130,7 @@ namespace CSharpRpp
             }
 
             assignExprs.AddRange(exprs);
+            assignExprs.Add(CreateParentConstructorCall());
 
             return new RppFunc(Name, p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
         }

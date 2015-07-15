@@ -38,13 +38,13 @@ class Foo(var k : Int)
     k = 13
 }
 
-class Bar extends Foo
+class Bar(var k: Int) extends Foo(k)
 {
 }
 
 object Main
 {
-    def main() : Foo = new Foo(1)
+    def main() : Foo = new Bar(1)
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

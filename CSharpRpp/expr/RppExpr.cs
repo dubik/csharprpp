@@ -358,7 +358,7 @@ namespace CSharpRpp
             get { return _argList.AsEnumerable(); }
         }
 
-        private IList<IRppExpr> _argList;
+        protected IList<IRppExpr> _argList;
 
         [NotNull]
         public IRppFunc Function { get; private set; }
@@ -538,6 +538,8 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
+            NodeUtils.Analyze(scope, _argList);
+
             bool castRequired;
             List<IRppParam> constructorParams = BaseClass.Constructor.Params.ToList();
             List<RppType> args = Args.Select(a => a.Type).ToList();
