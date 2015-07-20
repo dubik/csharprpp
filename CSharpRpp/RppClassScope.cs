@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 
@@ -7,11 +8,10 @@ namespace CSharpRpp
     // TODO don't like the way search is done, need to redo
     public class RppClassScope : RppScope
     {
-        private readonly RppClassScope _baseClassScope;
+        public RppClassScope BaseClassScope { get; set; }
 
-        public RppClassScope([CanBeNull] RppClassScope baseClassScope, [CanBeNull] RppScope parentScope) : base(parentScope)
+        public RppClassScope([CanBeNull] RppScope parentScope) : base(parentScope)
         {
-            _baseClassScope = baseClassScope;
         }
 
         public override IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)
@@ -34,7 +34,7 @@ namespace CSharpRpp
         protected IReadOnlyCollection<IRppFunc> LookupMember(string name)
         {
             var current = DoLookupFunction(name, false).ToList();
-            var baseMembers = _baseClassScope != null ? _baseClassScope.LookupMember(name) : Collections.NoFuncsCollection;
+            var baseMembers = BaseClassScope != null ? BaseClassScope.LookupMember(name) : Collections.NoFuncsCollection;
             current.AddRange(baseMembers);
             return current;
         }

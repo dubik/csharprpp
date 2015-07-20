@@ -21,7 +21,9 @@ namespace CSharpRpp
     public class RppClass : RppNamedNode, IRppClass
     {
         private IList<IRppFunc> _funcs;
-        private IList<RppField> _fields;
+        private IList<RppField> _fields = Collections.NoFields;
+        private IList<RppField> _classParams = Collections.NoFields;
+        private readonly List<IRppExpr> _constrExprs;
 
         public ClassKind Kind { get; private set; }
 
@@ -44,29 +46,34 @@ namespace CSharpRpp
         }
 
         [NotNull]
+        public IEnumerable<RppField> ClassParams
+        {
+            get { return _classParams.AsEnumerable(); }
+        }
+
+        [NotNull]
         public Type RuntimeType { get; set; }
 
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
-            _fields = Collections.NoFields;
             _funcs = Collections.NoFuncs;
             Constructor = CreateConstructor(Collections.NoExprs);
         }
 
-        public RppBaseConstructorCall BaseConstructorCall { get; set; }
+        public RppBaseConstructorCall BaseConstructorCall { get; private set; }
 
-        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> fields, [NotNull] IEnumerable<IRppNode> classBody,
+        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> classParams, [NotNull] IEnumerable<IRppNode> classBody,
             RppBaseConstructorCall baseConstructorCall) : base(name)
         {
             Kind = kind;
             BaseConstructorCall = baseConstructorCall;
-            _fields = fields;
+            _classParams = classParams;
 
-            _funcs = classBody.OfType<IRppFunc>().ToList();
+            IEnumerable<IRppNode> rppNodes = classBody as IList<IRppNode> ?? classBody.ToList();
+            _funcs = rppNodes.OfType<IRppFunc>().ToList();
             _funcs.ForEach(DefineFunc);
-            var exprs = classBody.OfType<IRppExpr>().ToList();
-            Constructor = CreateConstructor(exprs);
+            _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
         }
 
         private void DefineFunc(IRppFunc func)
@@ -88,44 +95,44 @@ namespace CSharpRpp
         {
             Debug.Assert(scope != null, "scope != null");
 
+            BaseConstructorCall.ResolveBaseClass(scope);
 
-            // fields should be available to constructor
-            RppScope constructorScope = new RppScope(scope);
-            _fields.ForEach(constructorScope.Add);
-
-            BaseConstructorCall.PreAnalyze(constructorScope);
-
-            Scope = new RppClassScope(BaseConstructorCall.BaseClass.Scope, scope);
-
+            Scope = new RppClassScope(scope);
             _funcs.ForEach(Scope.Add);
 
-            NodeUtils.PreAnalyze(Scope, _fields);
-            NodeUtils.PreAnalyze(Scope, _funcs);
-
-            Constructor.PreAnalyze(Scope);
+            _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
+            _fields.ForEach(Scope.Add);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
             Debug.Assert(Scope != null, "Scope != null");
+            Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
 
+            RppScope constructorScope = new RppScope(Scope);
+            _classParams.ForEach(constructorScope.Add);
+            Constructor = CreateConstructor(_constrExprs);
+            Constructor.PreAnalyze(constructorScope);
+
+            _classParams = NodeUtils.Analyze(Scope, _classParams);
             _fields = NodeUtils.Analyze(Scope, _fields);
-            Constructor.Analyze(Scope);
-            BaseConstructorCall.Analyze(Scope);
+            Constructor.Analyze(constructorScope);
+
             _funcs = NodeUtils.Analyze(Scope, _funcs);
 
             return this;
         }
 
+        [NotNull]
         private RppFunc CreateConstructor(IEnumerable<IRppExpr> exprs)
         {
-            var p = _fields.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type));
+            var p = _classParams.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type));
             List<IRppNode> assignExprs = new List<IRppNode>();
 
             foreach (var classParam in _fields)
             {
                 string argName = MakeConstructorArgName(classParam.Name);
-                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name, classParam), new RppId(argName));
+                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name), new RppId(argName));
                 assignExprs.Add(assign);
             }
 
@@ -138,12 +145,15 @@ namespace CSharpRpp
 
         /// <summary>
         /// renaming constructor parameter names so that custom constructor which
-        /// refers to fields would be resolved to field and not to param
+        /// refers to classParams would be resolved to field and not to param
         /// </summary>
         /// <param name="baseName">name of the argument</param>
         private string MakeConstructorArgName(string baseName)
         {
-            return "constrparam" + baseName;
+            if (_fields.Any(field => field.Name == baseName))
+                return "constrparam" + baseName;
+
+            return baseName;
         }
 
         private IRppExpr CreateParentConstructorCall()

@@ -9,7 +9,8 @@ namespace CSharpRpp
     public enum MutabilityFlag
     {
         MF_Val,
-        MF_Var
+        MF_Var,
+        MF_Unspecified
     }
 
     [DebuggerDisplay("Field: {Type.ToString()} {Name}")]

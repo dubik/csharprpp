@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Emit;
-using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
-using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -521,14 +518,17 @@ namespace CSharpRpp
         public override void PreAnalyze(RppScope scope)
         {
             base.PreAnalyze(scope);
+        }
 
+        public void ResolveBaseClass(RppScope scope)
+        {
             if (BaseClassName == "Object")
             {
                 BaseClass = new RppClass(ClassKind.Class, "Object");
             }
             else
             {
-                BaseClass = (RppClass)scope.Lookup(BaseClassName);
+                BaseClass = (RppClass) scope.Lookup(BaseClassName);
                 if (BaseClass == null)
                 {
                     throw new Exception(string.Format("Can't find {0} class", BaseClassName));

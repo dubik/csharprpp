@@ -38,7 +38,7 @@ class Foo(var k : Int)
     k = 13
 }
 
-class Bar(var k: Int) extends Foo(k)
+class Bar(k: Int) extends Foo(k)
 {
 }
 

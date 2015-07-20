@@ -10,6 +10,8 @@ namespace CSharpRpp
     {
         public override sealed RppType Type { get; protected set; }
 
+        public MutabilityFlag MutabilityFlag { get; private set; }
+
         [NotNull]
         public IRppExpr InitExpr { get; private set; }
 
@@ -18,8 +20,8 @@ namespace CSharpRpp
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
         {
             Type = type;
-
             InitExpr = initExpr;
+            MutabilityFlag = mutability;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
