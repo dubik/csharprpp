@@ -6,7 +6,7 @@ using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
-    class QualifiedId
+    internal class QualifiedId
     {
         private string _text;
 
@@ -16,7 +16,7 @@ namespace CSharpRpp
         }
     }
 
-    enum ObjectModifier
+    internal enum ObjectModifier
     {
         OmNone,
         OmPrivate,
@@ -28,7 +28,7 @@ namespace CSharpRpp
         OmLazy
     }
 
-    class SyntaxError : Exception
+    internal class SyntaxError : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
@@ -219,14 +219,14 @@ namespace CSharpRpp
         {
             classParam = null;
 
-            MutabilityFlag mutability = MutabilityFlag.MF_Val;
+            MutabilityFlag mutability = MutabilityFlag.MF_Unspecified;
             if (Require(RppLexer.KW_Var))
             {
                 mutability = MutabilityFlag.MF_Var;
             }
-            else
+            else if (Require(RppLexer.KW_Val))
             {
-                Require(RppLexer.KW_Val);
+                mutability = MutabilityFlag.MF_Val;
             }
 
             if (!Require(RppLexer.Id))

@@ -114,5 +114,40 @@ class Bar(var k: Int) extends Foo(k)
             Assert.IsNotNull(barTy);
         }
 
+        [TestMethod]
+        public void VarShouldMakeParamAField()
+        {
+            const string code = @"
+class Foo(var k : Int)
+{
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy.GetField("k"));
+        }
+
+        [TestMethod]
+        public void ValShouldMakeParamAField()
+        {
+            const string code = @"
+class Foo(val k : Int)
+{
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy.GetField("k"));
+        }
+
+        [TestMethod]
+        public void NoModificatorShouldntPromotClassParamToField()
+        {
+            const string code = @"
+class Foo(k : Int)
+{
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNull(fooTy.GetField("k"));
+        }
     }
 }

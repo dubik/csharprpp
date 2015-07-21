@@ -103,6 +103,8 @@ namespace RppRuntime
             varArgs("", 10, false, true);
             return a;
         }
+
+        public int IntegerProperty { get; set; }
     }
 
     // ReSharper restore InconsistentNaming

@@ -155,7 +155,7 @@ object Bar
         public void TestNewOperatorWithArgs()
         {
             const string code = @"
-class Foo(k : Int)
+class Foo(val k : Int)
 {
 }
 
@@ -178,7 +178,7 @@ object Bar
         public void CallFuncOfInstance()
         {
             const string code = @"
-class Foo(k : Int)
+class Foo(val k : Int)
 {
     def calculate(x : Int) : Int = {
         k + x
@@ -370,7 +370,7 @@ object Bar
         public void TestCompanionObjectWithOneArg()
         {
             const string code = @"
-class Foo(id: Int)
+class Foo(val id: Int)
 {
 }
 
