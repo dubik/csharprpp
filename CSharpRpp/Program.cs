@@ -33,18 +33,21 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo(var k : Int)
-{
-    k = 13
-}
-
-class Bar(k: Int) extends Foo(k)
+class Foo(id: Int)
 {
 }
 
-object Main
+object Foo
 {
-    def main() : Foo = new Bar(1)
+    def apply(pid: Int) : Foo = new Foo(pid)
+}
+
+object Bar
+{
+    def create() : Int = {
+        val foo : Foo = Foo(10)
+        foo.id
+    }
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

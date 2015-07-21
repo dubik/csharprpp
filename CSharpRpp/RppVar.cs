@@ -17,6 +17,8 @@ namespace CSharpRpp
 
         public LocalBuilder Builder { get; set; }
 
+        protected bool AddToScope = true;
+
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
         {
             Type = type;
@@ -31,12 +33,17 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
-            scope.Add(this);
-            InitExpr.PreAnalyze(scope);
+            
+            
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
+            if (AddToScope)
+            {
+                scope.Add(this);
+            }
+
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
             var resolvedType = Type.Resolve(scope);

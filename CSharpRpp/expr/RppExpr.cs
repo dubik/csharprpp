@@ -352,27 +352,27 @@ namespace CSharpRpp
 
         public IEnumerable<IRppExpr> Args
         {
-            get { return _argList.AsEnumerable(); }
+            get { return ArgList.AsEnumerable(); }
         }
 
-        protected IList<IRppExpr> _argList;
+        protected IList<IRppExpr> ArgList;
 
         [NotNull]
         public IRppFunc Function { get; private set; }
 
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name)
         {
-            _argList = argList;
+            ArgList = argList;
         }
 
         public override void PreAnalyze(RppScope scope)
         {
-            NodeUtils.PreAnalyze(scope, _argList);
+            NodeUtils.PreAnalyze(scope, ArgList);
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            NodeUtils.Analyze(scope, _argList);
+            NodeUtils.Analyze(scope, ArgList);
 
             IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
             var candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads).ToList();
@@ -389,9 +389,9 @@ namespace CSharpRpp
                 {
                     List<IRppParam> funcParams = candidate.Params.ToList();
                     int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
-                    var args = _argList.Take(variadicIndex).ToList();
-                    var variadicParams = _argList.Where((arg, index) => index >= variadicIndex).ToList();
-                    _argList = args;
+                    var args = ArgList.Take(variadicIndex).ToList();
+                    var variadicParams = ArgList.Where((arg, index) => index >= variadicIndex).ToList();
+                    ArgList = args;
 
                     IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
 
@@ -402,7 +402,7 @@ namespace CSharpRpp
                     variadicArgsArray.PreAnalyze(scope);
                     variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
 
-                    _argList.Add(variadicArgsArray);
+                    ArgList.Add(variadicArgsArray);
                 }
 
                 Function = candidate;
@@ -418,7 +418,7 @@ namespace CSharpRpp
                 }
 
                 IRppFunc matchedFunc = factoryFuncs[0];
-                return new RppFuncCall(matchedFunc.Name, _argList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
+                return new RppFuncCall(matchedFunc.Name, ArgList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
             }
 
             return this;
@@ -466,7 +466,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppFuncCall other)
         {
-            return _argList.SequenceEqual(other._argList) && Equals(Name, other.Name);
+            return ArgList.SequenceEqual(other.ArgList) && Equals(Name, other.Name);
         }
 
         public override bool Equals(object obj)
@@ -490,7 +490,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((_argList != null ? _argList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
+                return ((ArgList != null ? ArgList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
             }
         }
 
@@ -538,7 +538,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            NodeUtils.Analyze(scope, _argList);
+            NodeUtils.Analyze(scope, ArgList);
 
             bool castRequired;
             List<IRppParam> constructorParams = BaseClass.Constructor.Params.ToList();
@@ -767,7 +767,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
@@ -800,6 +800,10 @@ namespace CSharpRpp
 
         public override void PreAnalyze(RppScope scope)
         {
+        }
+
+        public override IRppNode Analyze(RppScope scope)
+        {
             if (Ref == null)
             {
                 // Lookup <name> or <name>$
@@ -827,10 +831,7 @@ namespace CSharpRpp
 
                 Ref = member;
             }
-        }
 
-        public override IRppNode Analyze(RppScope scope)
-        {
             Type = Ref.Type;
 
             return this;
