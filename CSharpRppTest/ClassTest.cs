@@ -149,5 +149,32 @@ class Foo(k : Int)
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
             Assert.IsNull(fooTy.GetField("k"));
         }
+
+        [TestMethod]
+        public void TestParentConstructorCalled()
+        {
+            const string code = @"
+class Foo(var k : Int)
+{
+}
+
+class Bar(k: Int) extends Foo(k)
+{
+}
+
+object Main
+{
+    def get() : Int = {
+        val inst : Foo = new Bar(13)
+        inst.k
+    }
+}
+
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
+            var res = getMethod.Invoke(null, null);
+            Assert.AreEqual(13, res);
+        }
     }
 }

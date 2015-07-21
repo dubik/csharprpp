@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
             {
                 RppClass clazz = pair.Key;
                 TypeBuilder typeBuilder = pair.Value;
-                var fieldsType = clazz.Fields.Select(f => f.Type.Runtime);
+                var fieldsType = clazz.ClassParams.Select(f => f.Type.Runtime);
                 ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
                 clazz.Constructor.ConstructorBuilder = builder;
                 AssignConstructorParamIndex(clazz.Constructor);
