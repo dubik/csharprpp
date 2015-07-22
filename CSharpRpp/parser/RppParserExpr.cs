@@ -301,11 +301,11 @@ namespace CSharpRpp
 
             if (Require(RppLexer.Id))
             {
-                path = new RppId(_lastToken.Text);
+                path = new RppId(_lastToken.Text) {Token = _lastToken};
                 while (Require(RppLexer.OP_Dot))
                 {
                     Expect(RppLexer.Id);
-                    path = new RppSelector(path, new RppId(_lastToken.Text));
+                    path = new RppSelector(path, new RppId(_lastToken.Text) {Token = _lastToken});
                 }
 
                 return true;
@@ -322,7 +322,7 @@ namespace CSharpRpp
             {
                 if (Require(RppLexer.Id))
                 {
-                    return ParseSimpleExprRest(new RppSelector(expr, new RppId(_lastToken.Text)));
+                    return ParseSimpleExprRest(new RppSelector(expr, new RppId(_lastToken.Text) {Token = _lastToken}));
                 }
 
                 throw new Exception("After . identifier is expected " + _lastToken);

@@ -17,6 +17,13 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
+            if (!Equals(Left.Type, Right.Type))
+            {
+                if (!Right.Type.IsSubclassOf(Left.Type))
+                {
+                    throw new TypeMismatchException(Right.Token, Right.Type.Runtime.ToString(), Left.Type.Runtime.ToString());
+                }
+            }
 
             return this;
         }

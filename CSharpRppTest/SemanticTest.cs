@@ -67,16 +67,13 @@ object Bar
         }
 
         [TestMethod]
-        [ExpectedException(typeof(System.Exception))]
+        [ExpectedException(typeof(TypeMismatchException))]
         public void TypeDonotMatch()
         {
             const string code = @"
 class Bar
-{
-}
 class Foo
-{
-}
+
 object Main
 {
     def main() : Unit = {

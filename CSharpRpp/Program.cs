@@ -33,12 +33,19 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo(var k : Int)
+class Bar
 {
 }
-
-class Bar(k: Int) extends Foo(k)
+class Foo
 {
+}
+object Main
+{
+    def main() : Unit = {
+        var foo : Foo = new Foo()
+        var bar: Bar = new Bar()
+        foo = bar
+    }
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
@@ -49,9 +56,24 @@ class Bar(k: Int) extends Foo(k)
             RppScope scope = new RppScope(runtimeScope);
 
             CodeGenerator generator = new CodeGenerator(program);
-            program.PreAnalyze(scope);
-            generator.PreGenerate();
-            program.Analyze(scope);
+            try
+            {
+                program.PreAnalyze(scope);
+                generator.PreGenerate();
+                program.Analyze(scope);
+            }
+            catch (TypeMismatchException e)
+            {
+                var lines = GetLines(code);
+                var line = lines[e.Token.Line - 1];
+                Console.WriteLine("<buffer>:{0} error: type mismatch", e.Token.Line);
+                Console.WriteLine(" found   : {0}", e.Found);
+                Console.WriteLine(" required: {0}", e.Required);
+                Console.WriteLine(line);
+                Console.WriteLine("{0}^", Ident(e.Token.CharPositionInLine));
+                Environment.Exit(-1);
+            }
+
             generator.Generate();
             generator.Save();
         }

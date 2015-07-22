@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -46,6 +46,11 @@ namespace CSharpRpp
 
         [CanBeNull]
         public abstract ResolvedType Resolve([NotNull] RppScope scope);
+
+        public virtual bool IsSubclassOf(RppType type)
+        {
+            return false;
+        }
 
         #region Eqaulity
 
@@ -197,6 +202,11 @@ namespace CSharpRpp
         {
             get { return Class.RuntimeType; }
         }
+
+        public override bool IsSubclassOf(RppType type)
+        {
+            return type.Runtime.IsSubclassOf(type.Runtime);
+        }
     }
 
     public sealed class RppArrayType : RppObjectType
@@ -234,7 +244,7 @@ namespace CSharpRpp
         }
     }
 
-    class RppClassBuilder
+    internal class RppClassBuilder
     {
         private string _name;
 

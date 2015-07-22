@@ -1,9 +1,11 @@
-﻿using JetBrains.Annotations;
+﻿using Antlr.Runtime;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
     public interface IRppNode
     {
+        IToken Token { get; }
         void PreAnalyze([NotNull] RppScope scope);
 
         [NotNull]
@@ -24,6 +26,8 @@ namespace CSharpRpp
 
     public class RppNode : IRppNode
     {
+        public IToken Token { get; set; }
+
         public virtual void PreAnalyze(RppScope scope)
         {
         }
