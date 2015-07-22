@@ -9,6 +9,27 @@ namespace CSharpRppTest
     public class ClassTest
     {
         [TestMethod]
+        public void TestClassWithoutBody()
+        {
+            const string code = @"
+class Bar
+
+class Foo(val id: Int)
+
+class Oor extends Bar
+";
+
+            var types = Utils.ParseAndCreateTypes(code, new List<string> {"Bar", "Foo", "Oor"}).ToArray();
+            var barTy = types[0];
+            var fooTy = types[1];
+            var oorTy = types[2];
+            Assert.IsNotNull(barTy);
+            Assert.IsTrue(oorTy.IsSubclassOf(barTy));
+            Assert.IsNotNull(fooTy.GetField("id"));
+        }
+
+
+        [TestMethod]
         public void TestEmptyClassExtend()
         {
             const string code = @"

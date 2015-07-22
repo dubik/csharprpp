@@ -83,8 +83,7 @@ object Main
     }
 }
 ";
-            RppProgram program = Utils.ParseAndAnalyze(code);
-            Assert.IsNotNull(program);
+            Utils.ParseAndAnalyze(code);
         }
     }
 }
