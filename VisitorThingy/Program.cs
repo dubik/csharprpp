@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.InteropServices.ComTypes;
+using AlgoW;
 
 namespace VisitorThingy
 {
@@ -112,11 +114,15 @@ namespace VisitorThingy
     {
         private static void Main(string[] args)
         {
+            /*
             Node program = new VarNode {Name = "x", InitExpr = new PlusNode(new NumberNode(5), new NumberNode(10))};
             INodeVisitor codegen = new Codegen();
             program.Accept(codegen);
 
             PrintlnSomething();
+             */
+
+            HindleyMilner.DoMain();
         }
 
         public static void Println(string format, params object[] args)
