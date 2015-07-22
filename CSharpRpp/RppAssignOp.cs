@@ -16,6 +16,8 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             base.Analyze(scope);
+
+
             return this;
         }
     }

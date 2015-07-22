@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CSharpRpp;
 using CSharpRpp.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,23 +47,47 @@ object Bar
             Assert.IsNotNull(program);
         }
 
-        private RppFunc intCreateFunc = new RppFunc("create", RppPrimitiveType.IntTy);
-        private RppFunc unitCreateFunc = new RppFunc("create", RppPrimitiveType.UnitTy);
+        private readonly RppFunc _intCreateFunc = new RppFunc("create", RppPrimitiveType.IntTy);
+        private readonly RppFunc _unitCreateFunc = new RppFunc("create", RppPrimitiveType.UnitTy);
 
         [TestMethod]
-        [ExpectedException(typeof(System.Exception))]
+        [ExpectedException(typeof (System.Exception))]
         public void TestDifferentReturnTypesForSameFunctionName()
         {
-            IList<RppFunc> functions = new List<RppFunc>() {intCreateFunc, unitCreateFunc};
+            IList<RppFunc> functions = new List<RppFunc> {_intCreateFunc, _unitCreateFunc};
+            FuncValidator.Validate(functions);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (System.Exception))]
+        public void MethodWithSameNameDefinedTwice()
+        {
+            IList<RppFunc> functions = new List<RppFunc> {_intCreateFunc, _intCreateFunc};
             FuncValidator.Validate(functions);
         }
 
         [TestMethod]
         [ExpectedException(typeof(System.Exception))]
-        public void MethodWithSameNameDefinedTwice()
+        public void TypeDonotMatch()
         {
-            IList<RppFunc> functions = new List<RppFunc>() { intCreateFunc, intCreateFunc };
-            FuncValidator.Validate(functions);
+            const string code = @"
+class Bar
+{
+}
+class Foo
+{
+}
+object Main
+{
+    def main() : Unit = {
+        var foo : Foo = new Foo()
+        var bar: Bar = new Bar()
+        foo = bar
+    }
+}
+";
+            RppProgram program = Utils.ParseAndAnalyze(code);
+            Assert.IsNotNull(program);
         }
     }
 }
