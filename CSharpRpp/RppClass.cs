@@ -91,7 +91,7 @@ namespace CSharpRpp
 
         #region Semantic
 
-        public override void PreAnalyze(RppScope scope)
+        public void PreAnalyze(RppScope scope)
         {
             Debug.Assert(scope != null, "scope != null");
 
@@ -112,7 +112,6 @@ namespace CSharpRpp
             RppScope constructorScope = new RppScope(Scope);
             _classParams.ForEach(constructorScope.Add);
             Constructor = CreateConstructor(_constrExprs);
-            Constructor.PreAnalyze(constructorScope);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams);
             _fields = NodeUtils.Analyze(Scope, _fields);

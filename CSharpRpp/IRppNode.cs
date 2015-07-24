@@ -6,7 +6,6 @@ namespace CSharpRpp
     public interface IRppNode
     {
         IToken Token { get; }
-        void PreAnalyze([NotNull] RppScope scope);
 
         [NotNull]
         IRppNode Analyze([NotNull] RppScope scope);
@@ -27,10 +26,6 @@ namespace CSharpRpp
     public class RppNode : IRppNode
     {
         public IToken Token { get; set; }
-
-        public virtual void PreAnalyze(RppScope scope)
-        {
-        }
 
         public virtual IRppNode Analyze(RppScope scope)
         {

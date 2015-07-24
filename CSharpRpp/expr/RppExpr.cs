@@ -157,12 +157,6 @@ namespace CSharpRpp
             Right = right;
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            Left.PreAnalyze(scope);
-            Right.PreAnalyze(scope);
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             Left = Left.Analyze(scope) as IRppExpr;
@@ -365,11 +359,6 @@ namespace CSharpRpp
             ArgList = argList;
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            NodeUtils.PreAnalyze(scope, ArgList);
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             NodeUtils.Analyze(scope, ArgList);
@@ -399,7 +388,6 @@ namespace CSharpRpp
                     variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
                     RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
-                    variadicArgsArray.PreAnalyze(scope);
                     variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
 
                     ArgList.Add(variadicArgsArray);
@@ -515,11 +503,6 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            base.PreAnalyze(scope);
-        }
-
         public void ResolveBaseClass(RppScope scope)
         {
             if (BaseClassName == "Object")
@@ -614,11 +597,6 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            NodeUtils.PreAnalyze(scope, _exprs);
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             _exprs = NodeUtils.Analyze(scope, _exprs);
@@ -704,11 +682,6 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            Target.PreAnalyze(scope);
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             Target.Analyze(scope);
@@ -721,7 +694,6 @@ namespace CSharpRpp
             targetType.Class.Functions.ForEach(classScope.Add);
             targetType.Class.Fields.ForEach(classScope.Add);
 
-            Path.PreAnalyze(classScope);
             Path.Analyze(classScope);
 
             return this;
@@ -796,10 +768,6 @@ namespace CSharpRpp
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.Visit(this);
-        }
-
-        public override void PreAnalyze(RppScope scope)
-        {
         }
 
         public override IRppNode Analyze(RppScope scope)

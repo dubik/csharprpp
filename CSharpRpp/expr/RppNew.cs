@@ -36,13 +36,8 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
-            NodeUtils.PreAnalyze(scope, _constructorsParams);
             NodeUtils.Analyze(scope, _constructorsParams);
 
             var refClass = scope.Lookup(_typeName) as RppClass;

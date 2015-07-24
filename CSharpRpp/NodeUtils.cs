@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CSharpRpp
 {
-    class NodeUtils
+    internal class NodeUtils
     {
         public static T AnalyzeNode<T>(RppScope scope, T node) where T : class, IRppNode
         {
@@ -13,7 +13,7 @@ namespace CSharpRpp
             return analyzedNode;
         }
 
-        public static void PreAnalyze<T>(RppScope parentScope, IList<T> nodes) where T : class, IRppNode
+        public static void PreAnalyze(RppScope parentScope, IList<RppClass> nodes)
         {
             foreach (var node in nodes)
             {

@@ -16,12 +16,6 @@ namespace CSharpRpp
             Body = body;
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            Condition.PreAnalyze(scope);
-            Body.PreAnalyze(scope);
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             Condition = (IRppExpr) Condition.Analyze(scope);

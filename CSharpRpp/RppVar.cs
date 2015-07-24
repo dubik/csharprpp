@@ -31,12 +31,6 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override void PreAnalyze(RppScope scope)
-        {
-            
-            
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             if (AddToScope)

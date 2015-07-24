@@ -45,7 +45,7 @@ namespace CSharpRpp
             _classes.Add(clazz);
         }
 
-        public override void PreAnalyze(RppScope scope)
+        public void PreAnalyze(RppScope scope)
         {
             _context.CreateAssembly(Name);
             _context.CreateModuleBuilder();

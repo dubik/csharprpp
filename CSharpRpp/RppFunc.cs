@@ -100,11 +100,6 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        // TODO this may be not needed and should be moved to Analyze()
-        public override void PreAnalyze(RppScope scope)
-        {
-        }
-
         public override IRppNode Analyze(RppScope scope)
         {
             _scope = new RppScope(scope);
