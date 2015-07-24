@@ -197,5 +197,17 @@ object Main
             var res = getMethod.Invoke(null, null);
             Assert.AreEqual(13, res);
         }
+
+        [TestMethod]
+        public void ParseClassGenericArg()
+        {
+            const string code = @"
+class Foo[T]
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+            Assert.AreEqual(1, fooTy.GetGenericArguments().Length);
+        }
     }
 }

@@ -59,6 +59,7 @@
     <Compile Include="ScopeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SemanticTest.cs" />
+    <Compile Include="TypeTest.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
