@@ -114,6 +114,20 @@ namespace CLRCodeGen
             assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
 
+        private static void CreateGenericClass()
+        {
+            AssemblyName assemblyName = new AssemblyName("genericClass");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
+
+            TypeBuilder stackTypeBuilder = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
+            var genericBuilder = stackTypeBuilder.DefineGenericParameters(new[] {"T"});
+            stackTypeBuilder.CreateType();
+
+
+            assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
         private static void GenCode(MethodBuilder builder, Type objectToCreate)
         {
             ILGenerator il = builder.GetILGenerator();
@@ -168,33 +182,7 @@ namespace CLRCodeGen
 
         private static void Main(String[] args)
         {
-            /*
-            int l = args.Length;
-            String item = args[0];
-            CreateObjects();
-            CreateCall();
-             */
-            //roundToEven();
             CreateMethodSlowely();
-        }
-
-        private static void roundToEven()
-        {
-            double k1 = roundToEven(0);
-            double k2 = roundToEven(1);
-            double k3 = roundToEven(2);
-            double k4 = roundToEven(3);
-        }
-
-        private static double roundToEven(double v)
-        {
-            double val = (int) Math.Round(v, MidpointRounding.ToEven);
-            if (val % 2 != 0)
-            {
-                return val + 1;
-            }
-
-            return val;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Policy;
 
 namespace RppRuntime
 {
@@ -14,6 +13,74 @@ namespace RppRuntime
         public static void printFormat(string format, params object[] args)
         {
             Console.WriteLine(format, args);
+        }
+    }
+
+    public class Element
+    {
+        public string Name;
+    }
+
+    public class Stack<T>
+    {
+        public T element;
+    }
+
+    public class Factory<T>
+    {
+        public static Stack<T> Create()
+        {
+            return new Stack<T>();
+        }
+
+        public static Stack<int> CreateInt()
+        {
+            return new Stack<int>();
+        }
+
+        public static Stack<Element> CreateElement()
+        {
+            return new Stack<Element>();
+        }
+    }
+
+    class StackRoot<T>
+    {
+        public virtual StackRoot<T> Push(T element)
+        {
+            return new StackNext<T>(element, this);
+        }
+
+        public virtual T Top()
+        {
+            throw new Exception("No element");
+        }
+
+        public virtual StackRoot<T> Pop()
+        {
+            throw new Exception("No element");
+        }
+    }
+
+    class StackNext<T> : StackRoot<T>
+    {
+        private readonly T _element;
+        private readonly StackRoot<T> _previous;
+
+        public StackNext(T element, StackRoot<T> prev)
+        {
+            _element = element;
+            _previous = prev;
+        }
+
+        public override T Top()
+        {
+            return _element;
+        }
+
+        public override StackRoot<T> Pop()
+        {
+            return _previous;
         }
     }
 
