@@ -182,12 +182,15 @@ namespace CSharpRpp
             if (Require(RppLexer.Id))
             {
                 string name = _lastToken.Text;
-                IList<RppType> typeParams = ParseTypeParamClause();
+                IList<RppVariantTypeParam> typeParams = ParseTypeParams();
                 IList<RppField> classParams = ParseClassParamClause();
                 string baseClassName;
                 IList<IRppExpr> baseClassArgs;
                 IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-                return new RppClass(ClassKind.Class, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs));
+                return new RppClass(ClassKind.Class, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs))
+                {
+                    TypeParams = typeParams
+                };
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -270,6 +273,63 @@ namespace CSharpRpp
             }
 
             return typeParams;
+        }
+
+        private IList<RppVariantTypeParam> ParseTypeParams()
+        {
+            IList<RppVariantTypeParam> typeParams = new List<RppVariantTypeParam>();
+            if (Require(RppLexer.OP_LBracket))
+            {
+                RppVariantTypeParam typeParam;
+                while (ParseVariantTypeParam(out typeParam))
+                {
+                    typeParams.Add(typeParam);
+                    if (Require(RppLexer.OP_RBracket))
+                    {
+                        break;
+                    }
+
+                    if (!Require(RppLexer.OP_Comma))
+                    {
+                        throw new Exception("Expected , or ] but got " + _lastToken.Text);
+                    }
+                }
+            }
+
+            return typeParams;
+        }
+
+        private bool ParseVariantTypeParam(out RppVariantTypeParam typeParam)
+        {
+            TypeVariant variant = TypeVariant.Contravariant; // -T
+            bool requireId = false;
+            if (Require(RppLexer.OP_Ops))
+            {
+                if (_lastToken.Text == "+")
+                {
+                    variant = TypeVariant.Covariant;
+                }
+                else if (_lastToken.Text != "-")
+                {
+                    throw new Exception("Expected '+' or '-' but got " + _lastToken.Text);
+                }
+
+                requireId = true;
+            }
+
+            if (Require(RppLexer.Id))
+            {
+                typeParam = new RppVariantTypeParam(_lastToken.Text, variant);
+                return true;
+            }
+
+            if (requireId)
+            {
+                throw new Exception("Expected identifier but got " + _lastToken.Text);
+            }
+
+            typeParam = null;
+            return false;
         }
 
         public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs)

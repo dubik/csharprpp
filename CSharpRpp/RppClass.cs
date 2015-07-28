@@ -54,6 +54,8 @@ namespace CSharpRpp
         [NotNull]
         public Type RuntimeType { get; set; }
 
+        public IList<RppVariantTypeParam> TypeParams { get; set; }
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -150,7 +152,9 @@ namespace CSharpRpp
         private string MakeConstructorArgName(string baseName)
         {
             if (_fields.Any(field => field.Name == baseName))
+            {
                 return "constrparam" + baseName;
+            }
 
             return baseName;
         }

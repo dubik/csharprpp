@@ -402,4 +402,24 @@ namespace CSharpRpp
 
         #endregion
     }
+
+    public enum TypeVariant
+    {
+        Covariant,
+        Contravariant
+    }
+
+    public class RppVariantTypeParam
+    {
+        public string Name { get; private set; }
+        public TypeVariant Variant { get; private set; }
+        public RppType LowerBound { get; set; }
+        public RppType UpperBound { get; set; }
+
+        public RppVariantTypeParam(string name, TypeVariant variant)
+        {
+            Name = name;
+            Variant = variant;
+        }
+    }
 }

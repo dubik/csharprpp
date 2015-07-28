@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class TypeCreator : RppNodeVisitor
+    internal class TypeCreator : RppNodeVisitor
     {
         private readonly ModuleBuilder _module;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
@@ -18,6 +19,11 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             TypeBuilder classType = _module.DefineType(node.GetNativeName());
+            if (node.TypeParams != null && node.TypeParams.Count > 0)
+            {
+                var genericParams = node.TypeParams.Select(x => x.Name).ToArray();
+                GenericTypeParameterBuilder[] genericTypeBuilders = classType.DefineGenericParameters(genericParams);
+            }
             _typeBuilders.Add(node, classType);
             node.RuntimeType = classType;
         }
