@@ -209,5 +209,16 @@ class Foo[T]
             Assert.IsTrue(fooTy.IsGenericType);
             Assert.AreEqual(1, fooTy.GetGenericArguments().Length);
         }
+
+        [TestMethod]
+        public void DeclareGenericField()
+        {
+            const string code = @"
+class Foo[T](val k : T)
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+        }
     }
 }

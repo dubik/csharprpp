@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    internal static class TypeExtensions
+    static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -244,7 +244,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class RppClassBuilder
+    class RppClassBuilder
     {
         private string _name;
 
@@ -409,16 +409,15 @@ namespace CSharpRpp
         Contravariant
     }
 
-    public class RppVariantTypeParam
+    public class RppVariantTypeParam : RppNamedNode
     {
-        public string Name { get; private set; }
         public TypeVariant Variant { get; private set; }
         public RppType LowerBound { get; set; }
         public RppType UpperBound { get; set; }
+        public RppType Type { get; set; }
 
-        public RppVariantTypeParam(string name, TypeVariant variant)
+        public RppVariantTypeParam(string name, TypeVariant variant) : base(name)
         {
-            Name = name;
             Variant = variant;
         }
     }

@@ -122,6 +122,7 @@ namespace CLRCodeGen
 
             TypeBuilder stackTypeBuilder = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
             var genericBuilder = stackTypeBuilder.DefineGenericParameters(new[] {"T"});
+            //genericBuilder[0].SetGenericParameterAttributes();
             stackTypeBuilder.CreateType();
 
 

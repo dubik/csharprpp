@@ -16,6 +16,11 @@ namespace RppRuntime
         }
     }
 
+    public class OneFieldClass<T>
+    {
+        public T MyField;
+    }
+
     public class Element
     {
         public string Name;
