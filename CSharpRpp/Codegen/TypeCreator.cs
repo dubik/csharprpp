@@ -23,7 +23,7 @@ namespace CSharpRpp.Codegen
             {
                 var genericParams = node.TypeParams.Select(x => x.Name).ToArray();
                 GenericTypeParameterBuilder[] genericTypeBuilders = classType.DefineGenericParameters(genericParams);
-                GenericTypeParameterBuilder builder = genericTypeBuilders[0];
+                node.TypeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index]);
             }
 
             _typeBuilders.Add(node, classType);

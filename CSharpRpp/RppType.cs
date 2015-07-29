@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -244,7 +244,7 @@ namespace CSharpRpp
         }
     }
 
-    class RppClassBuilder
+    internal class RppClassBuilder
     {
         private string _name;
 
@@ -361,6 +361,11 @@ namespace CSharpRpp
             }
 
             IRppNamedNode node = scope.Lookup(Name);
+            if (node is RppVariantTypeParam)
+            {
+                return RppNativeType.Create((node as RppVariantTypeParam).Runtime);
+            }
+
             RppClass clazz = node as RppClass;
             Debug.Assert(clazz != null);
             return new RppObjectType(clazz);
@@ -415,6 +420,8 @@ namespace CSharpRpp
         public RppType LowerBound { get; set; }
         public RppType UpperBound { get; set; }
         public RppType Type { get; set; }
+
+        public Type Runtime { get; set; }
 
         public RppVariantTypeParam(string name, TypeVariant variant) : base(name)
         {

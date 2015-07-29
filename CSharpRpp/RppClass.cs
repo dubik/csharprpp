@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -61,6 +62,7 @@ namespace CSharpRpp
             Kind = kind;
             _funcs = Collections.NoFuncs;
             Constructor = CreateConstructor(Collections.NoExprs);
+            TypeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
         }
 
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
@@ -76,6 +78,7 @@ namespace CSharpRpp
             _funcs = rppNodes.OfType<IRppFunc>().ToList();
             _funcs.ForEach(DefineFunc);
             _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
+            TypeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
         }
 
         private void DefineFunc(IRppFunc func)
@@ -104,6 +107,8 @@ namespace CSharpRpp
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
             _fields.ForEach(Scope.Add);
+
+            TypeParams.ForEach(Scope.Add);
         }
 
         public override IRppNode Analyze(RppScope scope)

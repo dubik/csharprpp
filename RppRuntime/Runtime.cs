@@ -21,6 +21,28 @@ namespace RppRuntime
         public T MyField;
     }
 
+
+    public class Pair<T, K>
+    {
+        public T Name;
+        public K Value;
+    }
+
+    public class StringKey<K> : Pair<string, K>
+    {
+        public K SecondValue;
+    }
+
+    public class OneFieldFactory
+    {
+        public static void Create()
+        {
+            var k = new OneFieldClass<int>();
+            var l = new OneFieldClass<string>();
+            var p = new OneFieldClass<Element>();
+        }
+    }
+
     public class Element
     {
         public string Name;
