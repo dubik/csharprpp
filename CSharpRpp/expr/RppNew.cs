@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
+using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -25,10 +26,20 @@ namespace CSharpRpp
 
         private readonly IList<IRppExpr> _constructorsParams;
 
+        private readonly IList<RppVariantTypeParam> _typeArgs;
+
         public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
         {
             _typeName = typeName;
             _constructorsParams = constructorsParams;
+            _typeArgs = ReadOnlyCollection<RppVariantTypeParam>.Empty;
+        }
+
+        public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams, [NotNull] IList<RppVariantTypeParam> typeArgs)
+        {
+            _typeName = typeName;
+            _constructorsParams = constructorsParams;
+            _typeArgs = typeArgs;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

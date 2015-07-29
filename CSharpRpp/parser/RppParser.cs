@@ -277,9 +277,10 @@ namespace CSharpRpp
 
         private IList<RppVariantTypeParam> ParseTypeParams()
         {
-            IList<RppVariantTypeParam> typeParams = new List<RppVariantTypeParam>();
+            IList<RppVariantTypeParam> typeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
             if (Require(RppLexer.OP_LBracket))
             {
+                typeParams = new List<RppVariantTypeParam>();
                 RppVariantTypeParam typeParam;
                 while (ParseVariantTypeParam(out typeParam))
                 {

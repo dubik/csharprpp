@@ -168,9 +168,9 @@ namespace CSharpRpp
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
-
+            IList<RppVariantTypeParam> typeArgs = ParseTypeParams();
             IList<IRppExpr> args = ParseArgsOpt();
-            return new RppNew(name, args);
+            return new RppNew(name, args, typeArgs);
         }
 
         /*

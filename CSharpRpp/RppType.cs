@@ -286,6 +286,15 @@ namespace CSharpRpp
                 return RppNativeType.Create(subType.Runtime.MakeArrayType());
             }
 
+            var paramType = _params.Select(param => param.Resolve(scope)).Select(param => param.Runtime).ToArray();
+            IRppNamedNode node = scope.Lookup(_typeName.Name);
+            if (node is RppClass)
+            {
+                RppClass obj = node as RppClass;
+                Type specializedType = obj.RuntimeType.MakeGenericType(paramType);
+                return RppNativeType.Create(specializedType);
+            }
+
             return null;
         }
 

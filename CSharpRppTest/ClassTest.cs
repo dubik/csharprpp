@@ -220,5 +220,23 @@ class Foo[T](val k : T)
             Assert.IsNotNull(fooTy);
             Assert.IsTrue(fooTy.IsGenericType);
         }
+
+        [TestMethod]
+        public void InstantiateGenericClass()
+        {
+            const string code = @"
+class Foo[T]
+
+object Bar
+{
+    def main() : Unit = {
+        val k : Foo[Int] = new Foo[Int]()
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            MethodInfo mainMethod = barTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
+            mainMethod.Invoke(null, null);
+        }
     }
 }
