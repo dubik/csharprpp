@@ -361,7 +361,8 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNew node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            _body.Emit(OpCodes.Newobj, node.RefClass.Constructor.ConstructorBuilder);
+            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder;
+            _body.Emit(OpCodes.Newobj, constructorBuilder);
         }
 
         public override void Visit(RppAssignOp node)

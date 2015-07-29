@@ -436,5 +436,20 @@ namespace CSharpRpp
         {
             Variant = variant;
         }
+
+        public void Resolve(RppScope scope)
+        {
+            if (Runtime == null)
+            {
+                RppTypeName typeName = new RppTypeName(Name);
+                ResolvedType resolvedType = typeName.Resolve(scope);
+                if (resolvedType == null)
+                {
+                    throw new Exception("Can't resolve type: " + Name);
+                }
+
+                Runtime = resolvedType.Runtime;
+            }
+        }
     }
 }

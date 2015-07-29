@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Emit;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
@@ -55,9 +56,26 @@ namespace CSharpRpp
             Debug.Assert(refClass != null);
             RefClass = refClass;
 
-            Type = RppNativeType.Create(RefClass.RuntimeType);
+            _typeArgs.ForEach(arg => arg.Resolve(scope));
+
+            Type = CreateType();
 
             return this;
+        }
+
+        /// <summary>
+        /// Creates type of 'new' expression, if required it creates generic arguments.
+        /// </summary>
+        /// <returns>type of the 'new' expression</returns>
+        private ResolvedType CreateType()
+        {
+            if (_typeArgs.Count > 0)
+            {
+                var genericArgs = _typeArgs.Select(arg => arg.Runtime).ToArray();
+                return RppNativeType.Create(RefClass.RuntimeType.MakeGenericType(genericArgs));
+            }
+
+            return RppNativeType.Create(RefClass.RuntimeType);
         }
     }
 }

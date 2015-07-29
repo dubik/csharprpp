@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -122,8 +124,12 @@ namespace CLRCodeGen
 
             TypeBuilder stackTypeBuilder = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
             var genericBuilder = stackTypeBuilder.DefineGenericParameters(new[] {"T"});
-            //genericBuilder[0].SetGenericParameterAttributes();
-            stackTypeBuilder.CreateType();
+
+            var t = stackTypeBuilder.CreateType();
+            var newType = stackTypeBuilder.MakeGenericType(new[] {typeof (int)});
+            var a  = newType.BaseType;
+            newType.IsSubclassOf(typeof (int));
+            var k = newType.IsAssignableFrom(typeof (int));
 
 
             assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
@@ -153,37 +159,18 @@ namespace CLRCodeGen
             return mainMethod;
         }
 
-        public static void Print()
+
+        private static void CreateGenericType()
         {
-            Console.WriteLine("Moika");
-
-            string res = "hello";
-            Console.WriteLine(res);
-        }
-
-        private class Moika
-        {
-            private string some;
-
-            public Moika(string some)
-            {
-                this.some = some;
-            }
-
-            public void println()
-            {
-                Console.WriteLine(some);
-            }
-
-            public static void printSomething(string some)
-            {
-                Console.WriteLine(some);
-            }
+            var typeofListOfInts = typeof (IList<int>);
+            var typeofList = typeof (IList<>);
+            var typeofListOfInt = typeofList.MakeGenericType(new Type[] {typeof (int)});
+            bool ass = typeofListOfInt.IsAssignableFrom(typeofListOfInts);
         }
 
         private static void Main(String[] args)
         {
-            CreateMethodSlowely();
+            CreateGenericClass();
         }
     }
 }

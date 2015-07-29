@@ -18,12 +18,52 @@ namespace CSharpRpp.Expr
                 return new RppBox(sourceExpr);
             }
 
+
+            if (IsAssignableFrom(sourceExpr.Type.Runtime, targetType))
+            {
+                return sourceExpr;
+            }
+
             if (sourceExpr.Type.Runtime.IsSubclassOf(targetType))
             {
                 return sourceExpr;
             }
 
             throw new Exception("Can't cast expression to a specific type");
+        }
+
+        // dest s = (source) s;
+        public static bool IsAssignableFrom(Type dest, Type source)
+        {
+            return IsSubclassOf(source, dest);
+        }
+
+        private static bool IsSubclassOf(Type sourceType, Type possibleBaseType)
+        {
+            if (sourceType.Name == possibleBaseType.Name)
+            {
+                if (sourceType.IsGenericType != possibleBaseType.IsGenericType)
+                {
+                    return false;
+                }
+
+                var sourceGenericTypes = sourceType.GenericTypeArguments;
+                var possibleBaseGenericTypes = possibleBaseType.GenericTypeArguments;
+                if (sourceGenericTypes.Length != possibleBaseGenericTypes.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < sourceGenericTypes.Length; i++)
+                {
+                    if (sourceGenericTypes[i].Name != possibleBaseGenericTypes[i].Name)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         private static readonly HashSet<Tuple<RppType, RppType>> _implicitConversions = new HashSet<Tuple<RppType, RppType>>()
@@ -38,7 +78,7 @@ namespace CSharpRpp.Expr
 
         private static Tuple<RppType, RppType> Zip(RppType first, RppType second)
         {
-            return Tuple.Create<RppType, RppType>(first, second);
+            return Tuple.Create(first, second);
         }
 
         public static bool CanCast(RppType source, RppType dest)

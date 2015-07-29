@@ -235,7 +235,7 @@ object Bar
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
-            MethodInfo mainMethod = barTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
+            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             mainMethod.Invoke(null, null);
         }
     }

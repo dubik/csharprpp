@@ -33,8 +33,14 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo[T](val k : T)
+class Foo[T](val k: T)
 
+object Bar
+{
+    def main() : Unit = {
+        val k : Foo[Int] = new Foo[Int](10)
+    }
+}
 ";
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
