@@ -249,6 +249,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppFuncCall node)
         {
+            Console.WriteLine("Generating func call");
             // TODO we should keep references to functions by making another pass of code gen before
             // real code generation
             if (node.Name == "ctor()")
@@ -266,7 +267,8 @@ namespace CSharpRpp.Codegen
                 }
 
                 node.Args.ForEach(arg => arg.Accept(this));
-                _body.Emit(OpCodes.Call, node.Function.RuntimeType);
+                OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                _body.Emit(callInst, node.Function.RuntimeType);
             }
         }
 
@@ -289,7 +291,8 @@ namespace CSharpRpp.Codegen
             // Normal function call
             if (node.Function.RuntimeType != null)
             {
-                _body.Emit(OpCodes.Call, node.Function.RuntimeType);
+                OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                _body.Emit(callInst, node.Function.RuntimeType);
             }
             else
             {
@@ -362,7 +365,8 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNew node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder; ;
+            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder;
+            ;
             if (node.TypeArgs.Any())
             {
                 var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();

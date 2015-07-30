@@ -44,6 +44,10 @@ namespace CSharpRpp.Codegen
             {
                 attrs |= MethodAttributes.Static;
             }
+            else
+            {
+                attrs |= MethodAttributes.Virtual;
+            }
 
             Type[] paramTypes = ParamTypes(node.Params);
             node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.ReturnType.Runtime, paramTypes);

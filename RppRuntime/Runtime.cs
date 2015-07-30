@@ -16,6 +16,28 @@ namespace RppRuntime
         }
     }
 
+    public class Human
+    {
+        public virtual int getId()
+        {
+            return 10;
+        }
+    }
+
+    public class Person : Human
+    {
+        public override int getId()
+        {
+            return 13;
+        }
+
+        public static int getGlobalId()
+        {
+            Human person = new Person();
+            return person.getId();
+        }
+    }
+
     public class OneFieldClass<T>
     {
         public T MyField;

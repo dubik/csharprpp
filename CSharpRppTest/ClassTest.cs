@@ -240,5 +240,33 @@ object Bar
             var res = mainMethod.Invoke(null, null);
             Assert.IsNotNull(res);
         }
+
+        [TestMethod]
+        public void InvokeOverridenMethod()
+        {
+            const string code = @"
+class Human
+{
+    def getId : Int = 10
+}
+
+class Person extends Human
+{
+    def getId : Int = 13
+}
+
+object Main
+{
+    def main : Int = {
+        val k : Human = new Person
+        k.getId()
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(13, res);
+        }
     }
 }

@@ -33,13 +33,21 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo[T](val k: T)
-
-object Bar
+class Human
 {
-    def main() : Unit = {
-        val k : Foo[Int] = new Foo[Int](10)
-        20
+    def getId : Int = 10
+}
+
+class Person extends Human
+{
+    def getId : Int = 13
+}
+
+object Main
+{
+    def main : Int = {
+        val k : Human = new Person
+        k.getId()
     }
 }
 ";
