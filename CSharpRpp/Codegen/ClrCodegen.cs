@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
@@ -146,7 +147,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppRelationalBinOp node)
         {
-            LocalBuilder _tempVar = _body.DeclareLocal(Types.Bool);
+            LocalBuilder tempVar = _body.DeclareLocal(Types.Bool);
             node.Left.Accept(this);
             node.Right.Accept(this);
 
@@ -163,11 +164,11 @@ namespace CSharpRpp.Codegen
                     break;
             }
 
-            ClrCodegenUtils.StoreLocal(_tempVar, _body);
-            ClrCodegenUtils.LoadLocal(_tempVar, _body);
+            ClrCodegenUtils.StoreLocal(tempVar, _body);
+            ClrCodegenUtils.LoadLocal(tempVar, _body);
         }
 
-        private readonly Dictionary<string, OpCode> ArithmToIL = new Dictionary<string, OpCode>
+        private readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
         {
             {"+", OpCodes.Add},
             {"-", OpCodes.Sub},
@@ -178,7 +179,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppArithmBinOp node)
         {
             OpCode opCode;
-            if (ArithmToIL.TryGetValue(node.Op, out opCode))
+            if (_arithmToIl.TryGetValue(node.Op, out opCode))
             {
                 node.Left.Accept(this);
                 node.Right.Accept(this);
@@ -361,8 +362,18 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNew node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder;
-            _body.Emit(OpCodes.Newobj, constructorBuilder);
+            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder; ;
+            if (node.TypeArgs.Any())
+            {
+                var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();
+                Type specializedType = node.RefClass.RuntimeType.MakeGenericType(genericArgs);
+                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructorBuilder);
+                _body.Emit(OpCodes.Newobj, specializedConstr);
+            }
+            else
+            {
+                _body.Emit(OpCodes.Newobj, constructorBuilder);
+            }
         }
 
         public override void Visit(RppAssignOp node)

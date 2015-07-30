@@ -6,11 +6,11 @@ using System.Reflection.Emit;
 
 namespace CLRCodeGen
 {
-    class ICodegenContext
+    internal class ICodegenContext
     {
     }
 
-    class Node
+    internal class Node
     {
         public void Analyze()
         {
@@ -21,7 +21,7 @@ namespace CLRCodeGen
         }
     }
 
-    class Program
+    internal class Program
     {
         private static void DoSomething()
         {
@@ -122,15 +122,26 @@ namespace CLRCodeGen
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
 
-            TypeBuilder stackTypeBuilder = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
-            var genericBuilder = stackTypeBuilder.DefineGenericParameters(new[] {"T"});
+            // Stack[T]
+            TypeBuilder clazz = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
+            var genericBuilder = clazz.DefineGenericParameters(new[] {"T"});
+            var genericTType = genericBuilder[0].AsType();
 
-            var t = stackTypeBuilder.CreateType();
-            var newType = stackTypeBuilder.MakeGenericType(new[] {typeof (int)});
-            var a  = newType.BaseType;
-            newType.IsSubclassOf(typeof (int));
-            var k = newType.IsAssignableFrom(typeof (int));
+            var retType = clazz.MakeGenericType(new[] {typeof (int)});
+            var method = clazz.DefineMethod("create", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, retType, null);
 
+            var constr = clazz.DefineDefaultConstructor(MethodAttributes.Public);
+            var intParamConstr = clazz.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] {genericTType});
+            intParamConstr.GetILGenerator().Emit(OpCodes.Ret);
+
+            var specConstr = TypeBuilder.GetConstructor(retType, intParamConstr);
+
+            var gen = method.GetILGenerator();
+            gen.Emit(OpCodes.Ldc_I4_3);
+            gen.Emit(OpCodes.Newobj, specConstr);
+            gen.Emit(OpCodes.Ret);
+
+            clazz.CreateType();
 
             assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
@@ -138,7 +149,7 @@ namespace CLRCodeGen
         private static void GenCode(MethodBuilder builder, Type objectToCreate)
         {
             ILGenerator il = builder.GetILGenerator();
-            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructor(new Type[] {}));
+            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructors()[0]);
             il.Emit(OpCodes.Ret);
         }
 

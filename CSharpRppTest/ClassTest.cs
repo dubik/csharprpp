@@ -229,14 +229,16 @@ class Foo[T]
 
 object Bar
 {
-    def main() : Unit = {
+    def main() : Foo[Int] = {
         val k : Foo[Int] = new Foo[Int]()
+        k
     }
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
             MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            mainMethod.Invoke(null, null);
+            var res = mainMethod.Invoke(null, null);
+            Assert.IsNotNull(res);
         }
     }
 }

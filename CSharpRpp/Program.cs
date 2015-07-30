@@ -39,6 +39,7 @@ object Bar
 {
     def main() : Unit = {
         val k : Foo[Int] = new Foo[Int](10)
+        20
     }
 }
 ";

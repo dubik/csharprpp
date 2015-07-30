@@ -27,6 +27,11 @@ namespace CSharpRpp
 
         private readonly IList<IRppExpr> _constructorsParams;
 
+        public IEnumerable<RppVariantTypeParam> TypeArgs
+        {
+            get { return _typeArgs.AsEnumerable(); }
+        }
+
         private readonly IList<RppVariantTypeParam> _typeArgs;
 
         public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
