@@ -229,7 +229,7 @@ namespace CSharpRpp
                 new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy)
             };
 
-            return new RppClass(ClassKind.Class, "Array", Collections.NoFields, funcs, RppBaseConstructorCall.Object);
+            return new RppClass(ClassKind.Class, Collections.NoModifiers, "Array", Collections.NoFields, funcs, RppBaseConstructorCall.Object);
         }
 
         public override ResolvedType Resolve(RppScope scope)

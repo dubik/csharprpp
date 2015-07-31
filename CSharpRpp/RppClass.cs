@@ -57,18 +57,20 @@ namespace CSharpRpp
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
+        public HashSet<ObjectModifier> Modifiers { get; private set; }
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
             _funcs = Collections.NoFuncs;
             Constructor = CreateConstructor(Collections.NoExprs);
-            TypeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
+            TypeParams = Collections.NoVariantTypeParams;
+            Modifiers = Collections.NoModifiers;
         }
 
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
 
-        public RppClass(ClassKind kind, [NotNull] string name, [NotNull] IList<RppField> classParams, [NotNull] IEnumerable<IRppNode> classBody,
-            RppBaseConstructorCall baseConstructorCall) : base(name)
+        public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams, [NotNull] IEnumerable<IRppNode> classBody, RppBaseConstructorCall baseConstructorCall) : base(name)
         {
             Kind = kind;
             BaseConstructorCall = baseConstructorCall;
@@ -78,7 +80,8 @@ namespace CSharpRpp
             _funcs = rppNodes.OfType<IRppFunc>().ToList();
             _funcs.ForEach(DefineFunc);
             _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
-            TypeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
+            TypeParams = Collections.NoVariantTypeParams;
+            Modifiers = modifiers;
         }
 
         private void DefineFunc(IRppFunc func)

@@ -122,7 +122,7 @@ object Main
                 RppParser parser = CreateParser(code);
                 return parser.CompilationUnit();
             }
-            catch (SyntaxError e)
+            catch (UnexpectedTokenException e)
             {
                 var lines = GetLines(code);
                 var line = lines[e.Actual.Line - 1];

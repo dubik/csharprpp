@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Antlr.Runtime;
 using Mono.Collections.Generic;
 
@@ -16,7 +15,7 @@ namespace CSharpRpp
         }
     }
 
-    internal enum ObjectModifier
+    public enum ObjectModifier
     {
         OmNone,
         OmPrivate,
@@ -25,18 +24,29 @@ namespace CSharpRpp
         OmFinal,
         OmSealed,
         OmImplicit,
-        OmLazy
+        OmLazy,
+        OmAbstract
     }
 
-    internal class SyntaxError : Exception
+    internal class UnexpectedTokenException : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
 
-        public SyntaxError(string message, IToken actual, string expected) : base(message)
+        public UnexpectedTokenException(string message, IToken actual, string expected) : base(message)
         {
             Actual = actual;
             Expected = expected;
+        }
+    }
+
+    internal class SyntaxException : Exception
+    {
+        public IToken BadToken { get; private set; }
+
+        public SyntaxException(string message, IToken badToken) : base(message)
+        {
+            BadToken = badToken;
         }
     }
 
@@ -70,8 +80,24 @@ namespace CSharpRpp
             {
                 IToken actual = _stream.LT(1);
                 string expected = RppLexer.TokenToString(token);
-                throw new SyntaxError("Unexpected token", actual, expected);
+                throw new UnexpectedTokenException("Unexpected token", actual, expected);
             }
+        }
+
+        private int Peek()
+        {
+            return _stream.LA(1);
+        }
+
+        private IToken PeekToken()
+        {
+            return _stream.LT(1);
+        }
+
+        private void Consume()
+        {
+            _lastToken = _stream.LT(1);
+            _stream.Consume();
         }
 
         private bool Peek(int token)
@@ -161,14 +187,14 @@ namespace CSharpRpp
 
             if (Require(RppLexer.KW_Class))
             {
-                RppClass obj = ParseClassDef();
+                RppClass obj = ParseClassDef(modifiers);
                 program.Add(obj);
                 return true;
             }
 
             if (Require(RppLexer.KW_Object))
             {
-                RppClass obj = ParseObjectDef();
+                RppClass obj = ParseObjectDef(modifiers);
                 program.Add(obj);
                 return true;
             }
@@ -177,7 +203,7 @@ namespace CSharpRpp
         }
 
         // ClassDef ::= id [TypeParamClause] {Annotation} [AccessModifier] ClassParamClauses ClassTemplateOpt
-        public RppClass ParseClassDef()
+        public RppClass ParseClassDef(HashSet<ObjectModifier> modifiers)
         {
             if (Require(RppLexer.Id))
             {
@@ -187,7 +213,7 @@ namespace CSharpRpp
                 string baseClassName;
                 IList<IRppExpr> baseClassArgs;
                 IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-                return new RppClass(ClassKind.Class, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs))
+                return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs))
                 {
                     TypeParams = typeParams
                 };
@@ -586,7 +612,7 @@ namespace CSharpRpp
             return false;
         }
 
-        private RppClass ParseObjectDef()
+        private RppClass ParseObjectDef(HashSet<ObjectModifier> modifiers)
         {
             Expect(RppLexer.Id);
             string objectName = _lastToken.Text;
@@ -594,18 +620,40 @@ namespace CSharpRpp
             string baseClassName;
             IList<IRppExpr> baseClassArgs;
             IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-            return new RppClass(ClassKind.Object, objectName, Collections.NoFields, stats, new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
+            return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats, new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
         }
+
+        private static readonly Dictionary<int, ObjectModifier> TokenToModifierMap = new Dictionary<int, ObjectModifier>()
+        {
+            {RppLexer.KW_Lazy, ObjectModifier.OmLazy},
+            {RppLexer.KW_Abstract, ObjectModifier.OmAbstract},
+            {RppLexer.KW_Final, ObjectModifier.OmFinal},
+            {RppLexer.KW_Implicit, ObjectModifier.OmImplicit},
+            {RppLexer.KW_Override, ObjectModifier.OmOverride},
+            {RppLexer.KW_Private, ObjectModifier.OmPrivate},
+            {RppLexer.KW_Protected, ObjectModifier.OmProtected},
+            {RppLexer.KW_Sealed, ObjectModifier.OmSealed},
+        };
 
         private HashSet<ObjectModifier> ParseObjectModifier()
         {
-            HashSet<ObjectModifier> modifiers = new HashSet<ObjectModifier>();
-            if (Require(RppLexer.KW_Lazy))
+            HashSet<ObjectModifier> res = new HashSet<ObjectModifier>();
+
+            int nextToken = Peek();
+            ObjectModifier modifier;
+            while (TokenToModifierMap.TryGetValue(nextToken, out modifier))
             {
-                modifiers.Add(ObjectModifier.OmLazy);
+                if (res.Contains(modifier))
+                {
+                    throw new SyntaxException("repeated modifier", PeekToken());
+                }
+
+                res.Add(modifier);
+                Consume();
+                nextToken = Peek();
             }
 
-            return modifiers;
+            return res;
         }
     }
 }

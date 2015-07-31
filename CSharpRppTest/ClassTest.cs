@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -267,6 +268,17 @@ object Main
             MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             var res = mainMethod.Invoke(null, null);
             Assert.AreEqual(13, res);
+        }
+
+        [TestMethod]
+        public void EmptyAbstractClass()
+        {
+            const string code = @"
+abstract class Foo
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsAbstract);
         }
     }
 }
