@@ -52,10 +52,22 @@ namespace CSharpRpp
         public ConstructorBuilder ConstructorBuilder { get; set; }
 
         public bool IsStatic { get; set; }
-        public bool IsPublic { get; set; }
-        public bool IsAbstract { get; set; }
+
+        public bool IsPublic
+        {
+            get { return !Modifiers.Contains(ObjectModifier.OmPrivate); }
+            set { throw new NotSupportedException(); }
+        }
+
+        public bool IsAbstract
+        {
+            get { return Expr is RppEmptyExpr; }
+            set { throw new NotSupportedException(); }
+        }
+
         public bool IsVariadic { get; set; }
         public RppClass Class { get; set; }
+        public HashSet<ObjectModifier> Modifiers { get; set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
@@ -86,7 +98,6 @@ namespace CSharpRpp
 
         private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr)
         {
-            IsPublic = true;
             Params = funcParams.ToArray();
             ReturnType = returnType;
             Expr = expr;

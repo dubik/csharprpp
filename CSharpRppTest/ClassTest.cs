@@ -280,5 +280,22 @@ abstract class Foo
             Assert.IsNotNull(fooTy);
             Assert.IsTrue(fooTy.IsAbstract);
         }
+
+        [TestMethod]
+        public void HaveAbstractMethod()
+        {
+            const string code = @"
+abstract class Foo
+{
+    def length: Int
+}
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            MethodInfo lengthMethod = fooTy.GetMethod("length", BindingFlags.Public | BindingFlags.Instance);
+            Assert.IsNotNull(lengthMethod);
+            Assert.IsTrue(lengthMethod.IsAbstract);
+            Assert.IsTrue(lengthMethod.IsVirtual);
+        }
     }
 }

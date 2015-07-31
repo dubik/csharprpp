@@ -190,7 +190,7 @@ namespace CSharpRpp
             while (true)
             {
                 SkipNewLines();
-                IRppNode defNode = ParseDef();
+                IRppNode defNode = ParseDef(ParseObjectModifier());
                 if (defNode != null)
                 {
                     exprs.Add(defNode);

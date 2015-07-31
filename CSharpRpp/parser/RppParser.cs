@@ -403,9 +403,9 @@ namespace CSharpRpp
         public IRppNode ParseTemplateStat()
         {
             SkipNewLines();
-            ParseModifier(); // TODO handle modifiers
+            HashSet<ObjectModifier> modifiers = ParseObjectModifier();
 
-            IRppNode stat = ParseDef();
+            IRppNode stat = ParseDef(modifiers);
             if (stat != null)
             {
                 return stat;
@@ -426,7 +426,7 @@ namespace CSharpRpp
             return null;
         }
 
-        private IRppNode ParseDef()
+        private IRppNode ParseDef(HashSet<ObjectModifier> modifiers)
         {
             if (Require(RppLexer.KW_Val))
             {
@@ -440,7 +440,7 @@ namespace CSharpRpp
 
             if (Require(RppLexer.KW_Def))
             {
-                return ParseFunDef();
+                return ParseFunDef(modifiers);
             }
 
             return null;
@@ -449,7 +449,7 @@ namespace CSharpRpp
         // FunSig [‘:’ Type] ‘=’ Expr
         // FunSig ::= id [FunTypeParamClause] ParamClauses
 
-        private RppFunc ParseFunDef()
+        private RppFunc ParseFunDef(HashSet<ObjectModifier> modifiers)
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
@@ -462,13 +462,15 @@ namespace CSharpRpp
                 throw new Exception("Expecting type but got " + _lastToken);
             }
 
-            Expect(RppLexer.OP_Eq);
+            if (Require(RppLexer.OP_Eq))
+            {
+                SkipNewLines();
 
-            SkipNewLines();
+                IRppExpr expr = ParseExpr();
+                return new RppFunc(name, funcParams, funcReturnType, expr) {Modifiers = modifiers};
+            }
 
-            IRppExpr expr = ParseExpr();
-
-            return new RppFunc(name, funcParams, funcReturnType, expr);
+            return new RppFunc(name, funcParams, funcReturnType) {Modifiers = modifiers};
         }
 
 
@@ -620,10 +622,11 @@ namespace CSharpRpp
             string baseClassName;
             IList<IRppExpr> baseClassArgs;
             IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-            return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats, new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
+            return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats,
+                new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
         }
 
-        private static readonly Dictionary<int, ObjectModifier> TokenToModifierMap = new Dictionary<int, ObjectModifier>()
+        private static readonly Dictionary<int, ObjectModifier> TokenToObjectModifierMap = new Dictionary<int, ObjectModifier>
         {
             {RppLexer.KW_Lazy, ObjectModifier.OmLazy},
             {RppLexer.KW_Abstract, ObjectModifier.OmAbstract},
@@ -641,7 +644,7 @@ namespace CSharpRpp
 
             int nextToken = Peek();
             ObjectModifier modifier;
-            while (TokenToModifierMap.TryGetValue(nextToken, out modifier))
+            while (TokenToObjectModifierMap.TryGetValue(nextToken, out modifier))
             {
                 if (res.Contains(modifier))
                 {

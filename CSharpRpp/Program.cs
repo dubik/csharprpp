@@ -33,22 +33,9 @@ object Runtime
 }
 ";
             const string code = @"
-class Human
+abstract class Foo
 {
-    def getId : Int = 10
-}
-
-class Person extends Human
-{
-    def getId : Int = 13
-}
-
-object Main
-{
-    def main : Int = {
-        val k : Human = new Person
-        k.getId()
-    }
+    def length: Int
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
