@@ -7,6 +7,7 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
+using CSharpRpp.Semantics;
 using RppRuntime;
 
 [assembly: CLSCompliant(true)]
@@ -51,6 +52,9 @@ abstract class Foo
                 program.PreAnalyze(scope);
                 generator.PreGenerate();
                 program.Analyze(scope);
+
+                SemanticAnalyzer semantic = new SemanticAnalyzer();
+                program.Accept(semantic);
             }
             catch (TypeMismatchException e)
             {

@@ -41,6 +41,12 @@ namespace CSharpRpp.Native
 
         public bool IsVariadic { get; set; }
 
+        public bool IsOverride
+        {
+            get { return false; }
+            set { throw new NotImplementedException(); }
+        }
+
         public RppClass Class { get; set; }
 
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)

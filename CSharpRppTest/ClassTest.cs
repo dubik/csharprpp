@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CSharpRpp.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -296,6 +297,37 @@ abstract class Foo
             Assert.IsNotNull(lengthMethod);
             Assert.IsTrue(lengthMethod.IsAbstract);
             Assert.IsTrue(lengthMethod.IsVirtual);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SemanticException))]
+        public void MissingAbstractMethodShouldThrowAnException()
+        {
+            const string code = @"
+abstract class Foo
+{
+    def length: Int
+    def length(k : Int) : Int
+}
+
+class Bar extends Foo
+{
+}
+";
+            Utils.ParseAndCreateType(code, "Bar");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (SemanticException))]
+        public void MissingAbstractModifierForEmptyMethods()
+        {
+            const string code = @"
+class Foo
+{
+    def length : Int
+}
+";
+            Utils.ParseAndCreateType(code, "Foo");
         }
     }
 }

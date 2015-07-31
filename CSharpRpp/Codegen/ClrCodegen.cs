@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
+using CSharpRpp.Exceptions;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
@@ -35,11 +37,27 @@ namespace CSharpRpp.Codegen
             Console.WriteLine("Genering class: " + node.Name);
         }
 
+        private readonly Regex typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
+
         public override void VisitExit(RppClass node)
         {
             var clazz = node.RuntimeType as TypeBuilder;
             Debug.Assert(clazz != null, "clazz != null");
-            clazz.CreateType();
+            try
+            {
+                clazz.CreateType();
+            } // TODO This is a hack, we should do our own semantic analyzes and find out which methods were not overriden
+            catch (TypeLoadException exception)
+            {
+                MatchCollection groups = typeExcSplitter.Matches(exception.Message);
+                if (groups.Count != 3)
+                {
+                    throw;
+                }
+
+                throw new SemanticException(string.Format("Method '{0}' in class '{1}' does not have an implementation", groups[0], groups[1]));
+            }
+
             Console.WriteLine("Generated class");
         }
 

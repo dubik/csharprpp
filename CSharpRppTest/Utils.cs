@@ -5,6 +5,7 @@ using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.Codegen;
+using CSharpRpp.Semantics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -48,6 +49,8 @@ namespace CSharpRppTest
             program.PreAnalyze(scope);
             generator.PreGenerate();
             program.Analyze(scope);
+            SemanticAnalyzer semantic = new SemanticAnalyzer();
+            program.Accept(semantic);
             generator.Generate();
             return generator.Assembly;
         }

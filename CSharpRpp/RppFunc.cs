@@ -28,6 +28,7 @@ namespace CSharpRpp
         bool IsPublic { get; set; }
         bool IsAbstract { get; set; }
         bool IsVariadic { get; set; }
+        bool IsOverride { get; set; }
 
         RppClass Class { get; set; }
     }
@@ -66,6 +67,13 @@ namespace CSharpRpp
         }
 
         public bool IsVariadic { get; set; }
+
+        public bool IsOverride
+        {
+            get { return Modifiers.Contains(ObjectModifier.OmOverride); }
+            set { throw new NotImplementedException(); }
+        }
+
         public RppClass Class { get; set; }
         public HashSet<ObjectModifier> Modifiers { get; set; }
 

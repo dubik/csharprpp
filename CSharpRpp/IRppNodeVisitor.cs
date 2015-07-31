@@ -33,7 +33,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppRelationalBinOp node);
     }
 
-    class RppNodeVisitor : IRppNodeVisitor
+    public class RppNodeVisitor : IRppNodeVisitor
     {
         public virtual void Visit(RppVar node)
         {
