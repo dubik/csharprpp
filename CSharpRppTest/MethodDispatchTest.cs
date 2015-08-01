@@ -23,11 +23,27 @@ object Foo
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             MethodInfo func = fooTy.GetMethod("callWithNoArg", BindingFlags.Static | BindingFlags.Public);
             object res = func.Invoke(null, null);
-            Assert.AreEqual(10 , res);
+            Assert.AreEqual(10, res);
 
             func = fooTy.GetMethod("callWithOneArg", BindingFlags.Static | BindingFlags.Public);
             res = func.Invoke(null, null);
             Assert.AreEqual(13, res);
+        }
+
+        [TestMethod]
+        public void DefineGenericFunc()
+        {
+            const string code = @"
+object Foo
+{
+    def same[T](x : T) : T = x
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
+            MethodInfo same = fooTy.GetMethod("same", BindingFlags.Static | BindingFlags.Public);
+            MethodInfo intSame = same.MakeGenericMethod(new[] {typeof (int)});
+            object res = intSame.Invoke(null, new object[] {12});
+            Assert.AreEqual(res, 12);
         }
     }
 }

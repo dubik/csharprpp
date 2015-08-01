@@ -34,9 +34,11 @@ object Runtime
 }
 ";
             const string code = @"
-abstract class Foo
+object Bar
 {
-    def length: Int
+    def concat(args: Int*) : Int = {
+        args.length()
+    }
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

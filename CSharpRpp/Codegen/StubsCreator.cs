@@ -30,41 +30,29 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppFunc node)
         {
-            TypeBuilder builder = _class.RuntimeType as TypeBuilder;
-            Debug.Assert(builder != null, "builder != null");
+            MethodBuilder method = node.Builder;
+            
+            DefineReturnType(node, method);
+            DefineParams(method, node.Params, node.IsStatic);
 
-            MethodAttributes attrs = MethodAttributes.Private;
+            DefineAttributes(node, method);
 
-            if (node.IsPublic)
-            {
-                attrs = MethodAttributes.Public;
-            }
+            _funcBuilders.Add(node, method);
+        }
 
-            if (node.IsStatic)
-            {
-                attrs |= MethodAttributes.Static;
-            }
-            else
-            {
-                attrs |= MethodAttributes.Virtual;
-            }
-
-            if (node.IsAbstract)
-            {
-                attrs |= MethodAttributes.Abstract;
-            }
-
-            Type[] paramTypes = ParamTypes(node.Params);
-            node.Builder = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard, node.ReturnType.Runtime, paramTypes);
+        private static void DefineAttributes(RppFunc node, MethodBuilder method)
+        {
             if (node.IsVariadic)
             {
                 ConstructorInfo constructorInfo = typeof (ParamArrayAttribute).GetConstructor(Type.EmptyTypes);
                 Debug.Assert(constructorInfo != null, "constructorInfo != null");
-                node.Builder.SetCustomAttribute(constructorInfo, new byte[] {1, 0, 0, 0});
+                method.SetCustomAttribute(constructorInfo, new byte[] {1, 0, 0, 0});
             }
+        }
 
-            DefineParams(node.Builder, node.Params, node.IsStatic);
-            _funcBuilders.Add(node, node.Builder);
+        private static void DefineReturnType(RppFunc node, MethodBuilder method)
+        {
+            method.SetReturnType(node.ReturnType.Runtime);
         }
 
         private static Type[] ParamTypes([NotNull] IEnumerable<IRppParam> paramList)
@@ -72,13 +60,16 @@ namespace CSharpRpp.Codegen
             return paramList.Select(param => param.Type.Runtime).ToArray();
         }
 
-        private static void DefineParams(MethodBuilder methodBuilder, IEnumerable<IRppParam> rppParams, bool isStatic)
+        private static void DefineParams(MethodBuilder method, IRppParam[] rppParams, bool isStatic)
         {
+            Type[] paramTypes = ParamTypes(rppParams);
+            method.SetParameters(paramTypes);
+
             int index = isStatic ? 0 : 1;
             foreach (var param in rppParams)
             {
                 param.Index = index;
-                methodBuilder.DefineParameter(index, ParameterAttributes.None, param.Name);
+                method.DefineParameter(index, ParameterAttributes.None, param.Name);
                 index++;
             }
         }

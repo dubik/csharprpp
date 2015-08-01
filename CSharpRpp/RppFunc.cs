@@ -68,6 +68,8 @@ namespace CSharpRpp
 
         public bool IsVariadic { get; set; }
 
+        // TODO in RppFunc this modifiers are booleans and there is a separate set of modifiers, modifiers which
+        // came from parser should be separated
         public bool IsOverride
         {
             get { return Modifiers.Contains(ObjectModifier.OmOverride); }
@@ -76,6 +78,9 @@ namespace CSharpRpp
 
         public RppClass Class { get; set; }
         public HashSet<ObjectModifier> Modifiers { get; set; }
+
+        [NotNull]
+        public IList<RppVariantTypeParam> TypeParams { get; set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
@@ -110,6 +115,7 @@ namespace CSharpRpp
             ReturnType = returnType;
             Expr = expr;
             IsVariadic = Params.Any(param => param.IsVariadic);
+            TypeParams = Collections.NoVariantTypeParams;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -123,6 +129,7 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
             Params.ForEach(_scope.Add);
+            TypeParams.ForEach(_scope.Add);
 
             NodeUtils.Analyze(_scope, Params);
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);

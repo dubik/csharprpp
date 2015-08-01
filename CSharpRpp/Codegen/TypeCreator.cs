@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class TypeCreator : RppNodeVisitor
+    class TypeCreator : RppNodeVisitor
     {
         private readonly ModuleBuilder _module;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
@@ -19,20 +19,56 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppClass node)
         {
-            TypeAttributes attrs = ToTypeAttributes(node.Modifiers);
+            TypeAttributes attrs = GetTypeAttributes(node.Modifiers);
             TypeBuilder classType = _module.DefineType(node.GetNativeName(), attrs);
-            if (node.TypeParams != null && node.TypeParams.Count > 0)
-            {
-                var genericParams = node.TypeParams.Select(x => x.Name).ToArray();
-                GenericTypeParameterBuilder[] genericTypeBuilders = classType.DefineGenericParameters(genericParams);
-                node.TypeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index].AsType());
-            }
+            IList<RppVariantTypeParam> typeParams = node.TypeParams;
+            GenericsSupport.DefineGenericParams(typeParams, classType);
 
             _typeBuilders.Add(node, classType);
             node.RuntimeType = classType;
         }
 
-        private static TypeAttributes ToTypeAttributes(HashSet<ObjectModifier> modifiers)
+        public override void VisitEnter(RppFunc node)
+        {
+            TypeBuilder builder = node.Class.RuntimeType as TypeBuilder;
+            Debug.Assert(builder != null, "builder != null");
+
+            var attrs = GetMethodAttributes(node);
+
+            MethodBuilder method = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
+
+            GenericsSupport.DefineGenericParams(node.TypeParams, method);
+
+            node.Builder = method;
+        }
+
+        // TODO there is inconstistency between method and type attributes, should be fixed
+        private static MethodAttributes GetMethodAttributes(IRppFunc node)
+        {
+            MethodAttributes attrs = MethodAttributes.Private;
+
+            if (node.IsPublic)
+            {
+                attrs = MethodAttributes.Public;
+            }
+
+            if (node.IsStatic)
+            {
+                attrs |= MethodAttributes.Static;
+            }
+            else
+            {
+                attrs |= MethodAttributes.Virtual;
+            }
+
+            if (node.IsAbstract)
+            {
+                attrs |= MethodAttributes.Abstract;
+            }
+            return attrs;
+        }
+
+        private static TypeAttributes GetTypeAttributes(ICollection<ObjectModifier> modifiers)
         {
             TypeAttributes attrs = TypeAttributes.Class;
             if (modifiers.Contains(ObjectModifier.OmAbstract))

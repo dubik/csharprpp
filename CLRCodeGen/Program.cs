@@ -130,6 +130,18 @@ namespace CLRCodeGen
             var retType = clazz.MakeGenericType(new[] {typeof (int)});
             var method = clazz.DefineMethod("create", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, retType, null);
 
+            var sameMethod = clazz.DefineMethod("same", MethodAttributes.Static | MethodAttributes.Public);
+            var sameMethod2 = clazz.DefineMethod("same", MethodAttributes.Static | MethodAttributes.Public);
+            sameMethod.SetReturnType(typeof(void));
+            sameMethod2.SetParameters(new[]{typeof(int)});
+            sameMethod2.SetReturnType(typeof(int));
+
+            sameMethod.GetILGenerator().Emit(OpCodes.Ret);
+
+            var gen2 = sameMethod2.GetILGenerator();
+            gen2.Emit(OpCodes.Ldc_I4_0);
+            gen2.Emit(OpCodes.Ret);
+
             var constr = clazz.DefineDefaultConstructor(MethodAttributes.Public);
             var intParamConstr = clazz.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] {genericTType});
             intParamConstr.GetILGenerator().Emit(OpCodes.Ret);

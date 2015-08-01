@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
-    internal class QualifiedId
+    class QualifiedId
     {
         private string _text;
 
@@ -28,7 +28,7 @@ namespace CSharpRpp
         OmAbstract
     }
 
-    internal class UnexpectedTokenException : Exception
+    class UnexpectedTokenException : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
@@ -40,7 +40,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class SyntaxException : Exception
+    class SyntaxException : Exception
     {
         public IToken BadToken { get; private set; }
 
@@ -453,7 +453,7 @@ namespace CSharpRpp
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
-            IList<RppType> typeParams = ParseTypeParamClause();
+            IList<RppVariantTypeParam> typeParams = ParseTypeParams();
             IEnumerable<IRppParam> funcParams = ParseParamClauses();
             Expect(RppLexer.OP_Colon);
             RppType funcReturnType;
@@ -467,10 +467,10 @@ namespace CSharpRpp
                 SkipNewLines();
 
                 IRppExpr expr = ParseExpr();
-                return new RppFunc(name, funcParams, funcReturnType, expr) {Modifiers = modifiers};
+                return new RppFunc(name, funcParams, funcReturnType, expr) {Modifiers = modifiers, TypeParams = typeParams};
             }
 
-            return new RppFunc(name, funcParams, funcReturnType) {Modifiers = modifiers};
+            return new RppFunc(name, funcParams, funcReturnType) {Modifiers = modifiers, TypeParams = typeParams};
         }
 
 
