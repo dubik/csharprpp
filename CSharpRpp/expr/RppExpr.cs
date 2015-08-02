@@ -355,6 +355,11 @@ namespace CSharpRpp
         [NotNull]
         public IRppFunc Function { get; private set; }
 
+        public bool IsConstructorCall
+        {
+            get { return Name == "this"; }
+        }
+
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name)
         {
             ArgList = argList;

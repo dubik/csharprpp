@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace CSharpRpp.Codegen
@@ -38,7 +40,24 @@ namespace CSharpRpp.Codegen
                 ClrCodegen codegen = new ClrCodegen(body);
                 clazz.Constructor.Expr.Accept(codegen);
                 body.Emit(OpCodes.Ret);
+
+                clazz.Constructors.ForEach(c => CreateConstructor(typeBuilder, c));
             }
+        }
+
+        private static void CreateConstructor(TypeBuilder type, IRppFunc constructor)
+        {
+            Type[] paramTypes = ParamTypes(constructor.Params);
+            ConstructorBuilder constructorBuilder = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, paramTypes);
+            var body = constructorBuilder.GetILGenerator();
+            ClrCodegen codegen = new ClrCodegen(body);
+            constructor.Expr.Accept(codegen);
+            body.Emit(OpCodes.Ret);
+        }
+
+        private static Type[] ParamTypes([NotNull] IEnumerable<IRppParam> paramList)
+        {
+            return paramList.Select(param => param.Type.Runtime).ToArray();
         }
 
         private static void AssignConstructorParamIndex(IRppFunc constructor)

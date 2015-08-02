@@ -280,14 +280,25 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                if (!node.Function.IsStatic)
+                // Probably makes more sense to make RppConstructorCall ast, instead of boolean
+                if (node.IsConstructorCall)
                 {
-                    _body.Emit(OpCodes.Ldarg_0); // push this
+                    _body.Emit(OpCodes.Ldarg_0);
+                    node.Args.ForEach(arg => arg.Accept(this));
+                    var constructor = node.Function.ConstructorInfo ?? node.Function.ConstructorBuilder;
+                    _body.Emit(OpCodes.Call, constructor);
                 }
+                else
+                {
+                    if (!node.Function.IsStatic)
+                    {
+                        _body.Emit(OpCodes.Ldarg_0); // push this
+                    }
 
-                node.Args.ForEach(arg => arg.Accept(this));
-                OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                _body.Emit(callInst, node.Function.RuntimeType);
+                    node.Args.ForEach(arg => arg.Accept(this));
+                    OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                    _body.Emit(callInst, node.Function.RuntimeType);
+                }
             }
         }
 

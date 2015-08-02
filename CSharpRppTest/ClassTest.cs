@@ -300,7 +300,7 @@ abstract class Foo
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [ExpectedException(typeof (SemanticException))]
         public void MissingAbstractMethodShouldThrowAnException()
         {
             const string code = @"
@@ -328,6 +328,21 @@ class Foo
 }
 ";
             Utils.ParseAndCreateType(code, "Foo");
+        }
+
+        [TestMethod]
+        public void SecondaryConstructor()
+        {
+            const string code = @"
+class Foo(length: Int)
+{
+    def this() = this(10)
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            ConstructorInfo[] constructors = fooTy.GetConstructors();
+            Assert.AreEqual(2, constructors.Length);
         }
     }
 }

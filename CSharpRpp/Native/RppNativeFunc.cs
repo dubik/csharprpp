@@ -47,6 +47,11 @@ namespace CSharpRpp.Native
             set { throw new NotImplementedException(); }
         }
 
+        public bool IsConstructor
+        {
+            get { return ConstructorInfo != null || ConstructorBuilder != null; }
+        }
+
         public RppClass Class { get; set; }
 
         public RppNativeFunc(ConstructorInfo constructorInfo) : base(constructorInfo.Name)

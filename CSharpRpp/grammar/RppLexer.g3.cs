@@ -33,7 +33,6 @@ namespace CSharpRpp
             {KW_Return, "return"},
             {KW_Sealed, "sealed"},
             {KW_Super, "super"},
-            {KW_This, "this"},
             {KW_Throw, "throw"},
             {KW_Trait, "trait"},
             {KW_Try, "try"},

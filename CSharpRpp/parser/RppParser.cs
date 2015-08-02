@@ -453,13 +453,20 @@ namespace CSharpRpp
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
-            IList<RppVariantTypeParam> typeParams = ParseTypeParams();
-            IEnumerable<IRppParam> funcParams = ParseParamClauses();
-            Expect(RppLexer.OP_Colon);
-            RppType funcReturnType;
-            if (!ParseType(out funcReturnType))
+            IList<RppVariantTypeParam> typeParams = Collections.NoVariantTypeParams;
+            if (name != "this")
             {
-                throw new Exception("Expecting type but got " + _lastToken);
+                typeParams = ParseTypeParams();
+            }
+            IEnumerable<IRppParam> funcParams = ParseParamClauses();
+            RppType funcReturnType = RppPrimitiveType.UnitTy;
+            if (name != "this")
+            {
+                Expect(RppLexer.OP_Colon);
+                if (!ParseType(out funcReturnType))
+                {
+                    throw new Exception("Expecting type but got " + _lastToken);
+                }
             }
 
             if (Require(RppLexer.OP_Eq))

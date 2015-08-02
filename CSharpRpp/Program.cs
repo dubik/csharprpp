@@ -34,9 +34,14 @@ object Runtime
 }
 ";
             const string code = @"
-object Foo
+class Foo(var k : Int)
 {
-    def main() : Unit = throw new Exception()
+    k = 13
+}
+
+object Main
+{
+    def main() : Foo = new Foo(1)
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

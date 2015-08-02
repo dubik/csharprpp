@@ -29,6 +29,7 @@ namespace CSharpRpp
         bool IsAbstract { get; set; }
         bool IsVariadic { get; set; }
         bool IsOverride { get; set; }
+        bool IsConstructor { get; }
 
         RppClass Class { get; set; }
         ConstructorInfo ConstructorInfo { get; set; }
@@ -75,6 +76,11 @@ namespace CSharpRpp
         {
             get { return Modifiers.Contains(ObjectModifier.OmOverride); }
             set { throw new NotImplementedException(); }
+        }
+
+        public bool IsConstructor
+        {
+            get { return Name == "this"; }
         }
 
         public RppClass Class { get; set; }

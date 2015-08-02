@@ -63,6 +63,8 @@ namespace CSharpRpp
 
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
+        public IList<IRppFunc> Constructors { get; private set; }
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -74,18 +76,21 @@ namespace CSharpRpp
 
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
 
-        public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams, [NotNull] IEnumerable<IRppNode> classBody, RppBaseConstructorCall baseConstructorCall) : base(name)
+        public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams,
+            [NotNull] IEnumerable<IRppNode> classBody, RppBaseConstructorCall baseConstructorCall) : base(name)
         {
             Kind = kind;
             BaseConstructorCall = baseConstructorCall;
             _classParams = classParams;
 
             IEnumerable<IRppNode> rppNodes = classBody as IList<IRppNode> ?? classBody.ToList();
-            _funcs = rppNodes.OfType<IRppFunc>().ToList();
+            _funcs = rppNodes.OfType<IRppFunc>().Where(f => !f.IsConstructor).ToList();
             _funcs.ForEach(DefineFunc);
             _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
             TypeParams = Collections.NoVariantTypeParams;
             Modifiers = modifiers;
+
+            Constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
         }
 
         private void DefineFunc(IRppFunc func)
@@ -131,6 +136,12 @@ namespace CSharpRpp
             _fields = NodeUtils.Analyze(Scope, _fields);
             Constructor.Analyze(constructorScope);
 
+            // Add all constructors to scope, so that they can be accessed by each other
+            Constructors.ForEach(Scope.Add);
+            Scope.Add(Constructor);
+
+            Constructors = NodeUtils.Analyze(constructorScope, Constructors);
+
             _funcs = NodeUtils.Analyze(Scope, _funcs);
 
             return this;
@@ -152,7 +163,7 @@ namespace CSharpRpp
             assignExprs.AddRange(exprs);
             assignExprs.Add(CreateParentConstructorCall());
 
-            return new RppFunc(Name, p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
+            return new RppFunc("this", p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
         }
 
 
