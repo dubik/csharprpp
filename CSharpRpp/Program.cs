@@ -34,17 +34,9 @@ object Runtime
 }
 ";
             const string code = @"
-object Bar
+object Foo
 {
-    def concat(x: Int, y : Float) : Int = {
-        10
-    }
-}
-
-class Foo
-{
-    def oneArg(x: Int) : Int = 10
-    def twoArgs(x: Int, y: String) : String = ""Hello""
+    def main() : Unit = throw new Exception()
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
@@ -102,6 +94,8 @@ class Foo
                     throw new Exception(string.Format("Can't find {0} class from runtime assembly", clazz.Name));
                 }
             }
+
+            scope.Add(new RppNativeClass(typeof (Exception)));
         }
 
         private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, RppScope scope)

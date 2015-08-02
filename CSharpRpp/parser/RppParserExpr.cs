@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Antlr.Runtime;
+using CSharpRpp.Expr;
 
 namespace CSharpRpp
 {
@@ -26,6 +28,12 @@ namespace CSharpRpp
             if (Require(RppLexer.KW_Return))
             {
                 throw new Exception("Return not supported");
+            }
+
+            if (Require(RppLexer.KW_Throw))
+            {
+                IToken throwToken = _lastToken;
+                return new RppThrow(ParseExpr()) {Token = throwToken};
             }
 
             return ParsePostfixExpr(0);

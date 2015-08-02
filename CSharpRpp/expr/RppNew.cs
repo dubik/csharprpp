@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Emit;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
@@ -14,7 +13,7 @@ namespace CSharpRpp
         public Type RuntimeType { get; private set; }
 
         [NotNull]
-        public RppClass RefClass { get; private set; }
+        public IRppClass RefClass { get; private set; }
 
         public IEnumerable<RppType> ArgumentTypes { get; private set; }
 
@@ -57,7 +56,7 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, _constructorsParams);
 
-            var refClass = scope.Lookup(_typeName) as RppClass;
+            var refClass = scope.Lookup(_typeName) as IRppClass;
             Debug.Assert(refClass != null);
             RefClass = refClass;
 

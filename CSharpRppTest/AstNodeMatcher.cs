@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CSharpRpp;
+using CSharpRpp.Expr;
 
 namespace CSharpRppTest
 {
@@ -137,6 +138,10 @@ namespace CSharpRppTest
         }
 
         public void Visit(RppRelationalBinOp node)
+        {
+        }
+
+        public void Visit(RppThrow node)
         {
         }
     }

@@ -81,6 +81,7 @@
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Exceptions\SemanticException.cs" />
     <Compile Include="Expr\ImplicitCast.cs" />
+    <Compile Include="Expr\RppThrow.cs" />
     <Compile Include="Expr\TypeInference.cs" />
     <Compile Include="IRppNamedNodeExtensions.cs" />
     <Compile Include="Parser\FuncValidator.cs" />

@@ -5,6 +5,7 @@ using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.Codegen;
+using CSharpRpp.Native;
 using CSharpRpp.Semantics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,21 +16,21 @@ namespace CSharpRppTest
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
             RppProgram program = Parse(code);
-            var assembly = CodeGen(program);
+            var assembly = CodeGen(program, null);
             return typesNames.Select(assembly.GetType);
         }
 
-        public static Type ParseAndCreateType(string code, string typeName)
+        public static Type ParseAndCreateType(string code, string typeName, Type additionalType = null)
         {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, typeName);
+            var fooTy = CodeGenAndGetType(program, typeName, additionalType);
             return fooTy;
         }
 
-        public static Type CodeGenAndGetType(RppProgram program, string typeName)
+        public static Type CodeGenAndGetType(RppProgram program, string typeName, Type additionalType)
         {
-            var assembly = CodeGen(program);
+            var assembly = CodeGen(program, additionalType);
             Type arrayTy = assembly.GetType(typeName);
             Assert.IsNotNull(arrayTy);
             return arrayTy;
@@ -38,13 +39,18 @@ namespace CSharpRppTest
         public static RppProgram ParseAndAnalyze(string code)
         {
             RppProgram program = Parse(code);
-            CodeGen(program);
+            CodeGen(program, null);
             return program;
         }
 
-        public static Assembly CodeGen(RppProgram program)
+        public static Assembly CodeGen(RppProgram program, Type additionalType)
         {
             RppScope scope = new RppScope(null);
+            if (additionalType != null)
+            {
+                scope.Add(new RppNativeClass(additionalType));
+            }
+
             CodeGenerator generator = new CodeGenerator(program);
             program.PreAnalyze(scope);
             generator.PreGenerate();

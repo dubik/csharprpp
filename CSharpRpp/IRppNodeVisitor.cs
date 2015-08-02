@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using CSharpRpp.Expr;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -31,6 +32,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppLogicalBinOp node);
         void Visit([NotNull] RppArithmBinOp node);
         void Visit([NotNull] RppRelationalBinOp node);
+        void Visit([NotNull] RppThrow node);
     }
 
     public class RppNodeVisitor : IRppNodeVisitor
@@ -84,6 +86,10 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppRelationalBinOp node)
+        {
+        }
+
+        public virtual void Visit(RppThrow node)
         {
         }
 

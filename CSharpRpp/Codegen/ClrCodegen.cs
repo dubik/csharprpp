@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using CSharpRpp.Exceptions;
+using CSharpRpp.Expr;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
@@ -397,7 +398,8 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                _body.Emit(OpCodes.Newobj, constructorBuilder);
+                // TODO RppNativeClass don't have constructor builders, they have constructorinfo instead, fix this
+                _body.Emit(OpCodes.Newobj, constructorBuilder ?? node.RefClass.Constructor.ConstructorInfo);
             }
         }
 
@@ -448,6 +450,12 @@ namespace CSharpRpp.Codegen
             node.Body.Accept(this);
             _body.Emit(OpCodes.Br_S, enterLoop);
             _body.MarkLabel(exitLoop);
+        }
+
+        public override void Visit(RppThrow node)
+        {
+            node.Expr.Accept(this);
+            _body.Emit(OpCodes.Throw);
         }
     }
 }

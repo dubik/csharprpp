@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace CSharpRpp.Native
 {
-    class RppNativeClass : RppNamedNode, IRppClass
+    public class RppNativeClass : RppNamedNode, IRppClass
     {
         public IEnumerable<IRppFunc> Functions { get; private set; }
         public IRppFunc Constructor { get; private set; }
