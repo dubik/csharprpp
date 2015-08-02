@@ -50,6 +50,7 @@
     <Compile Include="AstNodeMatcher.cs" />
     <Compile Include="ClassTest.cs" />
     <Compile Include="CodeGenTest.cs" />
+    <Compile Include="ExceptionsTest.cs" />
     <Compile Include="FuncTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />
     <Compile Include="MethodDispatchTest.cs" />

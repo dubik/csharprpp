@@ -14,10 +14,10 @@ namespace CSharpRpp.Native
         public IRppExpr Expr
         {
             get { throw new NotImplementedException(); }
-            private set { throw new NotImplementedException(); }
         }
 
         public MethodInfo RuntimeType { get; set; }
+        public ConstructorInfo ConstructorInfo { get; set; }
         public MethodBuilder Builder { get; set; }
         public ConstructorBuilder ConstructorBuilder { get; set; }
 
@@ -48,6 +48,15 @@ namespace CSharpRpp.Native
         }
 
         public RppClass Class { get; set; }
+
+        public RppNativeFunc(ConstructorInfo constructorInfo) : base(constructorInfo.Name)
+        {
+            ConstructorInfo = constructorInfo;
+            ReturnType = RppPrimitiveType.UnitTy;
+            Params = constructorInfo.GetParameters().Select(CreateRppParam).ToArray();
+            RuntimeReturnType = ReturnType.Runtime;
+            IsVariadic = constructorInfo.GetParameters().Any(IsParamVariadic);
+        }
 
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)
         {

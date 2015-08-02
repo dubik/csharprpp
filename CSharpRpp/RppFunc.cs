@@ -31,6 +31,7 @@ namespace CSharpRpp
         bool IsOverride { get; set; }
 
         RppClass Class { get; set; }
+        ConstructorInfo ConstructorInfo { get; set; }
     }
 
     public class RppFunc : RppNamedNode, IRppFunc
@@ -77,6 +78,7 @@ namespace CSharpRpp
         }
 
         public RppClass Class { get; set; }
+        public ConstructorInfo ConstructorInfo { get; set; }
         public HashSet<ObjectModifier> Modifiers { get; set; }
 
         [NotNull]

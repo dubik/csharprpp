@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
 
@@ -489,7 +490,7 @@ namespace CSharpRpp
     {
         public string BaseClassName { get; private set; }
 
-        public RppClass BaseClass { get; private set; }
+        public IRppClass BaseClass { get; private set; }
 
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs);
 
@@ -505,17 +506,21 @@ namespace CSharpRpp
 
         public void ResolveBaseClass(RppScope scope)
         {
-            if (BaseClassName == "Object")
+            switch (BaseClassName)
             {
-                BaseClass = new RppClass(ClassKind.Class, "Object");
-            }
-            else
-            {
-                BaseClass = (RppClass) scope.Lookup(BaseClassName);
-                if (BaseClass == null)
-                {
-                    throw new Exception(string.Format("Can't find {0} class", BaseClassName));
-                }
+                case "Object":
+                    BaseClass = new RppClass(ClassKind.Class, "Object");
+                    break;
+                case "Exception":
+                    BaseClass = new RppNativeClass(typeof (Exception));
+                    break;
+                default:
+                    BaseClass = (RppClass) scope.Lookup(BaseClassName);
+                    if (BaseClass == null)
+                    {
+                        throw new Exception(string.Format("Can't find {0} class", BaseClassName));
+                    }
+                    break;
             }
         }
 

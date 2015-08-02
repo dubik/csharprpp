@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
-using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -16,6 +15,12 @@ namespace CSharpRpp
     public interface IRppClass : IRppNamedNode
     {
         IEnumerable<IRppFunc> Functions { get; }
+
+        [NotNull]
+        IRppFunc Constructor { get; }
+
+        Type RuntimeType { get; }
+        RppClassScope Scope { get; }
     }
 
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
@@ -37,7 +42,6 @@ namespace CSharpRpp
             get { return _funcs.AsEnumerable(); }
         }
 
-        [NotNull]
         public IRppFunc Constructor { get; private set; }
 
         [NotNull]

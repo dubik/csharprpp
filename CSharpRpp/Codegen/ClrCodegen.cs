@@ -298,6 +298,9 @@ namespace CSharpRpp.Codegen
                 ? typeof (Object).GetConstructor(Type.EmptyTypes)
                 : node.BaseClass.Constructor.ConstructorBuilder;
 
+            if (constructor == null)
+                constructor = node.BaseClass.Constructor.ConstructorInfo;
+
             Debug.Assert(constructor != null, "constructor != null");
             _body.Emit(OpCodes.Call, constructor);
         }
@@ -384,7 +387,7 @@ namespace CSharpRpp.Codegen
         {
             node.Args.ForEach(arg => arg.Accept(this));
             ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder;
-            ;
+
             if (node.TypeArgs.Any())
             {
                 var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();

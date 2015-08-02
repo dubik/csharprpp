@@ -364,6 +364,11 @@ namespace CSharpRpp
                 return RppNativeType.Create(typeof (String));
             }
 
+            if (Name == "Exception")
+            {
+                return RppNativeType.Create(typeof (Exception));
+            }
+
             if (Name == "Any")
             {
                 return RppNativeType.Create(typeof (Object));
