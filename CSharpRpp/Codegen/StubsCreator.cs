@@ -10,7 +10,6 @@ namespace CSharpRpp.Codegen
 {
     class StubsCreator : RppNodeVisitor
     {
-        private RppClass _class;
         private readonly Dictionary<RppFunc, MethodBuilder> _funcBuilders;
 
         public StubsCreator(Dictionary<RppFunc, MethodBuilder> funcBuilders)
@@ -18,20 +17,10 @@ namespace CSharpRpp.Codegen
             _funcBuilders = funcBuilders;
         }
 
-        public override void VisitEnter(RppClass node)
-        {
-            _class = node;
-        }
-
-        public override void VisitExit(RppClass node)
-        {
-            _class = null;
-        }
-
         public override void VisitEnter(RppFunc node)
         {
             MethodBuilder method = node.Builder;
-            
+
             DefineReturnType(node, method);
             DefineParams(method, node.Params, node.IsStatic);
 
@@ -65,10 +54,10 @@ namespace CSharpRpp.Codegen
             Type[] paramTypes = ParamTypes(rppParams);
             method.SetParameters(paramTypes);
 
-            int index = isStatic ? 0 : 1;
+            int index = 1;
             foreach (var param in rppParams)
             {
-                param.Index = index;
+                param.Index = isStatic ? index - 1 : index; // In static args should start from 1
                 method.DefineParameter(index, ParameterAttributes.None, param.Name);
                 index++;
             }

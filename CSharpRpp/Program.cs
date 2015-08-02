@@ -36,9 +36,15 @@ object Runtime
             const string code = @"
 object Bar
 {
-    def concat(args: Int*) : Int = {
-        args.length()
+    def concat(x: Int, y : Float) : Int = {
+        10
     }
+}
+
+class Foo
+{
+    def oneArg(x: Int) : Int = 10
+    def twoArgs(x: Int, y: String) : String = ""Hello""
 }
 ";
             RppProgram runtime = Parse(runtimeCode);
