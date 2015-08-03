@@ -43,5 +43,31 @@ object Foo
                 throw e.InnerException;
             }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void ThrowSystemExceptionWithMessage()
+        {
+            const string code = @"
+object Foo
+{
+    def main : Unit = throw new Exception(""Hello"")
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Exception));
+            Assert.IsNotNull(fooTy);
+            MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            Assert.IsNotNull(mainMethod);
+            try
+            {
+                mainMethod.Invoke(null, null);
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual("Hello", e.InnerException.Message);
+                throw e.InnerException;
+            }
+        }
+
     }
 }

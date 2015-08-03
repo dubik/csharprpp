@@ -24,7 +24,7 @@ namespace CSharpRpp
         {
         }
 
-        private static void Main(string[] args)
+        private static void Main()
         {
             const string runtimeCode = @"
 object Runtime
@@ -34,14 +34,14 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo(var k : Int)
+class Foo(val length: Int)
 {
-    k = 13
+    def this() = this(13)
 }
 
 object Main
 {
-    def main() : Foo = new Foo(1)
+    def main : Foo = new Foo
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

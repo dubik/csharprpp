@@ -16,31 +16,18 @@ namespace RppRuntime
         }
     }
 
-    public class Human
+    public class Foo
     {
-        public virtual int getId()
-        {
-            return 10;
-        }
-    }
+        public int length;
 
-    public class Person : Human
-    {
-        public override int getId()
+        public Foo() : this(13)
         {
-            return 13;
         }
 
-        public static int getGlobalId()
+        public Foo(int length)
         {
-            Human person = new Person();
-            return person.getId();
+            this.length = length;
         }
-    }
-
-    public class OneFieldClass<T>
-    {
-        public T MyField;
     }
 
 
@@ -55,15 +42,6 @@ namespace RppRuntime
         public K SecondValue;
     }
 
-    public class OneFieldFactory
-    {
-        public static void Create()
-        {
-            var k = new OneFieldClass<int>();
-            var l = new OneFieldClass<string>();
-            var p = new OneFieldClass<Element>();
-        }
-    }
 
     public class Element
     {

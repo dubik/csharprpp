@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
@@ -31,25 +30,37 @@ namespace CSharpRpp.Codegen
             {
                 RppClass clazz = pair.Key;
                 TypeBuilder typeBuilder = pair.Value;
-                var fieldsType = clazz.ClassParams.Select(f => f.Type.Runtime);
-                ConstructorBuilder builder = GenerateConstructor(typeBuilder, fieldsType);
-                clazz.Constructor.ConstructorBuilder = builder;
-                AssignConstructorParamIndex(clazz.Constructor);
 
-                ILGenerator body = builder.GetILGenerator();
-                ClrCodegen codegen = new ClrCodegen(body);
-                clazz.Constructor.Expr.Accept(codegen);
-                body.Emit(OpCodes.Ret);
-
-                clazz.Constructors.ForEach(c => CreateConstructor(typeBuilder, c));
+                // Constructor may call each other, so we should create stub first, and the generate code
+                clazz.Constructors.ForEach(c => CreateConstructorStubs(typeBuilder, c));
+                clazz.Constructors.ForEach(CreateConstructorBody);
             }
         }
 
-        private static void CreateConstructor(TypeBuilder type, IRppFunc constructor)
+
+        private static void CreateConstructorStubs(TypeBuilder type, IRppFunc constructor)
         {
-            Type[] paramTypes = ParamTypes(constructor.Params);
+            var constructorParams = constructor.Params;
+            Type[] paramTypes = ParamTypes(constructorParams);
             ConstructorBuilder constructorBuilder = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, paramTypes);
-            var body = constructorBuilder.GetILGenerator();
+            constructor.ConstructorBuilder = constructorBuilder;
+
+            DefineParams(constructorParams, constructorBuilder);
+            AssignConstructorParamIndex(constructor);
+        }
+
+        private static void DefineParams(IEnumerable<IRppParam> constructorParams, ConstructorBuilder constructorBuilder)
+        {
+            int index = 1;
+            foreach (var param in constructorParams)
+            {
+                constructorBuilder.DefineParameter(index++, ParameterAttributes.None, RppClass.StringConstructorArgName(param.Name));
+            }
+        }
+
+        private static void CreateConstructorBody(IRppFunc constructor)
+        {
+            var body = constructor.ConstructorBuilder.GetILGenerator();
             ClrCodegen codegen = new ClrCodegen(body);
             constructor.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
@@ -67,12 +78,6 @@ namespace CSharpRpp.Codegen
             {
                 param.Index = index++;
             }
-        }
-
-        private static ConstructorBuilder GenerateConstructor(TypeBuilder typeBuilder, IEnumerable<Type> fieldsType)
-        {
-            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, fieldsType.ToArray());
-            return constructorBuilder;
         }
     }
 }

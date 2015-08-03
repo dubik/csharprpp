@@ -280,7 +280,7 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                // Probably makes more sense to make RppConstructorCall ast, instead of boolean
+                // TODO Probably makes more sense to make RppConstructorCall ast, instead of boolean
                 if (node.IsConstructorCall)
                 {
                     _body.Emit(OpCodes.Ldarg_0);
@@ -398,19 +398,19 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNew node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            ConstructorBuilder constructorBuilder = node.RefClass.Constructor.ConstructorBuilder;
+            IRppFunc constructor = node.Constructor;
 
             if (node.TypeArgs.Any())
             {
                 var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();
                 Type specializedType = node.RefClass.RuntimeType.MakeGenericType(genericArgs);
-                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructorBuilder);
+                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructor.ConstructorBuilder);
                 _body.Emit(OpCodes.Newobj, specializedConstr);
             }
             else
             {
                 // TODO RppNativeClass don't have constructor builders, they have constructorinfo instead, fix this
-                _body.Emit(OpCodes.Newobj, constructorBuilder ?? node.RefClass.Constructor.ConstructorInfo);
+                _body.Emit(OpCodes.Newobj, constructor.ConstructorBuilder ?? constructor.ConstructorInfo);
             }
         }
 

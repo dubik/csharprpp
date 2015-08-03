@@ -29,9 +29,10 @@ namespace CSharpRpp.Parser
 
     public class OverloadQuery
     {
+        // TODO may be name is not required, it accepts overloads anyway
         [NotNull]
         public static IEnumerable<IRppFunc> Find([NotNull] String name, [NotNull] IEnumerable<RppType> argTypes,
-            [NotNull] IReadOnlyCollection<IRppFunc> overloads)
+            [NotNull] IEnumerable<IRppFunc> overloads)
         {
             var argTypesArray = argTypes.ToArray();
 

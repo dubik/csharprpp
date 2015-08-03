@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Parser;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
@@ -33,6 +34,8 @@ namespace CSharpRpp
 
         private readonly IList<RppVariantTypeParam> _typeArgs;
 
+        public IRppFunc Constructor { get; private set; }
+
         public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
         {
             _typeName = typeName;
@@ -61,6 +64,16 @@ namespace CSharpRpp
             RefClass = refClass;
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
+
+            // Find correct constructor
+            var constructors = RefClass.Constructors;
+            var candidates = OverloadQuery.Find("this", Args.Select(a => a.Type), constructors).ToList();
+            if (candidates.Count() != 1)
+            {
+                throw new Exception("Can't figure out which overload to use");
+            }
+
+            Constructor = candidates[0];
 
             Type = CreateType();
 

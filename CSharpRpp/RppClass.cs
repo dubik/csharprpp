@@ -16,8 +16,12 @@ namespace CSharpRpp
     {
         IEnumerable<IRppFunc> Functions { get; }
 
+        [Obsolete("Use Constructors instead")]
         [NotNull]
         IRppFunc Constructor { get; }
+
+        [NotNull]
+        IEnumerable<IRppFunc> Constructors { get; }
 
         Type RuntimeType { get; }
         RppClassScope Scope { get; }
@@ -26,6 +30,7 @@ namespace CSharpRpp
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
+        private const string _constrparam = "constrparam";
         private IList<IRppFunc> _funcs;
         private IList<RppField> _fields = Collections.NoFields;
         private IList<RppField> _classParams = Collections.NoFields;
@@ -63,15 +68,21 @@ namespace CSharpRpp
 
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
-        public IList<IRppFunc> Constructors { get; private set; }
+        private IList<IRppFunc> _constructors;
+
+        public IEnumerable<IRppFunc> Constructors
+        {
+            get { return _constructors.AsEnumerable(); }
+        }
 
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
             _funcs = Collections.NoFuncs;
-            Constructor = CreateConstructor(Collections.NoExprs);
+            Constructor = CreatePrimaryConstructor(Collections.NoExprs);
             TypeParams = Collections.NoVariantTypeParams;
             Modifiers = Collections.NoModifiers;
+            _constructors = Collections.NoFuncs;
         }
 
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
@@ -90,7 +101,7 @@ namespace CSharpRpp
             TypeParams = Collections.NoVariantTypeParams;
             Modifiers = modifiers;
 
-            Constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
+            _constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
         }
 
         private void DefineFunc(IRppFunc func)
@@ -130,17 +141,16 @@ namespace CSharpRpp
 
             RppScope constructorScope = new RppScope(Scope);
             _classParams.ForEach(constructorScope.Add);
-            Constructor = CreateConstructor(_constrExprs);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams);
             _fields = NodeUtils.Analyze(Scope, _fields);
-            Constructor.Analyze(constructorScope);
 
+            Constructor = CreatePrimaryConstructor(_constrExprs);
+            _constructors.Add(Constructor);
             // Add all constructors to scope, so that they can be accessed by each other
             Constructors.ForEach(Scope.Add);
-            Scope.Add(Constructor);
 
-            Constructors = NodeUtils.Analyze(constructorScope, Constructors);
+            _constructors = NodeUtils.Analyze(constructorScope, _constructors);
 
             _funcs = NodeUtils.Analyze(Scope, _funcs);
 
@@ -148,7 +158,7 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        private RppFunc CreateConstructor(IEnumerable<IRppExpr> exprs)
+        private RppFunc CreatePrimaryConstructor(IEnumerable<IRppExpr> exprs)
         {
             var p = _classParams.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type));
             List<IRppNode> assignExprs = new List<IRppNode>();
@@ -176,10 +186,15 @@ namespace CSharpRpp
         {
             if (_fields.Any(field => field.Name == baseName))
             {
-                return "constrparam" + baseName;
+                return _constrparam + baseName;
             }
 
             return baseName;
+        }
+
+        public static string StringConstructorArgName(string name)
+        {
+            return name.StartsWith(_constrparam) ? name.Substring(_constrparam.Length) : name;
         }
 
         private IRppExpr CreateParentConstructorCall()

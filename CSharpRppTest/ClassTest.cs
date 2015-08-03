@@ -344,5 +344,28 @@ class Foo(length: Int)
             ConstructorInfo[] constructors = fooTy.GetConstructors();
             Assert.AreEqual(2, constructors.Length);
         }
+
+        [TestMethod]
+        public void CreateObjectWithSecondaryConstructor()
+        {
+            const string code = @"
+class Foo(val length: Int)
+{
+    def this() = this(13)
+}
+
+object Main
+{
+    def main : Foo = new Foo
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var fooInst = mainMethod.Invoke(null, null);
+            FieldInfo lengthField = fooInst.GetType().GetField("length");
+            var length = lengthField.GetValue(fooInst);
+            Assert.AreEqual(13, length);
+        }
     }
 }
