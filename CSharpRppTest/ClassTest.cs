@@ -174,7 +174,7 @@ class Foo(k : Int)
         }
 
         [TestMethod]
-        public void TestParentConstructorCalled()
+        public void TestParentPrimaryConstructorCalled()
         {
             const string code = @"
 class Foo(var k : Int)
@@ -192,7 +192,31 @@ object Main
         inst.k
     }
 }
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
+            var res = getMethod.Invoke(null, null);
+            Assert.AreEqual(13, res);
+        }
 
+        [TestMethod]
+        public void TestParentSecondayConstructorCalled()
+        {
+            const string code = @"
+class Foo(var k: Int)
+{
+    def this() = this(27)
+}
+
+class Bar extends Foo
+
+object Main
+{
+    def get() : Int = {
+        val inst : Foo = new Bar
+        inst.k
+    }
+}
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);

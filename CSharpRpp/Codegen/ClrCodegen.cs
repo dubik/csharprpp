@@ -285,7 +285,7 @@ namespace CSharpRpp.Codegen
                 {
                     _body.Emit(OpCodes.Ldarg_0);
                     node.Args.ForEach(arg => arg.Accept(this));
-                    var constructor = node.Function.ConstructorInfo ?? node.Function.ConstructorBuilder;
+                    var constructor = node.Function.ConstructorInfo;
                     _body.Emit(OpCodes.Call, constructor);
                 }
                 else
@@ -306,14 +306,8 @@ namespace CSharpRpp.Codegen
         {
             _body.Emit(OpCodes.Ldarg_0);
             node.Args.ForEach(arg => arg.Accept(this));
-            ConstructorInfo constructor = node.BaseClassName == "Object"
-                ? typeof (Object).GetConstructor(Type.EmptyTypes)
-                : node.BaseClass.Constructor.ConstructorBuilder;
-
-            if (constructor == null)
-                constructor = node.BaseClass.Constructor.ConstructorInfo;
-
-            Debug.Assert(constructor != null, "constructor != null");
+            ConstructorInfo constructor = node.BaseConstructor.ConstructorInfo;
+            Debug.Assert(constructor != null, "constructor != null, we should have figure out which constructor to use before");
             _body.Emit(OpCodes.Call, constructor);
         }
 
@@ -404,13 +398,13 @@ namespace CSharpRpp.Codegen
             {
                 var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();
                 Type specializedType = node.RefClass.RuntimeType.MakeGenericType(genericArgs);
-                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructor.ConstructorBuilder);
+                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructor.ConstructorInfo);
                 _body.Emit(OpCodes.Newobj, specializedConstr);
             }
             else
             {
                 // TODO RppNativeClass don't have constructor builders, they have constructorinfo instead, fix this
-                _body.Emit(OpCodes.Newobj, constructor.ConstructorBuilder ?? constructor.ConstructorInfo);
+                _body.Emit(OpCodes.Newobj, constructor.ConstructorInfo);
             }
         }
 

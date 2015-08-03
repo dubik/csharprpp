@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
@@ -497,6 +498,8 @@ namespace CSharpRpp
 
         public IRppClass BaseClass { get; private set; }
 
+        public IRppFunc BaseConstructor { get; private set; }
+
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs);
 
         public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList) : base("ctor()", argList)
@@ -514,7 +517,7 @@ namespace CSharpRpp
             switch (BaseClassName)
             {
                 case "Object":
-                    BaseClass = new RppClass(ClassKind.Class, "Object");
+                    BaseClass = new RppNativeClass(typeof(Object));
                     break;
                 case "Exception":
                     BaseClass = new RppNativeClass(typeof (Exception));
@@ -533,17 +536,24 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList);
 
-            bool castRequired;
-            List<IRppParam> constructorParams = BaseClass.Constructor.Params.ToList();
-            List<RppType> args = Args.Select(a => a.Type).ToList();
-            if (!OverloadQuery.SignatureMatched(args, constructorParams, out castRequired))
-            {
-                throw new Exception("Can't find correct constructor");
-            }
+            IEnumerable<RppType> args = Args.Select(a => a.Type);
+
+            BaseConstructor = FindMatchingConstructor(args);
 
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             return this;
+        }
+
+        private IRppFunc FindMatchingConstructor(IEnumerable<RppType> args)
+        {
+            var matchedConstructors = OverloadQuery.Find("this", args, BaseClass.Constructors).ToList();
+            if (matchedConstructors.Count != 1)
+            {
+                throw new Exception("Can't find correct constructor");
+            }
+
+            return matchedConstructors[0];
         }
     }
 

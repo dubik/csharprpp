@@ -54,7 +54,7 @@ namespace CSharpRpp.Native
 
         public RppClass Class { get; set; }
 
-        public RppNativeFunc(ConstructorInfo constructorInfo) : base(constructorInfo.Name)
+        public RppNativeFunc(ConstructorInfo constructorInfo) : base("this")
         {
             ConstructorInfo = constructorInfo;
             ReturnType = RppPrimitiveType.UnitTy;

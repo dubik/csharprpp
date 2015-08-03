@@ -31,17 +31,22 @@ object Runtime
 {
     def println(line: String) : Unit = { }
     def printFormat(format: String, args: Any*) : Unit = { }
-}
+} 
 ";
             const string code = @"
-class Foo(val length: Int)
+class Foo(var k: Int)
 {
-    def this() = this(13)
+    def this() = this(27)
 }
+
+class Bar extends Foo
 
 object Main
 {
-    def main : Foo = new Foo
+    def get() : Int = {
+        val inst : Foo = new Bar
+        inst.k
+    }
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

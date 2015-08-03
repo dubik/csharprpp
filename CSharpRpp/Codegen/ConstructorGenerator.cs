@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -43,7 +44,7 @@ namespace CSharpRpp.Codegen
             var constructorParams = constructor.Params;
             Type[] paramTypes = ParamTypes(constructorParams);
             ConstructorBuilder constructorBuilder = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, paramTypes);
-            constructor.ConstructorBuilder = constructorBuilder;
+            constructor.ConstructorInfo = constructorBuilder;
 
             DefineParams(constructorParams, constructorBuilder);
             AssignConstructorParamIndex(constructor);
@@ -60,7 +61,9 @@ namespace CSharpRpp.Codegen
 
         private static void CreateConstructorBody(IRppFunc constructor)
         {
-            var body = constructor.ConstructorBuilder.GetILGenerator();
+            ConstructorBuilder builder = constructor.ConstructorInfo as ConstructorBuilder;
+            Debug.Assert(builder != null, "builder != null");
+            var body = builder.GetILGenerator();
             ClrCodegen codegen = new ClrCodegen(body);
             constructor.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
