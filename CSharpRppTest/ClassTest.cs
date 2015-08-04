@@ -221,7 +221,7 @@ object Main
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
             var res = getMethod.Invoke(null, null);
-            Assert.AreEqual(13, res);
+            Assert.AreEqual(27, res);
         }
 
         [TestMethod]

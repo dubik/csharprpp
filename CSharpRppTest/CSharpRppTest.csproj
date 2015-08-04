@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="AstNodeMatcher.cs" />
     <Compile Include="ClassTest.cs" />
+    <Compile Include="ClosuresTest.cs" />
     <Compile Include="CodeGenTest.cs" />
     <Compile Include="ExceptionsTest.cs" />
     <Compile Include="FuncTest.cs" />
@@ -67,6 +68,10 @@
     <ProjectReference Include="..\CSharpRpp\CSharpRpp.csproj">
       <Project>{7fd873e7-cfd5-4023-8ef1-39682e068423}</Project>
       <Name>CSharpRpp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RppRuntime\RppRuntime.csproj">
+      <Project>{05d46799-2874-40de-966b-a49b50eeb74e}</Project>
+      <Name>RppRuntime</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

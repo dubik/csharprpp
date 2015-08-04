@@ -144,5 +144,9 @@ namespace CSharpRppTest
         public void Visit(RppThrow node)
         {
         }
+
+        public void Visit(RppNull node)
+        {
+        }
     }
 }

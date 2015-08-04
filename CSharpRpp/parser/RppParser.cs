@@ -5,7 +5,7 @@ using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
-    class QualifiedId
+    internal class QualifiedId
     {
         private string _text;
 
@@ -28,7 +28,7 @@ namespace CSharpRpp
         OmAbstract
     }
 
-    class UnexpectedTokenException : Exception
+    internal class UnexpectedTokenException : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
@@ -40,7 +40,7 @@ namespace CSharpRpp
         }
     }
 
-    class SyntaxException : Exception
+    internal class SyntaxException : Exception
     {
         public IToken BadToken { get; private set; }
 
@@ -614,6 +614,59 @@ namespace CSharpRpp
                 }
 
                 type = new RppTypeName(typeName);
+                return true;
+            }
+
+            if (Require(RppLexer.OP_LParen))
+            {
+                bool closingParenRequired = true;
+                RppType returnType;
+                IList<RppType> paramTypes = new List<RppType>();
+                while (true)
+                {
+                    if (Require(RppLexer.OP_RParen))
+                    {
+                        closingParenRequired = false;
+                        break;
+                    }
+
+                    if (Peek(RppLexer.OP_Follow))
+                    {
+                        break;
+                    }
+
+                    if (paramTypes.Count > 0)
+                    {
+                        Expect(RppLexer.OP_Comma);
+                    }
+
+                    RppType paramType;
+                    if (ParseType(out paramType))
+                    {
+                        paramTypes.Add(paramType);
+                    }
+                    else
+                    {
+                        throw new Exception("Expected type but got " + _lastToken.Text);
+                    }
+                }
+
+                Expect(RppLexer.OP_Follow);
+
+                if (!ParseType(out returnType))
+                {
+                    throw new Exception("Expected type but got " + _lastToken.Text);
+                }
+
+                if (closingParenRequired)
+                {
+                    Expect(RppLexer.OP_RParen);
+                }
+
+                RppGenericType closureType = new RppGenericType("Function" + paramTypes.Count);
+                paramTypes.ForEach(closureType.AddParam);
+                closureType.AddParam(returnType);
+                type = closureType;
                 return true;
             }
 

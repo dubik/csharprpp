@@ -71,7 +71,7 @@ namespace RppRuntime
         }
     }
 
-    class StackRoot<T>
+    internal class StackRoot<T>
     {
         public virtual StackRoot<T> Push(T element)
         {
@@ -89,7 +89,7 @@ namespace RppRuntime
         }
     }
 
-    class StackNext<T> : StackRoot<T>
+    internal class StackNext<T> : StackRoot<T>
     {
         private readonly T _element;
         private readonly StackRoot<T> _previous;

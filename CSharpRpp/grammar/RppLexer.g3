@@ -51,6 +51,7 @@ OP_Comma : ',';
 OP_LParen : '(';
 OP_RParen : ')';
 OP_Colon : ':';
+OP_Follow : '=>';
 OP_Eq : '=';
 OP_Dot : '.';
 OP_Star : '*';

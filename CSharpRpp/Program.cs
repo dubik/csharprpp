@@ -34,18 +34,11 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(var k: Int)
+object Bar
 {
-    def this() = this(27)
-}
-
-class Bar extends Foo
-
-object Main
-{
-    def get() : Int = {
-        val inst : Foo = new Bar
-        inst.k
+    def main : Int = {
+        var k : (Int, Int) => Int = null
+        10
     }
 }
 ";
@@ -106,6 +99,12 @@ object Main
             }
 
             scope.Add(new RppNativeClass(typeof (Exception)));
+            scope.Add(new RppNativeClass(typeof (Function0<>)));
+            scope.Add(new RppNativeClass(typeof (Function1<,>)));
+            scope.Add(new RppNativeClass(typeof (Function2<,,>)));
+            scope.Add(new RppNativeClass(typeof (Function3<,,,>)));
+            scope.Add(new RppNativeClass(typeof (Function4<,,,,>)));
+            scope.Add(new RppNativeClass(typeof (Function5<,,,,,>)));
         }
 
         private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, RppScope scope)

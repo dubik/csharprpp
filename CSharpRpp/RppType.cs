@@ -296,16 +296,34 @@ namespace CSharpRpp
                 return RppNativeType.Create(subType.Runtime.MakeArrayType());
             }
 
-            var paramType = _params.Select(param => param.Resolve(scope)).Select(param => param.Runtime).ToArray();
-            IRppNamedNode node = scope.Lookup(_typeName.Name);
-            if (node is RppClass)
+            Type[] paramType = _params.Select(param => param.Resolve(scope)).Select(param => param.Runtime).ToArray();
+            IRppNamedNode node = LookupGenericType(_typeName.Name, paramType.Length, scope);
+            if (node is IRppClass)
             {
-                RppClass obj = node as RppClass;
+                IRppClass obj = node as IRppClass;
                 Type specializedType = obj.RuntimeType.MakeGenericType(paramType);
                 return RppNativeType.Create(specializedType);
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// C# generates names of generic classes based on signature, e.g. Foo[T] is Foo`1
+        /// </summary>
+        /// <param name="name">base name of class, e.g. "Foo"</param>
+        /// <param name="genericArgCount">how many generic arguments</param>
+        /// <param name="scope">scope where to look</param>
+        /// <returns></returns>
+        private static IRppNamedNode LookupGenericType(string name, int genericArgCount, RppScope scope)
+        {
+            IRppNamedNode node = scope.Lookup(name);
+            if (node != null)
+            {
+                return node;
+            }
+
+            return scope.Lookup(name + '`' + genericArgCount); // 1 accounts for return type
         }
 
         public override string ToString()
