@@ -16,10 +16,6 @@ namespace CSharpRpp
     {
         IEnumerable<IRppFunc> Functions { get; }
 
-        [Obsolete("Use Constructors instead")]
-        [NotNull]
-        IRppFunc Constructor { get; }
-
         [NotNull]
         IEnumerable<IRppFunc> Constructors { get; }
 
