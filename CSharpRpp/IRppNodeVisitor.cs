@@ -34,6 +34,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppRelationalBinOp node);
         void Visit([NotNull] RppThrow node);
         void Visit([NotNull] RppNull node);
+        void Visit([NotNull] RppClosure node);
     }
 
     public class RppNodeVisitor : IRppNodeVisitor
@@ -95,6 +96,10 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppNull node)
+        {
+        }
+
+        public virtual void Visit(RppClosure node)
         {
         }
 

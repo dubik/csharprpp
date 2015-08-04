@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Antlr.Runtime;
+using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
-    internal class QualifiedId
+    class QualifiedId
     {
         private string _text;
 
@@ -28,7 +29,7 @@ namespace CSharpRpp
         OmAbstract
     }
 
-    internal class UnexpectedTokenException : Exception
+    class UnexpectedTokenException : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
@@ -40,7 +41,7 @@ namespace CSharpRpp
         }
     }
 
-    internal class SyntaxException : Exception
+    class SyntaxException : Exception
     {
         public IToken BadToken { get; private set; }
 
@@ -511,6 +512,66 @@ namespace CSharpRpp
             }
 
             return funcParams;
+        }
+
+        public bool ParseBindings([CanBeNull] out IEnumerable<IRppParam> bindings)
+        {
+            bindings = null;
+
+            if (!Require(RppLexer.OP_LParen))
+            {
+                return false;
+            }
+
+            var list = new List<IRppParam>();
+            while (true)
+            {
+                RppParam funcParam;
+                if (ParseBinding(out funcParam))
+                {
+                    list.Add(funcParam);
+                }
+                else
+                {
+                    break;
+                }
+
+                if (!Require(RppLexer.OP_Comma))
+                {
+                    break;
+                }
+            }
+
+            if (!Require(RppLexer.OP_RParen))
+            {
+                return false;
+            }
+
+            bindings = list;
+            return true;
+        }
+
+        private bool ParseBinding(out RppParam binding)
+        {
+            binding = null;
+            if (!Require(RppLexer.Id))
+            {
+                return false;
+            }
+
+            string name = _lastToken.Text;
+
+            RppType type = RppUndefinedType.Instance;
+            if (Require(RppLexer.OP_Colon))
+            {
+                if (!ParseType(out type))
+                {
+                    throw new Exception("Expected type but got " + _lastToken.Text);
+                }
+            }
+
+            binding = new RppParam(name, type);
+            return true;
         }
 
         //param ::= {Annotation} id [‘:’ ParamType] [‘=’ Expr]

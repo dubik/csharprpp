@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
@@ -18,6 +19,22 @@ namespace CSharpRpp.Codegen
         // inst.myField - selector with RppId, so when it generates field access it wants to
         // load 'this', which is wrong, because 'inst' already loaded
         private bool _inSelector;
+
+        private TypeBuilder _typeBuilder;
+
+        private readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
+        {
+            {"+", OpCodes.Add},
+            {"-", OpCodes.Sub},
+            {"*", OpCodes.Mul},
+            {"/", OpCodes.Div}
+        };
+
+        private bool _logicalGen;
+        private Label _trueLabel;
+        private Label _exitLabel;
+        private LocalBuilder _logicalTemp;
+        private int closureId;
 
         public ClrCodegen()
         {
@@ -36,6 +53,8 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             Console.WriteLine("Genering class: " + node.Name);
+            _typeBuilder = node.RuntimeType as TypeBuilder;
+            closureId = 1;
         }
 
         private readonly Regex typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
@@ -116,11 +135,6 @@ namespace CSharpRpp.Codegen
         };
 
 
-        private bool _logicalGen;
-        private Label _trueLabel;
-        private Label _exitLabel;
-        private LocalBuilder _logicalTemp;
-
         public override void Visit(RppLogicalBinOp node)
         {
             bool firstPass = !_logicalGen;
@@ -187,13 +201,6 @@ namespace CSharpRpp.Codegen
             ClrCodegenUtils.LoadLocal(tempVar, _body);
         }
 
-        private readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
-        {
-            {"+", OpCodes.Add},
-            {"-", OpCodes.Sub},
-            {"*", OpCodes.Mul},
-            {"/", OpCodes.Div}
-        };
 
         public override void Visit(RppArithmBinOp node)
         {
@@ -466,6 +473,39 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNull node)
         {
             _body.Emit(OpCodes.Ldnull);
+        }
+
+        public override void Visit(RppClosure node)
+        {
+            Type[] argTypes = node.Bindings.Select(p => p.Type.Runtime).ToArray();
+            TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (closureId++),
+                TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
+                typeof (Object),
+                new[] {node.Type.Runtime});
+            MethodBuilder applyMethod = closureClass.DefineMethod("apply",
+                MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
+                CallingConventions.Standard);
+            applyMethod.SetParameters(argTypes);
+            applyMethod.SetReturnType(node.ReturnType.Runtime);
+
+            int index = 1;
+            foreach (var param in node.Bindings)
+            {
+                applyMethod.DefineParameter(index, ParameterAttributes.None, param.Name);
+                param.Index = index++;
+            }
+
+            ILGenerator body = applyMethod.GetILGenerator();
+            ClrCodegen codegen = new ClrCodegen(body);
+            node.Expr.Accept(codegen);
+            body.Emit(OpCodes.Ret);
+
+
+            ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Private);
+            Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
+            _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
+            closureClass.CreateType();
+            
         }
     }
 }

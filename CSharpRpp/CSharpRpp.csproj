@@ -101,6 +101,7 @@
     <Compile Include="RppClass.cs" />
     <Compile Include="Expr\RppExpr.cs" />
     <Compile Include="RppClassScope.cs" />
+    <Compile Include="RppClosure.cs" />
     <Compile Include="RppField.cs" />
     <Compile Include="RppFunc.cs" />
     <Compile Include="RppNamedNode.cs" />

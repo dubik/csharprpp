@@ -148,5 +148,9 @@ namespace CSharpRppTest
         public void Visit(RppNull node)
         {
         }
+
+        public void Visit(RppClosure node)
+        {
+        }
     }
 }

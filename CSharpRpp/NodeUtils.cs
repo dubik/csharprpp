@@ -21,7 +21,7 @@ namespace CSharpRpp
             }
         }
 
-        public static IList<T> Analyze<T>(RppScope parentScope, IList<T> nodes) where T : class, IRppNode
+        public static IList<T> Analyze<T>(RppScope parentScope, IEnumerable<T> nodes) where T : class, IRppNode
         {
             return nodes.Select(rppClass =>
             {

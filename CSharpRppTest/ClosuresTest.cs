@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RppRuntime;
 
@@ -18,7 +19,25 @@ object Bar
     }
 }
 ";
-            Type barTy = Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
+            Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
+        }
+
+        [TestMethod]
+        public void ParseSimpleClosure()
+        {
+            const string code = @"
+object Bar
+{
+    def main() : Int = {
+        var k: (Int, Int) => Boolean = (x: Int, y: Int) => x < y
+        10
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
+            Assert.IsNotNull(barTy);
+            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            Assert.IsNotNull(mainMethod);
         }
     }
 }

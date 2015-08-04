@@ -10,6 +10,19 @@ namespace CSharpRpp
     {
         public IRppExpr ParseExpr()
         {
+            // TODO scala parser does it in a better way, it doesn't backtrack, just accomulates comma
+            // separated things and when it notice => it creates a closure. Doing backtracking here is quite heavy task
+            int rememberedPos = _stream.Mark();
+            IEnumerable<IRppParam> bindings;
+            if (ParseBindings(out bindings) && Peek(RppLexer.OP_Follow))
+            {
+                _stream.Release(rememberedPos);
+                Consume(); // '=>'
+                IRppExpr body = ParseExpr();
+                return new RppClosure(bindings, body);
+            }
+
+            _stream.Rewind(rememberedPos);
             return ParseExpr1();
         }
 

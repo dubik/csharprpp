@@ -102,6 +102,11 @@ namespace CSharpRpp
         }
     }
 
+    public sealed class RppUndefinedType : ResolvedType
+    {
+        public static RppUndefinedType Instance = new RppUndefinedType();
+    }
+
     public sealed class RppNativeType : ResolvedType
     {
         [NotNull]
@@ -112,6 +117,11 @@ namespace CSharpRpp
 
         private RppNativeType()
         {
+        }
+
+        public override string ToString()
+        {
+            return Runtime.ToString();
         }
     }
 
@@ -131,7 +141,7 @@ namespace CSharpRpp
 
         public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
         public static RppPrimitiveType CharTy = new RppPrimitiveType(ERppPrimitiveType.EChar);
-        public static RppPrimitiveType BoolTy = new RppPrimitiveType(ERppPrimitiveType.EBool);
+        public static RppPrimitiveType BooleanTy = new RppPrimitiveType(ERppPrimitiveType.EBool);
         public static RppPrimitiveType ShortTy = new RppPrimitiveType(ERppPrimitiveType.EShort);
         public static RppPrimitiveType IntTy = new RppPrimitiveType(ERppPrimitiveType.EInt);
         public static RppPrimitiveType LongTy = new RppPrimitiveType(ERppPrimitiveType.ELong);
@@ -140,7 +150,7 @@ namespace CSharpRpp
 
         private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
         {
-            {"Bool", BoolTy},
+            {"Boolean", BooleanTy},
             {"Char", CharTy},
             {"Short", ShortTy},
             {"Int", IntTy},
@@ -251,21 +261,6 @@ namespace CSharpRpp
             var makeArrayType = runtime.MakeArrayType();
             Runtime = makeArrayType;
             return this;
-        }
-    }
-
-    internal class RppClassBuilder
-    {
-        private string _name;
-
-        public RppClassBuilder(string name)
-        {
-            _name = name;
-        }
-
-        public static RppClassBuilder Create(string name)
-        {
-            return new RppClassBuilder(name);
         }
     }
 

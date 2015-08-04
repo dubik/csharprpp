@@ -6,6 +6,7 @@ namespace CSharpRpp
     {
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
+            Type = RppPrimitiveType.UnitTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
