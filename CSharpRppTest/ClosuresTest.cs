@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RppRuntime;
 
@@ -29,7 +28,7 @@ object Bar
 object Bar
 {
     def main() : Int = {
-        var k: (Int, Int) => Boolean = (x: Int, y: Int) => x < y
+        var func: (Int, Int) => Boolean = (x: Int, y: Int) => x < y
         10
     }
 }
@@ -38,6 +37,25 @@ object Bar
             Assert.IsNotNull(barTy);
             MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             Assert.IsNotNull(mainMethod);
+        }
+
+        [TestMethod]
+        public void CallClosure()
+        {
+            const string code = @"
+object Bar
+{
+    def main() : Int = {
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        func(10, 13)
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
+            Assert.IsNotNull(barTy);
+            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(23, res);
         }
     }
 }

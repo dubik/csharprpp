@@ -14,7 +14,7 @@ namespace CSharpRpp.Native
 
         public RppNativeClass(Type classType) : base(classType.Name)
         {
-            MethodInfo[] methods = classType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+            MethodInfo[] methods = classType.GetMethods();
             Constructors = classType.GetConstructors().Select(CreateConstructor).ToList();
             Functions = methods.Select(CreateFunc).ToList();
             RuntimeType = classType;

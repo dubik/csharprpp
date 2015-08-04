@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
@@ -417,15 +419,37 @@ namespace CSharpRpp
             }
             else
             {
-                RppClass obj = scope.LookupObject(Name);
-                var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
-                if (factoryFuncs.Count == 0)
+                IRppNamedNode node = scope.Lookup(Name);
+                if (node is IRppExpr) // () applied to expression, so it could be closure
                 {
-                    throw new Exception("Companion object doesn't have apply() with required signature");
-                }
+                    IRppExpr expr = node as IRppExpr;
 
-                IRppFunc matchedFunc = factoryFuncs[0];
-                return new RppFuncCall(matchedFunc.Name, ArgList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
+                    if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
+                    {
+                        RppNativeClass nativeClass = new RppNativeClass(expr.Type.Runtime);
+                        candidates = OverloadQuery.Find("apply", Args.Select(a => a.Type), nativeClass.Functions).ToList();
+                        if (candidates.Count != 1)
+                        {
+                            throw new Exception("Can't figure out which overload to use");
+                        }
+
+                        var applyFunction = candidates.First();
+                        return new RppSelector(new RppId(((RppMember) expr).Name, (RppMember) expr),
+                            new RppFuncCall("apply", ArgList) {Function = applyFunction, Type = applyFunction.ReturnType});
+                    }
+                }
+                else
+                {
+                    RppClass obj = scope.LookupObject(Name);
+                    var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
+                    if (factoryFuncs.Count == 0)
+                    {
+                        throw new Exception("Companion object doesn't have apply() with required signature");
+                    }
+
+                    IRppFunc matchedFunc = factoryFuncs[0];
+                    return new RppFuncCall(matchedFunc.Name, ArgList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
+                }
             }
 
             return this;
@@ -771,7 +795,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

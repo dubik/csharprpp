@@ -36,8 +36,9 @@ object Runtime
             const string code = @"
 object Bar
 {
-    def main : Unit = {
-        var k : (Int, Int) => Int = (x: Int, y: Int) => x + y
+    def main() : Int = {
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        func(10, 13)
     }
 }
 ";

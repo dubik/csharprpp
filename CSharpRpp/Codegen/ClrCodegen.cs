@@ -75,7 +75,8 @@ namespace CSharpRpp.Codegen
                     throw;
                 }
 
-                throw new SemanticException(string.Format("Method '{0}' in class '{1}' does not have an implementation", groups[0], groups[1]));
+                string msg = string.Format("Method '{0}' in class '{1}' does not have an implementation", groups[0], groups[1]);
+                throw new SemanticException(msg);
             }
 
             Console.WriteLine("Generated class");
@@ -270,6 +271,7 @@ namespace CSharpRpp.Codegen
             {
                 return OpCodes.Stelem_R4;
             }
+
             return OpCodes.Stelem_Ref;
         }
 
@@ -297,7 +299,7 @@ namespace CSharpRpp.Codegen
                 }
                 else
                 {
-                    if (!node.Function.IsStatic)
+                    if (!node.Function.IsStatic && !_inSelector)
                     {
                         _body.Emit(OpCodes.Ldarg_0); // push this
                     }
@@ -501,7 +503,7 @@ namespace CSharpRpp.Codegen
             body.Emit(OpCodes.Ret);
 
 
-            ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Private);
+            ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Public);
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
             closureClass.CreateType();
