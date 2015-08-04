@@ -241,7 +241,7 @@ namespace CSharpRpp
             }
             else if (Require(RppLexer.KW_Null))
             {
-                throw new Exception("Null is not implemented yet");
+                expr = new RppNull();
             }
             else
             {

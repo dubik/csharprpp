@@ -462,5 +462,10 @@ namespace CSharpRpp.Codegen
             node.Expr.Accept(this);
             _body.Emit(OpCodes.Throw);
         }
+
+        public override void Visit(RppNull node)
+        {
+            _body.Emit(OpCodes.Ldnull);
+        }
     }
 }

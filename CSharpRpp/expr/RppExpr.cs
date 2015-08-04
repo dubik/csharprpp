@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
@@ -26,6 +25,19 @@ namespace CSharpRpp
         public RppType Type
         {
             get { return RppPrimitiveType.UnitTy; }
+        }
+    }
+
+    public class RppNull : RppNode, IRppExpr
+    {
+        public RppType Type
+        {
+            get { return RppNullType.Instance; }
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
         }
     }
 
@@ -517,7 +529,7 @@ namespace CSharpRpp
             switch (BaseClassName)
             {
                 case "Object":
-                    BaseClass = new RppNativeClass(typeof(Object));
+                    BaseClass = new RppNativeClass(typeof (Object));
                     break;
                 case "Exception":
                     BaseClass = new RppNativeClass(typeof (Exception));

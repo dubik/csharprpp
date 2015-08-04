@@ -92,6 +92,16 @@ namespace CSharpRpp
         }
     }
 
+    public sealed class RppNullType : ResolvedType
+    {
+        public static RppNullType Instance = new RppNullType();
+
+        private RppNullType()
+        {
+            Runtime = typeof (object);
+        }
+    }
+
     public sealed class RppNativeType : ResolvedType
     {
         [NotNull]
