@@ -40,9 +40,22 @@ namespace CSharpRpp
 
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
-            var resolvedType = Type.Resolve(scope);
-            Debug.Assert(resolvedType != null);
-            Type = resolvedType;
+            // ReSharper disable once PossibleUnintendedReferenceComparison
+            if (Type == RppUndefinedType.Instance)
+            {
+                if (InitExpr is RppEmptyExpr)
+                {
+                    throw new Exception("Type is not specified but also initializing expression is missing, I give up");
+                }
+
+                Type = InitExpr.Type;
+            }
+            else
+            {
+                var resolvedType = Type.Resolve(scope);
+                Debug.Assert(resolvedType != null);
+                Type = resolvedType;
+            }
 
             if (!(InitExpr is RppEmptyExpr))
             {
@@ -51,7 +64,7 @@ namespace CSharpRpp
 
             return this;
         }
-
+         
         #region Equality
 
         protected bool Equals(RppVar other)

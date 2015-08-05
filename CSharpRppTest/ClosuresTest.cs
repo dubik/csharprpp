@@ -57,5 +57,27 @@ object Bar
             var res = mainMethod.Invoke(null, null);
             Assert.AreEqual(23, res);
         }
+
+        [TestMethod]
+        public void PassClosureAsAParam()
+        {
+            const string code = @"
+object Bar
+{
+    def invoker(func: (Int, Int) => Int) : Int = {
+        func(10, 24)
+    }
+
+    def main() : Int = {
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        invoker(func)
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
+            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(34, res);
+        }
     }
 }

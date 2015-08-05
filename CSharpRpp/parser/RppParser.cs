@@ -596,22 +596,27 @@ namespace CSharpRpp
             return true;
         }
 
-        // PatDef ::= Pattern2 {',' Pattern2} [':' Type] '=' Expr
+        // PatDef ::= Pattern2 {',' Pattern2} [':' Type] ['=' Expr]
         public RppVar ParsePatDef(MutabilityFlag mutabilityFlag)
         {
             Expect(RppLexer.Id);
             string varId = _lastToken.Text;
 
-            Expect(RppLexer.OP_Colon);
-            RppType type;
-            if (!ParseType(out type))
+            RppType type = RppUndefinedType.Instance;
+            if (Require(RppLexer.OP_Colon))
             {
-                throw new Exception("Expected type after ':' but got " + _lastToken.Text);
+                if (!ParseType(out type))
+                {
+                    throw new Exception("Expected type after ':' but got " + _lastToken.Text);
+                }
             }
 
-            Expect(RppLexer.OP_Eq);
+            IRppExpr expr = RppEmptyExpr.Instance;
+            if (Require(RppLexer.OP_Eq))
+            {
+                expr = ParseExpr();
+            }
 
-            IRppExpr expr = ParseExpr();
             return new RppVar(mutabilityFlag, varId, type, expr);
         }
 
