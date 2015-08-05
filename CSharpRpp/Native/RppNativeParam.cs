@@ -13,5 +13,10 @@ namespace CSharpRpp.Native
             Type = RppNativeType.Create(paramType);
             IsVariadic = variadic;
         }
+
+        public IRppParam CloneWithNewType(RppType newType)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

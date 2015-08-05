@@ -45,5 +45,21 @@ object Foo
             Assert.AreEqual(23, ret);
         }
 
+        [TestMethod]
+        public void FigureOutTypeOfClosureBasedVariableType()
+        {
+            const string code = @"
+object Foo
+{
+    def main() : (Int => Int) = {
+        val func : (Int => Int) = (x) => x + 10
+        func
+    }
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Function1<,>));
+            var mainMethod = fooTy.GetMethod("main", BindingFlags.Public | BindingFlags.Static);
+            var res = mainMethod.Invoke(null, null);
+        }
     }
 }

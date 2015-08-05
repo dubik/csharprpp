@@ -20,10 +20,10 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            RppScope _scope = new RppScope(scope);
-            Bindings.ForEach(_scope.Add);
-            NodeUtils.Analyze(_scope, Bindings);
-            Expr = NodeUtils.AnalyzeNode(_scope, Expr);
+            RppScope closureScope = new RppScope(scope);
+            Bindings.ForEach(closureScope.Add);
+            NodeUtils.Analyze(closureScope, Bindings);
+            Expr = NodeUtils.AnalyzeNode(closureScope, Expr);
 
             ReturnType = Expr.Type;
 

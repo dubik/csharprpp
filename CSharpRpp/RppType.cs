@@ -26,6 +26,16 @@ namespace CSharpRpp
             return type == typeof (int) || type == typeof (long) || type == typeof (float) || type == typeof (double) || type == typeof (short) ||
                    type == typeof (byte) || type == typeof (char);
         }
+
+        public static bool IsUndefined(this RppType type)
+        {
+            return type is RppUndefinedType;
+        }
+
+        public static bool IsDefined(this RppType type)
+        {
+            return !type.IsUndefined();
+        }
     }
 
     public class Types
@@ -266,6 +276,11 @@ namespace CSharpRpp
 
     public class RppGenericType : RppType
     {
+        public IEnumerable<RppType> Params
+        {
+            get { return _params.AsEnumerable(); }
+        }
+
         private readonly IList<RppType> _params = new List<RppType>();
 
         private readonly RppTypeName _typeName;

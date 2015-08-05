@@ -37,7 +37,7 @@ object Runtime
 object Foo
 {
     def main() : (Int => Int) = {
-        val func = (x: Int) => x + 10
+        val func : (Int => Int) = (x) => x + 10
         func
     }
 }

@@ -242,6 +242,8 @@ namespace CSharpRpp
     {
         int Index { get; set; }
         bool IsVariadic { get; set; }
+
+        IRppParam CloneWithNewType(RppType newType);
     }
 
     [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
@@ -270,6 +272,11 @@ namespace CSharpRpp
             Debug.Assert(resolvedType != null, "Can't resolve type");
             Type = resolvedType;
             return this;
+        }
+
+        public IRppParam CloneWithNewType(RppType newType)
+        {
+            return new RppParam(Name, newType, IsVariadic);
         }
     }
 }
