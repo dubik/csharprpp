@@ -19,7 +19,6 @@ namespace CSharpRpp
 
     public interface IRppExpr : IRppStatementExpr
     {
-        [NotNull]
         RppType Type { get; }
     }
 

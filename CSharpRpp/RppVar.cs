@@ -40,7 +40,7 @@ namespace CSharpRpp
                 scope.Add(this);
             }
 
-            InitExpr = ReplaceUndefinedClosureTypesIfNeeded(InitExpr);
+            InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
 
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
@@ -67,30 +67,6 @@ namespace CSharpRpp
             }
 
             return this;
-        }
-
-
-        [NotNull]
-        private IRppExpr ReplaceUndefinedClosureTypesIfNeeded([NotNull] IRppExpr expr)
-        {
-            if (expr is RppClosure)
-            {
-                RppClosure closure = (RppClosure) expr;
-                var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type.IsUndefined());
-                if (Type.IsDefined() && hasUndefinedClosureBinding)
-                {
-                    if (Type is RppGenericType)
-                    {
-                        RppGenericType varType = (RppGenericType) Type;
-                        var newBindings = varType.Params.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
-                        return new RppClosure(newBindings, closure.Expr);
-                    }
-
-                    throw new NotSupportedException("Only RppGenericType is supported at the moment");
-                }
-            }
-
-            return expr;
         }
 
         #region Equality

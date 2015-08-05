@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -105,6 +107,40 @@ namespace CSharpRpp
             Debug.Fail("Not done yet");
 
             return null;
+        }
+
+        [NotNull]
+        public static IRppExpr ReplaceUndefinedClosureTypesIfNeeded([NotNull] IRppExpr expr, RppType targetType)
+        {
+            if (expr is RppClosure)
+            {
+                RppClosure closure = (RppClosure) expr;
+                var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type.IsUndefined());
+                if (targetType.IsDefined() && hasUndefinedClosureBinding)
+                {
+                    if (targetType is RppGenericType)
+                    {
+                        RppGenericType varType = (RppGenericType) targetType;
+                        var newBindings = varType.Params.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
+                        return new RppClosure(newBindings, closure.Expr);
+                    }
+
+                    if (targetType is RppNativeType)
+                    {
+                        Type[] genericTypes = targetType.Runtime.GetGenericArguments();
+
+                        var newBindings =
+                            genericTypes.Take(genericTypes.Length - 1) // -1 is for return type
+                                .Zip(closure.Bindings, (genArg, binding) => binding.CloneWithNewType(RppNativeType.Create(genArg)))
+                                .ToList();
+                        return new RppClosure(newBindings, closure.Expr);
+                    }
+
+                    throw new NotSupportedException("Only RppGenericType is supported at the moment");
+                }
+            }
+
+            return expr;
         }
     }
 }

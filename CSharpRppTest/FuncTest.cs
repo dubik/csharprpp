@@ -19,12 +19,12 @@ namespace CSharpRppTest
         {
             var args = new List<RppType> {RppPrimitiveType.IntTy};
             var func1 = new RppFunc("create", new List<RppParam> {_intX}, RppPrimitiveType.UnitTy);
-            var results = OverloadQuery.Find("create", args, new List<IRppFunc> {func1}).ToList();
+            var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func1, results.First());
 
             var func2 = new RppFunc("create", RppPrimitiveType.UnitTy);
-            results = OverloadQuery.Find("create", Enumerable.Empty<RppType>(), new List<IRppFunc> {func2}).ToList();
+            results = OverloadQuery.Find(Enumerable.Empty<RppType>(), new List<IRppFunc> {func2}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func2, results.First());
         }
@@ -37,12 +37,12 @@ namespace CSharpRppTest
             var func2 = new RppFunc("create", new List<RppParam> {_intX, _intY}, RppPrimitiveType.UnitTy);
             var func3 = new RppFunc("create", new List<RppParam> {_intX, _floatY}, RppPrimitiveType.UnitTy);
 
-            var results = OverloadQuery.Find("create", args, new List<IRppFunc> {func1, func2, func3}).ToList();
+            var results = OverloadQuery.Find(args, new List<IRppFunc> {func1, func2, func3}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func2, results.First());
 
             args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.FloatTy};
-            results = OverloadQuery.Find("create", args, new List<IRppFunc> {func1, func2, func3}).ToList();
+            results = OverloadQuery.Find(args, new List<IRppFunc> {func1, func2, func3}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func3, results.First());
         }
@@ -53,7 +53,7 @@ namespace CSharpRppTest
             // def create(ids: Int*) : Unit
             var func1 = new RppFunc("create", new List<RppParam> {_varArgIntX}, RppPrimitiveType.UnitTy);
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
-            var results = OverloadQuery.Find("create", args, new List<IRppFunc> {func1}).ToList();
+            var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func1, results.First());
         }
@@ -64,7 +64,7 @@ namespace CSharpRppTest
             // def create(id: Int, ids: Int*) : Unit
             var func1 = new RppFunc("create", new List<RppParam> {_intX, _varArgIntX}, RppPrimitiveType.UnitTy);
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
-            var results = OverloadQuery.Find("create", args, new List<IRppFunc> {func1}).ToList();
+            var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func1, results.First());
         }

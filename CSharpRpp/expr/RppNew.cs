@@ -67,7 +67,7 @@ namespace CSharpRpp
 
             // Find correct constructor
             var constructors = RefClass.Constructors;
-            var candidates = OverloadQuery.Find("this", Args.Select(a => a.Type), constructors).ToList();
+            var candidates = OverloadQuery.Find(Args.Select(a => a.Type), constructors).ToList();
             if (candidates.Count() != 1)
             {
                 throw new Exception("Can't figure out which overload to use");

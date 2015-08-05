@@ -29,22 +29,39 @@ namespace CSharpRpp.Parser
 
     public class OverloadQuery
     {
-        // TODO may be name is not required, it accepts overloads anyway
+        public delegate bool TypesComparator<in T>(T source, RppType target);
+
+        public delegate bool CanCast<in T>(T source, RppType target);
+
+        public static bool DefaultTypesComparator(RppType source, RppType target)
+        {
+            return source.Equals(target);
+        }
+
+        public static bool DefaultCanCast(RppType source, RppType target)
+        {
+            return ImplicitCast.CanCast(source, target);
+        }
+
         [NotNull]
-        public static IEnumerable<IRppFunc> Find([NotNull] String name, [NotNull] IEnumerable<RppType> argTypes,
-            [NotNull] IEnumerable<IRppFunc> overloads)
+        public static IEnumerable<IRppFunc> Find([NotNull] IEnumerable<RppType> argTypes, [NotNull] IEnumerable<IRppFunc> overloads)
+        {
+            return Find(argTypes, overloads, DefaultTypesComparator, DefaultCanCast);
+        }
+
+        [NotNull]
+        public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<IRppFunc> overloads,
+            TypesComparator<T> typesComparator, CanCast<T> canCast)
         {
             var argTypesArray = argTypes.ToArray();
 
             var candidates = new List<IRppFunc>();
             foreach (var candidate in overloads)
             {
-                Debug.Assert(candidate.Name == name); // We should have candidates only with the same name
-
                 bool castRequired; // Flag if we need to cast any argument
                 IRppParam[] candidateParams = candidate.Params;
 
-                if (SignatureMatched(argTypesArray, candidateParams, out castRequired))
+                if (SignatureMatched(argTypesArray, candidateParams, typesComparator, canCast, out castRequired))
                 {
                     if (!castRequired)
                     {
@@ -58,7 +75,8 @@ namespace CSharpRpp.Parser
             return candidates;
         }
 
-        public static bool SignatureMatched(IList<RppType> argTypes, IList<IRppParam> candidateParams, out bool castRequired)
+        public static bool SignatureMatched<T>(IList<T> argTypes, IList<IRppParam> candidateParams, TypesComparator<T> typesComparator,
+            CanCast<T> canCast, out bool castRequired)
         {
             castRequired = false;
 
@@ -73,7 +91,7 @@ namespace CSharpRpp.Parser
             }
 
             int candidateParamIndex = 0;
-            foreach (RppType argType in argTypes)
+            foreach (T argType in argTypes)
             {
                 IRppParam param = candidateParams[candidateParamIndex];
                 RppType paramType = param.Type;
@@ -87,11 +105,11 @@ namespace CSharpRpp.Parser
                     candidateParamIndex++;
                 }
 
-                if (!argType.Equals(paramType))
+                if (!typesComparator(argType, paramType))
                 {
                     castRequired = true;
 
-                    if (!ImplicitCast.CanCast(argType, paramType))
+                    if (!canCast(argType, paramType))
                     {
                         return false;
                     }

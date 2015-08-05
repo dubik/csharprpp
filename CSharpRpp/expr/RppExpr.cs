@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using CSharpRpp.Expr;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
@@ -380,12 +381,48 @@ namespace CSharpRpp
             ArgList = argList;
         }
 
+        public IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, IRppFunc func)
+        {
+            return exprs.Zip(func.Params, (expr, param) => TypeInference.ReplaceUndefinedClosureTypesIfNeeded(expr, param.Type)).ToList();
+        }
+
+        private static bool HasUndefinedTypesInClosuresArgs(IEnumerable<IRppExpr> args)
+        {
+            return args.OfType<RppClosure>().Any(closure => closure.Bindings.Any(param => param.Type.IsUndefined()));
+        }
+
+        private bool CanCast(IRppExpr source, RppType target)
+        {
+            return ImplicitCast.CanCast(source.Type, target);
+        }
+
+        private bool TypesComparator(IRppExpr source, RppType target)
+        {
+            if (source is RppClosure)
+            {
+                RppClosure closure = (RppClosure) source;
+                if (closure.Type == null)
+                {
+                    Debug.Assert(target.Runtime != null, "Only runtime is supported at this moment");
+                    Type[] genericTypes = target.Runtime.GetGenericArguments();
+                    RppType[] paramTypes = closure.Bindings.Select(b => b.Type).ToArray();
+                    // Differentiate only by the number of arguments
+                    return genericTypes.Length == (paramTypes.Length + 1); // '1' is a return type
+                }
+            }
+
+            return target.Equals(source.Type);
+        }
+
+        // TODO This needs to be rewritten.
         public override IRppNode Analyze(RppScope scope)
         {
-            NodeUtils.Analyze(scope, ArgList);
+            NodeUtils.Analyze(scope, ArgList.Where(arg => !(arg is RppClosure)));
 
             IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
-            var candidates = OverloadQuery.Find(Name, Args.Select(a => a.Type), overloads).ToList();
+
+            var candidates = OverloadQuery.Find(Args, overloads, TypesComparator, CanCast).ToList();
+
             if (candidates.Count() > 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -395,6 +432,14 @@ namespace CSharpRpp
 
             if (candidate != null)
             {
+                if (HasUndefinedTypesInClosuresArgs(ArgList))
+                {
+                    Type = candidate.ReturnType;
+                    ArgList = ReplaceUndefinedClosureTypesIfNeeded(ArgList, candidate);
+                }
+
+                NodeUtils.Analyze(scope, ArgList.OfType<RppClosure>());
+
                 if (candidate.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
                 {
                     List<IRppParam> funcParams = candidate.Params.ToList();
@@ -427,7 +472,7 @@ namespace CSharpRpp
                     if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
                     {
                         RppNativeClass nativeClass = new RppNativeClass(expr.Type.Runtime);
-                        candidates = OverloadQuery.Find("apply", Args.Select(a => a.Type), nativeClass.Functions).ToList();
+                        candidates = OverloadQuery.Find(Args.Select(a => a.Type), nativeClass.Functions).ToList();
                         if (candidates.Count != 1)
                         {
                             throw new Exception("Can't figure out which overload to use");
@@ -583,7 +628,7 @@ namespace CSharpRpp
 
         private IRppFunc FindMatchingConstructor(IEnumerable<RppType> args)
         {
-            var matchedConstructors = OverloadQuery.Find("this", args, BaseClass.Constructors).ToList();
+            var matchedConstructors = OverloadQuery.Find(args, BaseClass.Constructors).ToList();
             if (matchedConstructors.Count != 1)
             {
                 throw new Exception("Can't find correct constructor");

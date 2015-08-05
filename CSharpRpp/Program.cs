@@ -34,11 +34,14 @@ object Runtime
 } 
 ";
             const string code = @"
-object Foo
+object Bar
 {
-    def main() : (Int => Int) = {
-        val func : (Int => Int) = (x) => x + 10
-        func
+    def invoker(func: (Int, Int) => Int) : Int = {
+        func(10, 24)
+    }
+
+    def main() : Int = {
+        invoker((x, y) => x + y)
     }
 }
 ";
