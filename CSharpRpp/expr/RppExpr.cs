@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using CSharpRpp.Expr;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
@@ -432,35 +430,20 @@ namespace CSharpRpp
 
             if (candidate != null)
             {
+                Function = candidate;
+                Type = Function.ReturnType;
+
                 if (HasUndefinedTypesInClosuresArgs(ArgList))
                 {
-                    Type = candidate.ReturnType;
                     ArgList = ReplaceUndefinedClosureTypesIfNeeded(ArgList, candidate);
                 }
 
                 NodeUtils.Analyze(scope, ArgList.OfType<RppClosure>());
 
-                if (candidate.IsVariadic) // TODO create function out of this and reuse it in the else clause as well
+                if (Function.IsVariadic)
                 {
-                    List<IRppParam> funcParams = candidate.Params.ToList();
-                    int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
-                    var args = ArgList.Take(variadicIndex).ToList();
-                    var variadicParams = ArgList.Where((arg, index) => index >= variadicIndex).ToList();
-                    ArgList = args;
-
-                    IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
-
-                    var elementType = GetElementType(variadicParam.Type);
-                    variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
-
-                    RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
-                    variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
-
-                    ArgList.Add(variadicArgsArray);
+                    ArgList = RewriteArgListForVariadicParameter(scope, ArgList, candidate);
                 }
-
-                Function = candidate;
-                Type = Function.ReturnType;
             }
             else
             {
@@ -498,6 +481,36 @@ namespace CSharpRpp
             }
 
             return this;
+        }
+
+        /// <summary>
+        /// Rewrites given list of arguments so that they can be used to call a function with variadic parameter.
+        /// For instance:
+        /// <code>def fun(id: Int, list: Float*) : Unit</code>
+        /// is called with <code>fun(1, 4.5f, 3.5f)</code>
+        /// Function rewrites it the following way [1, [4.5f, 3.5f]]
+        /// </summary>
+        /// <param name="scope">current scope, needed to anaylize array which contains variable number of args</param>
+        /// <param name="args">list of expressions</param>
+        /// <param name="function">target function</param>
+        /// <returns>list of arguments</returns>
+        private static List<IRppExpr> RewriteArgListForVariadicParameter(RppScope scope, IList<IRppExpr> args, IRppFunc function)
+        {
+            List<IRppParam> funcParams = function.Params.ToList();
+            int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
+            List<IRppExpr> newArgList = args.Take(variadicIndex).ToList();
+            var variadicParams = args.Where((arg, index) => index >= variadicIndex).ToList();
+
+            IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
+
+            var elementType = GetElementType(variadicParam.Type);
+            variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
+
+            RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
+            variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+
+            newArgList.Add(variadicArgsArray);
+            return newArgList;
         }
 
         private static RppType GetElementType(RppType arrayType)
@@ -840,7 +853,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

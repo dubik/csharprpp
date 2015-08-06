@@ -75,23 +75,23 @@ namespace CSharpRpp.Parser
             return candidates;
         }
 
-        public static bool SignatureMatched<T>(IList<T> argTypes, IList<IRppParam> candidateParams, TypesComparator<T> typesComparator,
+        public static bool SignatureMatched<T>(IList<T> items, IList<IRppParam> candidateParams, TypesComparator<T> typesComparator,
             CanCast<T> canCast, out bool castRequired)
         {
             castRequired = false;
 
-            if (candidateParams.Count == 0 && argTypes.Count > 0)
+            if (candidateParams.Count == 0 && items.Count > 0)
             {
                 return false;
             }
 
-            if (candidateParams.Count < argTypes.Count && (candidateParams.Count > 0 && !candidateParams.Last().IsVariadic))
+            if (candidateParams.Count < items.Count && (candidateParams.Count > 0 && !candidateParams.Last().IsVariadic))
             {
                 return false;
             }
 
             int candidateParamIndex = 0;
-            foreach (T argType in argTypes)
+            foreach (T item in items)
             {
                 IRppParam param = candidateParams[candidateParamIndex];
                 RppType paramType = param.Type;
@@ -105,11 +105,11 @@ namespace CSharpRpp.Parser
                     candidateParamIndex++;
                 }
 
-                if (!typesComparator(argType, paramType))
+                if (!typesComparator(item, paramType))
                 {
                     castRequired = true;
 
-                    if (!canCast(argType, paramType))
+                    if (!canCast(item, paramType))
                     {
                         return false;
                     }
