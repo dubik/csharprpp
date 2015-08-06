@@ -36,12 +36,12 @@ object Runtime
             const string code = @"
 object Bar
 {
-    def invoker(func: (Int, Int) => Int) : Int = {
-        func(10, 24)
+    def concat(args: Int*) : Int = {
+        args.length()
     }
 
-    def main() : Int = {
-        invoker((x, y) => x + y)
+    def invokeConcat() : Int = {
+        concat(10, 20)
     }
 }
 ";
