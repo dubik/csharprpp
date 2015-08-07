@@ -357,7 +357,7 @@ namespace CSharpRpp
 
     public class RppFuncCall : RppMember
     {
-        public override RppType Type { get; protected set; }
+        public override sealed RppType Type { get; protected set; }
 
         public IEnumerable<IRppExpr> Args
         {
@@ -379,145 +379,43 @@ namespace CSharpRpp
             ArgList = argList;
         }
 
-        public IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, IRppFunc func)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type)
+            : this(name, argList)
         {
-            return exprs.Zip(func.Params, (expr, param) => TypeInference.ReplaceUndefinedClosureTypesIfNeeded(expr, param.Type)).ToList();
+            Function = function;
+            Type = type;
         }
 
-        private static bool HasUndefinedTypesInClosuresArgs(IEnumerable<IRppExpr> args)
+        public IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, IRppParam[] funcParams)
         {
-            return args.OfType<RppClosure>().Any(closure => closure.Bindings.Any(param => param.Type.IsUndefined()));
+            IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
+            var funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
+            return rppExprs.Zip(funcParamTypes, TypeInference.ReplaceUndefinedClosureTypesIfNeeded).ToList();
         }
 
-        private static bool CanCast(IRppExpr source, RppType target)
+        /// <summary>
+        /// Expands variadic argument into arguments to make specified amount of arguments.
+        /// For example:
+        /// <code>
+        /// [String, Int*],4
+        /// </code>
+        /// would be expanded into
+        /// [String, Int, Int, Int]
+        /// </summary>
+        /// <param name="funcParams">input list of params</param>
+        /// <param name="totalNumberOfParams">how many params needs to be</param>
+        /// <returns>expanded list of types as in example above</returns>
+        private static IEnumerable<RppType> ExpandVariadicParam(ICollection<IRppParam> funcParams, int totalNumberOfParams)
         {
-            return ImplicitCast.CanCast(source.Type, target);
-        }
-
-        private static bool TypesComparator(IRppExpr source, RppType target)
-        {
-            if (source is RppClosure)
+            List<RppType> expandedList = funcParams.Where(p => !p.IsVariadic).Select(p => p.Type).ToList();
+            if (funcParams.Count > 0 && funcParams.Last().IsVariadic)
             {
-                RppClosure closure = (RppClosure) source;
-                if (closure.Type == null)
-                {
-                    Debug.Assert(target.Runtime != null, "Only runtime is supported at this moment");
-                    Type[] genericTypes = target.Runtime.GetGenericArguments();
-                    RppType[] paramTypes = closure.Bindings.Select(b => b.Type).ToArray();
-                    // Differentiate only by the number of arguments
-                    return genericTypes.Length == (paramTypes.Length + 1); // '1' is a return type
-                }
+                // Variadic param is an array, so extract sub type.
+                RppType variadicParamType = ((RppArrayType) funcParams.Last().Type).SubType;
+                Enumerable.Range(0, totalNumberOfParams - expandedList.Count).ForEach(i => expandedList.Add(variadicParamType));
             }
 
-            return target.Equals(source.Type);
-        }
-
-        private static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, RppScope scope)
-        {
-            ResolveResults res = SearchInFunctions(name, args, scope);
-            if (res != null)
-            {
-                return res;
-            }
-
-            res = SearchInClosures(name, args, scope);
-            if (res != null)
-            {
-                return res;
-            }
-
-            res = SearchInCompanionObjects(name, args, scope);
-            {
-                return res;
-            }
-        }
-
-        private static ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
-        {
-            IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(name);
-            var candidates = OverloadQuery.Find(args, overloads, TypesComparator, CanCast).ToList();
-            if (candidates.Count > 1)
-            {
-                throw new Exception("Can't figure out which overload to use");
-            }
-
-            if (candidates.Count == 0)
-            {
-                return null;
-            }
-
-            return new ResolveResults(candidates[0]);
-        }
-
-        private static ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, RppScope scope)
-        {
-            IRppNamedNode node = scope.Lookup(name);
-            if (node is IRppExpr) // () applied to expression, so it could be closure
-            {
-                IRppExpr expr = node as IRppExpr;
-
-                if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
-                {
-                    RppNativeClass nativeClass = new RppNativeClass(expr.Type.Runtime);
-                    var candidates = OverloadQuery.Find(args.Select(a => a.Type), nativeClass.Functions).ToList();
-                    if (candidates.Count > 1)
-                    {
-                        throw new Exception("Can't figure out which overload to use");
-                    }
-
-                    if (candidates.Count == 0)
-                    {
-                        return null;
-                    }
-
-                    return new ClosureResolveResults((RppMember) expr, candidates[0]);
-                }
-            }
-
-            return null;
-        }
-
-        private static ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, RppScope scope)
-        {
-            RppClass obj = scope.LookupObject(name);
-            var applyFunctions = obj.Functions.Where(func => func.Name == "apply").ToList();
-            if (applyFunctions.Count == 0)
-            {
-                throw new Exception("Companion object doesn't have apply() with required signature");
-            }
-
-            return new ResolveResults(applyFunctions[0]);
-        }
-
-        private class ResolveResults
-        {
-            public IRppFunc Function { get; private set; }
-
-            public ResolveResults(IRppFunc resolvedFunc)
-            {
-                Function = resolvedFunc;
-            }
-
-            public virtual IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList)
-            {
-                return new RppFuncCall(functionName, resolvedArgList) {Function = Function, Type = Function.ReturnType};
-            }
-        }
-
-        private class ClosureResolveResults : ResolveResults
-        {
-            private readonly RppMember _expr;
-
-            public ClosureResolveResults(RppMember expr, IRppFunc resolvedFunc) : base(resolvedFunc)
-            {
-                _expr = expr;
-            }
-
-            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList)
-            {
-                return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList) {Function = Function, Type = Function.ReturnType});
-            }
+            return expandedList;
         }
 
         // TODO This needs to be rewritten.
@@ -526,8 +424,8 @@ namespace CSharpRpp
             // Skip closures because they may have missing types
             NodeUtils.Analyze(scope, ArgListWithoutClosures(ArgList));
             // Search for a function which matches signature and possible gaps in types (for closures)
-            ResolveResults resolveResults = ResolveFunction(Name, ArgList, scope);
-            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function);
+            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, scope);
+            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Params);
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
             if (resolveResults.Function.IsVariadic)
             {
@@ -535,73 +433,6 @@ namespace CSharpRpp
             }
 
             return resolveResults.RewriteFunctionCall(Name, args);
-
-            /*
-            IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(Name);
-
-            var candidates = OverloadQuery.Find(Args, overloads, TypesComparator, CanCast).ToList();
-
-            if (candidates.Count() > 1)
-            {
-                throw new Exception("Can't figure out which overload to use");
-            }
-
-            IRppFunc candidate = candidates.FirstOrDefault();
-
-            if (candidate != null)
-            {
-                Function = candidate;
-                Type = Function.ReturnType;
-
-                if (HasUndefinedTypesInClosuresArgs(ArgList))
-                {
-                    ArgList = ReplaceUndefinedClosureTypesIfNeeded(ArgList, candidate);
-                }
-
-                NodeUtils.Analyze(scope, ArgListOfClosures(ArgList));
-
-                if (Function.IsVariadic)
-                {
-                    ArgList = RewriteArgListForVariadicParameter(scope, ArgList, candidate);
-                }
-            }
-            else
-            {
-                IRppNamedNode node = scope.Lookup(Name);
-                if (node is IRppExpr) // () applied to expression, so it could be closure
-                {
-                    IRppExpr expr = node as IRppExpr;
-
-                    if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
-                    {
-                        RppNativeClass nativeClass = new RppNativeClass(expr.Type.Runtime);
-                        candidates = OverloadQuery.Find(Args.Select(a => a.Type), nativeClass.Functions).ToList();
-                        if (candidates.Count != 1)
-                        {
-                            throw new Exception("Can't figure out which overload to use");
-                        }
-
-                        var applyFunction = candidates.First();
-                        return new RppSelector(new RppId(((RppMember) expr).Name, (RppMember) expr),
-                            new RppFuncCall("apply", ArgList) {Function = applyFunction, Type = applyFunction.ReturnType});
-                    }
-                }
-                else
-                {
-                    RppClass obj = scope.LookupObject(Name);
-                    var factoryFuncs = obj.Functions.Where(func => func.Name == "apply").ToList();
-                    if (factoryFuncs.Count == 0)
-                    {
-                        throw new Exception("Companion object doesn't have apply() with required signature");
-                    }
-
-                    IRppFunc matchedFunc = factoryFuncs[0];
-                    return new RppFuncCall(matchedFunc.Name, ArgList) {Function = matchedFunc, Type = matchedFunc.ReturnType};
-                }
-            }
-
-            return this;
-             */
         }
 
         private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
@@ -804,18 +635,6 @@ namespace CSharpRpp
             Type = resolvedType;
 
             return this;
-        }
-
-        public override void Accept(IRppNodeVisitor visitor)
-        {
-            visitor.Visit(this);
-        }
-    }
-
-    public class RppMessage : RppFuncCall
-    {
-        public RppMessage([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name, argList)
-        {
         }
 
         public override void Accept(IRppNodeVisitor visitor)

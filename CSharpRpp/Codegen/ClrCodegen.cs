@@ -301,14 +301,37 @@ namespace CSharpRpp.Codegen
                 {
                     if (!node.Function.IsStatic && !_inSelector)
                     {
-                        _body.Emit(OpCodes.Ldarg_0); // push this
+                        _body.Emit(OpCodes.Ldarg_0); // load 'this'
                     }
 
                     node.Args.ForEach(arg => arg.Accept(this));
-                    OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                    _body.Emit(callInst, node.Function.RuntimeType);
+
+                    if (node.Function.IsStub)
+                    {
+                        // Not real functions, like Array.length
+                        CodegenForStub(node.Function);
+                    }
+                    else
+                    {
+                        OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
+                        _body.Emit(callInst, node.Function.RuntimeType);
+                    }
                 }
             }
+        }
+
+        private void CodegenForStub(IRppFunc function)
+        {
+            if (function.Class.Name == "Array")
+            {
+                if (function.Name == "length")
+                {
+                    _body.Emit(OpCodes.Ldlen);
+                    return;
+                }
+            }
+
+            throw new NotImplementedException("Other funcs are not implemented");
         }
 
         public override void Visit(RppBaseConstructorCall node)
@@ -318,33 +341,6 @@ namespace CSharpRpp.Codegen
             ConstructorInfo constructor = node.BaseConstructor.ConstructorInfo;
             Debug.Assert(constructor != null, "constructor != null, we should have figure out which constructor to use before");
             _body.Emit(OpCodes.Call, constructor);
-        }
-
-        public override void Visit(RppMessage node)
-        {
-            node.Args.ForEach(arg => arg.Accept(this));
-
-            // Normal function call
-            if (node.Function.RuntimeType != null)
-            {
-                OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                _body.Emit(callInst, node.Function.RuntimeType);
-            }
-            else
-            {
-                // TODO fix this, identify stubs by some other means
-                // Function calls for stubs don't have RuntimeType because they are defined dynamically
-                if (node.Function.Class != null)
-                {
-                    if (node.Function.Class.Name == "Array")
-                    {
-                        if (node.Name == "length")
-                        {
-                            _body.Emit(OpCodes.Ldlen);
-                        }
-                    }
-                }
-            }
         }
 
         public override void Visit(RppSelector node)

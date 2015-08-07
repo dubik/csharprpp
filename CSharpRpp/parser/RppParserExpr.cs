@@ -379,7 +379,7 @@ namespace CSharpRpp
             if (expr is RppSelector)
             {
                 RppSelector selector = expr as RppSelector;
-                return new RppSelector(selector.Target, new RppMessage(selector.Path.Name, args));
+                return new RppSelector(selector.Target, new RppFuncCall(selector.Path.Name, args));
             }
 
             return expr;

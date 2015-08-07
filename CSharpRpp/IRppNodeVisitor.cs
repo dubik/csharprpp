@@ -16,7 +16,6 @@ namespace CSharpRpp
         void Visit([NotNull] RppString node);
         void Visit([NotNull] RppFuncCall node);
         void Visit([NotNull] RppBaseConstructorCall node);
-        void Visit([NotNull] RppMessage node);
         void VisitEnter([NotNull] RppBlockExpr node);
         void VisitExit([NotNull] RppBlockExpr node);
         void Visit([NotNull] RppSelector node);
@@ -112,10 +111,6 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppBaseConstructorCall node)
-        {
-        }
-
-        public virtual void Visit(RppMessage node)
         {
         }
 

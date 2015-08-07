@@ -254,9 +254,9 @@ namespace CSharpRpp
         {
             var funcs = new[]
             {
-                new RppFunc("length", RppPrimitiveType.IntTy),
-                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, subType),
-                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy)
+                new RppFunc("length", RppPrimitiveType.IntTy) {IsStub = true},
+                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, subType) {IsStub = true},
+                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy) {IsStub = true}
             };
 
             return new RppClass(ClassKind.Class, Collections.NoModifiers, "Array", Collections.NoFields, funcs, RppBaseConstructorCall.Object);

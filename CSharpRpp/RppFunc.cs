@@ -29,6 +29,9 @@ namespace CSharpRpp
         bool IsOverride { get; set; }
         bool IsConstructor { get; }
 
+        bool IsSynthesized { get; set; }
+        bool IsStub { get; set; }
+
         RppClass Class { get; set; }
         ConstructorInfo ConstructorInfo { get; set; }
     }
@@ -80,6 +83,9 @@ namespace CSharpRpp
         {
             get { return Name == "this"; }
         }
+
+        public bool IsSynthesized { get; set; }
+        public bool IsStub { get; set; }
 
         public RppClass Class { get; set; }
         public ConstructorInfo ConstructorInfo { get; set; }

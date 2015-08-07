@@ -83,6 +83,7 @@
     <Compile Include="Expr\ImplicitCast.cs" />
     <Compile Include="Expr\RppThrow.cs" />
     <Compile Include="Expr\TypeInference.cs" />
+    <Compile Include="FunctionResolution.cs" />
     <Compile Include="IRppNamedNodeExtensions.cs" />
     <Compile Include="Parser\FuncValidator.cs" />
     <Compile Include="Parser\OverloadQuery.cs" />

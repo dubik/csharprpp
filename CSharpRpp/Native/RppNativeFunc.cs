@@ -52,6 +52,18 @@ namespace CSharpRpp.Native
             get { return ConstructorInfo != null || ConstructorBuilder != null; }
         }
 
+        public bool IsSynthesized
+        {
+            get { return false; }
+            set { throw new NotImplementedException(); }
+        }
+
+        public bool IsStub
+        {
+            get { return false; }
+            set { throw new NotImplementedException(); }
+        }
+
         public RppClass Class { get; set; }
 
         public RppNativeFunc(ConstructorInfo constructorInfo) : base("this")
