@@ -19,6 +19,9 @@ namespace CSharpRpp
         [NotNull]
         IEnumerable<IRppFunc> Constructors { get; }
 
+        [NotNull]
+        IEnumerable<RppVariantTypeParam> TypeParams { get; }
+
         Type RuntimeType { get; }
         RppClassScope Scope { get; }
     }
@@ -26,7 +29,7 @@ namespace CSharpRpp
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
     public class RppClass : RppNamedNode, IRppClass
     {
-        private const string _constrparam = "constrparam";
+        private const string Constrparam = "constrparam";
         private IList<IRppFunc> _funcs;
         private IList<RppField> _fields = Collections.NoFields;
         private IList<RppField> _classParams = Collections.NoFields;
@@ -57,10 +60,15 @@ namespace CSharpRpp
             get { return _classParams.AsEnumerable(); }
         }
 
+        public IEnumerable<RppVariantTypeParam> TypeParams
+        {
+            get { return _typeParams.AsEnumerable(); }
+        }
+
         [NotNull]
         public Type RuntimeType { get; set; }
 
-        public IList<RppVariantTypeParam> TypeParams { get; set; }
+        private readonly IList<RppVariantTypeParam> _typeParams;
 
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
@@ -76,7 +84,7 @@ namespace CSharpRpp
             Kind = kind;
             _funcs = Collections.NoFuncs;
             Constructor = CreatePrimaryConstructor(Collections.NoExprs);
-            TypeParams = Collections.NoVariantTypeParams;
+            _typeParams = Collections.NoVariantTypeParams;
             Modifiers = Collections.NoModifiers;
             _constructors = Collections.NoFuncs;
         }
@@ -84,7 +92,7 @@ namespace CSharpRpp
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
 
         public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams,
-            [NotNull] IEnumerable<IRppNode> classBody, RppBaseConstructorCall baseConstructorCall) : base(name)
+            [NotNull] IEnumerable<IRppNode> classBody, [NotNull] IList<RppVariantTypeParam> typeParams, RppBaseConstructorCall baseConstructorCall) : base(name)
         {
             Kind = kind;
             BaseConstructorCall = baseConstructorCall;
@@ -94,7 +102,7 @@ namespace CSharpRpp
             _funcs = rppNodes.OfType<IRppFunc>().Where(f => !f.IsConstructor).ToList();
             _funcs.ForEach(DefineFunc);
             _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
-            TypeParams = Collections.NoVariantTypeParams;
+            _typeParams = typeParams;
             Modifiers = modifiers;
 
             _constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
@@ -127,7 +135,7 @@ namespace CSharpRpp
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
             _fields.ForEach(Scope.Add);
 
-            TypeParams.ForEach(Scope.Add);
+            _typeParams.ForEach(Scope.Add);
         }
 
         public override IRppNode Analyze(RppScope scope)
@@ -182,7 +190,7 @@ namespace CSharpRpp
         {
             if (_fields.Any(field => field.Name == baseName))
             {
-                return _constrparam + baseName;
+                return Constrparam + baseName;
             }
 
             return baseName;
@@ -190,7 +198,7 @@ namespace CSharpRpp
 
         public static string StringConstructorArgName(string name)
         {
-            return name.StartsWith(_constrparam) ? name.Substring(_constrparam.Length) : name;
+            return name.StartsWith(Constrparam) ? name.Substring(Constrparam.Length) : name;
         }
 
         private IRppExpr CreateParentConstructorCall()

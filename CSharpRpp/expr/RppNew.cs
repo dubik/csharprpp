@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Expr;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
@@ -55,6 +56,8 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
+        private Dictionary<string, RppVariantTypeParam> _nameToGenericArg;
+
         public override IRppNode Analyze(RppScope scope)
         {
             NodeUtils.Analyze(scope, _constructorsParams);
@@ -67,7 +70,10 @@ namespace CSharpRpp
 
             // Find correct constructor
             var constructors = RefClass.Constructors;
-            var candidates = OverloadQuery.Find(Args.Select(a => a.Type), constructors).ToList();
+
+            CreateNameToVariantTypeParam();
+
+            var candidates = OverloadQuery.Find(Args.Select(a => a.Type).ToList(), constructors, TypesComparator, CanCast).ToList();
             if (candidates.Count() != 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -78,6 +84,33 @@ namespace CSharpRpp
             Type = CreateType();
 
             return this;
+        }
+
+        private void CreateNameToVariantTypeParam()
+        {
+            _nameToGenericArg = new Dictionary<string, RppVariantTypeParam>();
+            int index = 0;
+            foreach (var typeParam in RefClass.TypeParams)
+            {
+                _nameToGenericArg.Add(typeParam.Name, _typeArgs[index]);
+                index++;
+            }
+        }
+
+        private static bool CanCast(RppType source, RppType target)
+        {
+            return ImplicitCast.CanCast(source, target);
+        }
+
+        private bool TypesComparator(RppType source, RppType target)
+        {
+            if (target.Runtime.IsGenericParameter)
+            {
+                RppVariantTypeParam typeParam = _nameToGenericArg[target.Runtime.Name];
+                return source.Runtime == typeParam.Runtime;
+            }
+
+            return source.Equals(target);
         }
 
         /// <summary>

@@ -34,14 +34,14 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
-{
-    def concat(args: Int*) : Int = {
-        args.length()
-    }
+class Option[A]
+class Some[A](a: A) extends Option[A]
 
-    def invokeConcat() : Int = {
-        concat(10, 20)
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        k.a
     }
 }
 ";

@@ -21,7 +21,7 @@ namespace CSharpRpp.Codegen
         {
             TypeAttributes attrs = GetTypeAttributes(node.Modifiers);
             TypeBuilder classType = _module.DefineType(node.GetNativeName(), attrs);
-            IList<RppVariantTypeParam> typeParams = node.TypeParams;
+            IEnumerable<RppVariantTypeParam> typeParams = node.TypeParams;
             GenericsSupport.DefineGenericParams(typeParams, classType);
 
             _typeBuilders.Add(node, classType);

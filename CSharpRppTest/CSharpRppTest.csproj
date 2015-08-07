@@ -51,6 +51,7 @@
     <Compile Include="ClassTest.cs" />
     <Compile Include="ClosuresTest.cs" />
     <Compile Include="CodeGenTest.cs" />
+    <Compile Include="ComplexTests.cs" />
     <Compile Include="ExceptionsTest.cs" />
     <Compile Include="FuncTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />

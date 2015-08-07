@@ -8,23 +8,25 @@ namespace CSharpRpp.Codegen
     class GenericsSupport
     {
         // TODO typeParams are updated, we should find a better way, can't just pass list of objects and poke their properies
-        public static void DefineGenericParams([NotNull] IList<RppVariantTypeParam> typeParams, MethodBuilder funcBuilder)
+        public static void DefineGenericParams([NotNull] IEnumerable<RppVariantTypeParam> typeParams, MethodBuilder funcBuilder)
         {
-            if (typeParams.Count > 0)
+            IEnumerable<RppVariantTypeParam> variantTypeParams = typeParams as IList<RppVariantTypeParam> ?? typeParams.ToList();
+            if (variantTypeParams.Any())
             {
-                var genericParams = typeParams.Select(x => x.Name).ToArray();
+                var genericParams = variantTypeParams.Select(x => x.Name).ToArray();
                 GenericTypeParameterBuilder[] genericTypeBuilders = funcBuilder.DefineGenericParameters(genericParams);
-                typeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index].AsType());
+                variantTypeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index].AsType());
             }
         }
 
-        public static void DefineGenericParams([NotNull] IList<RppVariantTypeParam> typeParams, [NotNull] TypeBuilder classType)
+        public static void DefineGenericParams([NotNull] IEnumerable<RppVariantTypeParam> typeParams, [NotNull] TypeBuilder classType)
         {
-            if (typeParams.Count > 0)
+            IEnumerable<RppVariantTypeParam> variantTypeParams = typeParams as RppVariantTypeParam[] ?? typeParams.ToArray();
+            if (variantTypeParams.Any())
             {
-                var genericParams = typeParams.Select(x => x.Name).ToArray();
+                var genericParams = variantTypeParams.Select(x => x.Name).ToArray();
                 GenericTypeParameterBuilder[] genericTypeBuilders = classType.DefineGenericParameters(genericParams);
-                typeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index].AsType());
+                variantTypeParams.ForEachWithIndex((index, param) => param.Runtime = genericTypeBuilders[index].AsType());
             }
         }
     }

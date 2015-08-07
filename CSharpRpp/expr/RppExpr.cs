@@ -374,19 +374,31 @@ namespace CSharpRpp
             get { return Name == "this"; }
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : base(name)
+        private readonly IList<RppType> _typeArgList;
+
+        public IEnumerable<RppType> TypeArgs
         {
-            ArgList = argList;
+            get { return _typeArgList; }
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type)
-            : this(name, argList)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoTypes)
+        {
+        }
+
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<RppType> typeArgList) : base(name)
+        {
+            ArgList = argList;
+            _typeArgList = typeArgList;
+        }
+
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type, [NotNull] IList<RppType> typeArgList)
+            : this(name, argList, typeArgList)
         {
             Function = function;
             Type = type;
         }
 
-        public IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, IRppParam[] funcParams)
+        private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, ICollection<IRppParam> funcParams)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
             var funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
@@ -432,7 +444,7 @@ namespace CSharpRpp
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
             }
 
-            return resolveResults.RewriteFunctionCall(Name, args);
+            return resolveResults.RewriteFunctionCall(Name, args, _typeArgList);
         }
 
         private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
@@ -556,9 +568,10 @@ namespace CSharpRpp
 
         public IRppFunc BaseConstructor { get; private set; }
 
-        public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs);
+        public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
 
-        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList) : base("ctor()", argList)
+        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IList<RppType> baseClassTypeArgs)
+            : base("ctor()", argList)
         {
             BaseClassName = baseClassName ?? "Object";
         }

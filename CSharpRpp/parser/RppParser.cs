@@ -213,11 +213,9 @@ namespace CSharpRpp
                 IList<RppField> classParams = ParseClassParamClause();
                 string baseClassName;
                 IList<IRppExpr> baseClassArgs;
-                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-                return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, new RppBaseConstructorCall(baseClassName, baseClassArgs))
-                {
-                    TypeParams = typeParams
-                };
+                IList<RppType> baseClassTypeArgs;
+                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
+                return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, typeParams, new RppBaseConstructorCall(baseClassName, baseClassArgs, baseClassTypeArgs));
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -360,10 +358,11 @@ namespace CSharpRpp
             return false;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs)
+        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs, out IList<RppType> baseClassTypeParams)
         {
             baseClassName = null;
             baseClassArgs = ReadOnlyCollection<IRppExpr>.Empty;
+            baseClassTypeParams = ReadOnlyCollection<RppType>.Empty;
             if (Require(RppLexer.KW_Extends))
             {
                 if (Require(RppLexer.Id))
@@ -375,6 +374,8 @@ namespace CSharpRpp
                     throw new Exception("Expected identifier but got : " + _lastToken.Text);
                 }
 
+                IList<RppType> typeArgs = ParseTypeParamClause();
+                baseClassTypeParams = typeArgs;
                 var args = ParseArgsOpt();
                 baseClassArgs = args;
             }
@@ -747,9 +748,10 @@ namespace CSharpRpp
 
             string baseClassName;
             IList<IRppExpr> baseClassArgs;
-            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs);
-            return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats,
-                new RppBaseConstructorCall(baseClassName, Collections.NoExprs));
+            IList<RppType> baseClassTypeArgs;
+            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
+            return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats, Collections.NoVariantTypeParams,
+                new RppBaseConstructorCall(baseClassName, Collections.NoExprs, baseClassTypeArgs));
         }
 
         private static readonly Dictionary<int, ObjectModifier> TokenToObjectModifierMap = new Dictionary<int, ObjectModifier>

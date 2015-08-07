@@ -391,5 +391,24 @@ object Main
             var length = lengthField.GetValue(fooInst);
             Assert.AreEqual(13, length);
         }
+
+        [TestMethod]
+        public void GenericBaseConstructor()
+        {
+            const string code = @"
+class Option[A]
+class Some[A](a: A) extends Options[A]
+
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        k.a
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+
+        }
     }
 }
