@@ -397,7 +397,7 @@ object Main
         {
             const string code = @"
 class Option[A]
-class Some[A](a: A) extends Option[A]
+class Some[A](val a: A) extends Option[A]
 
 object Main
 {

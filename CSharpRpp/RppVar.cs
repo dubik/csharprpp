@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection.Emit;
 using CSharpRpp.Expr;
 using JetBrains.Annotations;
-using Mono.Cecil;
 
 namespace CSharpRpp
 {

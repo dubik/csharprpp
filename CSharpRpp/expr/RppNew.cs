@@ -122,7 +122,8 @@ namespace CSharpRpp
             if (_typeArgs.Count > 0)
             {
                 var genericArgs = _typeArgs.Select(arg => arg.Runtime).ToArray();
-                return RppNativeType.Create(RefClass.RuntimeType.MakeGenericType(genericArgs));
+                //return RppNativeType.Create(RefClass.RuntimeType.MakeGenericType(genericArgs));
+                return new RppGenericObjectType((RppClass) RefClass, genericArgs, RefClass.RuntimeType.MakeGenericType(genericArgs));
             }
 
             return RppNativeType.Create(RefClass.RuntimeType);

@@ -19,7 +19,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    internal static class TypeExtensions
+    static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -239,6 +239,18 @@ namespace CSharpRpp
         }
     }
 
+    public sealed class RppGenericObjectType : RppObjectType
+    {
+        public override Type Runtime { get; protected set; }
+        public IEnumerable<Type> GenericArguments { get; private set; }
+
+        public RppGenericObjectType(RppClass clazz, IEnumerable<Type> genericArguments, Type runtimeType) : base(clazz)
+        {
+            Runtime = runtimeType;
+            GenericArguments = genericArguments;
+        }
+    }
+
     public sealed class RppArrayType : RppObjectType
     {
         public RppType SubType { get; set; }
@@ -309,11 +321,12 @@ namespace CSharpRpp
 
             Type[] paramType = _params.Select(param => param.Resolve(scope)).Select(param => param.Runtime).ToArray();
             IRppNamedNode node = LookupGenericType(_typeName.Name, paramType.Length, scope);
-            if (node is IRppClass)
+            if (node is RppClass)
             {
-                IRppClass obj = node as IRppClass;
+                RppClass obj = node as RppClass;
                 Type specializedType = obj.RuntimeType.MakeGenericType(paramType);
-                return RppNativeType.Create(specializedType);
+                return new RppGenericObjectType(obj, paramType, specializedType);
+                //return RppNativeType.Create(specializedType);
             }
 
             return null;
