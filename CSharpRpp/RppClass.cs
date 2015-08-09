@@ -197,7 +197,7 @@ namespace CSharpRpp
             assignExprs.AddRange(exprs);
             assignExprs.Add(CreateParentConstructorCall());
 
-            return new RppFunc("this", p, RppPrimitiveType.UnitTy, new RppBlockExpr(assignExprs));
+            return new RppFunc("this", p, RppTypeName.UnitTy, new RppBlockExpr(assignExprs));
         }
 
 

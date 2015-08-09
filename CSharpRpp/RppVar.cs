@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection.Emit;
 using CSharpRpp.Expr;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp

@@ -254,26 +254,6 @@ namespace CSharpRpp.Codegen
             ClrCodegenUtils.LoadLocal(arrVar, _body);
         }
 
-        private static OpCode StoreElementCodeByType(Type type)
-        {
-            if (type == Types.Int)
-            {
-                return OpCodes.Stelem_I4;
-            }
-
-            if (type == Types.Float)
-            {
-                return OpCodes.Stelem_R4;
-            }
-
-            if (type == Types.Double)
-            {
-                return OpCodes.Stelem_R4;
-            }
-
-            return OpCodes.Stelem_Ref;
-        }
-
         public override void Visit(RppFuncCall node)
         {
             Console.WriteLine("Generating func call");

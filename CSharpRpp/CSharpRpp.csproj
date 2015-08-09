@@ -101,7 +101,6 @@
     <Compile Include="Expr\ImplicitCast.cs" />
     <Compile Include="Expr\RppFieldSelector.cs" />
     <Compile Include="Expr\RppThrow.cs" />
-    <Compile Include="Expr\TypeInference.cs" />
     <Compile Include="FunctionResolution.cs" />
     <Compile Include="IRppNamedNodeExtensions.cs" />
     <Compile Include="Parser\DelegateTypeComparator.cs" />
@@ -143,6 +142,7 @@
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Semantics\SemanticAnalyzer.cs" />
     <Compile Include="TypeSystem\RType.cs" />
+    <Compile Include="TypeSystem\TypeInference.cs" />
     <Compile Include="Utils\Annotations.cs" />
     <Compile Include="Utils\Extensions.cs" />
   </ItemGroup>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
