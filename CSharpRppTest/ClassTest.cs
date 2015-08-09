@@ -408,7 +408,9 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(123, res);
         }
     }
 }

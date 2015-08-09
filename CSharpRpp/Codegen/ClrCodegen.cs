@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
@@ -343,9 +342,12 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Call, constructor);
         }
 
+        private RppType _selectorType;
+
         public override void Visit(RppSelector node)
         {
             node.Target.Accept(this);
+            _selectorType = node.Target.Type;
             _inSelector = true;
             node.Path.Accept(this);
             _inSelector = false;
@@ -360,7 +362,17 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldarg_0);
                 }
 
-                _body.Emit(OpCodes.Ldfld, ((RppField) node.Ref).Builder);
+
+                RppField field = (RppField) node.Ref;
+                FieldInfo cilField = field.Builder;
+                // TODO this is wierd, we should have all info in the node
+                if (_selectorType != null && _selectorType.Runtime.IsGenericType)
+                {
+                    cilField = TypeBuilder.GetField(_selectorType.Runtime, field.Builder);
+                }
+
+                Debug.Assert(cilField != null, "cilField != null");
+                _body.Emit(OpCodes.Ldfld, cilField);
             }
             else if (node.Ref is RppVar)
             {
@@ -503,7 +515,6 @@ namespace CSharpRpp.Codegen
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
             closureClass.CreateType();
-            
         }
     }
 }

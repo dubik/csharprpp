@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Native;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -326,9 +327,17 @@ namespace CSharpRpp
                 RppClass obj = node as RppClass;
                 Type specializedType = obj.RuntimeType.MakeGenericType(paramType);
                 return new RppGenericObjectType(obj, paramType, specializedType);
-                //return RppNativeType.Create(specializedType);
+                
             }
 
+            if (node is RppNativeClass)
+            {
+                RppNativeClass nativeClass = node as RppNativeClass;
+                Type specializedType = nativeClass.RuntimeType.MakeGenericType(paramType);
+                return RppNativeType.Create(specializedType);
+            }
+
+            
             return null;
         }
 
