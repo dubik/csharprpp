@@ -20,13 +20,18 @@ namespace CSharpRpp.Native
             Functions = methods.Select(CreateFunc).ToList();
             RuntimeType = classType;
             Scope = new RppClassScope(null);
-            TypeParams = classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList();
+            TypeParams = classType.IsGenericType ? classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList() : Collections.NoVariantTypeParams;
         }
 
         private static RppVariantTypeParam CreateVariantTypeParam(Type type)
         {
-            var attr = type.GenericParameterAttributes;
-            TypeVariant typeVariance = attr == GenericParameterAttributes.Covariant ? TypeVariant.Covariant : TypeVariant.Contravariant;
+            TypeVariant typeVariance = TypeVariant.Contravariant;
+            if (type.IsGenericParameter)
+            {
+                var attr = type.GenericParameterAttributes;
+                typeVariance = attr == GenericParameterAttributes.Covariant ? TypeVariant.Covariant : TypeVariant.Contravariant;
+            }
+
             return new RppVariantTypeParam(type.Name, typeVariance) {Runtime = type, Type = RppNativeType.Create(type)};
         }
 
