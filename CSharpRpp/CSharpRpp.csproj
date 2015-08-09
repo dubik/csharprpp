@@ -142,6 +142,7 @@
     <Compile Include="RppWhile.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Semantics\SemanticAnalyzer.cs" />
+    <Compile Include="TypeSystem\RType.cs" />
     <Compile Include="Utils\Annotations.cs" />
     <Compile Include="Utils\Extensions.cs" />
   </ItemGroup>
