@@ -10,8 +10,8 @@ namespace CSharpRppTest
         {
             const string code = @"
 class Option[A]
-class Some[A](a: A) extends Options[A]
-class None[A] extends Options[A]
+class Some[A](a: A) extends Option[A]
+class None[A] extends Option[A]
 
 object Bar
 {
