@@ -772,6 +772,7 @@ namespace CSharpRpp
             targetType.Class.Fields.ForEach(classScope.Add);
 
             Path = (RppMember) Path.Analyze(classScope);
+            Type = Path.Type;
 
             return this;
         }

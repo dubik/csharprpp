@@ -16,6 +16,8 @@ namespace CSharpRpp
     {
         IEnumerable<IRppFunc> Functions { get; }
 
+        IEnumerable<RppField> Fields { get; }
+
         [NotNull]
         IEnumerable<IRppFunc> Constructors { get; }
 

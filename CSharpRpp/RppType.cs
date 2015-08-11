@@ -222,9 +222,9 @@ namespace CSharpRpp
 
     public class RppObjectType : ResolvedType
     {
-        public RppClass Class { get; protected set; }
+        public IRppClass Class { get; protected set; }
 
-        public RppObjectType([NotNull] RppClass clazz)
+        public RppObjectType([NotNull] IRppClass clazz)
         {
             Class = clazz;
         }

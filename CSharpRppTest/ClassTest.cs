@@ -412,5 +412,27 @@ object Main
             var res = mainMethod.Invoke(null, null);
             Assert.AreEqual(123, res);
         }
+
+        [TestMethod]
+        public void AssignGenericFieldToAVar()
+        {
+            const string code = @"
+class Some[A](val a: A)
+
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.a
+        p
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(123, res);
+        }
+
     }
 }

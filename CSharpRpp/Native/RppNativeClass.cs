@@ -8,6 +8,8 @@ namespace CSharpRpp.Native
     public class RppNativeClass : RppNamedNode, IRppClass
     {
         public IEnumerable<IRppFunc> Functions { get; private set; }
+        public IEnumerable<RppField> Fields { get; private set; }
+
         public IEnumerable<IRppFunc> Constructors { get; private set; }
         public IEnumerable<RppVariantTypeParam> TypeParams { get; private set; }
         public Type RuntimeType { get; private set; }
@@ -18,9 +20,16 @@ namespace CSharpRpp.Native
             MethodInfo[] methods = classType.GetMethods();
             Constructors = classType.GetConstructors().Select(CreateConstructor).ToList();
             Functions = methods.Select(CreateFunc).ToList();
+            FieldInfo[] fields = classType.GetFields();
+            Fields = fields.Select(CreateField).ToList();
             RuntimeType = classType;
             Scope = new RppClassScope(null);
             TypeParams = classType.IsGenericType ? classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList() : Collections.NoVariantTypeParams;
+        }
+
+        private static RppField CreateField(FieldInfo field)
+        {
+            return new RppField(MutabilityFlag.MF_Val, field.Name, Collections.NoStrings, RppNativeType.Create(field.FieldType));
         }
 
         private static RppVariantTypeParam CreateVariantTypeParam(Type type)
