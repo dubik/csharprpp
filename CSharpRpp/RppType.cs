@@ -63,6 +63,11 @@ namespace CSharpRpp
             return false;
         }
 
+        public virtual bool IsGenericParameter()
+        {
+            return false;
+        }
+
         #region Eqaulity
 
         protected bool Equals(RppType other)
@@ -128,6 +133,11 @@ namespace CSharpRpp
 
         private RppNativeType()
         {
+        }
+
+        public override bool IsGenericParameter()
+        {
+            return Runtime.IsGenericParameter;
         }
 
         public override string ToString()
@@ -250,6 +260,16 @@ namespace CSharpRpp
             Runtime = runtimeType;
             GenericArguments = genericArguments;
         }
+
+        public Type MakeGenericType(Type type)
+        {
+            return type.MakeGenericType(GenericArguments.ToArray());
+        }
+
+        public override string ToString()
+        {
+            return Class.Name + "[" + string.Join(", ", GenericArguments) + "]";
+        }
     }
 
     public sealed class RppArrayType : RppObjectType
@@ -327,7 +347,6 @@ namespace CSharpRpp
                 RppClass obj = node as RppClass;
                 Type specializedType = obj.RuntimeType.MakeGenericType(paramType);
                 return new RppGenericObjectType(obj, paramType, specializedType);
-                
             }
 
             if (node is RppNativeClass)
@@ -337,7 +356,7 @@ namespace CSharpRpp
                 return RppNativeType.Create(specializedType);
             }
 
-            
+
             return null;
         }
 

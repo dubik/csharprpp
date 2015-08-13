@@ -11,6 +11,8 @@ namespace CSharpRpp
         [CanBeNull] protected readonly RppScope ParentScope;
         [NotNull] private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
         [NotNull] private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
+        [NotNull] private readonly Dictionary<string, RppType> _genericTypes = new Dictionary<string, RppType>();
+
 
         public RppScope(RppScope parentScope)
         {
@@ -68,6 +70,27 @@ namespace CSharpRpp
         {
             CheckFunctionAlreadyExists(func);
             _functions.Add(func.Name, func);
+        }
+
+        public void Add(string genericName, RppType specializedType)
+        {
+            if (_genericTypes.ContainsKey(genericName))
+            {
+                throw new ArgumentException(string.Format("Already containes {0}", genericName), "genericName");
+            }
+
+            _genericTypes.Add(genericName, specializedType);
+        }
+
+        public RppType LookupGenericType(string genericName)
+        {
+            RppType type;
+            if (_genericTypes.TryGetValue(genericName, out type))
+            {
+                return type;
+            }
+
+            return ParentScope != null ? ParentScope.LookupGenericType(genericName) : null;
         }
 
         private void CheckFunctionAlreadyExists(RppFunc func)

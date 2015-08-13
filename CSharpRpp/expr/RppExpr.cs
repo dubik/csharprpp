@@ -771,9 +771,17 @@ namespace CSharpRpp
             targetType.Class.Functions.ForEach(classScope.Add);
             targetType.Class.Fields.ForEach(classScope.Add);
 
+            if (Target.Type is RppGenericObjectType)
+            {
+                RppGenericObjectType targetGenericType = (RppGenericObjectType) Target.Type;
+                foreach (var pair in targetGenericType.Class.TypeParams.Zip(targetGenericType.GenericArguments, Tuple.Create))
+                {
+                    classScope.Add(pair.Item1.Name, RppNativeType.Create(pair.Item2));
+                }
+            }
+
             Path = (RppMember) Path.Analyze(classScope);
             Type = Path.Type;
-
             return this;
         }
 
@@ -817,7 +825,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 
@@ -878,8 +886,14 @@ namespace CSharpRpp
                 Ref = member;
             }
 
-            Type = Ref.Type;
+            // If generic like 'A', then find real type
+            if (Ref.Type.IsGenericParameter())
+            {
+                Type = scope.LookupGenericType(Ref.Type.Runtime.Name);
+                return this;
+            }
 
+            Type = Ref.Type;
             return this;
         }
 
