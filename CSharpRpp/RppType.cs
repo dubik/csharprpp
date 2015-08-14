@@ -20,7 +20,7 @@ namespace CSharpRpp
         EUnit
     }
 
-    static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsNumeric(this Type type)
         {
@@ -450,6 +450,11 @@ namespace CSharpRpp
             }
 
             if (Name == "Any")
+            {
+                return RppNativeType.Create(typeof (Object));
+            }
+
+            if (Name == "Nothing")
             {
                 return RppNativeType.Create(typeof (Object));
             }

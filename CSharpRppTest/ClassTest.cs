@@ -435,6 +435,28 @@ object Main
         }
 
         [TestMethod]
+        public void SpecifyTypesForBaseClass()
+        {
+            const string code = @"
+class Option[A](val x : A)
+
+class SomeInt(x : Int) extends Option[Int]
+
+object Main
+{
+    def main : Int = {
+        val k : SomeInt = new SomeInt(123)
+        k.x
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            var res = mainMethod.Invoke(null, null);
+            Assert.AreEqual(123, res);
+        }
+
+        [TestMethod]
         public void Mon()
         {
             const string code = @"
@@ -448,6 +470,12 @@ class Some[A](val x: A) extends Option[A]
 {
     override def isEmpty : Boolean = false
     override def get : A = x
+}
+
+class None extends Option[Nothing]
+{
+    override def isEmpty : Boolean = true
+    override def get : Nothing = throw new Exception(""Nothing to get"")
 }
 
 object Main

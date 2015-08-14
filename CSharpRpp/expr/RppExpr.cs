@@ -585,12 +585,15 @@ namespace CSharpRpp
 
         public IRppFunc BaseConstructor { get; private set; }
 
+        public IList<RppType> BaseClassTypeArgs { get; private set; }
+
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
 
         public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IList<RppType> baseClassTypeArgs)
             : base("ctor()", argList)
         {
             BaseClassName = baseClassName ?? "Object";
+            BaseClassTypeArgs = baseClassTypeArgs;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
