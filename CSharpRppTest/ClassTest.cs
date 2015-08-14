@@ -454,7 +454,7 @@ object Main
 {
     def main : Int = {
         val k : Some[Int] = new Some[Int](123)
-        val p = k.a
+        val p = k.x
         p
     }
 }
