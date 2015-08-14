@@ -34,6 +34,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppThrow node);
         void Visit([NotNull] RppNull node);
         void Visit([NotNull] RppClosure node);
+        void Accept([NotNull] RppBooleanLiteral node);
     }
 
     public class RppNodeVisitor : IRppNodeVisitor
@@ -99,6 +100,10 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppClosure node)
+        {
+        }
+
+        public virtual void Accept(RppBooleanLiteral node)
         {
         }
 

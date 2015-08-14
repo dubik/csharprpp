@@ -34,13 +34,23 @@ object Runtime
 } 
 ";
             const string code = @"
-class Some[A](val a: A)
+abstract class Option[A]
+{
+    def isEmpty : Boolean
+    def get: A
+}
+
+class Some[A](val x: A) extends Option[A]
+{
+    override def isEmpty : Boolean = false
+    override def get : A = x
+}
 
 object Main
 {
-    def main(argv: Array[String]) : Int = {
+    def main : Int = {
         val k : Some[Int] = new Some[Int](123)
-        val p = k.a
+        val p = k.x
         p
     }
 }

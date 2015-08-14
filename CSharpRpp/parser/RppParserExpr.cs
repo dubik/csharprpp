@@ -255,6 +255,9 @@ namespace CSharpRpp
             else if (Require(RppLexer.KW_Null))
             {
                 expr = new RppNull();
+            } else if (Require(RppLexer.BooleanLiteral))
+            {
+                expr = new RppBooleanLiteral(_lastToken.Text);
             }
             else
             {

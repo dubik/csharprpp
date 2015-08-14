@@ -355,6 +355,23 @@ namespace CSharpRpp
         }
     }
 
+    public sealed class RppBooleanLiteral : RppLiteralBase<bool>
+    {
+        public RppBooleanLiteral([NotNull] string valueStr) : base(valueStr)
+        {
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Accept(this);
+        }
+
+        protected override bool Parse(string valueStr)
+        {
+            return bool.Parse(valueStr);
+        }
+    }
+
     public class RppFuncCall : RppMember
     {
         public override sealed RppType Type { get; protected set; }

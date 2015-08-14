@@ -147,5 +147,9 @@ namespace CSharpRppTest
         public void Visit(RppClosure node)
         {
         }
+
+        public void Accept(RppBooleanLiteral node)
+        {
+        }
     }
 }

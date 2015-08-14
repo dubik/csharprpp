@@ -516,5 +516,11 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
             closureClass.CreateType();
         }
+
+        public override void Accept(RppBooleanLiteral node)
+        {
+            var boolOpCode = node.Value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
+            _body.Emit(boolOpCode);
+        }
     }
 }
