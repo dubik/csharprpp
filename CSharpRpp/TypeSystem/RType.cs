@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
@@ -127,6 +128,37 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
+    public class RppTypeParameterInfo
+    {
+        public string Name { get; private set; }
+    }
+
+    public interface IRppTypeDefinition
+    {
+        RppTypeParameterInfo[] TypeParameters { get; }
+        RppConstructorInfo[] Constructors { get; }
+        RppFieldInfo[] Fields { get; }
+        RppMethodInfo[] Methods { get; }
+    }
+
+    sealed class EmptyTypeDefinition : IRppTypeDefinition
+    {
+        public static IRppTypeDefinition Instance = new EmptyTypeDefinition();
+
+        public RppTypeParameterInfo[] TypeParameters { get; private set; }
+        public RppConstructorInfo[] Constructors { get; private set; }
+        public RppFieldInfo[] Fields { get; private set; }
+        public RppMethodInfo[] Methods { get; private set; }
+
+        private EmptyTypeDefinition()
+        {
+            TypeParameters = new RppTypeParameterInfo[0];
+            Constructors = new RppConstructorInfo[0];
+            Fields = new RppFieldInfo[0];
+            Methods = new RppMethodInfo[0];
+        }
+    }
+
     public class RType
     {
         private static readonly Dictionary<Type, RType> primitiveTypesMap = new Dictionary<Type, RType>();
@@ -138,7 +170,7 @@ namespace CSharpRpp.TypeSystem
                 RType type;
                 if (!primitiveTypesMap.TryGetValue(systemType, out type))
                 {
-                    type = new RType(systemType.Name, 0);
+                    type = new RType(systemType.Name, 0, EmptyTypeDefinition.Instance);
                     primitiveTypesMap.Add(systemType, type);
                 }
 
@@ -174,7 +206,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsGenericType
         {
-            get { throw new NotImplementedException(); }
+            get { return _typeDefinition.TypeParameters.Length != 0; }
         }
 
         public bool IsPrimitive
@@ -182,31 +214,33 @@ namespace CSharpRpp.TypeSystem
             get { return !IsClass; }
         }
 
-        private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
-        private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
-        private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
+        public Type TypeInfo { get; set; }
 
-        public RType(string name, RTypeAttributes attributes)
+        public RppFieldInfo[] Fields
+        {
+            get { return _typeDefinition.Fields; }
+        }
+
+        public RppConstructorInfo[] Constructors
+        {
+            get { return _typeDefinition.Constructors; }
+        }
+
+        public RppMethodInfo[] Methods
+        {
+            get { return _typeDefinition.Methods; }
+        }
+
+        private readonly IRppTypeDefinition _typeDefinition;
+
+        public RType([NotNull] string name, RTypeAttributes attributes, [NotNull] IRppTypeDefinition typeDefinition)
         {
             Name = name;
             Attributes = attributes;
+            _typeDefinition = typeDefinition;
         }
 
-        public RppMethodInfo[] GetMethods()
-        {
-            return _methods.ToArray();
-        }
-
-        public RppConstructorInfo[] GetConstructors()
-        {
-            return _constructors.ToArray();
-        }
-
-        public RppFieldInfo[] GetFields()
-        {
-            return _fields.ToArray();
-        }
-
+        /*
         public void DefineMethod(string name, RMethodAttributes attributes, RType returnType, IEnumerable<RppParameterInfo> parameterTypes)
         {
             DefineMethod(name, attributes, returnType, parameterTypes, Enumerable.Empty<RppGenericArgument>());
@@ -230,5 +264,6 @@ namespace CSharpRpp.TypeSystem
             RppConstructorInfo constructor = new RppConstructorInfo(attributes, parameterTypes, this);
             _constructors.Add(constructor);
         }
+         */
     }
 }

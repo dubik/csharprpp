@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CSharpRpp.TypeSystem;
+using System.Linq;
+using CSharpRpp.Native;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -50,7 +51,6 @@ namespace CSharpRpp
         public static Type Double = typeof (double);
     }
 
-    /*
     public abstract class RppType
     {
         public virtual Type Runtime { get; protected set; }
@@ -411,33 +411,32 @@ namespace CSharpRpp
 
         #endregion
     }
-    */
 
     [DebuggerDisplay("{Name}")]
-    public class RppTypeName
+    public class RppTypeName : RppType
     {
-        public static RType UnitTy = RType.Create(typeof (void));
-        public static RType CharTy = RType.Create(typeof (char));
-        public static RType BooleanTy = RType.Create(typeof (bool));
-        public static RType ShortTy = RType.Create(typeof (short));
-        public static RType IntTy = RType.Create(typeof (int));
-        public static RType LongTy = RType.Create(typeof (long));
-        public static RType FloatTy = RType.Create(typeof (float));
-        public static RType DoubleTy = RType.Create(typeof (double));
+        public static RppPrimitiveType UnitTy = new RppPrimitiveType(ERppPrimitiveType.EUnit);
+        public static RppPrimitiveType CharTy = new RppPrimitiveType(ERppPrimitiveType.EChar);
+        public static RppPrimitiveType BooleanTy = new RppPrimitiveType(ERppPrimitiveType.EBool);
+        public static RppPrimitiveType ShortTy = new RppPrimitiveType(ERppPrimitiveType.EShort);
+        public static RppPrimitiveType IntTy = new RppPrimitiveType(ERppPrimitiveType.EInt);
+        public static RppPrimitiveType LongTy = new RppPrimitiveType(ERppPrimitiveType.ELong);
+        public static RppPrimitiveType FloatTy = new RppPrimitiveType(ERppPrimitiveType.EFloat);
+        public static RppPrimitiveType DoubleTy = new RppPrimitiveType(ERppPrimitiveType.EDouble);
 
-        private static readonly Dictionary<ERppPrimitiveType, RType> SystemTypesMap = new Dictionary<ERppPrimitiveType, RType>
+        private static readonly Dictionary<ERppPrimitiveType, ResolvedType> SystemTypesMap = new Dictionary<ERppPrimitiveType, ResolvedType>
         {
-            {ERppPrimitiveType.EBool, BooleanTy},
-            {ERppPrimitiveType.EChar, CharTy},
-            {ERppPrimitiveType.EShort, ShortTy},
-            {ERppPrimitiveType.EInt, IntTy},
-            {ERppPrimitiveType.ELong, LongTy},
-            {ERppPrimitiveType.EFloat, FloatTy},
-            {ERppPrimitiveType.EDouble, DoubleTy},
-            {ERppPrimitiveType.EUnit, UnitTy}
+            {ERppPrimitiveType.EBool, RppNativeType.Create(typeof (bool))},
+            {ERppPrimitiveType.EChar, RppNativeType.Create(typeof (char))},
+            {ERppPrimitiveType.EShort, RppNativeType.Create(typeof (short))},
+            {ERppPrimitiveType.EInt, RppNativeType.Create(typeof (int))},
+            {ERppPrimitiveType.ELong, RppNativeType.Create(typeof (long))},
+            {ERppPrimitiveType.EFloat, RppNativeType.Create(typeof (float))},
+            {ERppPrimitiveType.EDouble, RppNativeType.Create(typeof (double))},
+            {ERppPrimitiveType.EUnit, RppNativeType.Create(typeof (void))}
         };
 
-        private static readonly Dictionary<string, RType> PrimitiveTypesMap = new Dictionary<string, RType>
+        private static readonly Dictionary<string, RppPrimitiveType> PrimitiveTypesMap = new Dictionary<string, RppPrimitiveType>
         {
             {"Boolean", BooleanTy},
             {"Char", CharTy},
@@ -449,7 +448,7 @@ namespace CSharpRpp
             {"Unit", UnitTy}
         };
 
-        public static bool IsPrimitive([NotNull] string name, out RType type)
+        public static bool IsPrimitive([NotNull] string name, out RppPrimitiveType type)
         {
             return PrimitiveTypesMap.TryGetValue(name, out type);
         }
@@ -461,28 +460,28 @@ namespace CSharpRpp
             Name = name;
         }
 
-        public RType Resolve(RppScope scope)
+        public override ResolvedType Resolve(RppScope scope)
         {
-            RType primitiveType;
+            RppPrimitiveType primitiveType;
 
             if (IsPrimitive(Name, out primitiveType))
             {
-                return primitiveType;
+                return primitiveType.Resolve(scope);
             }
 
             if (Name == "String")
             {
-                return RType.Create(typeof (String));
+                return RppNativeType.Create(typeof (String));
             }
 
             if (Name == "Exception")
             {
-                return RType.Create(typeof (Exception));
+                return RppNativeType.Create(typeof (Exception));
             }
 
             if (Name == "Any")
             {
-                return RType.Create(typeof (Object));
+                return RppNativeType.Create(typeof (Object));
             }
 
             if (Name == "Nothing")
@@ -493,13 +492,13 @@ namespace CSharpRpp
             IRppNamedNode node = scope.Lookup(Name);
             if (node is RppVariantTypeParam)
             {
-                return RType.Create((node as RppVariantTypeParam).Runtime);
+                return RppNativeType.Create((node as RppVariantTypeParam).Runtime);
             }
 
             // TODO implement type creation out of class
             RppClass clazz = node as RppClass;
-            Debug.Assert(false);
-            return RType.Create(typeof(void));
+            Debug.Assert(clazz != null);
+            return new RppObjectType(clazz);
         }
 
         public override string ToString()
@@ -548,9 +547,9 @@ namespace CSharpRpp
     public class RppVariantTypeParam : RppNamedNode
     {
         public TypeVariant Variant { get; private set; }
-        public RType LowerBound { get; set; }
-        public RType UpperBound { get; set; }
-        public RType Type { get; set; }
+        public RppType LowerBound { get; set; }
+        public RppType UpperBound { get; set; }
+        public RppType Type { get; set; }
 
         public Type Runtime { get; set; }
 
@@ -572,7 +571,7 @@ namespace CSharpRpp
             if (Runtime == null)
             {
                 RppTypeName typeName = new RppTypeName(Name);
-                RType resolvedType = typeName.Resolve(scope);
+                RppType resolvedType = typeName.Resolve(scope);
                 if (resolvedType == null)
                 {
                     throw new Exception("Can't resolve type: " + Name);
