@@ -66,6 +66,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectorTest.cs" />
     <Compile Include="SemanticTest.cs" />
+    <Compile Include="TypeSystemTest.cs" />
     <Compile Include="TypeTest.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

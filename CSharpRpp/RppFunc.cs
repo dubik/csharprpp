@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -92,6 +93,8 @@ namespace CSharpRpp
         public HashSet<ObjectModifier> Modifiers { get; set; }
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
+
+        public RType NewReturnType { get; private set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
@@ -262,6 +265,7 @@ namespace CSharpRpp
     public sealed class RppParam : RppMember, IRppParam
     {
         public override RppType Type { get; protected set; }
+        public override RType Type2 { get; protected set; }
 
         public int Index { get; set; }
 
@@ -285,6 +289,8 @@ namespace CSharpRpp
             Type = resolvedType;
             return this;
         }
+
+        public RType NewType { get; private set; }
 
         public IRppParam CloneWithNewType(RppType newType)
         {

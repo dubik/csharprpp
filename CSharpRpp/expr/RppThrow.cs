@@ -1,8 +1,11 @@
-﻿namespace CSharpRpp.Expr
+﻿using CSharpRpp.TypeSystem;
+
+namespace CSharpRpp.Expr
 {
     public class RppThrow : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
 
         public IRppExpr Expr;
 
@@ -10,6 +13,7 @@
         {
             Expr = expr;
             Type = RppPrimitiveType.UnitTy;
+            Type2 = RppTypeSystem.UnitTy;
         }
 
         public override IRppNode Analyze(RppScope scope)

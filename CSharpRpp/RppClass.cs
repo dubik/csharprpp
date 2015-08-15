@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -92,6 +93,7 @@ namespace CSharpRpp
         }
 
         public RppField InstanceField { get; private set; }
+        public RType Type2 { get; set; }
 
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {

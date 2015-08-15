@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -11,6 +12,7 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
 
         public RppType ClassType { get; private set; }
+        public override RType Type2 { get; protected set; }
 
         [CanBeNull]
         public RppField Field { get; private set; }

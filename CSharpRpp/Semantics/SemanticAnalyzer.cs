@@ -18,7 +18,7 @@ namespace CSharpRpp.Semantics
         {
             if (!node.Class.Modifiers.Contains(ObjectModifier.OmAbstract) && node.IsAbstract && !node.Modifiers.Contains(ObjectModifier.OmAbstract))
             {
-                throw new SemanticException(string.Format("Class {0} needs to be abstract, since method {1} is not defined", node.Class.Name, node.ToString()));
+                throw new SemanticException(string.Format("EnclosingType {0} needs to be abstract, since method {1} is not defined", node.Class.Name, node.ToString()));
             }
         }
 

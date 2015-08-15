@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Expr;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 using Mono.Collections.Generic;
 
@@ -12,6 +13,7 @@ namespace CSharpRpp
     public class RppNew : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
         public Type RuntimeType { get; private set; }
 
         [NotNull]

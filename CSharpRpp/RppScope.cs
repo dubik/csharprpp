@@ -13,7 +13,6 @@ namespace CSharpRpp
         [NotNull] private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
         [NotNull] private readonly Dictionary<string, RppType> _genericTypes = new Dictionary<string, RppType>();
 
-
         public RppScope(RppScope parentScope)
         {
             ParentScope = parentScope;

@@ -24,7 +24,8 @@ namespace CSharpRpp.TypeSystem
         Final = 2,
         Private = 4,
         Public = 8,
-        Static = 16
+        Static = 16,
+        Override = 32
     }
 
     [Flags]
@@ -41,13 +42,13 @@ namespace CSharpRpp.TypeSystem
     {
         public string Name { get; private set; }
         public RFieldAttributes Attributes { get; private set; }
-        public RType ParentType { get; private set; }
+        public RType EnclosingType { get; private set; }
 
-        public RppFieldInfo(string name, RFieldAttributes attributes, RType parentType)
+        public RppFieldInfo(string name, RFieldAttributes attributes, RType enclosingType)
         {
             Name = name;
             Attributes = attributes;
-            ParentType = parentType;
+            EnclosingType = enclosingType;
         }
 
         #region Equality
@@ -59,8 +60,14 @@ namespace CSharpRpp.TypeSystem
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
             return obj is RppFieldInfo && Equals((RppFieldInfo) obj);
         }
 
@@ -79,13 +86,13 @@ namespace CSharpRpp.TypeSystem
     {
         public RMethodAttributes Attributes { get; private set; }
         public RType[] ParameterTypes { get; private set; }
-        public RType Class { get; private set; }
+        public RType EnclosingType { get; private set; }
 
-        public RppConstructorInfo(RMethodAttributes attributes, IEnumerable<RType> parameterTypes, RType parentClass)
+        public RppConstructorInfo(RMethodAttributes attributes, IEnumerable<RType> parameterTypes, RType enclosingType)
         {
             Attributes = attributes;
             ParameterTypes = parameterTypes.ToArray();
-            Class = parentClass;
+            EnclosingType = enclosingType;
         }
     }
 
@@ -141,7 +148,7 @@ namespace CSharpRpp.TypeSystem
         RppMethodInfo[] Methods { get; }
     }
 
-    sealed class EmptyTypeDefinition : IRppTypeDefinition
+    public sealed class EmptyTypeDefinition : IRppTypeDefinition
     {
         public static IRppTypeDefinition Instance = new EmptyTypeDefinition();
 
@@ -161,25 +168,6 @@ namespace CSharpRpp.TypeSystem
 
     public class RType
     {
-        private static readonly Dictionary<Type, RType> primitiveTypesMap = new Dictionary<Type, RType>();
-
-        public static RType Create(Type systemType)
-        {
-            if (systemType.IsPrimitive)
-            {
-                RType type;
-                if (!primitiveTypesMap.TryGetValue(systemType, out type))
-                {
-                    type = new RType(systemType.Name, 0, EmptyTypeDefinition.Instance);
-                    primitiveTypesMap.Add(systemType, type);
-                }
-
-                return type;
-            }
-
-            throw new NotImplementedException("Not implemented yet");
-        }
-
         public string Name { get; private set; }
 
         public RTypeAttributes Attributes { get; private set; }
@@ -206,7 +194,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsGenericType
         {
-            get { return _typeDefinition.TypeParameters.Length != 0; }
+            get { return _typeParameters.Count != 0; }
         }
 
         public bool IsPrimitive
@@ -216,31 +204,33 @@ namespace CSharpRpp.TypeSystem
 
         public Type TypeInfo { get; set; }
 
-        public RppFieldInfo[] Fields
+        public IReadOnlyList<RppFieldInfo> Fields
         {
-            get { return _typeDefinition.Fields; }
+            get { return _fields; }
         }
 
-        public RppConstructorInfo[] Constructors
+        public IReadOnlyList<RppMethodInfo> Methods
         {
-            get { return _typeDefinition.Constructors; }
+            get { return _methods; }
         }
 
-        public RppMethodInfo[] Methods
-        {
-            get { return _typeDefinition.Methods; }
-        }
+        private readonly List<RppTypeParameterInfo> _typeParameters = new List<RppTypeParameterInfo>();
+        private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
+        private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
+        private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
 
-        private readonly IRppTypeDefinition _typeDefinition;
+        public RType([NotNull] string name, RTypeAttributes attributes)
+        {
+            Name = name;
+            Attributes = attributes;
+        }
 
         public RType([NotNull] string name, RTypeAttributes attributes, [NotNull] IRppTypeDefinition typeDefinition)
         {
             Name = name;
             Attributes = attributes;
-            _typeDefinition = typeDefinition;
         }
 
-        /*
         public void DefineMethod(string name, RMethodAttributes attributes, RType returnType, IEnumerable<RppParameterInfo> parameterTypes)
         {
             DefineMethod(name, attributes, returnType, parameterTypes, Enumerable.Empty<RppGenericArgument>());
@@ -264,6 +254,5 @@ namespace CSharpRpp.TypeSystem
             RppConstructorInfo constructor = new RppConstructorInfo(attributes, parameterTypes, this);
             _constructors.Add(constructor);
         }
-         */
     }
 }

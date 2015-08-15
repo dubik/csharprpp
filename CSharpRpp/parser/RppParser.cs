@@ -232,7 +232,7 @@ namespace CSharpRpp
                     RppField classParam;
                     if (!ParseClassParam(out classParam))
                     {
-                        throw new Exception("Class param was expected but got " + _lastToken.Text);
+                        throw new Exception("EnclosingType param was expected but got " + _lastToken.Text);
                     }
 
                     classParams.Add(classParam);

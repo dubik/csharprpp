@@ -10,6 +10,7 @@ namespace CSharpRpp
     public class RppVar : RppMember
     {
         public override sealed RppType Type { get; protected set; }
+        public override sealed RType Type2 { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
 

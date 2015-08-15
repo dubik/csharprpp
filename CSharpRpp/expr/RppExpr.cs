@@ -13,6 +13,7 @@ namespace CSharpRpp
     public abstract class RppMember : RppNamedNode, IRppExpr
     {
         public abstract RppType Type { get; protected set; }
+        public abstract RType Type2 { get; protected set; }
 
         // TODO perhaps it would make more sense to add target to constructor as a parameter (not type, but node)
         public RppObjectType TargetType { get; set; }
@@ -27,11 +28,15 @@ namespace CSharpRpp
         public static RppEmptyExpr Instance = new RppEmptyExpr();
 
         public RppType Type => RppPrimitiveType.UnitTy;
+
+        public RType Type2 { get { return RppTypeSystem.UnitTy; }}
     }
 
     public class RppNull : RppNode, IRppExpr
     {
         public RppType Type => RppNullType.Instance;
+
+        public RType Type2 { get { return RppTypeSystem.NullTy; } }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -129,6 +134,7 @@ namespace CSharpRpp
     public class BinOp : RppNode, IRppExpr
     {
         public RppType Type { get; protected set; }
+        public RType Type2 { get; protected set; }
 
         [NotNull]
         public string Op { get; private set; }
@@ -246,6 +252,7 @@ namespace CSharpRpp
         public T Value { get; private set; }
 
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
 
         protected RppLiteralBase(string valueStr)
         {
@@ -372,6 +379,7 @@ namespace CSharpRpp
     public class RppFuncCall : RppMember
     {
         public override sealed RppType Type { get; protected set; }
+        public override sealed RType Type2 { get; protected set; }
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
@@ -671,6 +679,7 @@ namespace CSharpRpp
     public class RppArray : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
 
         public IEnumerable<IRppExpr> Initializers { get; private set; }
 
@@ -701,6 +710,7 @@ namespace CSharpRpp
     public class RppBlockExpr : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
 
         private IList<IRppNode> _exprs;
 
@@ -785,6 +795,7 @@ namespace CSharpRpp
     public class RppSelector : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+        public RType Type2 { get; private set; }
         public Type RuntimeType { get; private set; }
 
         public IRppExpr Target { get; }
@@ -872,6 +883,7 @@ namespace CSharpRpp
     sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
+        public override RType Type2 { get; protected set; }
 
         public ClassAsMemberAdapter(RppClass clazz) : base(clazz.Name)
         {
@@ -882,6 +894,7 @@ namespace CSharpRpp
     public class RppId : RppMember
     {
         public override RppType Type { get; protected set; }
+        public override RType Type2 { get; protected set; }
 
         [CanBeNull]
         public RppMember Ref { get; private set; }
@@ -981,6 +994,7 @@ namespace CSharpRpp
     public class RppBox : RppNode, IRppExpr
     {
         public RppType Type { get; }
+        public RType Type2 { get; private set; }
 
         public IRppExpr Expression { get; }
 

@@ -1,4 +1,5 @@
 ﻿using Antlr.Runtime;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -20,6 +21,7 @@ namespace CSharpRpp
     public interface IRppExpr : IRppStatementExpr
     {
         RppType Type { get; }
+        RType Type2 { get; }
     }
 
     public class RppNode : IRppNode
