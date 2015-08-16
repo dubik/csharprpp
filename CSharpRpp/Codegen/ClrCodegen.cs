@@ -522,5 +522,26 @@ namespace CSharpRpp.Codegen
             var boolOpCode = node.Value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
             _body.Emit(boolOpCode);
         }
+
+        public override void Accept(RppFieldSelector node)
+        {
+            if (!_inSelector)
+            {
+                _body.Emit(OpCodes.Ldarg_0); // load 'this'
+            }
+
+            Debug.Assert(node.Field != null, "node.Field != null");
+
+            FieldInfo field = node.Field.Builder;
+
+            Type targetType = node.TargetType.Runtime;
+            if (targetType.IsGenericType)
+            {
+                field = TypeBuilder.GetField(targetType, field);
+            }
+
+            Debug.Assert(field != null, "field != null");
+            _body.Emit(OpCodes.Ldfld, field);
+        }
     }
 }

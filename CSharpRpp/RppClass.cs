@@ -26,6 +26,9 @@ namespace CSharpRpp
 
         Type RuntimeType { get; }
         RppClassScope Scope { get; }
+
+        [CanBeNull]
+        IRppClass BaseClass { get; }
     }
 
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
@@ -41,6 +44,11 @@ namespace CSharpRpp
 
         [CanBeNull]
         public RppClassScope Scope { get; private set; }
+
+        public IRppClass BaseClass
+        {
+            get { return BaseConstructorCall.BaseClass; }
+        }
 
         [NotNull]
         public IEnumerable<IRppFunc> Functions
@@ -184,7 +192,7 @@ namespace CSharpRpp
 
 
         /// <summary>
-        /// renaming constructor parameter names so that custom constructor which
+        /// Renaming constructor parameter names so that custom constructor which
         /// refers to classParams would be resolved to field and not to param
         /// </summary>
         /// <param name="baseName">name of the argument</param>

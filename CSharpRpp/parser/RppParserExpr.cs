@@ -255,7 +255,8 @@ namespace CSharpRpp
             else if (Require(RppLexer.KW_Null))
             {
                 expr = new RppNull();
-            } else if (Require(RppLexer.BooleanLiteral))
+            }
+            else if (Require(RppLexer.BooleanLiteral))
             {
                 expr = new RppBooleanLiteral(_lastToken.Text);
             }
@@ -329,7 +330,7 @@ namespace CSharpRpp
                 while (Require(RppLexer.OP_Dot))
                 {
                     Expect(RppLexer.Id);
-                    path = new RppSelector(path, new RppId(_lastToken.Text) {Token = _lastToken});
+                    path = new RppSelector(path, new RppFieldSelector(_lastToken.Text) {Token = _lastToken});
                 }
 
                 return true;
@@ -346,7 +347,7 @@ namespace CSharpRpp
             {
                 if (Require(RppLexer.Id))
                 {
-                    return ParseSimpleExprRest(new RppSelector(expr, new RppId(_lastToken.Text) {Token = _lastToken}));
+                    return ParseSimpleExprRest(new RppSelector(expr, new RppFieldSelector(_lastToken.Text) {Token = _lastToken}));
                 }
 
                 throw new Exception("After . identifier is expected " + _lastToken);

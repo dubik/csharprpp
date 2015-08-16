@@ -69,7 +69,7 @@ namespace CSharpRppTest
             IRppExpr actual;
             Assert.IsTrue(parser.ParsePath(out actual));
             Assert.IsNotNull(actual);
-            Assert.AreEqual(Selector(Id("foo"), Id("bar")), actual);
+            Assert.AreEqual(Selector(Id("foo"), Field("bar")), actual);
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseLongChainOfFieldsAndMethods()
         {
-            TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), FollowedCall("MyFunc")), Id("bar")), FollowedCall("Length")));
+            TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), FollowedCall("MyFunc")), Field("bar")), FollowedCall("Length")));
         }
 
         [TestMethod]
@@ -132,6 +132,11 @@ namespace CSharpRppTest
         private static RppId Id(string id)
         {
             return new RppId(id);
+        }
+
+        private static RppFieldSelector Field(string field)
+        {
+            return new RppFieldSelector(field);
         }
 
         private static RppFuncCall Call(string id)

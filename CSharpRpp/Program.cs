@@ -34,15 +34,14 @@ object Runtime
 } 
 ";
             const string code = @"
-class Option[A](val x : A)
-
-class SomeInt(x : Int) extends Option[Int](x)
+class Some[A](val a: A)
 
 object Main
 {
     def main : Int = {
-        val k : SomeInt = new SomeInt(123)
-        k.x
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.a
+        p
     }
 }
 ";

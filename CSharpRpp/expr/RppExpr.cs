@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CSharpRpp.Expr;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using JetBrains.Annotations;
@@ -13,6 +12,9 @@ namespace CSharpRpp
     public abstract class RppMember : RppNamedNode, IRppExpr
     {
         public abstract RppType Type { get; protected set; }
+
+        // TODO perhaps it would make more sense to add target to constructor as a parameter (not type, but node)
+        public RppObjectType TargetType { get; set; }
 
         protected RppMember(string name) : base(name)
         {
@@ -800,8 +802,10 @@ namespace CSharpRpp
                 }
             }
 
+            Path.TargetType = targetType;
             Path = (RppMember) Path.Analyze(classScope);
-            Type = Path.Type;
+            Type = Path.Type.Runtime.IsGenericParameter ? classScope.LookupGenericType(Path.Type.Runtime.Name) : Path.Type;
+
             return this;
         }
 

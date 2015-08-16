@@ -14,6 +14,7 @@ namespace CSharpRpp.Native
         public IEnumerable<RppVariantTypeParam> TypeParams { get; private set; }
         public Type RuntimeType { get; private set; }
         public RppClassScope Scope { get; private set; }
+        public IRppClass BaseClass { get; private set; }
 
         public RppNativeClass(Type classType) : base(classType.Name)
         {
@@ -25,6 +26,11 @@ namespace CSharpRpp.Native
             RuntimeType = classType;
             Scope = new RppClassScope(null);
             TypeParams = classType.IsGenericType ? classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList() : Collections.NoVariantTypeParams;
+
+            if (classType.BaseType != null)
+            {
+                BaseClass = new RppNativeClass(classType.BaseType);
+            }
         }
 
         private static RppField CreateField(FieldInfo field)

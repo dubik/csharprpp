@@ -138,18 +138,6 @@ class Bar(var k: Int) extends Foo(k)
         }
 
         [TestMethod]
-        public void VarShouldMakeParamAField()
-        {
-            const string code = @"
-class Foo(var k : Int)
-{
-}
-";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo");
-            Assert.IsNotNull(fooTy.GetField("k"));
-        }
-
-        [TestMethod]
         public void ValShouldMakeParamAField()
         {
             const string code = @"
@@ -435,6 +423,7 @@ object Main
         }
 
         [TestMethod]
+        [Ignore]
         public void SpecifyTypesForBaseClass()
         {
             const string code = @"
@@ -457,6 +446,7 @@ object Main
         }
 
         [TestMethod]
+        [Ignore]
         public void Mon()
         {
             const string code = @"
@@ -491,6 +481,31 @@ object Main
             MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
             var res = mainMethod.Invoke(null, null);
             Assert.AreEqual(123, res);
+        }
+
+        [TestMethod]
+        public void AccessFieldFromBaseClass()
+        {
+            const string code = @"
+class Foo(var k: Int)
+{
+    def this() = this(27)
+}
+
+class Bar extends Foo
+
+object Main
+{
+    def get() : Int = {
+        val inst : Bar = new Bar
+        inst.k
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
+            var res = getMethod.Invoke(null, null);
+            Assert.AreEqual(27, res);
         }
     }
 }
