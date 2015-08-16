@@ -423,7 +423,6 @@ object Main
         }
 
         [TestMethod]
-        [Ignore]
         public void SpecifyTypesForBaseClass()
         {
             const string code = @"

@@ -255,7 +255,7 @@ namespace CSharpRpp
         public override Type Runtime { get; protected set; }
         public IEnumerable<Type> GenericArguments { get; private set; }
 
-        public RppGenericObjectType(RppClass clazz, IEnumerable<Type> genericArguments, Type runtimeType) : base(clazz)
+        public RppGenericObjectType(IRppClass clazz, IEnumerable<Type> genericArguments, Type runtimeType) : base(clazz)
         {
             Runtime = runtimeType;
             GenericArguments = genericArguments;

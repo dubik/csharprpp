@@ -337,7 +337,13 @@ namespace CSharpRpp.Codegen
         {
             _body.Emit(OpCodes.Ldarg_0);
             node.Args.ForEach(arg => arg.Accept(this));
+
             ConstructorInfo constructor = node.BaseConstructor.ConstructorInfo;
+            if (node.BaseClassType.Runtime.IsGenericType)
+            {
+                constructor = TypeBuilder.GetConstructor(node.BaseClassType.Runtime, constructor);
+            }
+
             Debug.Assert(constructor != null, "constructor != null, we should have figure out which constructor to use before");
             _body.Emit(OpCodes.Call, constructor);
         }

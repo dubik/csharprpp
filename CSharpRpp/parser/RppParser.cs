@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Antlr.Runtime;
 using JetBrains.Annotations;
-using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -302,7 +301,7 @@ namespace CSharpRpp
 
         private IList<RppVariantTypeParam> ParseTypeParams()
         {
-            IList<RppVariantTypeParam> typeParams = ReadOnlyCollection<RppVariantTypeParam>.Empty;
+            IList<RppVariantTypeParam> typeParams = Collections.NoVariantTypeParams;
             if (Require(RppLexer.OP_LBracket))
             {
                 typeParams = new List<RppVariantTypeParam>();
@@ -361,8 +360,8 @@ namespace CSharpRpp
         public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs, out IList<RppType> baseClassTypeParams)
         {
             baseClassName = null;
-            baseClassArgs = ReadOnlyCollection<IRppExpr>.Empty;
-            baseClassTypeParams = ReadOnlyCollection<RppType>.Empty;
+            baseClassArgs = Collections.NoExprs;
+            baseClassTypeParams = Collections.NoTypes;
             if (Require(RppLexer.KW_Extends))
             {
                 if (Require(RppLexer.Id))

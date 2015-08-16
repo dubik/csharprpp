@@ -589,6 +589,8 @@ namespace CSharpRpp
 
         public IList<RppType> BaseClassTypeArgs { get; private set; }
 
+        public ResolvedType BaseClassType { get; private set; }
+
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
 
         public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IList<RppType> baseClassTypeArgs)
@@ -627,7 +629,21 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList);
 
+            var types = BaseClassTypeArgs.Select(t =>
+                                                 {
+                                                     ResolvedType resolvedType = t.Resolve(scope);
+                                                     return resolvedType != null ? resolvedType.Runtime : null;
+                                                 }).ToArray();
+
             IEnumerable<RppType> args = Args.Select(a => a.Type);
+            if (BaseClass.RuntimeType.IsGenericType)
+            {
+                BaseClassType = new RppGenericObjectType(BaseClass, types, BaseClass.RuntimeType.MakeGenericType(types));
+            }
+            else
+            {
+                BaseClassType = new RppObjectType(BaseClass);
+            }
 
             BaseConstructor = FindMatchingConstructor(args);
 

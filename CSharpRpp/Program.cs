@@ -34,17 +34,18 @@ object Runtime
 } 
 ";
             const string code = @"
-class Some[A](val a: A)
+class Option[A](val x : A)
+
+class SomeInt(x : Int) extends Option[Int](x)
 
 object Main
 {
     def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
-        val p = k.a
-        p
+        
+        10
     }
 }
-";
+"; // val k : SomeInt = new SomeInt(123)
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);
