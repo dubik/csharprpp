@@ -302,7 +302,6 @@ namespace CLRCodeGen
             return mainMethod;
         }
 
-
         private static void CreateGenericType()
         {
             var typeofListOfInts = typeof (IList<int>);
