@@ -635,7 +635,7 @@ namespace CSharpRpp
                                                      return resolvedType != null ? resolvedType.Runtime : null;
                                                  }).ToArray();
 
-            IEnumerable<RppType> args = Args.Select(a => a.Type);
+            IEnumerable<RppType> args = Args.Select(a => a.Type).ToList();
             if (BaseClass.RuntimeType.IsGenericType)
             {
                 BaseClassType = new RppGenericObjectType(BaseClass, types, BaseClass.RuntimeType.MakeGenericType(types));
@@ -654,13 +654,29 @@ namespace CSharpRpp
 
         private IRppFunc FindMatchingConstructor(IEnumerable<RppType> args)
         {
-            var matchedConstructors = OverloadQuery.Find(args, BaseClass.Constructors).ToList();
+            var matchedConstructors = OverloadQuery.Find(args, BaseClass.Constructors, TypesComparator, CanCast).ToList();
             if (matchedConstructors.Count != 1)
             {
                 throw new Exception("Can't find correct constructor");
             }
 
             return matchedConstructors[0];
+        }
+
+        private bool CanCast(RppType source, RppType target)
+        {
+            return OverloadQuery.DefaultCanCast(source, target);
+        }
+
+        private bool TypesComparator(RppType source, RppType target)
+        {
+            if (target.Runtime.IsGenericParameter)
+            {
+                RppType genericType = BaseClassTypeArgs[target.Runtime.GenericParameterPosition];
+                return false;
+            }
+
+            return OverloadQuery.DefaultTypesComparator(source, target);
         }
     }
 

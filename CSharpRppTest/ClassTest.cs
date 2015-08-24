@@ -428,7 +428,7 @@ object Main
             const string code = @"
 class Option[A](val x : A)
 
-class SomeInt(x : Int) extends Option[Int]
+class SomeInt(x : Int) extends Option[Int](x)
 
 object Main
 {

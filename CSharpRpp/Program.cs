@@ -41,11 +41,11 @@ class SomeInt(x : Int) extends Option[Int](x)
 object Main
 {
     def main : Int = {
-        
-        10
+        val k : SomeInt = new SomeInt(123)
+        k.x
     }
 }
-"; // val k : SomeInt = new SomeInt(123)
+";
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);

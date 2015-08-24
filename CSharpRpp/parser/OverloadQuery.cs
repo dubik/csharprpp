@@ -85,7 +85,14 @@ namespace CSharpRpp.Parser
                 return false;
             }
 
-            if (candidateParams.Count < items.Count && (candidateParams.Count > 0 && !candidateParams.Last().IsVariadic))
+            if (items.Count == 0 && candidateParams.Count != 0)
+            {
+                return false;
+            }
+
+            bool isCandidateVariadic = candidateParams.Count > 0 && candidateParams.Last().IsVariadic;
+
+            if ((candidateParams.Count < items.Count) && !isCandidateVariadic)
             {
                 return false;
             }
