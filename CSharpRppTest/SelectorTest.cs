@@ -4,10 +4,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
+    #pragma warning disable 649
     sealed class Option
     {
         public int K;
     }
+    #pragma warning restore 649
 
     [TestClass]
     public class SelectorTest
