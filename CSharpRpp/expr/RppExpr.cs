@@ -587,13 +587,13 @@ namespace CSharpRpp
 
         public IRppFunc BaseConstructor { get; private set; }
 
-        public IList<RppType> BaseClassTypeArgs { get; private set; }
+        public IEnumerable<RppType> BaseClassTypeArgs { get; private set; }
 
         public ResolvedType BaseClassType { get; private set; }
 
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
 
-        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IList<RppType> baseClassTypeArgs)
+        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IEnumerable<RppType> baseClassTypeArgs)
             : base("ctor()", argList)
         {
             BaseClassName = baseClassName ?? "Object";
@@ -629,11 +629,9 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList);
 
-            var types = BaseClassTypeArgs.Select(t =>
-                                                 {
-                                                     ResolvedType resolvedType = t.Resolve(scope);
-                                                     return resolvedType != null ? resolvedType.Runtime : null;
-                                                 }).ToArray();
+            BaseClassTypeArgs = BaseClassTypeArgs.Select(type => type.Resolve(scope)).ToList();
+
+            var types = BaseClassTypeArgs.Select(type => type.Runtime).ToArray();
 
             IEnumerable<RppType> args = Args.Select(a => a.Type).ToList();
             if (BaseClass.RuntimeType.IsGenericType)
@@ -663,7 +661,7 @@ namespace CSharpRpp
             return matchedConstructors[0];
         }
 
-        private bool CanCast(RppType source, RppType target)
+        private static bool CanCast(RppType source, RppType target)
         {
             return OverloadQuery.DefaultCanCast(source, target);
         }
@@ -672,8 +670,8 @@ namespace CSharpRpp
         {
             if (target.Runtime.IsGenericParameter)
             {
-                RppType genericType = BaseClassTypeArgs[target.Runtime.GenericParameterPosition];
-                return false;
+                RppType specializedTarget = BaseClassTypeArgs.ElementAt(target.Runtime.GenericParameterPosition);
+                return OverloadQuery.DefaultTypesComparator(source, specializedTarget);
             }
 
             return OverloadQuery.DefaultTypesComparator(source, target);
@@ -881,7 +879,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

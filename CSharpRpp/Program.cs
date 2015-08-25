@@ -16,14 +16,6 @@ namespace CSharpRpp
 {
     public class Program
     {
-        public static void func(object k)
-        {
-        }
-
-        public static void func(int k)
-        {
-        }
-
         private static void Main()
         {
             const string runtimeCode = @"
