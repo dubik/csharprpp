@@ -388,29 +388,23 @@ namespace CSharpRpp
         [NotNull]
         public IRppFunc Function { get; private set; }
 
-        public bool IsConstructorCall
-        {
-            get { return Name == "this"; }
-        }
+        public bool IsConstructorCall => Name == "this";
 
-        private readonly IList<RppType> _typeArgList;
+        private readonly IList<RppVariantTypeParam> _typeArgList;
 
-        public IEnumerable<RppType> TypeArgs
-        {
-            get { return _typeArgList; }
-        }
+        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgList;
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoTypes)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoVariantTypeParams)
         {
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<RppType> typeArgList) : base(name)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<RppVariantTypeParam> typeArgList) : base(name)
         {
             ArgList = argList;
             _typeArgList = typeArgList;
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type, [NotNull] IList<RppType> typeArgList)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type, [NotNull] IList<RppVariantTypeParam> typeArgList)
             : this(name, argList, typeArgList)
         {
             Function = function;

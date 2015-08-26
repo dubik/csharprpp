@@ -21,17 +21,11 @@ namespace CSharpRpp
 
         private readonly string _typeName;
 
-        public IEnumerable<IRppExpr> Args
-        {
-            get { return _constructorsParams.AsEnumerable(); }
-        }
+        public IEnumerable<IRppExpr> Args => _constructorsParams.AsEnumerable();
 
         private readonly IList<IRppExpr> _constructorsParams;
 
-        public IEnumerable<RppVariantTypeParam> TypeArgs
-        {
-            get { return _typeArgs.AsEnumerable(); }
-        }
+        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgs.AsEnumerable();
 
         private readonly IList<RppVariantTypeParam> _typeArgs;
 
@@ -68,13 +62,13 @@ namespace CSharpRpp
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
-            // Find correct constructor
+            // TODO Find correct constructor
             var constructors = RefClass.Constructors;
 
             CreateNameToVariantTypeParam();
 
             var candidates = OverloadQuery.Find(Args.Select(a => a.Type).ToList(), constructors, TypesComparator, CanCast).ToList();
-            if (candidates.Count() != 1)
+            if (candidates.Count != 1)
             {
                 throw new Exception("Can't figure out which overload to use");
             }
@@ -122,7 +116,6 @@ namespace CSharpRpp
             if (_typeArgs.Count > 0)
             {
                 var genericArgs = _typeArgs.Select(arg => arg.Runtime).ToArray();
-                //return RppNativeType.Create(RefClass.RuntimeType.MakeGenericType(genericArgs));
                 return new RppGenericObjectType((RppClass) RefClass, genericArgs, RefClass.RuntimeType.MakeGenericType(genericArgs));
             }
 

@@ -19,7 +19,7 @@ namespace CSharpRpp
                 Function = resolvedFunc;
             }
 
-            public virtual IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppType> typeArgs)
+            public virtual IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> typeArgs)
             {
                 return new RppFuncCall(functionName, resolvedArgList, Function, Function.ReturnType, typeArgs);
             }
@@ -35,7 +35,7 @@ namespace CSharpRpp
                 _expr = expr;
             }
 
-            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppType> typeArgs)
+            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> typeArgs)
             {
                 return new RppSelector(new RppId(_expr.Name, _expr),
                     new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs));

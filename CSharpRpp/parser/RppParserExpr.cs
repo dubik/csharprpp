@@ -341,6 +341,7 @@ namespace CSharpRpp
 
         // clazz.myField
         // class.Func()
+        // class.Func[Int]()
         private IRppExpr ParseSimpleExprRest(IRppExpr expr)
         {
             if (Require(RppLexer.OP_Dot))
@@ -353,10 +354,22 @@ namespace CSharpRpp
                 throw new Exception("After . identifier is expected " + _lastToken);
             }
 
+            if (Peek(RppLexer.OP_LBracket))
+            {
+                IList<RppVariantTypeParam> typeArgs = ParseTypeParams();
+                if (!Peek(RppLexer.OP_LParen))
+                {
+                    throw new SyntaxException("Expecting function call after type arguments", _lastToken);
+                }
+
+                IList<IRppExpr> args = ParseArgs();
+                return ParseSimpleExprRest(MakeCall(expr, args, typeArgs));
+            }
+
             if (Peek(RppLexer.OP_LParen))
             {
                 IList<IRppExpr> args = ParseArgs();
-                return ParseSimpleExprRest(MakeCall(expr, args));
+                return ParseSimpleExprRest(MakeCall(expr, args, Collections.NoVariantTypeParams));
             }
 
             return expr;
@@ -372,18 +385,18 @@ namespace CSharpRpp
             return Collections.NoExprs;
         }
 
-        private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args)
+        private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args, IList<RppVariantTypeParam> typeArgs)
         {
             if (expr is RppId)
             {
                 RppId id = expr as RppId;
-                return new RppFuncCall(id.Name, args);
+                return new RppFuncCall(id.Name, args, typeArgs);
             }
 
             if (expr is RppSelector)
             {
                 RppSelector selector = expr as RppSelector;
-                return new RppSelector(selector.Target, new RppFuncCall(selector.Path.Name, args));
+                return new RppSelector(selector.Target, new RppFuncCall(selector.Path.Name, args, typeArgs));
             }
 
             return expr;

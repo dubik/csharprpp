@@ -55,6 +55,7 @@
     <Compile Include="ComplexTests.cs" />
     <Compile Include="ExceptionsTest.cs" />
     <Compile Include="FuncTest.cs" />
+    <Compile Include="GenericsTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />
     <Compile Include="MethodDispatchTest.cs" />
     <Compile Include="ParserExprTest.cs" />

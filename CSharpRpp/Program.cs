@@ -26,16 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-object Foo
+object Bar
 {
-    def doSomething() : Int = 10
-}
+    def func[A](x: A) : A = x
 
-object Main
-{
-    def main : Unit = {
-        Foo.doSomething()
-    }
+    def main(name: String) : String = func[String](name)
 }
 ";
             RppProgram runtime = Parse(runtimeCode);

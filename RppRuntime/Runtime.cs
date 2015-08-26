@@ -201,5 +201,25 @@ namespace RppRuntime
         public int IntegerProperty { get; set; }
     }
 
+    interface IGenMethod
+    {
+        void WriteToConsole(string str);
+    }
+
+    class GenMethods
+    {
+        public string Func<T>(T p) where T: IGenMethod
+        {
+            p.WriteToConsole("Hello");
+            return "Hello";
+        }
+
+        public static void DoSomething()
+        {
+            GenMethods i = new GenMethods();
+            i.Func<IGenMethod>(null);
+        }
+    }
+
     // ReSharper restore InconsistentNaming
 }
