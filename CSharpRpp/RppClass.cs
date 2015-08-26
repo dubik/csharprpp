@@ -29,6 +29,8 @@ namespace CSharpRpp
 
         [CanBeNull]
         IRppClass BaseClass { get; }
+
+        RppBaseConstructorCall BaseConstructorCall { get; }
     }
 
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]

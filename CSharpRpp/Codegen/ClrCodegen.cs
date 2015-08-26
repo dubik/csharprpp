@@ -371,7 +371,7 @@ namespace CSharpRpp.Codegen
 
                 RppField field = (RppField) node.Ref;
                 FieldInfo cilField = field.Builder;
-                // TODO this is wierd, we should have all info in the node
+                // TODO this is wierd, we should have all info in the fieldSelector
                 if (_selectorType != null && _selectorType.Runtime.IsGenericType)
                 {
                     cilField = TypeBuilder.GetField(_selectorType.Runtime, field.Builder);
@@ -529,19 +529,19 @@ namespace CSharpRpp.Codegen
             _body.Emit(boolOpCode);
         }
 
-        public override void Accept(RppFieldSelector node)
+        public override void Accept(RppFieldSelector fieldSelector)
         {
             if (!_inSelector)
             {
                 _body.Emit(OpCodes.Ldarg_0); // load 'this'
             }
 
-            Debug.Assert(node.Field != null, "node.Field != null");
+            Debug.Assert(fieldSelector.Field != null, "fieldSelector.Field != null");
 
-            FieldInfo field = node.Field.Builder;
+            FieldInfo field = fieldSelector.Field.Builder;
+            Type targetType = fieldSelector.ClassType.Runtime;
 
-            Type targetType = node.TargetType.Runtime;
-            if (targetType.IsGenericType)
+            if (field.FieldType.ContainsGenericParameters)
             {
                 field = TypeBuilder.GetField(targetType, field);
             }

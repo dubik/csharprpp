@@ -15,6 +15,7 @@ namespace CSharpRpp.Native
         public Type RuntimeType { get; private set; }
         public RppClassScope Scope { get; private set; }
         public IRppClass BaseClass { get; private set; }
+        public RppBaseConstructorCall BaseConstructorCall { get; private set; }
 
         public RppNativeClass(Type classType) : base(classType.Name)
         {
@@ -31,6 +32,9 @@ namespace CSharpRpp.Native
             {
                 BaseClass = new RppNativeClass(classType.BaseType);
             }
+
+            // TODO Not yet implemented, I guess we should
+            BaseConstructorCall = null;
         }
 
         private static RppField CreateField(FieldInfo field)

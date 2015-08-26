@@ -26,15 +26,18 @@ object Runtime
 } 
 ";
             const string code = @"
-class Option[A](val x : A)
+class Foo(var k: Int)
+{
+    def this() = this(27)
+}
 
-class SomeInt(x : Int) extends Option[Int](x)
+class Bar extends Foo
 
 object Main
 {
-    def main : Int = {
-        val k : SomeInt = new SomeInt(123)
-        k.x
+    def get() : Int = {
+        val inst : Bar = new Bar
+        inst.k
     }
 }
 ";
