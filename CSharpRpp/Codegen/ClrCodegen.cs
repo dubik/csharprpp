@@ -282,7 +282,7 @@ namespace CSharpRpp.Codegen
             if (node.Name == "ctor()")
             {
                 _body.Emit(OpCodes.Ldarg_0);
-                ConstructorInfo constructor = typeof (Object).GetConstructor(Type.EmptyTypes);
+                ConstructorInfo constructor = typeof (object).GetConstructor(Type.EmptyTypes);
                 Debug.Assert(constructor != null, "constructor != null");
                 _body.Emit(OpCodes.Call, constructor);
             }
@@ -303,6 +303,12 @@ namespace CSharpRpp.Codegen
                         _body.Emit(OpCodes.Ldarg_0); // load 'this'
                     }
 
+                    if (node.Function.IsStatic)
+                    {
+                        var instanceField = node.Function.Class.InstanceField.Builder;
+                        _body.Emit(OpCodes.Ldsfld, instanceField);
+                    }
+
                     node.Args.ForEach(arg => arg.Accept(this));
 
                     if (node.Function.IsStub)
@@ -312,8 +318,7 @@ namespace CSharpRpp.Codegen
                     }
                     else
                     {
-                        OpCode callInst = node.Function.IsStatic ? OpCodes.Call : OpCodes.Callvirt;
-                        _body.Emit(callInst, node.Function.RuntimeType);
+                        _body.Emit(OpCodes.Callvirt, node.Function.RuntimeType);
                     }
                 }
             }

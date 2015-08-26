@@ -35,7 +35,7 @@ object Bar
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
             Assert.IsNotNull(barTy);
-            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
+            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Public | BindingFlags.Instance);
             Assert.IsNotNull(mainMethod);
         }
 
@@ -53,8 +53,7 @@ object Bar
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
             Assert.IsNotNull(barTy);
-            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(23, res);
         }
 
@@ -75,8 +74,7 @@ object Bar
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
-            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }
     }

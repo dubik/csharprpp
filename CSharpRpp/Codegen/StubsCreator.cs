@@ -22,7 +22,7 @@ namespace CSharpRpp.Codegen
             MethodBuilder method = node.Builder;
 
             DefineReturnType(node, method);
-            DefineParams(method, node.Params, node.IsStatic);
+            DefineParams(method, node.Params);
 
             DefineAttributes(node, method);
 
@@ -49,7 +49,7 @@ namespace CSharpRpp.Codegen
             return paramList.Select(param => param.Type.Runtime).ToArray();
         }
 
-        private static void DefineParams(MethodBuilder method, IRppParam[] rppParams, bool isStatic)
+        private static void DefineParams(MethodBuilder method, IRppParam[] rppParams)
         {
             Type[] paramTypes = ParamTypes(rppParams);
             method.SetParameters(paramTypes);
@@ -57,7 +57,7 @@ namespace CSharpRpp.Codegen
             int index = 1;
             foreach (var param in rppParams)
             {
-                param.Index = isStatic ? index - 1 : index; // In static args should start from 1
+                param.Index = index; // In static args should start from 1
                 method.DefineParameter(index, ParameterAttributes.None, param.Name);
                 index++;
             }

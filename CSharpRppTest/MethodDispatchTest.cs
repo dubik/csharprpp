@@ -21,12 +21,9 @@ object Foo
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
-            MethodInfo func = fooTy.GetMethod("callWithNoArg", BindingFlags.Static | BindingFlags.Public);
-            object res = func.Invoke(null, null);
+            object res = Utils.InvokeStatic(fooTy, "callWithNoArg");
             Assert.AreEqual(10, res);
-
-            func = fooTy.GetMethod("callWithOneArg", BindingFlags.Static | BindingFlags.Public);
-            res = func.Invoke(null, null);
+            res = Utils.InvokeStatic(fooTy, "callWithOneArg");
             Assert.AreEqual(13, res);
         }
 
@@ -40,9 +37,9 @@ object Foo
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
-            MethodInfo same = fooTy.GetMethod("same", BindingFlags.Static | BindingFlags.Public);
-            MethodInfo intSame = same.MakeGenericMethod(new[] {typeof (int)});
-            object res = intSame.Invoke(null, new object[] {12});
+            MethodInfo same = fooTy.GetMethod("same", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo intSame = same.MakeGenericMethod(typeof (int));
+            object res = intSame.Invoke(Utils.GetObjectInstance(fooTy), new object[] {12});
             Assert.AreEqual(res, 12);
         }
     }

@@ -91,6 +91,8 @@ namespace CSharpRpp
             get { return _constructors.AsEnumerable(); }
         }
 
+        public RppField InstanceField { get; private set; }
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -146,6 +148,12 @@ namespace CSharpRpp
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
             _fields.ForEach(Scope.Add);
+
+            if (Kind == ClassKind.Object)
+            {
+                string objectName = RppScope.GetObjectName(Name);
+                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new RppTypeName(objectName));
+            }
 
             _typeParams.ForEach(Scope.Add);
         }

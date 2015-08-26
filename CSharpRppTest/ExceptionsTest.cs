@@ -30,13 +30,12 @@ object Foo
     def main : Unit = throw new Exception
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Exception));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof (Exception));
             Assert.IsNotNull(fooTy);
-            MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            Assert.IsNotNull(mainMethod);
+
             try
             {
-                mainMethod.Invoke(null, null);
+                Utils.InvokeStatic(fooTy, "main");
             }
             catch (Exception e)
             {
@@ -45,7 +44,7 @@ object Foo
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof (Exception))]
         public void ThrowSystemExceptionWithMessage()
         {
             const string code = @"
@@ -54,13 +53,11 @@ object Foo
     def main : Unit = throw new Exception(""Hello"")
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Exception));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof (Exception));
             Assert.IsNotNull(fooTy);
-            MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            Assert.IsNotNull(mainMethod);
             try
             {
-                mainMethod.Invoke(null, null);
+                Utils.InvokeStatic(fooTy, "main");
             }
             catch (Exception e)
             {
@@ -68,6 +65,5 @@ object Foo
                 throw e.InnerException;
             }
         }
-
     }
 }

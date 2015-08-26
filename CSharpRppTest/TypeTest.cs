@@ -20,8 +20,7 @@ object Foo
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
-            var mainMethod = fooTy.GetMethod("main", BindingFlags.Public | BindingFlags.Static);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(fooTy, "main");
             Assert.AreEqual(10, res);
         }
 
@@ -38,8 +37,7 @@ object Foo
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Function1<,>));
-            var mainMethod = fooTy.GetMethod("main", BindingFlags.Public | BindingFlags.Static);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(fooTy, "main");
             Function1<int, int> func = (Function1<int, int>) res;
             var ret = func.apply(13);
             Assert.AreEqual(23, ret);
@@ -58,8 +56,7 @@ object Foo
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Function1<,>));
-            var mainMethod = fooTy.GetMethod("main", BindingFlags.Public | BindingFlags.Static);
-            var res = mainMethod.Invoke(null, null);
+            Utils.InvokeStatic(fooTy, "main");
         }
 
         [TestMethod]
@@ -78,8 +75,7 @@ object Bar
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
-            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }
     }

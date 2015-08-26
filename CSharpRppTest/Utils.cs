@@ -77,5 +77,23 @@ namespace CSharpRppTest
             RppParser parser = new RppParser(tokenStream);
             return parser;
         }
+
+        public static object InvokeStatic(Type type, string name)
+        {
+            return InvokeStatic(type, name, null);
+        }
+
+        public static object InvokeStatic(Type type, string name, object[] @params)
+        {
+            var instance = GetObjectInstance(type);
+            MethodInfo method = type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
+            return method.Invoke(instance, @params);
+        }
+
+        public static object GetObjectInstance(Type type)
+        {
+            var instanceField = type.GetField("_instance");
+            return instanceField.GetValue(null);
+        }
     }
 }

@@ -26,18 +26,15 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(var k: Int)
+object Foo
 {
-    def this() = this(27)
+    def doSomething() : Int = 10
 }
-
-class Bar extends Foo
 
 object Main
 {
-    def get() : Int = {
-        val inst : Bar = new Bar
-        inst.k
+    def main : Unit = {
+        Foo.doSomething()
     }
 }
 ";

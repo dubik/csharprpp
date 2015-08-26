@@ -90,8 +90,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
             Assert.AreEqual("Bar", res.GetType().Name);
         }
@@ -111,8 +110,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
             var fieldInfo = res.GetType().GetField("k");
             var k = fieldInfo.GetValue(res);
@@ -182,8 +180,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
-            var res = getMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "get");
             Assert.AreEqual(13, res);
         }
 
@@ -207,8 +204,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
-            var res = getMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "get");
             Assert.AreEqual(27, res);
         }
 
@@ -250,8 +246,7 @@ object Bar
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
-            MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(barTy, "main");
             Assert.IsNotNull(res);
         }
 
@@ -278,8 +273,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(13, res);
         }
 
@@ -373,8 +367,7 @@ object Main
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             Assert.IsNotNull(mainTy);
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var fooInst = mainMethod.Invoke(null, null);
+            var fooInst = Utils.InvokeStatic(mainTy, "main");
             FieldInfo lengthField = fooInst.GetType().GetField("length");
             var length = lengthField.GetValue(fooInst);
             Assert.AreEqual(13, length);
@@ -396,8 +389,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(123, res);
         }
 
@@ -417,8 +409,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(123, res);
         }
 
@@ -439,14 +430,12 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(123, res);
         }
 
         [TestMethod]
-        [Ignore]
-        public void Mon()
+        public void OptionMonad()
         {
             const string code = @"
 abstract class Option[A]
@@ -476,9 +465,8 @@ object Main
     }
 }
 ";
-            var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo mainMethod = mainTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            var res = mainMethod.Invoke(null, null);
+            var mainTy = Utils.ParseAndCreateType(code, "Main$", typeof(Exception));
+            var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(123, res);
         }
 
@@ -502,8 +490,7 @@ object Main
 }
 ";
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            MethodInfo getMethod = mainTy.GetMethod("get", BindingFlags.Static | BindingFlags.Public);
-            var res = getMethod.Invoke(null, null);
+            var res = Utils.InvokeStatic(mainTy, "get");
             Assert.AreEqual(27, res);
         }
     }

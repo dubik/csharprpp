@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class TypeCreator : RppNodeVisitor
+    internal class TypeCreator : RppNodeVisitor
     {
         private readonly ModuleBuilder _module;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
@@ -52,19 +52,14 @@ namespace CSharpRpp.Codegen
                 attrs = MethodAttributes.Public;
             }
 
-            if (node.IsStatic)
-            {
-                attrs |= MethodAttributes.Static;
-            }
-            else
-            {
-                attrs |= MethodAttributes.Virtual;
-            }
+            // always virtual, even for statics
+            attrs |= MethodAttributes.Virtual;
 
             if (node.IsAbstract)
             {
                 attrs |= MethodAttributes.Abstract;
             }
+
             return attrs;
         }
 

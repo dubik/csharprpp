@@ -9,7 +9,7 @@ using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace CSharpRpp.Codegen
 {
-    class ConstructorGenerator
+    internal class ConstructorGenerator
     {
         public static void GenerateFields(IEnumerable<KeyValuePair<RppClass, TypeBuilder>> classes)
         {
@@ -21,6 +21,11 @@ namespace CSharpRpp.Codegen
                 {
                     FieldBuilder builder = typeBuilder.DefineField(field.Name, field.Type.Runtime, FieldAttributes.Public);
                     field.Builder = builder;
+                }
+
+                if (clazz.IsObject())
+                {
+                    clazz.InstanceField.Builder = typeBuilder.DefineField(clazz.InstanceField.Name, typeBuilder, FieldAttributes.Public | FieldAttributes.Static);
                 }
             }
         }
@@ -35,9 +40,22 @@ namespace CSharpRpp.Codegen
                 // Constructor may call each other, so we should create stub first, and the generate code
                 clazz.Constructors.ForEach(c => CreateConstructorStubs(typeBuilder, c));
                 clazz.Constructors.ForEach(CreateConstructorBody);
+
+                if (clazz.IsObject())
+                {
+                    CreateStaticConstructor(typeBuilder, clazz);
+                }
             }
         }
 
+        private static void CreateStaticConstructor(TypeBuilder typeBuilder, RppClass obj)
+        {
+            ConstructorBuilder staticConstructor = typeBuilder.DefineTypeInitializer();
+            ILGenerator body = staticConstructor.GetILGenerator();
+            body.Emit(OpCodes.Newobj, obj.Constructor.ConstructorInfo);
+            body.Emit(OpCodes.Stsfld, obj.InstanceField.Builder);
+            body.Emit(OpCodes.Ret);
+        }
 
         private static void CreateConstructorStubs(TypeBuilder type, IRppFunc constructor)
         {
