@@ -148,11 +148,15 @@ namespace CSharpRppTest
         {
         }
 
-        public void Accept(RppBooleanLiteral node)
+        public void Visit(RppBooleanLiteral node)
         {
         }
 
-        public void Accept(RppFieldSelector node)
+        public void Visit(RppFieldSelector node)
+        {
+        }
+
+        public void Visit(RppIf node)
         {
         }
     }

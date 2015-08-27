@@ -7,11 +7,11 @@ namespace CSharpRpp
         public IRppExpr Condition { get; private set; }
         public IRppNode Body { get; private set; }
 
-        public RppType Type { get; private set; }
+        public RppType Type { get; }
 
         public RppWhile(IRppExpr condition, IRppNode body)
         {
-            Type = RppNativeType.Create(typeof(void));
+            Type = RppPrimitiveType.UnitTy;
             Condition = condition;
             Body = body;
         }

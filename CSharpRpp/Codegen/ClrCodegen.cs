@@ -11,7 +11,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class ClrCodegen : RppNodeVisitor
+    internal class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -492,6 +492,19 @@ namespace CSharpRpp.Codegen
             _body.MarkLabel(exitLoop);
         }
 
+        public override void Visit(RppIf node)
+        {
+            Label jumpOverLabel = _body.DefineLabel();
+            Label elseLabel = _body.DefineLabel();
+            node.Condition.Accept(this);
+            _body.Emit(OpCodes.Brfalse, elseLabel);
+            node.ThenExpr.Accept(this);
+            _body.Emit(OpCodes.Br, jumpOverLabel);
+            _body.MarkLabel(elseLabel);
+            node.ElseExpr.Accept(this);
+            _body.MarkLabel(jumpOverLabel);
+        }
+
         public override void Visit(RppThrow node)
         {
             node.Expr.Accept(this);
@@ -535,13 +548,13 @@ namespace CSharpRpp.Codegen
             closureClass.CreateType();
         }
 
-        public override void Accept(RppBooleanLiteral node)
+        public override void Visit(RppBooleanLiteral node)
         {
             var boolOpCode = node.Value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
             _body.Emit(boolOpCode);
         }
 
-        public override void Accept(RppFieldSelector fieldSelector)
+        public override void Visit(RppFieldSelector fieldSelector)
         {
             if (!_inSelector)
             {

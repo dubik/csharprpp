@@ -54,6 +54,7 @@
     <Compile Include="CodeGenTest.cs" />
     <Compile Include="ComplexTests.cs" />
     <Compile Include="ExceptionsTest.cs" />
+    <Compile Include="ExpressionTest.cs" />
     <Compile Include="FuncTest.cs" />
     <Compile Include="GenericsTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />

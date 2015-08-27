@@ -365,7 +365,7 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            visitor.Accept(this);
+            visitor.Visit(this);
         }
 
         protected override bool Parse(string valueStr)

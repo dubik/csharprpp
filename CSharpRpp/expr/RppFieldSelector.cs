@@ -102,7 +102,7 @@ namespace CSharpRpp
 
         public override void Accept(IRppNodeVisitor visitor)
         {
-            visitor.Accept(this);
+            visitor.Visit(this);
         }
 
         #region Equality

@@ -441,7 +441,7 @@ namespace CSharpRpp
 
             if (Name == "String")
             {
-                return RppNativeType.Create(typeof (String));
+                return RppNativeType.Create(typeof (string));
             }
 
             if (Name == "Exception")
@@ -451,12 +451,12 @@ namespace CSharpRpp
 
             if (Name == "Any")
             {
-                return RppNativeType.Create(typeof (Object));
+                return RppNativeType.Create(typeof (object));
             }
 
             if (Name == "Nothing")
             {
-                return RppNativeType.Create(typeof (Object));
+                return RppNativeType.Create(typeof (object));
             }
 
             IRppNamedNode node = scope.Lookup(Name);

@@ -96,6 +96,7 @@
     <Compile Include="Collections.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Exceptions\SemanticException.cs" />
+    <Compile Include="Expr\RppIf.cs" />
     <Compile Include="Expr\ImplicitCast.cs" />
     <Compile Include="Expr\RppFieldSelector.cs" />
     <Compile Include="Expr\RppThrow.cs" />

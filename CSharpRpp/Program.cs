@@ -26,13 +26,37 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
+abstract class Option[A]
 {
-    def func[A](x: A) : A = x
+    def isEmpty : Boolean
+    def get: A
 
-    def main(name: String) : String = func[String](name)
+    def map[B](func: (A) => B): Option[B] = if(isEmpty) None else Some(func(get()))
+}
+
+class Some[A](val x: A) extends Option[A]
+{
+    override def isEmpty : Boolean = false
+    override def get : A = x
+}
+
+object None extends Option[Nothing]
+{
+    override def isEmpty : Boolean = true
+    override def get : Nothing = throw new Exception(""Nothing to get"")
+}
+
+
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.x
+        p
+    }
 }
 ";
+            // def map[B](func: A => B): Option[B] = if(isEmpty) None else Some(func(get()))
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);

@@ -28,9 +28,9 @@ namespace CSharpRpp
 
         private IRppExpr ParseExpr1()
         {
-            if (Require(RppLexer.KW_If))
+            if (Peek(RppLexer.KW_If))
             {
-                throw new Exception("If not supported");
+                return ParseIf();
             }
 
             if (Peek(RppLexer.KW_While))
@@ -50,6 +50,36 @@ namespace CSharpRpp
             }
 
             return ParsePostfixExpr(0);
+        }
+
+        private IRppExpr ParseIf()
+        {
+            Expect(RppLexer.KW_If);
+            Expect(RppLexer.OP_LParen);
+            IRppExpr condition = ParseExpr();
+            if (condition == null)
+            {
+                throw new Exception("Expected expression");
+            }
+            Expect(RppLexer.OP_RParen);
+            IRppExpr thenExpr = ParseExpr();
+            if (thenExpr == null)
+            {
+                throw new Exception("Expected then expression");
+            }
+
+            IRppExpr elseExpr = RppEmptyExpr.Instance;
+            if (Peek(RppLexer.KW_Else))
+            {
+                Consume();
+                elseExpr = ParseExpr();
+                if (elseExpr == null)
+                {
+                    throw new Exception("Expected else expression");
+                }
+            }
+
+            return new RppIf(condition, thenExpr, elseExpr);
         }
 
         private RppWhile ParseWhile()
