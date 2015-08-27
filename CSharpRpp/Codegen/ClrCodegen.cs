@@ -33,7 +33,7 @@ namespace CSharpRpp.Codegen
         private Label _trueLabel;
         private Label _exitLabel;
         private LocalBuilder _logicalTemp;
-        private int closureId;
+        private int _closureId;
 
         public ClrCodegen()
         {
@@ -53,10 +53,10 @@ namespace CSharpRpp.Codegen
         {
             Console.WriteLine("Genering class: " + node.Name);
             _typeBuilder = node.RuntimeType as TypeBuilder;
-            closureId = 1;
+            _closureId = 1;
         }
 
-        private readonly Regex typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
+        private readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
         public override void VisitExit(RppClass node)
         {
@@ -68,13 +68,13 @@ namespace CSharpRpp.Codegen
             } // TODO This is a hack, we should do our own semantic analyzes and find out which methods were not overriden
             catch (TypeLoadException exception)
             {
-                MatchCollection groups = typeExcSplitter.Matches(exception.Message);
+                MatchCollection groups = _typeExcSplitter.Matches(exception.Message);
                 if (groups.Count != 3)
                 {
                     throw;
                 }
 
-                string msg = string.Format("Method '{0}' in class '{1}' does not have an implementation", groups[0], groups[1]);
+                string msg = $"Method '{groups[0]}' in class '{groups[1]}' does not have an implementation";
                 throw new SemanticException(msg);
             }
 
@@ -318,7 +318,14 @@ namespace CSharpRpp.Codegen
                     }
                     else
                     {
-                        _body.Emit(OpCodes.Callvirt, node.Function.RuntimeType);
+                        MethodInfo method = node.Function.RuntimeType;
+                        if (method.IsGenericMethod)
+                        {
+                            Type[] typeArgs = node.TypeArgs.Select(type => type.Runtime).ToArray();
+                            method = method.MakeGenericMethod(typeArgs);
+                        }
+
+                        _body.Emit(OpCodes.Callvirt, method);
                     }
                 }
             }
@@ -499,7 +506,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppClosure node)
         {
             Type[] argTypes = node.Bindings.Select(p => p.Type.Runtime).ToArray();
-            TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (closureId++),
+            TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
                 typeof (Object),
                 new[] {node.Type.Runtime});

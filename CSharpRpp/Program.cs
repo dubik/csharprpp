@@ -85,7 +85,7 @@ object Bar
                 }
                 else
                 {
-                    throw new Exception(string.Format("Can't find {0} class from runtime assembly", clazz.Name));
+                    throw new Exception($"Can't find {clazz.Name} class from runtime assembly");
                 }
             }
 

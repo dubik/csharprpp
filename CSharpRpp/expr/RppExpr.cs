@@ -390,9 +390,9 @@ namespace CSharpRpp
 
         public bool IsConstructorCall => Name == "this";
 
-        private readonly IList<RppVariantTypeParam> _typeArgList;
+        private readonly IList<RppVariantTypeParam> _typeArgs;
 
-        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgList;
+        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgs;
 
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoVariantTypeParams)
         {
@@ -401,7 +401,7 @@ namespace CSharpRpp
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<RppVariantTypeParam> typeArgList) : base(name)
         {
             ArgList = argList;
-            _typeArgList = typeArgList;
+            _typeArgs = typeArgList;
         }
 
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type, [NotNull] IList<RppVariantTypeParam> typeArgList)
@@ -448,8 +448,11 @@ namespace CSharpRpp
         {
             // Skip closures because they may have missing types
             NodeUtils.Analyze(scope, ArgListWithoutClosures(ArgList));
+
+            _typeArgs.ForEach(arg => arg.Resolve(scope));
+
             // Search for a function which matches signature and possible gaps in types (for closures)
-            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, scope);
+            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, TypeArgs, scope);
             IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Params);
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
             if (resolveResults.Function.IsVariadic)
@@ -457,7 +460,7 @@ namespace CSharpRpp
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
             }
 
-            return resolveResults.RewriteFunctionCall(Name, args, _typeArgList);
+            return resolveResults.RewriteFunctionCall(Name, args, _typeArgs);
         }
 
         private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
