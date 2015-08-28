@@ -31,7 +31,7 @@ abstract class Option[A]
     def isEmpty : Boolean
     def get: A
 
-    def map[B](func: (A) => B): Option[B] = if(isEmpty) None else Some(func(get()))
+    def map[B](func: (A) => B): Option[B] = if(isEmpty()) None else Some(func(get()))
 }
 
 class Some[A](val x: A) extends Option[A]
