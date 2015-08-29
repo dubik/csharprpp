@@ -27,7 +27,7 @@ namespace CSharpRpp
                 return node;
             }
 
-            return ParentScope != null ? ParentScope.Lookup(name) : null;
+            return ParentScope?.Lookup(name);
         }
 
         public RppClass LookupObject(string name)
@@ -59,7 +59,7 @@ namespace CSharpRpp
 
                 if (_entities.ContainsKey(name))
                 {
-                    throw new ArgumentException(string.Format("Already containes {0}", node.Name), "node");
+                    throw new ArgumentException($"Already containes {node.Name}", nameof(node));
                 }
 
                 _entities.Add(name, node);
@@ -76,7 +76,7 @@ namespace CSharpRpp
         {
             if (_genericTypes.ContainsKey(genericName))
             {
-                throw new ArgumentException(string.Format("Already containes {0}", genericName), "genericName");
+                throw new ArgumentException($"Already containes {genericName}", nameof(genericName));
             }
 
             _genericTypes.Add(genericName, specializedType);
@@ -90,7 +90,7 @@ namespace CSharpRpp
                 return type;
             }
 
-            return ParentScope != null ? ParentScope.LookupGenericType(genericName) : null;
+            return ParentScope?.LookupGenericType(genericName);
         }
 
         private void CheckFunctionAlreadyExists(RppFunc func)
