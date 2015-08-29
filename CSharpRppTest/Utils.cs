@@ -8,6 +8,7 @@ using CSharpRpp.Codegen;
 using CSharpRpp.Native;
 using CSharpRpp.Semantics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RppRuntime;
 
 namespace CSharpRppTest
 {
@@ -16,21 +17,21 @@ namespace CSharpRppTest
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
             RppProgram program = Parse(code);
-            var assembly = CodeGen(program, null);
+            var assembly = CodeGen(program);
             return typesNames.Select(assembly.GetType);
         }
 
-        public static Type ParseAndCreateType(string code, string typeName, Type additionalType = null)
+        public static Type ParseAndCreateType(string code, string typeName)
         {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, typeName, additionalType);
+            var fooTy = CodeGenAndGetType(program, typeName);
             return fooTy;
         }
 
-        public static Type CodeGenAndGetType(RppProgram program, string typeName, Type additionalType)
+        public static Type CodeGenAndGetType(RppProgram program, string typeName)
         {
-            var assembly = CodeGen(program, additionalType);
+            var assembly = CodeGen(program);
             Type arrayTy = assembly.GetType(typeName);
             Assert.IsNotNull(arrayTy);
             return arrayTy;
@@ -39,18 +40,14 @@ namespace CSharpRppTest
         public static RppProgram ParseAndAnalyze(string code)
         {
             RppProgram program = Parse(code);
-            CodeGen(program, null);
+            CodeGen(program);
             return program;
         }
 
-        public static Assembly CodeGen(RppProgram program, Type additionalType)
+        public static Assembly CodeGen(RppProgram program)
         {
             RppScope scope = new RppScope(null);
-            if (additionalType != null)
-            {
-                scope.Add(new RppNativeClass(additionalType));
-            }
-
+            WireRuntime(scope);
             CodeGenerator generator = new CodeGenerator(program);
             program.PreAnalyze(scope);
             generator.PreGenerate();
@@ -59,6 +56,17 @@ namespace CSharpRppTest
             program.Accept(semantic);
             generator.Generate();
             return generator.Assembly;
+        }
+
+        private static void WireRuntime(RppScope scope)
+        {
+            scope.Add(new RppNativeClass(typeof(Exception)));
+            scope.Add(new RppNativeClass(typeof(Function0<>)));
+            scope.Add(new RppNativeClass(typeof(Function1<,>)));
+            scope.Add(new RppNativeClass(typeof(Function2<,,>)));
+            scope.Add(new RppNativeClass(typeof(Function3<,,,>)));
+            scope.Add(new RppNativeClass(typeof(Function4<,,,,>)));
+            scope.Add(new RppNativeClass(typeof(Function5<,,,,,>)));
         }
 
         public static RppProgram Parse(string code)

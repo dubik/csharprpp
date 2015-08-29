@@ -465,7 +465,7 @@ object Main
     }
 }
 ";
-            var mainTy = Utils.ParseAndCreateType(code, "Main$", typeof(Exception));
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
             var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(123, res);
         }

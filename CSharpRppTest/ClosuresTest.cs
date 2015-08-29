@@ -18,7 +18,7 @@ object Bar
     }
 }
 ";
-            Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
+            Utils.ParseAndCreateType(code, "Bar$");
         }
 
         [TestMethod]
@@ -33,7 +33,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             Assert.IsNotNull(barTy);
             MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Public | BindingFlags.Instance);
             Assert.IsNotNull(mainMethod);
@@ -51,7 +51,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof (Function2<,,>));
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             Assert.IsNotNull(barTy);
             var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(23, res);
@@ -73,7 +73,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }

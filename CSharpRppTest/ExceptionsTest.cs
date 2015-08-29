@@ -30,7 +30,7 @@ object Foo
     def main : Unit = throw new Exception
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof (Exception));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             Assert.IsNotNull(fooTy);
 
             try
@@ -53,7 +53,7 @@ object Foo
     def main : Unit = throw new Exception(""Hello"")
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof (Exception));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             Assert.IsNotNull(fooTy);
             try
             {

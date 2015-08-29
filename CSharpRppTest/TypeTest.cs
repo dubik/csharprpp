@@ -36,7 +36,7 @@ object Foo
     }
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Function1<,>));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             var res = Utils.InvokeStatic(fooTy, "main");
             Function1<int, int> func = (Function1<int, int>) res;
             var ret = func.apply(13);
@@ -55,7 +55,7 @@ object Foo
     }
 }
 ";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$", typeof(Function1<,>));
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             Utils.InvokeStatic(fooTy, "main");
         }
 
@@ -74,7 +74,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$", typeof(Function2<,,>));
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
             var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }
