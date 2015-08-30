@@ -8,7 +8,7 @@ using CSharpRpp.Parser;
 
 namespace CSharpRpp
 {
-    internal class FunctionResolution
+    class FunctionResolution
     {
         public class ResolveResults
         {
@@ -28,24 +28,28 @@ namespace CSharpRpp
         public class ClosureResolveResults : ResolveResults
         {
             private readonly RppMember _expr;
+            private readonly IEnumerable<Type> _typeArgs;
 
-            public ClosureResolveResults(RppMember expr, IRppFunc resolvedFunc)
+            public ClosureResolveResults(RppMember expr, IRppFunc resolvedFunc, IEnumerable<Type> typeArgs)
                 : base(resolvedFunc)
             {
                 _expr = expr;
+                _typeArgs = typeArgs;
             }
 
-            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> typeArgs)
+            // For closures we don't specify types explicitely, they are deduced during resolution
+            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> unused)
             {
+                var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs));
+                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()));
             }
         }
 
 
-        private IEnumerable<RppVariantTypeParam> _typeArgs;
+        private IEnumerable<Type> _typeArgs;
 
-        private FunctionResolution(IEnumerable<RppVariantTypeParam> typeArgs)
+        private FunctionResolution(IEnumerable<Type> typeArgs)
         {
             _typeArgs = typeArgs;
         }
@@ -53,7 +57,7 @@ namespace CSharpRpp
         public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RppVariantTypeParam> typeArgs, RppScope scope)
         {
             IEnumerable<IRppExpr> argsList = args as IList<IRppExpr> ?? args.ToList();
-            IList<RppVariantTypeParam> typeArgsList = typeArgs as IList<RppVariantTypeParam> ?? typeArgs.ToList();
+            IList<Type> typeArgsList = typeArgs.Select(a => a.Runtime).ToList();
             FunctionResolution resolution = new FunctionResolution(typeArgsList);
 
             ResolveResults res = resolution.SearchInFunctions(name, argsList, scope);
@@ -86,7 +90,7 @@ namespace CSharpRpp
             if (target.IsGenericParameter())
             {
                 // TODO should be consistent with RppNew
-                targetType = RppNativeType.Create(_typeArgs.ElementAt(target.Runtime.GenericParameterPosition).Runtime);
+                targetType = RppNativeType.Create(_typeArgs.ElementAt(target.Runtime.GenericParameterPosition));
             }
 
             if (source is RppClosure)
@@ -131,8 +135,13 @@ namespace CSharpRpp
 
                 if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
                 {
-                    RppNativeClass nativeClass = new RppNativeClass(expr.Type.Runtime);
-                    var candidates = OverloadQuery.Find(args.Select(a => a.Type), nativeClass.Functions).ToList();
+                    IRppClass clazz = (expr.Type as RppObjectType).Class;
+                    if (expr.Type is RppGenericObjectType)
+                    {
+                        var objectType = expr.Type as RppGenericObjectType;
+                        _typeArgs = objectType.GenericArguments;
+                    }
+                    var candidates = OverloadQuery.Find(args, clazz.Functions, TypesComparator, CanCast).ToList();
                     if (candidates.Count > 1)
                     {
                         throw new Exception("Can't figure out which overload to use");
@@ -143,7 +152,7 @@ namespace CSharpRpp
                         return null;
                     }
 
-                    return new ClosureResolveResults((RppMember) expr, candidates[0]);
+                    return new ClosureResolveResults((RppMember) expr, candidates[0], _typeArgs);
                 }
             }
 

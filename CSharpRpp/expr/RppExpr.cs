@@ -378,15 +378,12 @@ namespace CSharpRpp
     {
         public override sealed RppType Type { get; protected set; }
 
-        public IEnumerable<IRppExpr> Args
-        {
-            get { return ArgList.AsEnumerable(); }
-        }
+        public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
         protected IList<IRppExpr> ArgList;
 
         [NotNull]
-        public IRppFunc Function { get; private set; }
+        public IRppFunc Function { get; }
 
         public bool IsConstructorCall => Name == "this";
 
@@ -950,7 +947,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return string.Format("Id: \"{0}\"", Name);
+            return $"Id: \"{Name}\"";
         }
 
         #region Equality

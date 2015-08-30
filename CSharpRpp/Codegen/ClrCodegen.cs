@@ -319,7 +319,7 @@ namespace CSharpRpp.Codegen
                     else
                     {
                         MethodInfo method = node.Function.RuntimeType;
-                        if (method.IsGenericMethod)
+                        if (method.ContainsGenericParameters)
                         {
                             Type[] typeArgs = node.TypeArgs.Select(type => type.Runtime).ToArray();
                             method = method.MakeGenericMethod(typeArgs);
@@ -548,7 +548,6 @@ namespace CSharpRpp.Codegen
             ClrCodegen codegen = new ClrCodegen(body);
             node.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
-
 
             ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Public);
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");

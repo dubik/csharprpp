@@ -141,7 +141,14 @@ namespace CSharpRpp
         {
             _scope = new RppScope(scope);
             Params.ForEach(_scope.Add);
+            // TODO this is probably not needed , because next line adds generic params to the scope
             TypeParams.ForEach(_scope.Add);
+
+            foreach (var typeParam in TypeParams)
+            {
+                _scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
+            }
+
 
             NodeUtils.Analyze(_scope, Params);
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);

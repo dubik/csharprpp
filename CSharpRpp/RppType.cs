@@ -345,7 +345,7 @@ namespace CSharpRpp
             {
                 RppNativeClass nativeClass = node as RppNativeClass;
                 Type specializedType = nativeClass.RuntimeType.MakeGenericType(paramType);
-                return RppNativeType.Create(specializedType);
+                return new RppGenericObjectType(nativeClass, paramType, specializedType);
             }
 
 
@@ -513,6 +513,14 @@ namespace CSharpRpp
         public RppType Type { get; set; }
 
         public Type Runtime { get; set; }
+
+        // TODO this is kinda bad I think. We shouldn't create variant type out of native type since they solve different tasks
+        // variant type describes constraints but native type doesn't have those
+        public RppVariantTypeParam(Type nativeType) : base(nativeType.Name)
+        {
+            Runtime = nativeType;
+            Type = RppNativeType.Create(nativeType);
+        }
 
         public RppVariantTypeParam(string name, TypeVariant variant) : base(name)
         {

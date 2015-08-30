@@ -77,30 +77,20 @@ object Bar
             Assert.AreEqual(34, res);
         }
 
-        /*
         [TestMethod]
-        public void GenericsInAClosure()
+        public void ABitSimpler()
         {
             const string code = @"
-class Foo[A]
-{
-    def func(k: A) : Unit = {
-        var f: (A) => Int = (x: A) => 10
-        10
-    }
-}
-
 object Bar
 {
-    def main() : Int = {
-        34
+    def func[A](k : A) : A =  {
+         val f: (A) => A = (x : A) => x
+         f[A](k)
     }
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
-            var res = Utils.InvokeStatic(barTy, "main");
-            Assert.AreEqual(34, res);
         }
-        */
     }
 }
+
