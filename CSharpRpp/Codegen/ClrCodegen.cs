@@ -11,7 +11,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class ClrCodegen : RppNodeVisitor
+    class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -521,11 +521,19 @@ namespace CSharpRpp.Codegen
             Type[] argTypes = node.Bindings.Select(p => p.Type.Runtime).ToArray();
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
-                typeof (Object),
+                typeof (object),
                 new[] {node.Type.Runtime});
+
+            string[] genericTypes = argTypes.Where(arg => arg.IsGenericParameter).Select(arg => arg.Name).ToArray();
+            if (genericTypes.Length > 0)
+            {
+                closureClass.DefineGenericParameters(genericTypes);
+            }
+
             MethodBuilder applyMethod = closureClass.DefineMethod("apply",
                 MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
                 CallingConventions.Standard);
+
             applyMethod.SetParameters(argTypes);
             applyMethod.SetReturnType(node.ReturnType.Runtime);
 

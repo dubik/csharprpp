@@ -77,5 +77,31 @@ object Bar
             var res = Utils.InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }
+
+        /*
+        [TestMethod]
+        public void GenericsInAClosure()
+        {
+            const string code = @"
+class Foo[A]
+{
+    def func(k: A) : Unit = {
+        var f: (A) => Int = (x: A) => 10
+        10
+    }
+}
+
+object Bar
+{
+    def main() : Int = {
+        34
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            var res = Utils.InvokeStatic(barTy, "main");
+            Assert.AreEqual(34, res);
+        }
+        */
     }
 }

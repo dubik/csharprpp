@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using FieldAttributes = System.Reflection.FieldAttributes;
+using MethodAttributes = System.Reflection.MethodAttributes;
+using TypeAttributes = System.Reflection.TypeAttributes;
 
 namespace CLRCodeGen
 {
-    internal class ICodegenContext
+    class ICodegenContext
     {
     }
 
-    internal class Node
+    class Node
     {
         public void Analyze()
         {
@@ -21,7 +23,40 @@ namespace CLRCodeGen
         }
     }
 
-    internal class Program
+    public class Foo
+    {
+    }
+
+    public interface Function<in T, out Res>
+    {
+        Res Apply(T p);
+    }
+
+    /*
+    class Foo[A]
+    {
+        def func(k: A) : Unit = {
+            var f: (A) => Int = (x: A) => 10
+        }
+    }
+    */
+    public class MyMain<A>
+    {
+        private class Closure : Function<A, int>
+        {
+            public int Apply(A p)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Create()
+        {
+            Function<A, int> k = new Closure();
+        }
+    }
+
+    class Program
     {
         private static void DoSomething()
         {
@@ -76,7 +111,7 @@ namespace CLRCodeGen
             }
         }
             */
-            AssemblyName assemblyName = new AssemblyName("sampleAssembl");
+    AssemblyName assemblyName = new AssemblyName("sampleAssembl");
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
 
@@ -127,14 +162,14 @@ namespace CLRCodeGen
             var genericBuilder = clazz.DefineGenericParameters(new[] {"T"});
             var genericTType = genericBuilder[0].AsType();
 
-            var retType = clazz.MakeGenericType(new[] {typeof (int)});
+            var retType = clazz.MakeGenericType(typeof (int));
             var method = clazz.DefineMethod("create", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, retType, null);
 
             var sameMethod = clazz.DefineMethod("same", MethodAttributes.Static | MethodAttributes.Public);
             var sameMethod2 = clazz.DefineMethod("same", MethodAttributes.Static | MethodAttributes.Public);
-            sameMethod.SetReturnType(typeof(void));
-            sameMethod2.SetParameters(new[]{typeof(int)});
-            sameMethod2.SetReturnType(typeof(int));
+            sameMethod.SetReturnType(typeof (void));
+            sameMethod2.SetParameters(typeof (int));
+            sameMethod2.SetReturnType(typeof (int));
 
             sameMethod.GetILGenerator().Emit(OpCodes.Ret);
 
@@ -154,6 +189,45 @@ namespace CLRCodeGen
             gen.Emit(OpCodes.Ret);
 
             clazz.CreateType();
+
+            assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
+        private static void CreateGenericClosures()
+        {
+            AssemblyName assemblyName = new AssemblyName("genericClosure");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".dll");
+
+            TypeBuilder main = moduleBuilder.DefineType("Main", TypeAttributes.Class | TypeAttributes.Public);
+
+            Type t = typeof (Foo);
+
+            // Defining generic param for Main class
+            GenericTypeParameterBuilder[] generics = main.DefineGenericParameters("A");
+            t = generics[0]; // [1] Uncomment to enable for nested class
+
+            var iFunctionType = typeof (Function<,>).MakeGenericType(t, t);
+
+            TypeBuilder closure = main.DefineNestedType("Closure", TypeAttributes.Class | TypeAttributes.NestedPrivate, typeof (object));
+            closure.AddInterfaceImplementation(iFunctionType);
+            GenericTypeParameterBuilder[] closureGenerics = closure.DefineGenericParameters("A");
+
+
+            MethodBuilder applyMethod = closure.DefineMethod("Apply",
+                MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
+                CallingConventions.Standard);
+            applyMethod.SetParameters(t);
+            applyMethod.SetReturnType(t);
+
+            ILGenerator body = applyMethod.GetILGenerator();
+            body.Emit(OpCodes.Ldnull);
+            body.Emit(OpCodes.Ret);
+
+            closure.DefineDefaultConstructor(MethodAttributes.Public);
+
+            closure.CreateType();
+            main.CreateType();
 
             assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
@@ -195,6 +269,7 @@ namespace CLRCodeGen
         {
             CreateGenericClass();
             CecilCodeGen.doSomething();
+            CreateGenericClosures();
         }
     }
 }
