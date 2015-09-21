@@ -26,19 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo[A]
-{
-    def func(k: A) : A = {
-        var f: (A) => Int = (x: A) => 10
-        f(k)
-    }
-}
-
 object Bar
 {
     def main() : Int = {
-        val foo: Foo[Int] = new Foo[Int]
-        foo.func(13)
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        func(10, 13)
     }
 }
 ";
