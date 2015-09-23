@@ -26,12 +26,13 @@ object Runtime
 } 
 ";
             const string code = @"
+class Foo[T](val id: T)
+
+class SecondFoo(id: Int) extends Foo[Int](id)
+
 object Bar
 {
-    def main() : Int = {
-        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
-        func(10, 13)
-    }
+    def main : Foo[Int] = new SecondFoo(10)
 }
 ";
             // def map[B](func: A => B): Option[B] = if(isEmpty) None else Some(func(get()))
