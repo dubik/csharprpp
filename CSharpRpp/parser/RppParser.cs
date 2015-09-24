@@ -214,7 +214,8 @@ namespace CSharpRpp
                 IList<IRppExpr> baseClassArgs;
                 IList<RppType> baseClassTypeArgs;
                 IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
-                return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, typeParams, new RppBaseConstructorCall(baseClassName, baseClassArgs, baseClassTypeArgs));
+                return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, typeParams,
+                    new RppBaseConstructorCall(baseClassName, baseClassArgs, baseClassTypeArgs));
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -226,7 +227,7 @@ namespace CSharpRpp
             var classParams = new List<RppField>();
             if (Require(RppLexer.OP_LParen))
             {
-                while (!Require(RppLexer.OP_RParen))
+                while (true)
                 {
                     RppField classParam;
                     if (!ParseClassParam(out classParam))
@@ -235,6 +236,14 @@ namespace CSharpRpp
                     }
 
                     classParams.Add(classParam);
+
+                    if (!Peek(RppLexer.OP_Comma))
+                    {
+                        Expect(RppLexer.OP_RParen);
+                        break;
+                    }
+
+                    Consume(); // Comma
                 }
             }
 
