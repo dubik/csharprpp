@@ -8,7 +8,7 @@ namespace CLRCodeGen
 {
     class CecilCodeGen
     {
-        public static void doSomething()
+        public static void DoSomething()
         {
             AssemblyNameDefinition name = new AssemblyNameDefinition("CecilAssembly", new Version(1, 0));
             AssemblyDefinition assembly = AssemblyDefinition.CreateAssembly(name, "CLRCodeGen", ModuleKind.Dll);
