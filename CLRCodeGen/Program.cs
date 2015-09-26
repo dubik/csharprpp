@@ -268,7 +268,7 @@ namespace CLRCodeGen
         private static void Main(String[] args)
         {
             CreateGenericClass();
-            CecilCodeGen.doSomething();
+            CecilCodeGen.DoSomething();
             CreateGenericClosures();
         }
     }
