@@ -41,7 +41,7 @@ class MyClosure extends Func[Int, Float]
 object Bar {
     def main : Int = {
         val f : Func[Int, Float] = new MyClosure()
-        f(12.3)
+        f.apply(12.3)
     }
 }
 ";

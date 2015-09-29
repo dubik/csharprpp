@@ -319,7 +319,7 @@ namespace CSharpRpp.Codegen
                     else
                     {
                         MethodInfo method = node.Function.RuntimeType;
-                        if (method.ContainsGenericParameters)
+                        if (method.IsGenericMethod)
                         {
                             Type[] typeArgs = node.TypeArgs.Select(type => type.Runtime).ToArray();
                             method = method.MakeGenericMethod(typeArgs);
