@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using CSharpRpp.Expr;
-using CSharpRpp.Native;
 using CSharpRpp.Parser;
 
 namespace CSharpRpp
@@ -19,9 +16,10 @@ namespace CSharpRpp
                 Function = resolvedFunc;
             }
 
-            public virtual IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> typeArgs)
+            public virtual IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
+                IList<RppVariantTypeParam> typeArgs)
             {
-                return new RppFuncCall(functionName, resolvedArgList, Function, Function.ReturnType, typeArgs);
+                return new RppFuncCall(functionName, resolvedArgList, Function, Function.ReturnType, typeArgs) {TargetType = targetType};
             }
         }
 
@@ -38,14 +36,14 @@ namespace CSharpRpp
             }
 
             // For closures we don't specify types explicitely, they are deduced during resolution
-            public override IRppExpr RewriteFunctionCall(string functionName, IList<IRppExpr> resolvedArgList, IList<RppVariantTypeParam> unused)
+            public override IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
+                IList<RppVariantTypeParam> unused)
             {
                 var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()));
+                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()) {TargetType = targetType});
             }
         }
-
 
         private IEnumerable<Type> _typeArgs;
 
@@ -78,41 +76,10 @@ namespace CSharpRpp
             }
         }
 
-        public bool CanCast(IRppExpr source, RppType target)
-        {
-            return ImplicitCast.CanCast(source.Type, target);
-        }
-
-        public bool TypesComparator(IRppExpr source, RppType target)
-        {
-            RppType targetType = target;
-
-            if (target.IsGenericParameter())
-            {
-                // TODO should be consistent with RppNew
-                targetType = RppNativeType.Create(_typeArgs.ElementAt(target.Runtime.GenericParameterPosition));
-            }
-
-            if (source is RppClosure)
-            {
-                RppClosure closure = (RppClosure) source;
-                if (closure.Type == null)
-                {
-                    Debug.Assert(targetType.Runtime != null, "Only runtime is supported at this moment");
-                    Type[] genericTypes = targetType.Runtime.GetGenericArguments();
-                    RppType[] paramTypes = closure.Bindings.Select(b => b.Type).ToArray();
-                    // Differentiate only by the number of arguments
-                    return genericTypes.Length == (paramTypes.Length + 1); // '1' is a return type
-                }
-            }
-
-            return targetType.Equals(source.Type);
-        }
-
         private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
         {
             IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(name);
-            var candidates = OverloadQuery.Find(args, overloads, TypesComparator, CanCast).ToList();
+            var candidates = OverloadQuery.Find(args, overloads, new DefaultTypesComparator(scope)).ToList();
             if (candidates.Count > 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -141,7 +108,7 @@ namespace CSharpRpp
                         var objectType = expr.Type as RppGenericObjectType;
                         _typeArgs = objectType.GenericArguments;
                     }
-                    var candidates = OverloadQuery.Find(args, clazz.Functions, TypesComparator, CanCast).ToList();
+                    var candidates = OverloadQuery.Find(args, clazz.Functions, new DefaultTypesComparator(scope)).ToList();
                     if (candidates.Count > 1)
                     {
                         throw new Exception("Can't figure out which overload to use");

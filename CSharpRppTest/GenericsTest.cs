@@ -78,7 +78,7 @@ object Bar
         public void ClosureLikeClass()
         {
             const string code = @"
-abstract class Func[T, R]
+abstract class Func[R, T]
 {
     def apply(arg : T) : R
 }

@@ -94,6 +94,7 @@
     <Compile Include="Codegen\StubsCreator.cs" />
     <Compile Include="Codegen\TypeCreator.cs" />
     <Compile Include="Collections.cs" />
+    <Compile Include="DefaultTypesComparator.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Exceptions\SemanticException.cs" />
     <Compile Include="Expr\RppIf.cs" />

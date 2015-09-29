@@ -401,7 +401,8 @@ namespace CSharpRpp
             _typeArgs = typeArgList;
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type, [NotNull] IList<RppVariantTypeParam> typeArgList)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type,
+            [NotNull] IList<RppVariantTypeParam> typeArgList)
             : this(name, argList, typeArgList)
         {
             Function = function;
@@ -457,7 +458,7 @@ namespace CSharpRpp
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
             }
 
-            return resolveResults.RewriteFunctionCall(Name, args, _typeArgs);
+            return resolveResults.RewriteFunctionCall(TargetType, Name, args, _typeArgs);
         }
 
         private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
@@ -873,7 +874,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    internal sealed class ClassAsMemberAdapter : RppMember
+    sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
 

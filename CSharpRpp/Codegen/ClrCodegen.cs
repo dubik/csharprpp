@@ -319,11 +319,18 @@ namespace CSharpRpp.Codegen
                     else
                     {
                         MethodInfo method = node.Function.RuntimeType;
+                        if (node.TargetType is RppGenericObjectType)
+                        {
+                            method = TypeBuilder.GetMethod(node.TargetType.Runtime, method);
+                        }
+
+                        /*
                         if (method.IsGenericMethod)
                         {
                             Type[] typeArgs = node.TypeArgs.Select(type => type.Runtime).ToArray();
                             method = method.MakeGenericMethod(typeArgs);
                         }
+                        */
 
                         _body.Emit(OpCodes.Callvirt, method);
                     }
