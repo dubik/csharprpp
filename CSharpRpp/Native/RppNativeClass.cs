@@ -7,15 +7,15 @@ namespace CSharpRpp.Native
 {
     public class RppNativeClass : RppNamedNode, IRppClass
     {
-        public IEnumerable<IRppFunc> Functions { get; private set; }
-        public IEnumerable<RppField> Fields { get; private set; }
+        public IEnumerable<IRppFunc> Functions { get; }
+        public IEnumerable<RppField> Fields { get; }
 
-        public IEnumerable<IRppFunc> Constructors { get; private set; }
-        public IEnumerable<RppVariantTypeParam> TypeParams { get; private set; }
-        public Type RuntimeType { get; private set; }
-        public RppClassScope Scope { get; private set; }
-        public IRppClass BaseClass { get; private set; }
-        public RppBaseConstructorCall BaseConstructorCall { get; private set; }
+        public IEnumerable<IRppFunc> Constructors { get; }
+        public IEnumerable<RppVariantTypeParam> TypeParams { get; }
+        public Type RuntimeType { get; }
+        public RppClassScope Scope { get; }
+        public IRppClass BaseClass { get; }
+        public RppBaseConstructorCall BaseConstructorCall { get; }
 
         public RppNativeClass(Type classType) : base(classType.Name)
         {

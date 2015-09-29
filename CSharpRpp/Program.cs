@@ -26,7 +26,7 @@ object Runtime
 } 
 ";
             const string code = @"
-class Func[R, T]
+abstract class Func[R, T]
 {
     def apply(arg : T) : R
 }
@@ -40,12 +40,11 @@ class MyClosure extends Func[Int, Float]
 
 object Bar {
     def main : Int = {
-        val f : Func[Int, Float] = new MyClosure[Int, Float]()
+        val f : Func[Int, Float] = new MyClosure()
         f(12.3)
     }
 }
 ";
-            // def map[B](func: A => B): Option[B] = if(isEmpty) None else Some(func(get()))
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);

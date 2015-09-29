@@ -239,10 +239,7 @@ namespace CSharpRpp
             Class = clazz;
         }
 
-        public override Type Runtime
-        {
-            get { return Class.RuntimeType; }
-        }
+        public override Type Runtime => Class.RuntimeType;
 
         public override bool IsSubclassOf(RppType type)
         {
@@ -253,17 +250,12 @@ namespace CSharpRpp
     public sealed class RppGenericObjectType : RppObjectType
     {
         public override Type Runtime { get; protected set; }
-        public IEnumerable<Type> GenericArguments { get; private set; }
+        public IEnumerable<Type> GenericArguments { get; }
 
         public RppGenericObjectType(IRppClass clazz, IEnumerable<Type> genericArguments, Type runtimeType) : base(clazz)
         {
             Runtime = runtimeType;
             GenericArguments = genericArguments;
-        }
-
-        public Type MakeGenericType(Type type)
-        {
-            return type.MakeGenericType(GenericArguments.ToArray());
         }
 
         public override string ToString()
