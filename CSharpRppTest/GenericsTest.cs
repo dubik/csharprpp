@@ -78,18 +78,28 @@ object Bar
         public void ClosureLikeClass()
         {
             const string code = @"
-class Func[R, T]
+abstract class Func[T, R]
 {
     def apply(arg : T) : R
 }
 
 class MyClosure extends Func[Int, Float]
 {
-    def apply
+    def apply(f: Float) : Int = {
+        10
+    }
 }
 
+object Bar {
+    def main : Int = {
+        val f : Func[Int, Float] = new MyClosure()
+        f.apply(12.3)
+    }
+}
 ";
+            Type barTy = Utils.ParseAndCreateType(code, "Bar$");
+            var res = Utils.InvokeStatic(barTy, "main");
+            Assert.IsNotNull(res);
         }
-
     }
 }

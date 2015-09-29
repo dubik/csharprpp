@@ -26,13 +26,23 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo[T](val id: T)
-
-class SecondFoo[A](id: Int, val name: A) extends Foo[Int](id)
-
-object Bar
+class Func[R, T]
 {
-    def main : Foo[Int] = new SecondFoo[String](10, ""Hello"")
+    def apply(arg : T) : R
+}
+
+class MyClosure extends Func[Int, Float]
+{
+    def apply(f: Float) : Int = {
+        10
+    }
+}
+
+object Bar {
+    def main : Int = {
+        val f : Func[Int, Float] = new MyClosure[Int, Float]()
+        f(12.3)
+    }
 }
 ";
             // def map[B](func: A => B): Option[B] = if(isEmpty) None else Some(func(get()))
