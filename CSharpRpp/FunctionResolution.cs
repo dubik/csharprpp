@@ -41,7 +41,7 @@ namespace CSharpRpp
             {
                 var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()) {TargetType = targetType});
+                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()) {TargetType = (RppObjectType) _expr.Type});
             }
         }
 
@@ -71,9 +71,7 @@ namespace CSharpRpp
             }
 
             res = resolution.SearchInCompanionObjects(name, argsList, scope);
-            {
-                return res;
-            }
+            return res;
         }
 
         private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
@@ -108,13 +106,15 @@ namespace CSharpRpp
                         var objectType = expr.Type as RppGenericObjectType;
                         _typeArgs = objectType.GenericArguments;
                     }
-                    var candidates = OverloadQuery.Find(args, clazz.Functions, new DefaultTypesComparator(scope)).ToList();
+
+                    // We should have only one function - 'apply'
+                    var candidates = clazz.Functions.ToList();
                     if (candidates.Count > 1)
                     {
                         throw new Exception("Can't figure out which overload to use");
                     }
 
-                    if (candidates.Count == 0)
+                    if (!candidates.Any())
                     {
                         return null;
                     }

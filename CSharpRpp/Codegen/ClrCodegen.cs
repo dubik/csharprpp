@@ -321,7 +321,20 @@ namespace CSharpRpp.Codegen
                         MethodInfo method = node.Function.RuntimeType;
                         if (node.TargetType is RppGenericObjectType)
                         {
-                            method = TypeBuilder.GetMethod(node.TargetType.Runtime, method);
+                            RppGenericObjectType genericObjectType = (RppGenericObjectType) node.TargetType;
+                            try
+                            {
+                                // Getting a specialized method from generic object. genericObjectType.Runtime has specialized type
+                                // and 'method' contains generic version
+                                method = TypeBuilder.GetMethod(genericObjectType.Runtime, method);
+                            }
+                            catch
+                            {
+                                // Above works only for TypeBuilders, for C# imported types it throws an exception, so getting
+                                // method which has the same name and amount of parameters
+                                method = node.TargetType.Runtime
+                                    .GetMethods().FirstOrDefault(x => x.Name == method.Name && x.GetParameters().Length == method.GetParameters().Length);
+                            }
                         }
 
                         /*

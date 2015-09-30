@@ -26,22 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-abstract class Func[R, T]
+object Bar
 {
-    def apply(arg : T) : R
-}
-
-class MyClosure extends Func[Int, Float]
-{
-    def apply(f: Float) : Int = {
-        10
-    }
-}
-
-object Bar {
-    def main : Int = {
-        val f : Func[Int, Float] = new MyClosure()
-        f.apply(12.3)
+    def main() : Int = {
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        func(10, 13)
     }
 }
 ";
