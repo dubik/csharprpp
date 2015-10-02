@@ -118,6 +118,15 @@ namespace CSharpRpp
                 var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type.IsUndefined());
                 if (targetType.IsDefined() && hasUndefinedClosureBinding)
                 {
+                    if (targetType is RppGenericObjectType)
+                    {
+                        RppGenericObjectType varType = (RppGenericObjectType) targetType;
+                        var newBindgings =
+                            varType.GenericArguments.Zip(closure.Bindings,
+                                (varTypeGenArg, binding) => binding.CloneWithNewType(RppNativeType.Create(varTypeGenArg))).ToList();
+                        return new RppClosure(newBindgings, closure.Expr);
+                    }
+
                     if (targetType is RppGenericType)
                     {
                         RppGenericType varType = (RppGenericType) targetType;
@@ -136,7 +145,7 @@ namespace CSharpRpp
                         return new RppClosure(newBindings, closure.Expr);
                     }
 
-                    throw new NotSupportedException("Only RppGenericType is supported at the moment");
+                    throw new NotSupportedException("Only RppGenericType and RppGenericObjectType is supported at the moment");
                 }
             }
 

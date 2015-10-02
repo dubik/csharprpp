@@ -337,14 +337,7 @@ namespace CSharpRpp.Codegen
                             }
                         }
 
-                        /*
-                        if (method.IsGenericMethod)
-                        {
-                            Type[] typeArgs = node.TypeArgs.Select(type => type.Runtime).ToArray();
-                            method = method.MakeGenericMethod(typeArgs);
-                        }
-                        */
-
+                        Debug.Assert(method != null, "method != null");
                         _body.Emit(OpCodes.Callvirt, method);
                     }
                 }

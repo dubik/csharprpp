@@ -28,9 +28,12 @@ object Runtime
             const string code = @"
 object Bar
 {
+    def invoker(func: (Int, Int) => Int) : Int = {
+        func(10, 24)
+    }
+
     def main() : Int = {
-        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
-        func(10, 13)
+        invoker((x, y) => x + y)
     }
 }
 ";
