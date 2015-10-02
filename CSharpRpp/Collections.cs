@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpRpp
 {
@@ -10,6 +11,7 @@ namespace CSharpRpp
         public static IList<string> NoStrings = new List<string>().AsReadOnly();
         public static IList<IRppExpr> NoExprs = new List<IRppExpr>().AsReadOnly();
         public static IList<RppType> NoTypes = new List<RppType>().AsReadOnly();
+        public static IList<Type> NoRuntimeTypes = new List<Type>().AsReadOnly();
         public static IList<RppVariantTypeParam> NoVariantTypeParams = new List<RppVariantTypeParam>().AsReadOnly();
         public static HashSet<ObjectModifier> NoModifiers = new HashSet<ObjectModifier>();
 

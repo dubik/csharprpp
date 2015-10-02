@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Expr;
 using JetBrains.Annotations;
+using System;
 
 namespace CSharpRpp.Parser
 {
@@ -57,6 +58,22 @@ namespace CSharpRpp.Parser
         public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<IRppFunc> overloads,
             ITypesComparator<T> comparator)
         {
+            return Find(argTypes, Collections.NoRuntimeTypes, overloads, comparator);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="argTypes"></param>
+        /// <param name="typeArgs">specialized function type argument for function</param>
+        /// <param name="overloads"></param>
+        /// <param name="comparator"></param>
+        /// <returns></returns>
+        public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<Type> typeArgs,
+            [NotNull] IEnumerable<IRppFunc> overloads,
+            ITypesComparator<T> comparator)
+        {
             var argTypesArray = argTypes.ToArray();
 
             var candidates = new List<IRppFunc>();
@@ -65,7 +82,8 @@ namespace CSharpRpp.Parser
                 bool castRequired; // Flag if we need to cast any argument
                 IRppParam[] candidateParams = candidate.Params;
 
-                if (SignatureMatched(argTypesArray, candidateParams, comparator, out castRequired))
+                if (candidate.TypeParams.Count == typeArgs.Count() 
+                    && SignatureMatched(argTypesArray, typeArgs, candidateParams, comparator, out castRequired))
                 {
                     if (!castRequired)
                     {
@@ -86,7 +104,8 @@ namespace CSharpRpp.Parser
             return Find(argTypes, overloads, new DelegateTypeComparator<T>(typesComparator, canCast));
         }
 
-        public static bool SignatureMatched<T>(IList<T> items, IList<IRppParam> candidateParams, ITypesComparator<T> comparator, out bool castRequired)
+        public static bool SignatureMatched<T>(IList<T> items, IEnumerable<Type> typeArgs, IList<IRppParam> candidateParams, ITypesComparator<T> comparator,
+            out bool castRequired)
         {
             castRequired = false;
 
@@ -120,6 +139,18 @@ namespace CSharpRpp.Parser
                 else
                 {
                     candidateParamIndex++;
+                }
+
+                // If generic parameter, replace it with specialized type
+                // def func[A](x: A)...
+                // Though this only works for generic methods. If generic parameter comes
+                // class Foo[A] {
+                //    def func(x: A)...
+                // }
+                // from class description, then we should skip, it will be taken care of in the comparator
+                if (paramType.Runtime.IsGenericParameter && typeArgs.Any())
+                {
+                    paramType = RppNativeType.Create(typeArgs.ElementAt(paramType.Runtime.GenericParameterPosition));
                 }
 
                 if (!comparator.Compare(item, paramType))

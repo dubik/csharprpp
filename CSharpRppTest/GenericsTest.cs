@@ -7,7 +7,7 @@ namespace CSharpRppTest
     public class GenericsTest
     {
         [TestMethod]
-        public void GenericFunction()
+        public void GenericStaticFunction()
         {
             const string code = @"
 object Bar

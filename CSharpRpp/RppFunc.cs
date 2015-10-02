@@ -34,6 +34,9 @@ namespace CSharpRpp
 
         RppClass Class { get; set; }
         ConstructorInfo ConstructorInfo { get; set; }
+
+        [NotNull]
+        IList<RppVariantTypeParam> TypeParams { get; set; }
     }
 
     public class RppFunc : RppNamedNode, IRppFunc
@@ -79,10 +82,7 @@ namespace CSharpRpp
             set { throw new NotImplementedException(); }
         }
 
-        public bool IsConstructor
-        {
-            get { return Name == "this"; }
-        }
+        public bool IsConstructor => Name == "this";
 
         public bool IsSynthesized { get; set; }
         public bool IsStub { get; set; }
@@ -91,7 +91,6 @@ namespace CSharpRpp
         public ConstructorInfo ConstructorInfo { get; set; }
         public HashSet<ObjectModifier> Modifiers { get; set; }
 
-        [NotNull]
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
         public RppFunc([NotNull] string name) : base(name)

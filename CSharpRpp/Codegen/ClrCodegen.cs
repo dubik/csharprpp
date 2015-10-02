@@ -338,6 +338,13 @@ namespace CSharpRpp.Codegen
                         }
 
                         Debug.Assert(method != null, "method != null");
+
+                        if (method.IsGenericMethod)
+                        {
+                            var methodTypeArgs = node.TypeArgs.Select(t => t.Runtime).ToArray();
+                            method = method.MakeGenericMethod(methodTypeArgs);
+                        }
+
                         _body.Emit(OpCodes.Callvirt, method);
                     }
                 }

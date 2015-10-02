@@ -26,14 +26,14 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
-{
-    def invoker(func: (Int, Int) => Int) : Int = {
-        func(10, 24)
-    }
+class Some[A](val a: A)
 
-    def main() : Int = {
-        invoker((x, y) => x + y)
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.a
+        p
     }
 }
 ";

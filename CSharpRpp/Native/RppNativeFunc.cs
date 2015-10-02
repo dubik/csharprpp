@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -18,6 +19,8 @@ namespace CSharpRpp.Native
 
         public MethodInfo RuntimeType { get; set; }
         public ConstructorInfo ConstructorInfo { get; set; }
+        public IList<RppVariantTypeParam> TypeParams { get; set; }
+
         public MethodBuilder Builder { get; set; }
         public ConstructorBuilder ConstructorBuilder { get; set; }
 
@@ -73,6 +76,8 @@ namespace CSharpRpp.Native
             Params = constructorInfo.GetParameters().Select(CreateRppParam).ToArray();
             RuntimeReturnType = ReturnType.Runtime;
             IsVariadic = constructorInfo.GetParameters().Any(IsParamVariadic);
+
+            TypeParams = Collections.NoVariantTypeParams;
         }
 
         public RppNativeFunc(MethodInfo methodInfo) : base(methodInfo.Name)
@@ -84,6 +89,8 @@ namespace CSharpRpp.Native
             RuntimeReturnType = methodInfo.ReturnType;
 
             IsVariadic = methodInfo.GetParameters().Any(IsParamVariadic);
+
+            TypeParams = methodInfo.GetGenericArguments().Select(a => new RppVariantTypeParam(a)).ToList();
         }
 
         private static IRppParam CreateRppParam(ParameterInfo paramInfo)

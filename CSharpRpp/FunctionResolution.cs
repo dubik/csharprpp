@@ -77,7 +77,8 @@ namespace CSharpRpp
         private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
         {
             IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(name);
-            var candidates = OverloadQuery.Find(args, overloads, new DefaultTypesComparator(scope)).ToList();
+            
+            var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
             if (candidates.Count > 1)
             {
                 throw new Exception("Can't figure out which overload to use");
