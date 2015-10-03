@@ -85,7 +85,7 @@ abstract class Func[R, T]
 
 class MyClosure extends Func[Int, Float]
 {
-    def apply(f: Float) : Int = {
+    override def apply(f: Float) : Int = {
         10
     }
 }

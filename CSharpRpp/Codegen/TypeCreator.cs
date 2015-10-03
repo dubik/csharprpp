@@ -54,6 +54,11 @@ namespace CSharpRpp.Codegen
 
             // always virtual, even for statics
             attrs |= MethodAttributes.Virtual;
+            attrs |= MethodAttributes.HideBySig;
+            if (!node.IsOverride)
+            {
+                attrs |= MethodAttributes.NewSlot;
+            }
 
             if (node.IsAbstract)
             {

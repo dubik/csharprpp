@@ -261,7 +261,7 @@ class Human
 
 class Person extends Human
 {
-    def getId : Int = 13
+    override def getId : Int = 13
 }
 
 object Main

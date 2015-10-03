@@ -8,11 +8,11 @@ using TypeAttributes = System.Reflection.TypeAttributes;
 
 namespace CLRCodeGen
 {
-    class ICodegenContext
+    internal class ICodegenContext
     {
     }
 
-    class Node
+    internal class Node
     {
         public void Analyze()
         {
@@ -25,6 +25,20 @@ namespace CLRCodeGen
 
     public class Foo
     {
+        public int k;
+
+        public virtual int func()
+        {
+            return 13;
+        }
+    }
+
+    public class Bar : Foo
+    {
+        public override int func()
+        {
+            return 27;
+        }
     }
 
     public interface Function<in T, out Res>
@@ -32,7 +46,7 @@ namespace CLRCodeGen
         Res Apply(T p);
     }
 
-    class MyFoo<A, C>
+    internal class MyFoo<A, C>
     {
         private class MyBar<Z>
         {
@@ -41,15 +55,15 @@ namespace CLRCodeGen
             public void func<B>(B someB)
             {
                 var f = new Func<object, C>((b) =>
-                              {
-                                  Console.WriteLine(someB);
-                                  return myField;
-                              });
+                                            {
+                                                Console.WriteLine(someB);
+                                                return myField;
+                                            });
             }
         }
     }
 
-    class MyFooMain
+    internal class MyFooMain
     {
         public static void main()
         {
@@ -83,7 +97,7 @@ namespace CLRCodeGen
         }
     }
 
-    class Program
+    internal class Program
     {
         private static void DoSomething()
         {

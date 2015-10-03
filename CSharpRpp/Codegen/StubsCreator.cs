@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
             _funcBuilders.Add(node, method);
         }
 
-        private static void DefineAttributes(RppFunc node, MethodBuilder method)
+        private static void DefineAttributes(IRppFunc node, MethodBuilder method)
         {
             if (node.IsVariadic)
             {
