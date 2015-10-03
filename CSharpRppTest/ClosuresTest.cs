@@ -77,6 +77,7 @@ object Bar
             Assert.AreEqual(34, res);
         }
 
+        [Ignore]
         [TestMethod]
         public void ABitSimpler()
         {
