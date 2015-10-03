@@ -732,7 +732,7 @@ namespace CSharpRpp
 
         private void InitializeType()
         {
-            if (_exprs.Any() && _exprs.Last() is IRppExpr)
+            if (_exprs.Any() && _exprs.Last() is IRppExpr && !(_exprs.Last() is RppVar))
             {
                 var lastExpr = _exprs.Last() as IRppExpr;
                 if (lastExpr != null)

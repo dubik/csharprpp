@@ -26,14 +26,10 @@ object Runtime
 } 
 ";
             const string code = @"
-class Some[A](val a: A)
-
 object Main
 {
-    def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
-        val p = k.a
-        p
+    def main : Unit = {
+        val k : Int = 1
     }
 }
 ";
