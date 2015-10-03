@@ -32,6 +32,32 @@ namespace CLRCodeGen
         Res Apply(T p);
     }
 
+    class MyFoo<A, C>
+    {
+        private class MyBar<Z>
+        {
+            private C myField;
+
+            public void func<B>(B someB)
+            {
+                var f = new Func<object, C>((b) =>
+                              {
+                                  Console.WriteLine(someB);
+                                  return myField;
+                              });
+            }
+        }
+    }
+
+    class MyFooMain
+    {
+        public static void main()
+        {
+            MyFoo<int, float> a = new MyFoo<int, float>();
+        }
+    }
+
+
     /*
     class Foo[A]
     {
@@ -40,6 +66,7 @@ namespace CLRCodeGen
         }
     }
     */
+
     public class MyMain<A>
     {
         private class Closure : Function<A, int>
@@ -111,7 +138,7 @@ namespace CLRCodeGen
             }
         }
             */
-    AssemblyName assemblyName = new AssemblyName("sampleAssembl");
+            AssemblyName assemblyName = new AssemblyName("sampleAssembl");
             AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
 
