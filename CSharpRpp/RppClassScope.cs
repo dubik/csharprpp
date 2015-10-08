@@ -33,7 +33,7 @@ namespace CSharpRpp
         protected IReadOnlyCollection<IRppFunc> LookupMember(string name)
         {
             var current = DoLookupFunction(name, false).ToList();
-            var baseMembers = BaseClassScope != null ? BaseClassScope.LookupMember(name) : Collections.NoFuncsCollection;
+            var baseMembers = BaseClassScope?.LookupMember(name) ?? Collections.NoFuncsCollection;
             current.AddRange(baseMembers);
             return current;
         }

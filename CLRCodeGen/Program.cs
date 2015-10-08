@@ -46,20 +46,25 @@ namespace CLRCodeGen
         Res Apply(T p);
     }
 
-    internal class MyFoo<A, C>
+    class MyFoo<A, C, P>
     {
-        private class MyBar<Z>
+        class MyBar<Z>
         {
             private C myField;
 
             public void func<B>(B someB)
             {
-                var f = new Func<object, C>((b) =>
+                var f = new Func<object, C>(b =>
                                             {
                                                 Console.WriteLine(someB);
                                                 return myField;
                                             });
             }
+        }
+
+        public static void Create()
+        {
+            MyBar<int> b = new MyBar<int>();
         }
     }
 
@@ -67,7 +72,7 @@ namespace CLRCodeGen
     {
         public static void main()
         {
-            MyFoo<int, float> a = new MyFoo<int, float>();
+            MyFoo<int, float, float> a = new MyFoo<int, float, float>();
         }
     }
 

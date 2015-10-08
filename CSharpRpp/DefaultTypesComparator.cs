@@ -33,7 +33,6 @@ namespace CSharpRpp
             if (target.IsGenericParameter())
             {
                 // TODO should be consistent with RppNew
-                //targetType = RppNativeType.Create(_typeArgs.ElementAt(target.Runtime.GenericParameterPosition));
                 var genericParameterName = targetType.Runtime.Name;
                 targetType = _scope.LookupGenericType(genericParameterName);
             }

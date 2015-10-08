@@ -373,7 +373,7 @@ namespace CSharpRpp
         public override string ToString()
         {
             var paramsString = string.Join(", ", _params.Select(p => p.ToString()));
-            return string.Format("{0}[{1}]", _typeName, paramsString);
+            return $"{_typeName}[{paramsString}]";
         }
 
         #region Equality
@@ -405,7 +405,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((_params != null ? _params.GetHashCode() : 0) * 397) ^ _typeName.GetHashCode();
+                return ((_params?.GetHashCode() ?? 0) * 397) ^ _typeName.GetHashCode();
             }
         }
 

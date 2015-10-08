@@ -8,9 +8,9 @@ namespace CSharpRpp.Native
 {
     public class RppNativeFunc : RppNamedNode, IRppFunc
     {
-        public RppType ReturnType { get; private set; }
+        public RppType ReturnType { get; }
         public Type RuntimeReturnType { get; private set; }
-        public IRppParam[] Params { get; private set; }
+        public IRppParam[] Params { get; }
 
         public IRppExpr Expr
         {
@@ -50,10 +50,7 @@ namespace CSharpRpp.Native
             set { throw new NotImplementedException(); }
         }
 
-        public bool IsConstructor
-        {
-            get { return ConstructorInfo != null || ConstructorBuilder != null; }
-        }
+        public bool IsConstructor => ConstructorInfo != null || ConstructorBuilder != null;
 
         public bool IsSynthesized
         {
