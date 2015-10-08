@@ -34,26 +34,6 @@ class Foo(val k: Int)
             Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
         }
 
-        [Ignore]
-        [TestMethod]
-        public void TestMainFunc()
-        {
-            const string code = @"
-object Foo
-{
-    def main(args: Array[String]) : Unit = {
-    }
-}
-";
-            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
-            MethodInfo mainMethod = fooTy.GetMethod("main", BindingFlags.Static | BindingFlags.Public);
-            Assert.IsNotNull(mainMethod);
-            ParameterInfo[] p = mainMethod.GetParameters();
-            Assert.AreEqual(typeof (void), mainMethod.ReturnType);
-            Assert.AreEqual(1, p.Length);
-            Assert.AreEqual(typeof (string[]), p[0].ParameterType);
-        }
-
         [TestMethod]
         public void TestSimpleExpression()
         {
