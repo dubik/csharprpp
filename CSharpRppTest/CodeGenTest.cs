@@ -29,7 +29,7 @@ class Foo(val k: Int)
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
-            object foo = Activator.CreateInstance(fooTy, new object[] {10});
+            object foo = Activator.CreateInstance(fooTy, 10);
             Assert.IsNotNull(foo);
             Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
         }
