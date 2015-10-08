@@ -16,61 +16,6 @@ namespace RppRuntime
         }
     }
 
-    public class Foo
-    {
-        public int length;
-
-        public Foo() : this(13)
-        {
-        }
-
-        public Foo(int length)
-        {
-            this.length = length;
-        }
-    }
-
-
-    public class Pair<T, K>
-    {
-        public T Name;
-        public K Value;
-    }
-
-    public class StringKey<K> : Pair<string, K>
-    {
-        public K SecondValue;
-    }
-
-
-    public class Element
-    {
-        public string Name;
-    }
-
-    public class Stack<T>
-    {
-        public T element;
-    }
-
-    public class Factory<T>
-    {
-        public static Stack<T> Create()
-        {
-            return new Stack<T>();
-        }
-
-        public static Stack<int> CreateInt()
-        {
-            return new Stack<int>();
-        }
-
-        public static Stack<Element> CreateElement()
-        {
-            return new Stack<Element>();
-        }
-    }
-
     internal class StackRoot<T>
     {
         public virtual StackRoot<T> Push(T element)

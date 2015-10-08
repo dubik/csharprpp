@@ -26,19 +26,9 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(val k : Int)
-{
-    def func : Int = 13
-}
-
-class Bar extends Foo(13)
-{
-    override def func : Int = 15
-}
-
 object Main
 {
-    def main : Unit = {
+    def main(args: String*) : Int = {
         13
     }
 }

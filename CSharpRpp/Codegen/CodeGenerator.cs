@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
     public sealed class CodeGenerator
     {
-        public Assembly Assembly
-        {
-            get { return _assemblyBuilder; }
-        }
+        public Assembly Assembly => _assemblyBuilder;
 
         private readonly RppProgram _program;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
@@ -75,7 +74,8 @@ namespace CSharpRpp.Codegen
             var mainFunc = FindMain();
             if (mainFunc != null)
             {
-                _assemblyBuilder.SetEntryPoint(mainFunc, PEFileKinds.ConsoleApplication);
+                MethodInfo wrappedMain = WrapMain(mainFunc);
+                _assemblyBuilder.SetEntryPoint(wrappedMain, PEFileKinds.ConsoleApplication);
                 _assemblyBuilder.Save(_assemblyName.Name + ".exe");
             }
             else
@@ -87,12 +87,77 @@ namespace CSharpRpp.Codegen
         private MethodInfo FindMain()
         {
             MethodBuilder mainFunc = _funcBuilders.Values.FirstOrDefault(func => func.Name == "main");
-            if (mainFunc != null)
+            return mainFunc?.GetBaseDefinition();
+        }
+
+        private MethodInfo WrapMain(MethodInfo mainFunc)
+        {
+            ValidateMainFunc(mainFunc);
+            return GeneratedWrappedMainCode(mainFunc);
+        }
+
+        /// <summary>
+        /// Creates type RppApp with one static method which calls app's main method.
+        /// In Rpp there are actually no static methods so we need to generate one
+        /// for an entry point.
+        /// </summary>
+        /// <param name="targetMainFunc">app's main method</param>
+        /// <returns>static method which delegates calls to app's main method</returns>
+        [NotNull]
+        private MethodBuilder GeneratedWrappedMainCode(MethodInfo targetMainFunc)
+        {
+            Type declaringType = targetMainFunc.DeclaringType;
+            Debug.Assert(declaringType != null, "declaringType != null");
+            FieldInfo instanceField = declaringType.GetField("_instance");
+
+            TypeBuilder wrappedMainType = _moduleBuilder.DefineType("<>RppApp");
+            MethodBuilder wrappedMain = wrappedMainType.DefineMethod("Main", MethodAttributes.Static | MethodAttributes.Public, typeof (int),
+                new[] {typeof (string[])});
+            wrappedMain.DefineParameter(1, ParameterAttributes.None, "args");
+            var body = wrappedMain.GetILGenerator();
+
+            body.Emit(OpCodes.Ldsfld, instanceField);
+
+            ParameterInfo[] parameters = targetMainFunc.GetParameters();
+            if (parameters.Any())
             {
-                return mainFunc.GetBaseDefinition();
+                body.Emit(OpCodes.Ldarg_0);
             }
 
-            return null;
+            body.Emit(OpCodes.Callvirt, targetMainFunc);
+
+            if (targetMainFunc.ReturnType == typeof (void))
+            {
+                body.Emit(OpCodes.Ldc_I4_0);
+            }
+
+            body.Emit(OpCodes.Ret);
+            wrappedMainType.CreateType();
+            return wrappedMain;
+        }
+
+        /// <summary>
+        /// Main method should have Unit or Int return type and shouldn't have parameters or
+        /// it should be just one - array of strings.
+        /// </summary>
+        /// <param name="mainFunc">app's main function to validate</param>
+        private static void ValidateMainFunc([NotNull] MethodInfo mainFunc)
+        {
+            if (mainFunc.ReturnType != typeof (void) && mainFunc.ReturnType != typeof (int))
+            {
+                throw new Exception("Main doesn't match signature of entry point");
+            }
+
+            var parameters = mainFunc.GetParameters();
+            if (parameters.Length != 0 && parameters.Length != 1)
+            {
+                throw new Exception("Main doesn't match signature of entry point");
+            }
+
+            if (parameters.Length == 1 && parameters[0].ParameterType != typeof (string[]))
+            {
+                throw new Exception("First parameter of main should be Int");
+            }
         }
     }
 }
