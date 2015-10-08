@@ -10,7 +10,7 @@ namespace CSharpRpp
 
     public abstract class RppNamedNode : RppNode, IRppNamedNode
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         protected RppNamedNode([NotNull] string name)
         {

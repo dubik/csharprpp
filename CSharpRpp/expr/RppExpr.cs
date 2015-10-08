@@ -25,18 +25,12 @@ namespace CSharpRpp
     {
         public static RppEmptyExpr Instance = new RppEmptyExpr();
 
-        public RppType Type
-        {
-            get { return RppPrimitiveType.UnitTy; }
-        }
+        public RppType Type => RppPrimitiveType.UnitTy;
     }
 
     public class RppNull : RppNode, IRppExpr
     {
-        public RppType Type
-        {
-            get { return RppNullType.Instance; }
-        }
+        public RppType Type => RppNullType.Instance;
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -380,7 +374,7 @@ namespace CSharpRpp
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
-        protected IList<IRppExpr> ArgList;
+        protected readonly IList<IRppExpr> ArgList;
 
         [NotNull]
         public IRppFunc Function { get; }
@@ -536,7 +530,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return string.Format("Call: \"{0}\"", Name);
+            return $"Call: \"{Name}\"";
         }
 
         #region Equality
@@ -567,7 +561,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((ArgList != null ? ArgList.GetHashCode() : 0) * 397) ^ (Function != null ? Function.GetHashCode() : 0);
+                return ((ArgList?.GetHashCode() ?? 0) * 397) ^ Function.GetHashCode();
             }
         }
 
@@ -576,7 +570,7 @@ namespace CSharpRpp
 
     public class RppBaseConstructorCall : RppFuncCall
     {
-        public string BaseClassName { get; private set; }
+        public string BaseClassName { get; }
 
         public IRppClass BaseClass { get; private set; }
 
@@ -614,7 +608,7 @@ namespace CSharpRpp
                     BaseClass = (RppClass) scope.Lookup(BaseClassName);
                     if (BaseClass == null)
                     {
-                        throw new Exception(string.Format("Can't find {0} class", BaseClassName));
+                        throw new Exception($"Can't find {BaseClassName} class");
                     }
                     break;
             }
@@ -792,7 +786,7 @@ namespace CSharpRpp
         public RppType Type { get; private set; }
         public Type RuntimeType { get; private set; }
 
-        public IRppExpr Target { get; private set; }
+        public IRppExpr Target { get; }
         public RppMember Path { get; private set; }
 
         public RppSelector(IRppExpr target, RppMember path)
@@ -836,7 +830,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return string.Format("{{ {0} -> {1} }}", Target, Path);
+            return $"{{ {Target} -> {Path} }}";
         }
 
         #region Equality
@@ -867,7 +861,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return ((Target != null ? Target.GetHashCode() : 0) * 397) ^ (Path != null ? Path.GetHashCode() : 0);
+                return ((Target?.GetHashCode() ?? 0) * 397) ^ (Path?.GetHashCode() ?? 0);
             }
         }
 
@@ -985,9 +979,9 @@ namespace CSharpRpp
 
     public class RppBox : RppNode, IRppExpr
     {
-        public RppType Type { get; private set; }
+        public RppType Type { get; }
 
-        public IRppExpr Expression { get; private set; }
+        public IRppExpr Expression { get; }
 
         public RppBox([NotNull] IRppExpr expr)
         {
@@ -1027,7 +1021,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return (Type.GetHashCode() * 397) ^ (Expression != null ? Expression.GetHashCode() : 0);
+                return (Type.GetHashCode() * 397) ^ (Expression?.GetHashCode() ?? 0);
             }
         }
     }
