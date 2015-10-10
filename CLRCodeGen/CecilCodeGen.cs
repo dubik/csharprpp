@@ -6,7 +6,7 @@ using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace CLRCodeGen
 {
-    class CecilCodeGen
+    internal class CecilCodeGen
     {
         public static void DoSomething()
         {
