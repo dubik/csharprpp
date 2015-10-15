@@ -168,9 +168,11 @@ namespace CSharpRpp.TypeSystem
 
     public class RType
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public RTypeAttributes Attributes { get; private set; }
+        public RType DeclaredType { get; }
+
+        public RTypeAttributes Attributes { get; }
 
         public bool IsAbstract
         {
@@ -254,5 +256,27 @@ namespace CSharpRpp.TypeSystem
             RppConstructorInfo constructor = new RppConstructorInfo(attributes, parameterTypes, this);
             _constructors.Add(constructor);
         }
+
+        #region Equality
+
+        protected bool Equals(RType other)
+        {
+            return string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name?.GetHashCode() ?? 0;
+        }
+
+        #endregion
     }
 }

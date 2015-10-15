@@ -1,10 +1,13 @@
-﻿using JetBrains.Annotations;
+﻿using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.Expr
 {
     public class RppIf : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
+
+        public RType Type2 { get; }
 
         [NotNull]
         public IRppExpr Condition { get; private set; }
