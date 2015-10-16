@@ -7,14 +7,20 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class Type2Creator : RppNodeVisitor
+    public class Type2Creator : RppNodeVisitor
     {
         private RType _currentType;
 
         public override void VisitEnter(RppClass node)
         {
-            _currentType = new RType(node.Name, GetAttributes(node.Modifiers), null, _currentType);
+            _currentType = new RType(node.Name, GetTypeAttributes(node), null, _currentType);
             node.Type2 = _currentType;
+        }
+
+        private static RTypeAttributes GetTypeAttributes(RppClass node)
+        {
+            RTypeAttributes attr = node.Kind == ClassKind.Class ? RTypeAttributes.Class : RTypeAttributes.Object;
+            return attr | GetAttributes(node.Modifiers);
         }
 
         public override void VisitExit(RppFunc node)

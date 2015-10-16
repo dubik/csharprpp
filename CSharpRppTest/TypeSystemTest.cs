@@ -1,90 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using CSharpRpp;
+﻿using System.Linq;
+using CSharpRpp.Codegen;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    internal class Type2Creator : RppNodeVisitor
-    {
-        private RType _type;
-
-        public override void VisitEnter(RppClass node)
-        {
-            RTypeAttributes attrs = GetAttributes(node.Modifiers) | RTypeAttributes.Class;
-            _type = new RType(node.Name, attrs);
-            node.Type2 = _type;
-        }
-
-        private static RTypeAttributes GetAttributes(ICollection<ObjectModifier> modifiers)
-        {
-            RTypeAttributes attrs = RTypeAttributes.None;
-            if (modifiers.Contains(ObjectModifier.OmSealed))
-            {
-                attrs |= RTypeAttributes.Sealed;
-            }
-            if (modifiers.Contains(ObjectModifier.OmAbstract))
-            {
-                attrs |= RTypeAttributes.Abstract;
-            }
-            if (!modifiers.Contains(ObjectModifier.OmPrivate))
-            {
-                attrs |= RTypeAttributes.Public;
-            }
-
-            return attrs;
-        }
-    }
-
-    internal class MethodCreator : RppNodeVisitor
-    {
-        private RType _type;
-
-        public override void VisitEnter(RppClass node)
-        {
-            _type = node.Type2;
-        }
-
-        public override void VisitEnter(RppFunc node)
-        {
-            RMethodAttributes attrs = GetMethodAttributes(node.Modifiers);
-            var funcParams = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2)).ToArray();
-            _type.DefineMethod(node.Name, attrs, node.NewReturnType, funcParams);
-        }
-
-        public override void Visit(RppField node)
-        {
-            _type.DefineField(node.Name, RFieldAttributes.Public, node.Type2);
-        }
-
-        private static RMethodAttributes GetMethodAttributes(ICollection<ObjectModifier> modifiers)
-        {
-            RMethodAttributes attrs = RMethodAttributes.None;
-            if (modifiers.Contains(ObjectModifier.OmOverride))
-            {
-                attrs |= RMethodAttributes.Override;
-            }
-            if (!modifiers.Contains(ObjectModifier.OmPrivate))
-            {
-                attrs |= RMethodAttributes.Public;
-            }
-            if (modifiers.Contains(ObjectModifier.OmAbstract))
-            {
-                attrs |= RMethodAttributes.Abstract;
-            }
-            return attrs;
-        }
-    }
-
     [TestClass]
     public class TypeSystemTest
     {
         [TestMethod]
         public void PrimitiveTypeEquality()
         {
-            RType t = new RType("Int");
-            RType t1 = new RType("Int");
+            var t = new RType("Int");
+            var t1 = new RType("Int");
             Assert.AreEqual(t, t1);
         }
 
@@ -94,12 +22,50 @@ namespace CSharpRppTest
             const string code = @"
 class Foo
 class Bar extends Foo
+object Main
 ";
-            RppProgram program = Utils.Parse(code);
-            Type2Creator crea = new Type2Creator();
-            program.Accept(crea);
-            MethodCreator methodCreator = new MethodCreator();
-            program.Accept(methodCreator);
+            var program = Utils.Parse(code);
+            var creator = new Type2Creator();
+            program.Accept(creator);
+            var classes = program.Classes.ToArray();
+            var fooType = classes[0].Type2;
+            var barType = classes[1].Type2;
+            var mainType = classes[2].Type2;
+
+            Assert.IsTrue(fooType.IsClass);
+            Assert.IsFalse(fooType.IsAbstract);
+            Assert.IsFalse(fooType.IsArray);
+            Assert.IsFalse(fooType.IsGenericType);
+            Assert.IsFalse(fooType.IsPrimitive);
+            Assert.IsFalse(fooType.IsSealed);
+        }
+
+        [TestMethod]
+        public void TypeDefinitionForClass()
+        {
+            var t = new RType("Foo", RTypeAttributes.Class);
+            Assert.IsTrue(t.IsClass);
+            Assert.IsFalse(t.IsAbstract);
+            Assert.IsFalse(t.IsArray);
+            Assert.IsFalse(t.IsGenericType);
+            Assert.IsFalse(t.IsPrimitive);
+            Assert.IsFalse(t.IsSealed);
+        }
+
+        [TestMethod]
+        public void TypeDefinitionForSealedClass()
+        {
+            var t = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Sealed);
+            Assert.IsTrue(t.IsClass);
+            Assert.IsTrue(t.IsSealed);
+        }
+
+        [TestMethod]
+        public void TypeDefinitionForAbstractClass()
+        {
+            var t = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Abstract);
+            Assert.IsTrue(t.IsClass);
+            Assert.IsTrue(t.IsAbstract);
         }
 
         [TestMethod]
@@ -110,11 +76,9 @@ class Foo[A]
 
 class Bar extends Foo[Int]
 ";
-            RppProgram program = Utils.Parse(code);
-            Type2Creator crea = new Type2Creator();
+            var program = Utils.Parse(code);
+            var crea = new Type2Creator();
             program.Accept(crea);
-            MethodCreator methodCreator = new MethodCreator();
-            program.Accept(methodCreator);
 
             // Analyze
         }

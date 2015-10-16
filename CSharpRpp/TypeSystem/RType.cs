@@ -11,9 +11,10 @@ namespace CSharpRpp.TypeSystem
         None = 0,
         Abstract = 1,
         Class = 2,
-        Sealed = 4,
-        Interface = 8,
-        Public = 16
+        Object = 4,
+        Sealed = 8,
+        Interface = 16,
+        Public = 32
     }
 
     [Flags]
@@ -195,10 +196,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsSealed => Attributes.HasFlag(RTypeAttributes.Sealed);
 
-        public bool IsArray
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool IsArray => false;
 
         public bool IsGenericType => _typeParameters.Count != 0;
 

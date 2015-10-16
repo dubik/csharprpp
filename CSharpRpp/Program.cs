@@ -26,10 +26,19 @@ object Runtime
 } 
 ";
             const string code = @"
+class Foo
+{
+    def length : Int = 12
+    def mkString(k: Int) : Int = 43
+}
+
 object Main
 {
     def main(args: String*) : Int = {
         13
+    }
+
+    def mkString() : Unit = {
     }
 }
 ";
