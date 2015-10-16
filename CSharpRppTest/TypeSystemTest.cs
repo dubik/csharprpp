@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    internal class TypeCrea : RppNodeVisitor
+    internal class Type2Creator : RppNodeVisitor
     {
         private RType _type;
 
@@ -49,7 +49,7 @@ namespace CSharpRppTest
         public override void VisitEnter(RppFunc node)
         {
             RMethodAttributes attrs = GetMethodAttributes(node.Modifiers);
-            var funcParams = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2)).ToList();
+            var funcParams = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2)).ToArray();
             _type.DefineMethod(node.Name, attrs, node.NewReturnType, funcParams);
         }
 
@@ -83,8 +83,8 @@ namespace CSharpRppTest
         [TestMethod]
         public void PrimitiveTypeEquality()
         {
-            RType t = new RType("Int", RTypeAttributes.None);
-            RType t1 = new RType("Int", RTypeAttributes.None);
+            RType t = new RType("Int");
+            RType t1 = new RType("Int");
             Assert.AreEqual(t, t1);
         }
 
@@ -96,7 +96,7 @@ class Foo
 class Bar extends Foo
 ";
             RppProgram program = Utils.Parse(code);
-            TypeCrea crea = new TypeCrea();
+            Type2Creator crea = new Type2Creator();
             program.Accept(crea);
             MethodCreator methodCreator = new MethodCreator();
             program.Accept(methodCreator);
@@ -111,14 +111,12 @@ class Foo[A]
 class Bar extends Foo[Int]
 ";
             RppProgram program = Utils.Parse(code);
-            TypeCrea crea = new TypeCrea();
+            Type2Creator crea = new Type2Creator();
             program.Accept(crea);
             MethodCreator methodCreator = new MethodCreator();
             program.Accept(methodCreator);
 
             // Analyze
-
         }
-
     }
 }

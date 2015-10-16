@@ -34,6 +34,8 @@ namespace CSharpRpp.Codegen
         {
             TypeCreator creatorCreator = new TypeCreator(_moduleBuilder, _typeBuilders);
             _program.Accept(creatorCreator);
+            Type2Creator createCreator2 = new Type2Creator();
+            _program.Accept(createCreator2);
         }
 
         public void Generate()

@@ -52,9 +52,11 @@ namespace CSharpRpp
 
         public MethodInfo RuntimeType
         {
-            get { return Builder != null ? Builder.GetBaseDefinition() : null; }
+            get { return Builder?.GetBaseDefinition(); }
             set { throw new NotImplementedException(); }
         }
+
+        public RppMethodInfo MethodInfo { get; set; }
 
         public MethodBuilder Builder { get; set; }
         public ConstructorBuilder ConstructorBuilder { get; set; }

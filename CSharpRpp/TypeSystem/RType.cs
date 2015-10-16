@@ -45,10 +45,10 @@ namespace CSharpRpp.TypeSystem
 
         public RFieldAttributes Attributes { get; }
 
-        [CanBeNull]
+        [NotNull]
         public RType DeclaringType { get; }
 
-        public RppFieldInfo([NotNull] string name, RFieldAttributes attributes, RType declaringType)
+        public RppFieldInfo([NotNull] string name, RFieldAttributes attributes, [NotNull] RType declaringType)
         {
             Name = name;
             Attributes = attributes;
@@ -97,10 +97,11 @@ namespace CSharpRpp.TypeSystem
 
         public RppParameterInfo[] Parameters { get; private set; }
 
-        [CanBeNull]
+        [NotNull]
         public RType DeclaringType { get; private set; }
 
-        public RppMethodInfo(string name, RType declaringType, RMethodAttributes attributes, RType returnType, RppParameterInfo[] parameters)
+        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [NotNull] RType returnType,
+            [NotNull] RppParameterInfo[] parameters)
         {
             Name = name;
             DeclaringType = declaringType;
@@ -110,7 +111,7 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    public class RppConstructorInfo : RppMethodInfo
+    public sealed class RppConstructorInfo : RppMethodInfo
     {
         public RppConstructorInfo(RMethodAttributes attributes, RppParameterInfo[] parameterTypes, RType declaringType)
             : base("ctor", declaringType, attributes, RppTypeSystem.UnitTy, parameterTypes)
@@ -232,24 +233,40 @@ namespace CSharpRpp.TypeSystem
             DeclaringType = declaringType;
         }
 
-        public void DefineMethod(string name, RMethodAttributes attributes, RType returnType, IEnumerable<RppParameterInfo> parameterTypes)
+        public RppMethodInfo DefineMethod([NotNull] string name, RMethodAttributes attributes)
         {
-            DefineMethod(name, attributes, returnType, parameterTypes, Enumerable.Empty<RppGenericArgument>());
+            return DefineMethod(name, attributes, null, new RppParameterInfo[0]);
         }
 
-        public RppMethodInfo DefineMethod(string name, RMethodAttributes attributes, RType returnType, IEnumerable<RppParameterInfo> parameterTypes,
-            IEnumerable<RppGenericArgument> genericArguments)
+        public RppMethodInfo DefineMethod([NotNull] string name,
+            RMethodAttributes attributes,
+            [CanBeNull] RType returnType,
+            [NotNull] RppParameterInfo[] parameterTypes)
         {
-            RppMethodInfo method = new RppMethodInfo(name, this, attributes, returnType, parameterTypes.ToArray());
+            return DefineMethod(name, attributes, returnType, parameterTypes, null);
+        }
+
+        public RppMethodInfo DefineMethod([NotNull] string name,
+            RMethodAttributes attributes,
+            [CanBeNull] RType returnType,
+            [NotNull] RppParameterInfo[] parameterTypes,
+            [NotNull] RppGenericArgument[] genericArguments)
+        {
+            RppMethodInfo method = new RppMethodInfo(name, this, attributes, returnType, parameterTypes);
             _methods.Add(method);
             return method;
         }
 
-        public RppFieldInfo DefineField(string name, RFieldAttributes attributes, RType type)
+        public RppFieldInfo DefineField([NotNull] string name, RFieldAttributes attributes, [NotNull] RType type)
         {
             RppFieldInfo field = new RppFieldInfo(name, attributes, this);
             _fields.Add(field);
             return field;
+        }
+
+        public RppMethodInfo DefineConstructor(RMethodAttributes attributes)
+        {
+            return DefineConstructor(attributes, new RppParameterInfo[0]);
         }
 
         public RppConstructorInfo DefineConstructor(RMethodAttributes attributes, RppParameterInfo[] parameterTypes)
@@ -285,7 +302,7 @@ namespace CSharpRpp.TypeSystem
 
         public override int GetHashCode()
         {
-            return Name?.GetHashCode() ?? 0;
+            return (int) Name?.GetHashCode();
         }
 
         #endregion

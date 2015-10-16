@@ -2,10 +2,71 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
+    internal class Type2Creator : RppNodeVisitor
+    {
+        private RType _currentType;
+
+        public override void VisitEnter(RppClass node)
+        {
+            _currentType = new RType(node.Name, GetAttributes(node.Modifiers), null, _currentType);
+            node.Type2 = _currentType;
+        }
+
+        public override void VisitExit(RppFunc node)
+        {
+            if (node.IsConstructor)
+            {
+                node.MethodInfo = _currentType.DefineConstructor(GetMethodAttributes(node.Modifiers));
+            }
+            else
+            {
+                node.MethodInfo = _currentType.DefineMethod(node.Name, GetMethodAttributes(node.Modifiers));
+            }
+        }
+
+        private static RTypeAttributes GetAttributes(ICollection<ObjectModifier> modifiers)
+        {
+            RTypeAttributes attrs = RTypeAttributes.None;
+            if (modifiers.Contains(ObjectModifier.OmSealed))
+            {
+                attrs |= RTypeAttributes.Sealed;
+            }
+            if (modifiers.Contains(ObjectModifier.OmAbstract))
+            {
+                attrs |= RTypeAttributes.Abstract;
+            }
+            if (!modifiers.Contains(ObjectModifier.OmPrivate))
+            {
+                attrs |= RTypeAttributes.Public;
+            }
+
+            return attrs;
+        }
+
+        private static RMethodAttributes GetMethodAttributes(ICollection<ObjectModifier> modifiers)
+        {
+            RMethodAttributes attrs = RMethodAttributes.None;
+            if (modifiers.Contains(ObjectModifier.OmOverride))
+            {
+                attrs |= RMethodAttributes.Override;
+            }
+            if (!modifiers.Contains(ObjectModifier.OmPrivate))
+            {
+                attrs |= RMethodAttributes.Public;
+            }
+            if (modifiers.Contains(ObjectModifier.OmAbstract))
+            {
+                attrs |= RMethodAttributes.Abstract;
+            }
+            return attrs;
+        }
+    }
+
     internal class TypeCreator : RppNodeVisitor
     {
         private readonly ModuleBuilder _module;
