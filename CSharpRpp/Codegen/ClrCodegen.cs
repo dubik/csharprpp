@@ -11,7 +11,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    class ClrCodegen : RppNodeVisitor
+    internal class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 

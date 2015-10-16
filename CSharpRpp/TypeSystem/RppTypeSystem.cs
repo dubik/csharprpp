@@ -17,7 +17,7 @@ namespace CSharpRpp.TypeSystem
 
         private static RType CreatePrimitive(string name, Type systemType)
         {
-            return new RType(name, RTypeAttributes.None, EmptyTypeDefinition.Instance) {TypeInfo = systemType};
+            return new RType(name) {TypeInfo = systemType};
         }
 
         private static readonly Dictionary<string, RType> PrimitiveTypesMap = new Dictionary<string, RType>
