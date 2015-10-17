@@ -8,6 +8,7 @@ using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
 using CSharpRpp.Semantics;
+using CSharpRpp.TypeSystem;
 using RppRuntime;
 
 [assembly: CLSCompliant(true)]
@@ -42,22 +43,47 @@ object Main
     }
 }
 ";
+
+            /*
+            Create Types (go through classes)
+            Create function stubs (no parameters)
+            Create primary constructors (no parameters)
+            Set parent class relationship
+            Resolve function parameters types               | Combined
+            Resolve primary constructors parameters types   |
+            Resolve fields and add the to types
+            Analyze function bodies
+            Generate code
+            */
+
             RppProgram runtime = Parse(runtimeCode);
             RppScope runtimeScope = new RppScope(null);
             WireRuntime(runtime.Classes, runtimeScope);
             RppProgram program = Parse(code);
             program.Name = "Sample";
             RppScope scope = new RppScope(runtimeScope);
+            RppTypeSystem.PopulateBuiltinTypes(scope);
 
             CodeGenerator generator = new CodeGenerator(program);
             try
             {
+                TypeAndStub2Creator createCreator2 = new TypeAndStub2Creator();
+                program.Accept(createCreator2);
+                // Set Parent relationship
+                program.PreAnalyze(scope);
+
+                /*
                 program.PreAnalyze(scope);
                 generator.PreGenerate();
-                program.Analyze(scope);
+                */
 
+                program.Analyze(scope);
+                StubCreator stubs = new StubCreator();
+                program.Accept(stubs);
+                /*
                 SemanticAnalyzer semantic = new SemanticAnalyzer();
                 program.Accept(semantic);
+                */
             }
             catch (TypeMismatchException e)
             {

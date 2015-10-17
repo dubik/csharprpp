@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using CSharpRpp.TypeSystem;
@@ -7,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    public class Type2Creator : RppNodeVisitor
+    public class TypeAndStub2Creator : RppNodeVisitor
     {
         private RType _currentType;
 
@@ -57,6 +58,9 @@ namespace CSharpRpp.Codegen
         private static RMethodAttributes GetMethodAttributes(ICollection<ObjectModifier> modifiers)
         {
             RMethodAttributes attrs = RMethodAttributes.None;
+            if (modifiers == null)
+                return attrs;
+
             if (modifiers.Contains(ObjectModifier.OmOverride))
             {
                 attrs |= RMethodAttributes.Override;
@@ -72,6 +76,50 @@ namespace CSharpRpp.Codegen
             return attrs;
         }
     }
+
+    public class StubCreator : RppNodeVisitor
+    {
+        private RppClass _class;
+
+        public override void VisitEnter(RppClass node)
+        {
+            _class = node;
+        }
+
+        public override void VisitExit(RppFunc node)
+        {
+            RppMethodInfo method = node.MethodInfo;
+            UpdateParameters(node, method);
+            UpdateReturnType(node, method);
+        }
+
+        private void UpdateParameters(RppFunc node, RppMethodInfo method)
+        {
+            IRppParam[] funcParams = node.Params;
+            if (funcParams.Length != 0)
+            {
+                RppParameterInfo[] funcParamsTypes = funcParams.Select(p => new RppParameterInfo(p.Name, ResolveType(p))).ToArray();
+                method.Parameters = funcParamsTypes;
+            }
+        }
+
+        private RType ResolveType(IRppExpr param)
+        {
+            Debug.Assert(_class.Scope != null, "_class.Scope != null");
+            param.Analyze(_class.Scope);
+            return param.Type2;
+        }
+
+        private void UpdateReturnType(RppFunc node, RppMethodInfo method)
+        {
+            if (!node.IsConstructor)
+            {
+                node.ResolveTypes(_class.Scope);
+                method.ReturnType = node.ReturnType2;
+            }
+        }
+    }
+
 
     internal class TypeCreator : RppNodeVisitor
     {

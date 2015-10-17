@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -25,7 +26,7 @@ class Bar extends Foo
 object Main
 ";
             var program = Utils.Parse(code);
-            var creator = new Type2Creator();
+            var creator = new TypeAndStub2Creator();
             program.Accept(creator);
             var classes = program.Classes.ToArray();
             var fooType = classes[0].Type2;
@@ -38,6 +39,8 @@ object Main
             Assert.IsFalse(fooType.IsGenericType);
             Assert.IsFalse(fooType.IsPrimitive);
             Assert.IsFalse(fooType.IsSealed);
+
+            Assert.IsTrue(mainType.IsObject);
         }
 
         [TestMethod]
@@ -77,10 +80,28 @@ class Foo[A]
 class Bar extends Foo[Int]
 ";
             var program = Utils.Parse(code);
-            var crea = new Type2Creator();
+            var crea = new TypeAndStub2Creator();
             program.Accept(crea);
 
             // Analyze
+        }
+
+        [TestMethod]
+        public void TypeCreation()
+        {
+            const string code = @"
+class Foo
+{
+    def length(k: Int) : Int = 13
+}
+";
+            RppProgram program = Utils.Parse(code);
+            TypeAndStub2Creator creator = new TypeAndStub2Creator();
+            program.Accept(creator);
+            RppScope scope = new RppScope(null);
+            program.PreAnalyze(scope);
+            program.Analyze(scope);
+
         }
     }
 }

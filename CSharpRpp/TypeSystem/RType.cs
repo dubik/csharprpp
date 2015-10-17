@@ -93,15 +93,16 @@ namespace CSharpRpp.TypeSystem
         public string Name { get; private set; }
         public RMethodAttributes Attributes { get; private set; }
 
-        [NotNull]
-        public RType ReturnType { get; private set; }
+        [CanBeNull]
+        public RType ReturnType { get; set; }
 
-        public RppParameterInfo[] Parameters { get; private set; }
+        [CanBeNull]
+        public RppParameterInfo[] Parameters { get; set; }
 
         [NotNull]
         public RType DeclaringType { get; private set; }
 
-        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [NotNull] RType returnType,
+        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [CanBeNull] RType returnType,
             [NotNull] RppParameterInfo[] parameters)
         {
             Name = name;
@@ -144,10 +145,12 @@ namespace CSharpRpp.TypeSystem
     public class RppTypeParameterInfo
     {
         public string Name { get; private set; }
+        public RType Type { get; private set; }
 
-        public RppTypeParameterInfo(string name)
+        public RppTypeParameterInfo(string name, RType type)
         {
             Name = name;
+            Type = type;
         }
     }
 
@@ -186,13 +189,15 @@ namespace CSharpRpp.TypeSystem
         public RType DeclaringType { get; }
 
         [CanBeNull]
-        public RType BaseType { get; }
+        public RType BaseType { get; private set; }
 
         public RTypeAttributes Attributes { get; }
 
         public bool IsAbstract => Attributes.HasFlag(RTypeAttributes.Abstract);
 
         public bool IsClass => Attributes.HasFlag(RTypeAttributes.Class);
+
+        public bool IsObject => Attributes.HasFlag(RTypeAttributes.Object);
 
         public bool IsSealed => Attributes.HasFlag(RTypeAttributes.Sealed);
 
@@ -304,5 +309,10 @@ namespace CSharpRpp.TypeSystem
         }
 
         #endregion
+
+        public void SetParent(RType type2)
+        {
+            BaseType = type2;
+        }
     }
 }

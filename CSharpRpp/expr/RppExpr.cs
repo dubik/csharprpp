@@ -29,14 +29,20 @@ namespace CSharpRpp
 
         public RppType Type => RppPrimitiveType.UnitTy;
 
-        public RType Type2 { get { return RppTypeSystem.UnitTy; }}
+        public RType Type2
+        {
+            get { return RppTypeSystem.UnitTy; }
+        }
     }
 
     public class RppNull : RppNode, IRppExpr
     {
         public RppType Type => RppNullType.Instance;
 
-        public RType Type2 { get { return RppTypeSystem.NullTy; } }
+        public RType Type2
+        {
+            get { return RppTypeSystem.NullTy; }
+        }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -589,6 +595,8 @@ namespace CSharpRpp
 
         public ResolvedType BaseClassType { get; private set; }
 
+        public RType BaseClassType2 { get; private set; }
+
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
 
         public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IEnumerable<RppType> baseClassTypeArgs)
@@ -608,7 +616,7 @@ namespace CSharpRpp
             switch (BaseClassName)
             {
                 case "Object":
-                    BaseClass = new RppNativeClass(typeof (Object));
+                    BaseClass = new RppNativeClass(typeof (object));
                     break;
                 case "Exception":
                     BaseClass = new RppNativeClass(typeof (Exception));

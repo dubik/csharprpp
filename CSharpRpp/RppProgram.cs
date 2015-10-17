@@ -32,10 +32,7 @@ namespace CSharpRpp
     {
         public string Name { get; set; }
 
-        public IEnumerable<RppClass> Classes
-        {
-            get { return _classes.AsEnumerable(); }
-        }
+        public IEnumerable<RppClass> Classes => _classes.AsEnumerable();
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppClass> _classes = new List<RppClass>();
         private readonly CodegenContext _context = new CodegenContext();
@@ -52,7 +49,7 @@ namespace CSharpRpp
 
             BootstrapRuntime(scope);
 
-            _classes.ForEach(scope.Add);
+            _classes.ForEach(c => scope.Add(c.Type2));
 
             NodeUtils.PreAnalyze(scope, _classes);
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
@@ -44,6 +45,19 @@ namespace CSharpRpp.TypeSystem
 
         public RppTypeSystem()
         {
+        }
+
+        public static void PopulateBuiltinTypes([NotNull] RppScope scope)
+        {
+            scope.Add(UnitTy);
+            scope.Add(CharTy);
+            scope.Add(BooleanTy);
+            scope.Add(ShortTy);
+            scope.Add(IntTy);
+            scope.Add(LongTy);
+            scope.Add(FloatTy);
+            scope.Add(DoubleTy);
+            scope.Add(NullTy);
         }
     }
 }

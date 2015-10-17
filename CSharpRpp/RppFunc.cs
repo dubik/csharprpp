@@ -96,7 +96,7 @@ namespace CSharpRpp
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
-        public RType NewReturnType { get; private set; }
+        public RType ReturnType2 { get; private set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
@@ -141,6 +141,13 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
+        public void ResolveTypes(RppClassScope scope)
+        {
+            var runtimeReturnType = ReturnType.Resolve(_scope);
+            Debug.Assert(runtimeReturnType != null);
+            ReturnType = runtimeReturnType;
+        }
+
         public override IRppNode Analyze(RppScope scope)
         {
             _scope = new RppScope(scope);
@@ -157,9 +164,6 @@ namespace CSharpRpp
             NodeUtils.Analyze(_scope, Params);
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);
 
-            var runtimeReturnType = ReturnType.Resolve(_scope);
-            Debug.Assert(runtimeReturnType != null);
-            ReturnType = runtimeReturnType;
 
             return this;
         }
@@ -208,7 +212,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return string.Format("{0} def {1}({2}) : {3}", ModifiersToString(), Name, ParamsToString(), ReturnType);
+            return $"{ModifiersToString()} def {Name}({ParamsToString()}) : {ReturnType}";
         }
 
         public string ModifiersToString()
@@ -263,7 +267,7 @@ namespace CSharpRpp
         IRppParam CloneWithNewType(RppType newType);
     }
 
-    [DebuggerDisplay("{Type.ToString()} {Name} [{RuntimeType}]")]
+    [DebuggerDisplay("{Type.ToString()} {Name} [{Type}]")]
     public sealed class RppParam : RppMember, IRppParam
     {
         public override RppType Type { get; protected set; }
@@ -289,12 +293,11 @@ namespace CSharpRpp
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null, "Can't resolve type");
             Type = resolvedType;
+            Type2 = scope.Lookup(Type)
             return this;
         }
 
-        public RType NewType { get; private set; }
-
-        public IRppParam CloneWithNewType(RppType newType)
+         public IRppParam CloneWithNewType(RppType newType)
         {
             return new RppParam(Name, newType, IsVariadic);
         }

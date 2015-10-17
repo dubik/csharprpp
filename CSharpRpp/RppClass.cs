@@ -95,6 +95,8 @@ namespace CSharpRpp
         public RppField InstanceField { get; private set; }
         public RType Type2 { get; set; }
 
+        [NotNull] private IRppFunc _primaryConstructor;
+
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
             Kind = kind;
@@ -103,6 +105,7 @@ namespace CSharpRpp
             _typeParams = Collections.NoVariantTypeParams;
             Modifiers = Collections.NoModifiers;
             _constructors = Collections.NoFuncs;
+            _primaryConstructor = new RppFunc("this");
         }
 
         public RppBaseConstructorCall BaseConstructorCall { get; private set; }
@@ -122,6 +125,7 @@ namespace CSharpRpp
             Modifiers = modifiers;
 
             _constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
+            _primaryConstructor = new RppFunc("this");
         }
 
         private void DefineFunc(IRppFunc func)
@@ -133,6 +137,7 @@ namespace CSharpRpp
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.VisitEnter(this);
+            _primaryConstructor.Accept(visitor);
             _funcs.ForEach(func => func.Accept(visitor));
             visitor.VisitExit(this);
         }
@@ -146,10 +151,10 @@ namespace CSharpRpp
             BaseConstructorCall.ResolveBaseClass(scope);
 
             Scope = new RppClassScope(scope);
-            _funcs.ForEach(Scope.Add);
+            //_funcs.ForEach(Scope.Add);
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
-            _fields.ForEach(Scope.Add);
+            //_fields.ForEach(Scope.Add);
 
             if (Kind == ClassKind.Object)
             {

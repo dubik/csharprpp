@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
@@ -12,6 +13,8 @@ namespace CSharpRpp
         [NotNull] private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
         [NotNull] private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
         [NotNull] private readonly Dictionary<string, RppType> _genericTypes = new Dictionary<string, RppType>();
+
+        [NotNull] private readonly Dictionary<string, RType> _types = new Dictionary<string, RType>();
 
         public RppScope(RppScope parentScope)
         {
@@ -39,6 +42,16 @@ namespace CSharpRpp
         public static string GetObjectName(string name)
         {
             return name + "$";
+        }
+
+        public void Add(RType type)
+        {
+            if (_types.ContainsKey(type.Name))
+            {
+                throw new ArgumentException($"Already containes {type.Name}", nameof(type));
+            }
+
+            _types.Add(type.Name, type);
         }
 
         public void Add(IRppNamedNode node)
