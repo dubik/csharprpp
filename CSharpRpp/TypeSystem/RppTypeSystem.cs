@@ -43,10 +43,6 @@ namespace CSharpRpp.TypeSystem
             return PrimitiveTypesMap[name];
         }
 
-        public RppTypeSystem()
-        {
-        }
-
         public static void PopulateBuiltinTypes([NotNull] RppScope scope)
         {
             scope.Add(UnitTy);
@@ -57,7 +53,13 @@ namespace CSharpRpp.TypeSystem
             scope.Add(LongTy);
             scope.Add(FloatTy);
             scope.Add(DoubleTy);
-            scope.Add(NullTy);
+            scope.Add(Import(typeof(string)));
+        }
+
+        public static RType Import(Type systemType)
+        {
+            RType type = new RType(systemType.Name, systemType.IsClass ? RTypeAttributes.Class : RTypeAttributes.None);
+            return type;
         }
     }
 }

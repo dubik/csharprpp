@@ -114,7 +114,8 @@ namespace CSharpRpp
             Initialize(funcParams, returnType, RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr) : base(name)
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType,
+            [NotNull] IRppExpr expr) : base(name)
         {
             Initialize(funcParams, returnType, expr);
         }
@@ -125,7 +126,8 @@ namespace CSharpRpp
             return Params.SequenceEqual(otherFunc.Params, ParamTypeComparer.Default);
         }
 
-        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType, [NotNull] IRppExpr expr)
+        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType,
+            [NotNull] IRppExpr expr)
         {
             Params = funcParams.ToArray();
             ReturnType = returnType;
@@ -172,7 +174,8 @@ namespace CSharpRpp
 
         protected bool Equals(RppFunc other)
         {
-            return Equals(Name, other.Name) && Equals(ReturnType, other.ReturnType) && Equals(Params, other.Params) && IsStatic.Equals(other.IsStatic) &&
+            return Equals(Name, other.Name) && Equals(ReturnType, other.ReturnType) && Equals(Params, other.Params) &&
+                   IsStatic.Equals(other.IsStatic) &&
                    IsPublic.Equals(other.IsPublic) && IsAbstract.Equals(other.IsAbstract);
         }
 
@@ -198,10 +201,10 @@ namespace CSharpRpp
             unchecked
             {
                 var hashCode = ReturnType.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Params != null ? Params.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
-                hashCode = (hashCode * 397) ^ IsAbstract.GetHashCode();
+                hashCode = (hashCode*397) ^ (Params != null ? Params.GetHashCode() : 0);
+                hashCode = (hashCode*397) ^ IsStatic.GetHashCode();
+                hashCode = (hashCode*397) ^ IsPublic.GetHashCode();
+                hashCode = (hashCode*397) ^ IsAbstract.GetHashCode();
                 return hashCode;
             }
         }
@@ -277,10 +280,23 @@ namespace CSharpRpp
 
         public bool IsVariadic { get; set; }
 
+        [CanBeNull] private readonly string _typeName;
+
         public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
             Type = variadic ? new RppArrayType(type) : type;
             IsVariadic = variadic;
+            if (type is RppTypeName)
+            {
+                Console.WriteLine("Warning: Should use another constructor");
+                _typeName = ((RppTypeName) type).Name;
+            }
+        }
+
+        public RppParam(string name, string typeName, bool variadic = false) : base(name)
+        {
+            IsVariadic = variadic;
+            _typeName = typeName;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -293,11 +309,16 @@ namespace CSharpRpp
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null, "Can't resolve type");
             Type = resolvedType;
-            Type2 = scope.Lookup(Type)
+            if (Type2 == null)
+            {
+                Debug.Assert(_typeName != null, "_typeName != null");
+                Type2 = scope.LookupType(_typeName);
+            }
+
             return this;
         }
 
-         public IRppParam CloneWithNewType(RppType newType)
+        public IRppParam CloneWithNewType(RppType newType)
         {
             return new RppParam(Name, newType, IsVariadic);
         }

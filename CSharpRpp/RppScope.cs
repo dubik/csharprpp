@@ -32,6 +32,17 @@ namespace CSharpRpp
             return ParentScope?.Lookup(name);
         }
 
+        public RType LookupType(string name)
+        {
+            RType type;
+            if (_types.TryGetValue(name, out type))
+            {
+                return type;
+            }
+
+            return ParentScope?.LookupType(name);
+        }
+
         public RppClass LookupObject(string name)
         {
             RppClass obj = (RppClass) Lookup(GetObjectName(name));

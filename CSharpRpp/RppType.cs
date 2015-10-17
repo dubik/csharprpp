@@ -94,7 +94,7 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            return (Runtime != null ? Runtime.GetHashCode() : 0);
+            return Runtime?.GetHashCode() ?? 0;
         }
 
         #endregion
@@ -302,10 +302,7 @@ namespace CSharpRpp
 
     public class RppGenericType : RppType
     {
-        public IEnumerable<RppType> Params
-        {
-            get { return _params.AsEnumerable(); }
-        }
+        public IEnumerable<RppType> Params => _params.AsEnumerable();
 
         private readonly IList<RppType> _params = new List<RppType>();
 
