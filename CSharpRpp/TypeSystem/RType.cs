@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
@@ -179,6 +181,47 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
+    public class RTypeName
+    {
+        public static RTypeName Undefined = new RTypeName("Undefined");
+        public static RTypeName UnitN = new RTypeName("Unit");
+        public static RTypeName IntN = new RTypeName("Int");
+
+        public string Name { get; }
+
+        private readonly IList<RTypeName> _params = new List<RTypeName>();
+
+        public RTypeName(string name)
+        {
+            Name = name;
+        }
+
+        public void AddGenericArgument(RTypeName genericArgument)
+        {
+            _params.Add(genericArgument);
+        }
+
+        public RType Resolve([NotNull] RppScope scope)
+        {
+            if (_params.Any())
+                throw new NotImplementedException("Generics not implemented yet");
+
+            return scope.LookupType(Name);
+        }
+
+        public override string ToString()
+        {
+            if (_params.Any())
+            {
+                var paramsString = string.Join(", ", _params.Select(p => p.ToString()));
+                return $"{Name}[{paramsString}]";
+            }
+
+            return Name;
+        }
+    }
+
+    [DebuggerDisplay("Name = {Name}")]
     public class RType
     {
         [NotNull]

@@ -96,25 +96,26 @@ namespace CSharpRpp
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
+        private RTypeName _returnTypeName2;
         public RType ReturnType2 { get; private set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
-            Initialize(EmptyParams, RppPrimitiveType.UnitTy, RppEmptyExpr.Instance);
+            Initialize(EmptyParams, new RTypeName("Unit"), RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] RppType returnType) : base(name)
+        public RppFunc([NotNull] string name, [NotNull] RTypeName returnType) : base(name)
         {
             Initialize(EmptyParams, returnType, RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType)
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType)
             : base(name)
         {
             Initialize(funcParams, returnType, RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType,
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType,
             [NotNull] IRppExpr expr) : base(name)
         {
             Initialize(funcParams, returnType, expr);
@@ -126,11 +127,11 @@ namespace CSharpRpp
             return Params.SequenceEqual(otherFunc.Params, ParamTypeComparer.Default);
         }
 
-        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RppType returnType,
+        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType,
             [NotNull] IRppExpr expr)
         {
             Params = funcParams.ToArray();
-            ReturnType = returnType;
+            _returnTypeName2 = returnType;
             Expr = expr;
             IsVariadic = Params.Any(param => param.IsVariadic);
             TypeParams = Collections.NoVariantTypeParams;
@@ -143,8 +144,14 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
+
         public void ResolveTypes(RppClassScope scope)
         {
+            if (ReturnType2 == null)
+            {
+                ReturnType2 = _returnTypeName2.Resolve(scope);
+            }
+
             var runtimeReturnType = ReturnType.Resolve(_scope);
             Debug.Assert(runtimeReturnType != null);
             ReturnType = runtimeReturnType;
@@ -162,10 +169,8 @@ namespace CSharpRpp
                 _scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
             }
 
-
             NodeUtils.Analyze(_scope, Params);
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);
-
 
             return this;
         }
@@ -201,10 +206,10 @@ namespace CSharpRpp
             unchecked
             {
                 var hashCode = ReturnType.GetHashCode();
-                hashCode = (hashCode*397) ^ (Params != null ? Params.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ IsStatic.GetHashCode();
-                hashCode = (hashCode*397) ^ IsPublic.GetHashCode();
-                hashCode = (hashCode*397) ^ IsAbstract.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Params != null ? Params.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsAbstract.GetHashCode();
                 return hashCode;
             }
         }
@@ -280,7 +285,7 @@ namespace CSharpRpp
 
         public bool IsVariadic { get; set; }
 
-        [CanBeNull] private readonly string _typeName;
+        [CanBeNull] private readonly RTypeName _typeName;
 
         public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
@@ -289,11 +294,12 @@ namespace CSharpRpp
             if (type is RppTypeName)
             {
                 Console.WriteLine("Warning: Should use another constructor");
-                _typeName = ((RppTypeName) type).Name;
+                _typeName = new RTypeName(((RppTypeName) type).Name);
+                ;
             }
         }
 
-        public RppParam(string name, string typeName, bool variadic = false) : base(name)
+        public RppParam(string name, RTypeName typeName, bool variadic = false) : base(name)
         {
             IsVariadic = variadic;
             _typeName = typeName;
@@ -306,13 +312,15 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
+            /*
             var resolvedType = Type.Resolve(scope);
             Debug.Assert(resolvedType != null, "Can't resolve type");
             Type = resolvedType;
+            */
             if (Type2 == null)
             {
                 Debug.Assert(_typeName != null, "_typeName != null");
-                Type2 = scope.LookupType(_typeName);
+                Type2 = _typeName.Resolve(scope);
             }
 
             return this;

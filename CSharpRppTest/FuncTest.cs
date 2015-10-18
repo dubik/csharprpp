@@ -2,6 +2,7 @@
 using System.Linq;
 using CSharpRpp;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -18,12 +19,12 @@ namespace CSharpRppTest
         public void QueryOneToOneOverload()
         {
             var args = new List<RppType> {RppPrimitiveType.IntTy};
-            var func1 = new RppFunc("create", new List<RppParam> {_intX}, RppPrimitiveType.UnitTy);
+            var func1 = new RppFunc("create", new List<RppParam> {_intX}, RTypeName.UnitN);
             var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func1, results.First());
 
-            var func2 = new RppFunc("create", RppPrimitiveType.UnitTy);
+            var func2 = new RppFunc("create", RTypeName.UnitN);
             results = OverloadQuery.Find(Enumerable.Empty<RppType>(), new List<IRppFunc> {func2}).ToList();
             Assert.AreEqual(1, results.Count());
             Assert.AreEqual(func2, results.First());
@@ -33,9 +34,9 @@ namespace CSharpRppTest
         public void QueryOneOutOfTwoOverload()
         {
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
-            var func1 = new RppFunc("create", new List<RppParam> {_intX}, RppPrimitiveType.UnitTy);
-            var func2 = new RppFunc("create", new List<RppParam> {_intX, _intY}, RppPrimitiveType.UnitTy);
-            var func3 = new RppFunc("create", new List<RppParam> {_intX, _floatY}, RppPrimitiveType.UnitTy);
+            var func1 = new RppFunc("create", new List<RppParam> {_intX}, RTypeName.UnitN);
+            var func2 = new RppFunc("create", new List<RppParam> {_intX, _intY}, RTypeName.UnitN);
+            var func3 = new RppFunc("create", new List<RppParam> {_intX, _floatY}, RTypeName.UnitN);
 
             var results = OverloadQuery.Find(args, new List<IRppFunc> {func1, func2, func3}).ToList();
             Assert.AreEqual(1, results.Count());
@@ -51,7 +52,7 @@ namespace CSharpRppTest
         public void QueryOnlyVarArg()
         {
             // def create(ids: Int*) : Unit
-            var func1 = new RppFunc("create", new List<RppParam> {_varArgIntX}, RppPrimitiveType.UnitTy);
+            var func1 = new RppFunc("create", new List<RppParam> {_varArgIntX}, RTypeName.UnitN);
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
             var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());
@@ -62,7 +63,7 @@ namespace CSharpRppTest
         public void QuerySecondVarArg()
         {
             // def create(id: Int, ids: Int*) : Unit
-            var func1 = new RppFunc("create", new List<RppParam> {_intX, _varArgIntX}, RppPrimitiveType.UnitTy);
+            var func1 = new RppFunc("create", new List<RppParam> {_intX, _varArgIntX}, RTypeName.UnitN);
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
             var results = OverloadQuery.Find(args, new List<IRppFunc> {func1}).ToList();
             Assert.AreEqual(1, results.Count());

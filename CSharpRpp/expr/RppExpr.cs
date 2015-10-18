@@ -592,7 +592,7 @@ namespace CSharpRpp
         public IRppFunc BaseConstructor { get; private set; }
 
         public IEnumerable<RppType> BaseClassTypeArgs { get; private set; }
-
+        public IEnumerable<RTypeName> BaseClassTypeArgs2 { get; private set; }
         public ResolvedType BaseClassType { get; private set; }
 
         public RType BaseClassType2 { get; private set; }
@@ -605,6 +605,14 @@ namespace CSharpRpp
             BaseClassName = baseClassName ?? "Object";
             BaseClassTypeArgs = baseClassTypeArgs;
         }
+
+        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IEnumerable<RTypeName> baseClassTypeArgs)
+            : base("ctor()", argList)
+        {
+            BaseClassName = baseClassName ?? "Object";
+            BaseClassTypeArgs2 = baseClassTypeArgs;
+        }
+
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -635,6 +643,7 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList);
 
+            /*
             BaseClassTypeArgs = BaseClassTypeArgs.Select(type => type.Resolve(scope)).ToList();
 
             var types = BaseClassTypeArgs.Select(type => type.Runtime).ToArray();
@@ -653,6 +662,7 @@ namespace CSharpRpp
 
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
+            */
             return this;
         }
 

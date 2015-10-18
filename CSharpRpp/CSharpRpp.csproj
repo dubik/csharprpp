@@ -111,6 +111,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="TypeSystem\ResolvableType.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />
     <Compile Include="grammar\RppLexer.g3.cs">

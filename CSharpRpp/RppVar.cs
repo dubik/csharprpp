@@ -28,6 +28,13 @@ namespace CSharpRpp
             MutabilityFlag = mutability;
         }
 
+        public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RTypeName type, [NotNull] IRppExpr initExpr) : base(name)
+        {
+            InitExpr = initExpr;
+            MutabilityFlag = mutability;
+            throw new NotImplementedException("Types not implemented yet");
+        }
+
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.Visit(this);

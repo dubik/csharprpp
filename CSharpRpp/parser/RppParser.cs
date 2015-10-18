@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Antlr.Runtime;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -212,7 +213,7 @@ namespace CSharpRpp
                 IList<RppField> classParams = ParseClassParamClause();
                 string baseClassName;
                 IList<IRppExpr> baseClassArgs;
-                IList<RppType> baseClassTypeArgs;
+                IList<RTypeName> baseClassTypeArgs;
                 IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
                 return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, typeParams,
                     new RppBaseConstructorCall(baseClassName, baseClassArgs, baseClassTypeArgs));
@@ -272,7 +273,7 @@ namespace CSharpRpp
 
             string name = _lastToken.Text;
             Expect(RppLexer.OP_Colon);
-            RppType paramType;
+            RTypeName paramType;
             if (!ParseType(out paramType))
             {
                 throw new Exception("Expected type but found: " + _lastToken.Text);
@@ -283,12 +284,12 @@ namespace CSharpRpp
         }
 
         // [T, N]
-        private IList<RppType> ParseTypeParamClause()
+        private IList<RTypeName> ParseTypeParamClause()
         {
-            IList<RppType> typeParams = new List<RppType>();
+            IList<RTypeName> typeParams = new List<RTypeName>();
             if (Require(RppLexer.OP_LBracket))
             {
-                RppType type;
+                RTypeName type;
 
                 while (ParseType(out type))
                 {
@@ -366,11 +367,11 @@ namespace CSharpRpp
             return false;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs, out IList<RppType> baseClassTypeParams)
+        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs, out IList<RTypeName> baseClassTypeParams)
         {
             baseClassName = null;
             baseClassArgs = Collections.NoExprs;
-            baseClassTypeParams = Collections.NoTypes;
+            baseClassTypeParams = Collections.NoTypeNames;
             if (Require(RppLexer.KW_Extends))
             {
                 if (Require(RppLexer.Id))
@@ -382,7 +383,7 @@ namespace CSharpRpp
                     throw new Exception("Expected identifier but got : " + _lastToken.Text);
                 }
 
-                IList<RppType> typeArgs = ParseTypeParamClause();
+                IList<RTypeName> typeArgs = ParseTypeParamClause();
                 baseClassTypeParams = typeArgs;
                 var args = ParseArgsOpt();
                 baseClassArgs = args;
@@ -469,7 +470,7 @@ namespace CSharpRpp
                 typeParams = ParseTypeParams();
             }
             IEnumerable<IRppParam> funcParams = ParseParamClauses();
-            RppType funcReturnType = RppPrimitiveType.UnitTy;
+            RTypeName funcReturnType = RTypeName.UnitN;
             if (name != "this")
             {
                 Expect(RppLexer.OP_Colon);
@@ -570,7 +571,7 @@ namespace CSharpRpp
 
             string name = _lastToken.Text;
 
-            RppType type = RppUndefinedType.Instance;
+            RTypeName type = RTypeName.Undefined;
             if (Require(RppLexer.OP_Colon))
             {
                 if (!ParseType(out type))
@@ -593,7 +594,7 @@ namespace CSharpRpp
             }
             string name = _lastToken.Text;
             Expect(RppLexer.OP_Colon);
-            RppType type;
+            RTypeName type;
             if (!ParseType(out type))
             {
                 throw new Exception("Expected type but got " + _lastToken.Text);
@@ -611,7 +612,7 @@ namespace CSharpRpp
             Expect(RppLexer.Id);
             string varId = _lastToken.Text;
 
-            RppType type = RppUndefinedType.Instance;
+            RTypeName type = RTypeName.Undefined;
             if (Require(RppLexer.OP_Colon))
             {
                 if (!ParseType(out type))
@@ -645,23 +646,23 @@ namespace CSharpRpp
             return false;
         }
 
-        public bool ParseType(out RppType type)
+        public bool ParseType(out RTypeName type)
         {
             if (Require(RppLexer.Id))
             {
                 string typeName = _lastToken.Text;
                 if (Require(RppLexer.OP_LBracket))
                 {
-                    RppGenericType genericType = new RppGenericType(typeName);
+                    RTypeName genericType = new RTypeName(typeName);
                     type = genericType;
 
-                    RppType subType;
+                    RTypeName subType;
                     if (!ParseType(out subType))
                     {
                         throw new Exception("Expected type but got " + _lastToken.Text);
                     }
 
-                    genericType.AddParam(subType);
+                    genericType.AddGenericArgument(subType);
 
                     while (true)
                     {
@@ -677,7 +678,7 @@ namespace CSharpRpp
                                 throw new Exception("Expected type but got " + _lastToken.Text);
                             }
 
-                            genericType.AddParam(subType);
+                            genericType.AddGenericArgument(subType);
                         }
                         else
                         {
@@ -688,15 +689,15 @@ namespace CSharpRpp
                     return true;
                 }
 
-                type = new RppTypeName(typeName);
+                type = new RTypeName(typeName);
                 return true;
             }
 
             if (Require(RppLexer.OP_LParen))
             {
                 bool closingParenRequired = true;
-                RppType returnType;
-                IList<RppType> paramTypes = new List<RppType>();
+                RTypeName returnType;
+                IList<RTypeName> paramTypes = new List<RTypeName>();
                 while (true)
                 {
                     if (Require(RppLexer.OP_RParen))
@@ -715,7 +716,7 @@ namespace CSharpRpp
                         Expect(RppLexer.OP_Comma);
                     }
 
-                    RppType paramType;
+                    RTypeName paramType;
                     if (ParseType(out paramType))
                     {
                         paramTypes.Add(paramType);
@@ -738,9 +739,9 @@ namespace CSharpRpp
                     Expect(RppLexer.OP_RParen);
                 }
 
-                RppGenericType closureType = new RppGenericType("Function" + paramTypes.Count);
-                paramTypes.ForEach(closureType.AddParam);
-                closureType.AddParam(returnType);
+                RTypeName closureType = new RTypeName("Function" + paramTypes.Count);
+                paramTypes.ForEach(closureType.AddGenericArgument);
+                closureType.AddGenericArgument(returnType);
                 type = closureType;
                 return true;
             }
@@ -756,7 +757,7 @@ namespace CSharpRpp
 
             string baseClassName;
             IList<IRppExpr> baseClassArgs;
-            IList<RppType> baseClassTypeArgs;
+            IList<RTypeName> baseClassTypeArgs;
             IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
             return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats, Collections.NoVariantTypeParams,
                 new RppBaseConstructorCall(baseClassName, Collections.NoExprs, baseClassTypeArgs));

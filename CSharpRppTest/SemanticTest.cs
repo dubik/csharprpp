@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CSharpRpp;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -47,8 +48,8 @@ object Bar
             Assert.IsNotNull(program);
         }
 
-        private readonly RppFunc _intCreateFunc = new RppFunc("create", RppPrimitiveType.IntTy);
-        private readonly RppFunc _unitCreateFunc = new RppFunc("create", RppPrimitiveType.UnitTy);
+        private readonly RppFunc _intCreateFunc = new RppFunc("create", RTypeName.IntN);
+        private readonly RppFunc _unitCreateFunc = new RppFunc("create", RTypeName.UnitN);
 
         [TestMethod]
         [ExpectedException(typeof (System.Exception))]

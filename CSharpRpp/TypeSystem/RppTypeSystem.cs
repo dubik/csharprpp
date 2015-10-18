@@ -53,12 +53,12 @@ namespace CSharpRpp.TypeSystem
             scope.Add(LongTy);
             scope.Add(FloatTy);
             scope.Add(DoubleTy);
-            scope.Add(Import(typeof(string)));
+            scope.Add(Import(typeof (string)));
         }
 
         public static RType Import(Type systemType)
         {
-            RType type = new RType(systemType.Name, systemType.IsClass ? RTypeAttributes.Class : RTypeAttributes.None);
+            RType type = new RType(systemType.Name, systemType.IsClass ? RTypeAttributes.Class : RTypeAttributes.None) {TypeInfo = systemType};
             return type;
         }
     }

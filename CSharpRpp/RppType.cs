@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Native;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -279,9 +280,9 @@ namespace CSharpRpp
         {
             var funcs = new[]
             {
-                new RppFunc("length", RppPrimitiveType.IntTy) {IsStub = true},
-                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, subType) {IsStub = true},
-                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RppPrimitiveType.UnitTy) {IsStub = true}
+                new RppFunc("length", RTypeName.IntN) {IsStub = true},
+                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, RTypeName.UnitN) {IsStub = true}, // TODO not implemented subType, replace UnitN
+                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RTypeName.UnitN) {IsStub = true}
             };
 
             return new RppClass(ClassKind.Class, Collections.NoModifiers, "Array", Collections.NoFields, funcs, Collections.NoVariantTypeParams,

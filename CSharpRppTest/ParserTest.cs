@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -107,7 +108,7 @@ namespace CSharpRppTest
 
         private static void TestType<T>(string code, T expectedType)
         {
-            RppType type;
+            RTypeName type;
             Assert.IsTrue(CreateParser(code).ParseType(out type));
             Assert.IsInstanceOfType(type, typeof (T));
             Assert.AreEqual(expectedType, type);

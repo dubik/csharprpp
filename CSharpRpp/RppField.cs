@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using CSharpRpp.TypeSystem;
 
 
 namespace CSharpRpp
@@ -20,6 +21,13 @@ namespace CSharpRpp
 
         public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type)
             : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
+        {
+            _modifiers = modifiers;
+            AddToScope = false;
+        }
+
+        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RTypeName typeName)
+            : base(mutabilityFlag, name, typeName, RppEmptyExpr.Instance)
         {
             _modifiers = modifiers;
             AddToScope = false;

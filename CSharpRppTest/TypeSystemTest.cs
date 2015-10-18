@@ -101,7 +101,6 @@ class Foo
             RppScope scope = new RppScope(null);
             program.PreAnalyze(scope);
             program.Analyze(scope);
-
         }
     }
 }
