@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
@@ -15,7 +17,9 @@ namespace CSharpRpp.TypeSystem
         Object = 4,
         Sealed = 8,
         Interface = 16,
-        Public = 32
+        Public = 32,
+        Protected = 64,
+        Private = 128
     }
 
     [Flags]
@@ -91,8 +95,8 @@ namespace CSharpRpp.TypeSystem
 
     public class RppMethodInfo
     {
-        public string Name { get; private set; }
-        public RMethodAttributes Attributes { get; private set; }
+        public string Name { get; }
+        public RMethodAttributes Attributes { get; }
 
         [CanBeNull]
         public RType ReturnType { get; set; }
@@ -102,6 +106,8 @@ namespace CSharpRpp.TypeSystem
 
         [NotNull]
         public RType DeclaringType { get; private set; }
+
+        public MethodBuilder Native { get; set; }
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [CanBeNull] RType returnType,
             [NotNull] RppParameterInfo[] parameters)
@@ -204,7 +210,9 @@ namespace CSharpRpp.TypeSystem
         public RType Resolve([NotNull] RppScope scope)
         {
             if (_params.Any())
+            {
                 throw new NotImplementedException("Generics not implemented yet");
+            }
 
             return scope.LookupType(Name);
         }
@@ -249,7 +257,28 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsPrimitive => !IsClass;
 
-        public Type TypeInfo { get; set; }
+        [CanBeNull] private TypeBuilder _typeBuilder;
+
+        [CanBeNull] private readonly Type _type;
+
+        [NotNull]
+        public Type NativeType
+        {
+            get
+            {
+                if (_type != null)
+                {
+                    return _type;
+                }
+
+                if (_typeBuilder == null)
+                {
+                    throw new Exception("Native type is not initialized, call CreateNativeType method");
+                }
+
+                return _typeBuilder;
+            }
+        }
 
         public IReadOnlyList<RppFieldInfo> Fields => _fields;
 
@@ -263,6 +292,13 @@ namespace CSharpRpp.TypeSystem
         private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
+
+        public RType([NotNull] string name, [NotNull] Type type)
+        {
+            Name = name;
+            _type = type;
+            // TODO initialize fields and method maps
+        }
 
         public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.None)
         {
@@ -355,6 +391,85 @@ namespace CSharpRpp.TypeSystem
         public void SetParent(RType type2)
         {
             BaseType = type2;
+        }
+
+        public void InitializeNativeType(ModuleBuilder module)
+        {
+            if (_typeBuilder == null)
+            {
+                TypeAttributes attrs = GetTypeAttributes(Attributes);
+                _typeBuilder = module.DefineType(Name, attrs);
+            }
+        }
+
+        public void CreateNativeType(ModuleBuilder module)
+        {
+            if (_typeBuilder == null)
+            {
+                throw new Exception("This instance is wrapping runtime type so can't create native type out of it");
+            }
+
+            foreach (RppMethodInfo rppMethod in Methods)
+            {
+                MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes);
+                RType returnType = rppMethod.ReturnType;
+                Debug.Assert(returnType != null, "returnType != null");
+
+                rppMethod.Native = _typeBuilder.DefineMethod(rppMethod.Name, attr, CallingConventions.Standard,
+                    returnType.NativeType, Type.EmptyTypes);
+            }
+
+            foreach (RppConstructorInfo rppConstructor in Constructors)
+            {
+                MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes);
+                rppConstructor.Native = _typeBuilder.DefineConstructor(attr, CallingConventions.Standard, Type.EmptyTypes);
+            }
+        }
+
+        private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
+        {
+            TypeAttributes attrs = TypeAttributes.Class;
+            if (modifiers.HasFlag(RTypeAttributes.Abstract))
+            {
+                attrs |= TypeAttributes.Abstract;
+            }
+
+            if (modifiers.HasFlag(RTypeAttributes.Sealed))
+            {
+                attrs |= TypeAttributes.Sealed;
+            }
+
+            if (modifiers.HasFlag(RTypeAttributes.Private) || modifiers.HasFlag(RTypeAttributes.Protected))
+            {
+                attrs |= TypeAttributes.NotPublic;
+            }
+
+            return attrs;
+        }
+
+        private static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes)
+        {
+            MethodAttributes attrs = MethodAttributes.Private;
+            if (rAttributes.HasFlag(RMethodAttributes.Public))
+            {
+                attrs = MethodAttributes.Public;
+            }
+
+            // always virtual, even for statics
+            attrs |= MethodAttributes.Virtual;
+            attrs |= MethodAttributes.HideBySig;
+
+            if (!rAttributes.HasFlag(RMethodAttributes.Override))
+            {
+                attrs |= MethodAttributes.NewSlot;
+            }
+
+            if (rAttributes.HasFlag(RMethodAttributes.Abstract))
+            {
+                attrs |= MethodAttributes.Abstract;
+            }
+
+            return attrs;
         }
     }
 }

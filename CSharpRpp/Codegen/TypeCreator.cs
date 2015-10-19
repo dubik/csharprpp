@@ -8,6 +8,8 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -69,7 +71,9 @@ namespace CSharpRpp.Codegen
         {
             RMethodAttributes attrs = RMethodAttributes.None;
             if (modifiers == null)
+            {
                 return attrs;
+            }
 
             if (modifiers.Contains(ObjectModifier.OmOverride))
             {
@@ -130,6 +134,102 @@ namespace CSharpRpp.Codegen
         }
     }
 
+    public class TypeBuilderCreator : RppNodeVisitor
+    {
+        [NotNull] private readonly ModuleBuilder _module;
+        private RppClass _class;
+
+        public TypeBuilderCreator([NotNull] ModuleBuilder module)
+        {
+            _module = module;
+        }
+
+        public override void VisitEnter(RppClass node)
+        {
+            TypeAttributes attrs = GetTypeAttributes(node.Type2.Attributes);
+            TypeBuilder typeBuilder = _module.DefineType(node.Name, attrs);
+            node.Type2.NativeType = typeBuilder;
+            _class = node;
+        }
+
+        private void CreateNativeType(RType type)
+        {
+            TypeAttributes attrs = GetTypeAttributes(type.Attributes);
+            TypeBuilder typeBuilder = _module.DefineType(type.Name, attrs);
+            foreach (RppMethodInfo rppMethod in type.Methods)
+            {
+            }
+
+            foreach (RppConstructorInfo rppConstructor in type.Constructors)
+            {
+            }
+        }
+
+        public override void VisitEnter(RppFunc node)
+        {
+            TypeBuilder typeBuilder = _class.Type2.NativeType as TypeBuilder;
+            var attrs = GetMethodAttributes(node);
+            Debug.Assert(typeBuilder != null, "typeBuilder != null");
+
+            if (node.IsConstructor)
+            {
+                var constructor = typeBuilder.DefineConstructor(GetMethodAttributes(node), CallingConventions.Standard, Type.EmptyTypes);
+                node.ConstructorBuilder = constructor;
+            }
+            else
+            {
+                node.Builder = typeBuilder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
+            }
+
+            // node.
+        }
+
+        private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
+        {
+            TypeAttributes attrs = TypeAttributes.Class;
+            if (modifiers.HasFlag(RTypeAttributes.Abstract))
+            {
+                attrs |= TypeAttributes.Abstract;
+            }
+
+            if (modifiers.HasFlag(RTypeAttributes.Sealed))
+            {
+                attrs |= TypeAttributes.Sealed;
+            }
+
+            if (modifiers.HasFlag(RTypeAttributes.Private) || modifiers.HasFlag(RTypeAttributes.Protected))
+            {
+                attrs |= TypeAttributes.NotPublic;
+            }
+
+            return attrs;
+        }
+
+        private static MethodAttributes GetMethodAttributes(IRppFunc node)
+        {
+            MethodAttributes attrs = MethodAttributes.Private;
+
+            if (node.IsPublic)
+            {
+                attrs = MethodAttributes.Public;
+            }
+
+            // always virtual, even for statics
+            attrs |= MethodAttributes.Virtual;
+            attrs |= MethodAttributes.HideBySig;
+            if (!node.IsOverride)
+            {
+                attrs |= MethodAttributes.NewSlot;
+            }
+
+            if (node.IsAbstract)
+            {
+                attrs |= MethodAttributes.Abstract;
+            }
+
+            return attrs;
+        }
+    }
 
     internal class TypeCreator : RppNodeVisitor
     {

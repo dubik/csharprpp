@@ -97,6 +97,9 @@ object Main
                 Environment.Exit(-1);
             }
 
+            TypeBuilderCreator typeBuilderCreator = new TypeBuilderCreator(generator.Module);
+            program.Accept(typeBuilderCreator);
+
             generator.Generate();
             generator.Save();
         }

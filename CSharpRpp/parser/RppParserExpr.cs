@@ -227,7 +227,7 @@ namespace CSharpRpp
         /*
     Block ::= {BlockStat semi} [ResultExpr]
 
-    BlockStat ::= Import
+    BlockStat ::= ImportClass
                 | {Annotation} [‘implicit’ | ‘lazy’] Def
                 | {Annotation} {LocalModifier} TmplDef
                 | Expr1

@@ -11,6 +11,7 @@ namespace CSharpRpp.Codegen
     public sealed class CodeGenerator
     {
         public Assembly Assembly => _assemblyBuilder;
+        public ModuleBuilder Module => _moduleBuilder;
 
         private readonly RppProgram _program;
         private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;

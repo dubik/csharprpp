@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.TypeSystem;
@@ -9,6 +12,8 @@ namespace CSharpRppTest
     [TestClass]
     public class TypeSystemTest
     {
+        private ModuleBuilder _module;
+
         [TestMethod]
         public void PrimitiveTypeEquality()
         {
@@ -101,6 +106,26 @@ class Foo
             RppScope scope = new RppScope(null);
             program.PreAnalyze(scope);
             program.Analyze(scope);
+        }
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            _module = CreateModule();
+        }
+
+        [TestMethod]
+        public void CreateSimpleNativeTypeFromRType()
+        {
+            RType simpleType = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Public);
+            simpleType.CreateNativeType(_module);
+        }
+
+        private static ModuleBuilder CreateModule()
+        {
+            var assemblyName = new AssemblyName("TestAssembly");
+            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            return assemblyBuilder.DefineDynamicModule("TestAssembly", "TestAssembly.dll");
         }
     }
 }
