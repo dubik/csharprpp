@@ -1,10 +1,21 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------
+// Copyright © 2014 Microsoft Mobile. All rights reserved.
+// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
+//  
+// This software, including documentation, is protected by copyright controlled by
+// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
+// adapting or translating, any or all of this material requires the prior written consent of
+// Microsoft Mobile. This material also contains confidential information which may not
+// be disclosed to others without the prior written consent of Microsoft Mobile.
+// ----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Native;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
+using static CSharpRpp.TypeSystem.ResolvableType;
 
 namespace CSharpRpp
 {
@@ -280,9 +291,9 @@ namespace CSharpRpp
         {
             var funcs = new[]
             {
-                new RppFunc("length", RTypeName.IntN) {IsStub = true},
-                new RppFunc("apply", new[] {new RppParam("i", RppPrimitiveType.IntTy)}, RTypeName.UnitN) {IsStub = true}, // TODO not implemented subType, replace UnitN
-                new RppFunc("update", new[] {new RppParam("i", RppPrimitiveType.IntTy), new RppParam("x", subType)}, RTypeName.UnitN) {IsStub = true}
+                new RppFunc("length", IntTy) {IsStub = true},
+                new RppFunc("apply", new[] {new RppParam("i", IntTy)}, UnitTy) {IsStub = true}, // TODO not implemented subType, replace UnitN
+                new RppFunc("update", new[] {new RppParam("i", IntTy), new RppParam("x", subType)}, UnitTy) {IsStub = true}
             };
 
             return new RppClass(ClassKind.Class, Collections.NoModifiers, "Array", Collections.NoFields, funcs, Collections.NoVariantTypeParams,

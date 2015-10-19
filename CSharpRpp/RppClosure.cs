@@ -8,7 +8,7 @@ namespace CSharpRpp
     public class RppClosure : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-        public RType Type2 { get; private set; }
+        public ResolvableType Type2 { get; private set; }
 
         public readonly IEnumerable<IRppParam> Bindings;
         public IRppExpr Expr { get; private set; }

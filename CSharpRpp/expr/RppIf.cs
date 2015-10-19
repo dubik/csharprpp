@@ -7,7 +7,7 @@ namespace CSharpRpp.Expr
     {
         public RppType Type { get; private set; }
 
-        public RType Type2 { get; }
+        public ResolvableType Type2 { get; }
 
         [NotNull]
         public IRppExpr Condition { get; private set; }

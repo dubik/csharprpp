@@ -5,6 +5,10 @@ namespace CSharpRpp.TypeSystem
 {
     public class ResolvableType
     {
+        public static ResolvableType UnitTy = new ResolvableType(RppTypeSystem.UnitTy);
+        public static ResolvableType IntTy = new ResolvableType(RppTypeSystem.IntTy);
+        public static ResolvableType NullTy = new ResolvableType(RppTypeSystem.UnitTy);
+
         [NotNull]
         public RTypeName Name { get; }
 

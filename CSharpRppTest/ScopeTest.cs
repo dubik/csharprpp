@@ -3,6 +3,7 @@ using System.Linq;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.TypeSystem.ResolvableType;
 
 namespace CSharpRppTest
 {
@@ -42,7 +43,7 @@ namespace CSharpRppTest
         public void BaseClassLookup()
         {
             RppClassScope parent = new RppClassScope(null);
-            RppFunc func = new RppFunc("create", RTypeName.UnitN);
+            RppFunc func = new RppFunc("create", UnitTy);
             parent.Add(func);
             RppClassScope scope = new RppClassScope(null) {BaseClassScope = parent};
             var res = scope.LookupFunction("create").ToList();
@@ -54,11 +55,11 @@ namespace CSharpRppTest
         public void TwoFuncsMatchInCurrentAndBase()
         {
             RppClassScope parent = new RppClassScope(null);
-            RppFunc func = new RppFunc("create", RTypeName.UnitN);
+            RppFunc func = new RppFunc("create", UnitTy);
             parent.Add(func);
             RppClassScope scope = new RppClassScope(null) {BaseClassScope = parent};
 
-            RppFunc func1 = new RppFunc("create", new List<IRppParam> {_intX}, RTypeName.UnitN);
+            RppFunc func1 = new RppFunc("create", new List<IRppParam> {_intX}, UnitTy);
             scope.Add(func1);
             var res = scope.LookupFunction("create").ToList();
             Assert.AreEqual(2, res.Count);

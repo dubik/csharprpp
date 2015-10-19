@@ -48,8 +48,8 @@ object Bar
             Assert.IsNotNull(program);
         }
 
-        private readonly RppFunc _intCreateFunc = new RppFunc("create", RTypeName.IntN);
-        private readonly RppFunc _unitCreateFunc = new RppFunc("create", RTypeName.UnitN);
+        private readonly RppFunc _intCreateFunc = new RppFunc("create", ResolvableType.IntTy);
+        private readonly RppFunc _unitCreateFunc = new RppFunc("create", ResolvableType.UnitTy);
 
         [TestMethod]
         [ExpectedException(typeof (System.Exception))]

@@ -1,4 +1,14 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------
+// Copyright © 2014 Microsoft Mobile. All rights reserved.
+// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
+//  
+// This software, including documentation, is protected by copyright controlled by
+// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
+// adapting or translating, any or all of this material requires the prior written consent of
+// Microsoft Mobile. This material also contains confidential information which may not
+// be disclosed to others without the prior written consent of Microsoft Mobile.
+// ----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using Antlr.Runtime;
 using CSharpRpp.TypeSystem;
@@ -485,10 +495,10 @@ namespace CSharpRpp
                 SkipNewLines();
 
                 IRppExpr expr = ParseExpr();
-                return new RppFunc(name, funcParams, funcReturnType, expr) {Modifiers = modifiers, TypeParams = typeParams};
+                return new RppFunc(name, funcParams, new ResolvableType(funcReturnType), expr) {Modifiers = modifiers, TypeParams = typeParams};
             }
 
-            return new RppFunc(name, funcParams, funcReturnType) {Modifiers = modifiers, TypeParams = typeParams};
+            return new RppFunc(name, funcParams, new ResolvableType(funcReturnType)) {Modifiers = modifiers, TypeParams = typeParams};
         }
 
 
@@ -580,7 +590,7 @@ namespace CSharpRpp
                 }
             }
 
-            binding = new RppParam(name, type);
+            binding = new RppParam(name, new ResolvableType(type));
             return true;
         }
 
@@ -602,7 +612,7 @@ namespace CSharpRpp
 
             bool variadic = Require(RppLexer.OP_Star);
 
-            funcParam = new RppParam(name, type, variadic);
+            funcParam = new RppParam(name, new ResolvableType(type), variadic);
             return true;
         }
 

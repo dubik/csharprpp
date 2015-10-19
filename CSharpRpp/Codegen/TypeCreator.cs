@@ -1,4 +1,14 @@
-﻿using System.Collections.Generic;
+﻿// ----------------------------------------------------------------------
+// Copyright © 2014 Microsoft Mobile. All rights reserved.
+// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
+//  
+// This software, including documentation, is protected by copyright controlled by
+// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
+// adapting or translating, any or all of this material requires the prior written consent of
+// Microsoft Mobile. This material also contains confidential information which may not
+// be disclosed to others without the prior written consent of Microsoft Mobile.
+// ----------------------------------------------------------------------
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -107,7 +117,7 @@ namespace CSharpRpp.Codegen
         {
             Debug.Assert(_class.Scope != null, "_class.Scope != null");
             param.Analyze(_class.Scope);
-            return param.Type2;
+            return param.Type2.Value;
         }
 
         private void UpdateReturnType(RppFunc node, RppMethodInfo method)
@@ -115,7 +125,7 @@ namespace CSharpRpp.Codegen
             if (!node.IsConstructor)
             {
                 node.ResolveTypes(_class.Scope);
-                method.ReturnType = node.ReturnType2;
+                method.ReturnType = node.ReturnType2.Value;
             }
         }
     }

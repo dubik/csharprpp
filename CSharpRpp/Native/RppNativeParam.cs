@@ -5,8 +5,8 @@ namespace CSharpRpp.Native
 {
     public class RppNativeParam : RppNamedNode, IRppParam
     {
-        public RppType Type { get; private set; }
-        public RType Type2 { get; private set; }
+        public RppType Type { get; }
+        public ResolvableType Type2 { get; private set; }
 
         public int Index { get; set; }
         public bool IsVariadic { get; set; }

@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
 
                 builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
 
-                node.Type2.SetParent(node.BaseConstructorCall.Type2);
+                node.Type2.SetParent(node.BaseConstructorCall.Type2.Value);
             }
         }
     }

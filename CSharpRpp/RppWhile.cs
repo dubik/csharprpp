@@ -9,7 +9,7 @@ namespace CSharpRpp
         public IRppNode Body { get; private set; }
 
         public RppType Type { get; }
-        public RType Type2 { get; private set; }
+        public ResolvableType Type2 { get; private set; }
 
         public RppWhile(IRppExpr condition, IRppNode body)
         {

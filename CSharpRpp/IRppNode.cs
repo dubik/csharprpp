@@ -21,7 +21,7 @@ namespace CSharpRpp
     public interface IRppExpr : IRppStatementExpr
     {
         RppType Type { get; }
-        RType Type2 { get; }
+        ResolvableType Type2 { get; }
     }
 
     public class RppNode : IRppNode

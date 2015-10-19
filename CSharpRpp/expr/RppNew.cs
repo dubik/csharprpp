@@ -13,7 +13,7 @@ namespace CSharpRpp
     public class RppNew : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-        public RType Type2 { get; private set; }
+        public ResolvableType Type2 { get; private set; }
         public Type RuntimeType { get; private set; }
 
         [NotNull]

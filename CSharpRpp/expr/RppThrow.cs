@@ -5,7 +5,7 @@ namespace CSharpRpp.Expr
     public class RppThrow : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-        public RType Type2 { get; private set; }
+        public ResolvableType Type2 { get; private set; }
 
         public IRppExpr Expr;
 
@@ -13,7 +13,7 @@ namespace CSharpRpp.Expr
         {
             Expr = expr;
             Type = RppPrimitiveType.UnitTy;
-            Type2 = RppTypeSystem.UnitTy;
+            Type2 = ResolvableType.UnitTy;
         }
 
         public override IRppNode Analyze(RppScope scope)

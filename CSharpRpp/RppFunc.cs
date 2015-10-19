@@ -1,4 +1,14 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------
+// Copyright © 2014 Microsoft Mobile. All rights reserved.
+// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
+//  
+// This software, including documentation, is protected by copyright controlled by
+// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
+// adapting or translating, any or all of this material requires the prior written consent of
+// Microsoft Mobile. This material also contains confidential information which may not
+// be disclosed to others without the prior written consent of Microsoft Mobile.
+// ----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -96,26 +106,25 @@ namespace CSharpRpp
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
-        private RTypeName _returnTypeName2;
-        public RType ReturnType2 { get; private set; }
+        public ResolvableType ReturnType2 { get; private set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
-            Initialize(EmptyParams, new RTypeName("Unit"), RppEmptyExpr.Instance);
+            Initialize(EmptyParams, new ResolvableType(RppTypeSystem.UnitTy), RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] RTypeName returnType) : base(name)
+        public RppFunc([NotNull] string name, [NotNull] ResolvableType returnType) : base(name)
         {
             Initialize(EmptyParams, returnType, RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType)
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] ResolvableType returnType)
             : base(name)
         {
             Initialize(funcParams, returnType, RppEmptyExpr.Instance);
         }
 
-        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType,
+        public RppFunc([NotNull] string name, [NotNull] IEnumerable<IRppParam> funcParams, [NotNull] ResolvableType returnType,
             [NotNull] IRppExpr expr) : base(name)
         {
             Initialize(funcParams, returnType, expr);
@@ -127,11 +136,11 @@ namespace CSharpRpp
             return Params.SequenceEqual(otherFunc.Params, ParamTypeComparer.Default);
         }
 
-        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] RTypeName returnType,
+        private void Initialize([NotNull] IEnumerable<IRppParam> funcParams, [NotNull] ResolvableType returnType,
             [NotNull] IRppExpr expr)
         {
             Params = funcParams.ToArray();
-            _returnTypeName2 = returnType;
+            ReturnType2 = returnType;
             Expr = expr;
             IsVariadic = Params.Any(param => param.IsVariadic);
             TypeParams = Collections.NoVariantTypeParams;
@@ -147,14 +156,7 @@ namespace CSharpRpp
 
         public void ResolveTypes(RppClassScope scope)
         {
-            if (ReturnType2 == null)
-            {
-                ReturnType2 = _returnTypeName2.Resolve(scope);
-            }
-
-            var runtimeReturnType = ReturnType.Resolve(_scope);
-            Debug.Assert(runtimeReturnType != null);
-            ReturnType = runtimeReturnType;
+            ReturnType2.Resolve(scope);
         }
 
         public override IRppNode Analyze(RppScope scope)
@@ -279,13 +281,11 @@ namespace CSharpRpp
     public sealed class RppParam : RppMember, IRppParam
     {
         public override RppType Type { get; protected set; }
-        public override RType Type2 { get; protected set; }
+        public override ResolvableType Type2 { get; protected set; }
 
         public int Index { get; set; }
 
         public bool IsVariadic { get; set; }
-
-        [CanBeNull] private readonly RTypeName _typeName;
 
         public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
         {
@@ -294,15 +294,15 @@ namespace CSharpRpp
             if (type is RppTypeName)
             {
                 Console.WriteLine("Warning: Should use another constructor");
-                _typeName = new RTypeName(((RppTypeName) type).Name);
-                ;
+                
+                
             }
         }
 
-        public RppParam(string name, RTypeName typeName, bool variadic = false) : base(name)
+        public RppParam(string name, ResolvableType type, bool variadic = false) : base(name)
         {
             IsVariadic = variadic;
-            _typeName = typeName;
+            Type2 = type;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -312,17 +312,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            /*
-            var resolvedType = Type.Resolve(scope);
-            Debug.Assert(resolvedType != null, "Can't resolve type");
-            Type = resolvedType;
-            */
-            if (Type2 == null)
-            {
-                Debug.Assert(_typeName != null, "_typeName != null");
-                Type2 = _typeName.Resolve(scope);
-            }
-
+            Type2.Resolve(scope);
             return this;
         }
 
