@@ -65,7 +65,8 @@ namespace CSharpRpp.TypeSystem
 
         private bool Equals(RppFieldInfo other)
         {
-            return string.Equals(Name, other.Name) && Attributes == other.Attributes && (DeclaringType == null || DeclaringType.Equals(other.DeclaringType));
+            return string.Equals(Name, other.Name) && Attributes == other.Attributes &&
+                   (DeclaringType == null || DeclaringType.Equals(other.DeclaringType));
         }
 
         public override bool Equals(object obj)
@@ -86,7 +87,7 @@ namespace CSharpRpp.TypeSystem
         {
             unchecked
             {
-                return (Name.GetHashCode() * 397) ^ (int) Attributes ^ (DeclaringType?.GetHashCode() ?? 0);
+                return (Name.GetHashCode()*397) ^ (int) Attributes ^ (DeclaringType?.GetHashCode() ?? 0);
             }
         }
 
@@ -109,7 +110,8 @@ namespace CSharpRpp.TypeSystem
 
         public MethodBase Native { get; set; }
 
-        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [CanBeNull] RType returnType,
+        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
+            [CanBeNull] RType returnType,
             [NotNull] RppParameterInfo[] parameters)
         {
             Name = name;
@@ -127,7 +129,8 @@ namespace CSharpRpp.TypeSystem
 
         #region ToString
 
-        private static readonly List<Tuple<RMethodAttributes, string>> _attrToStr = new List<Tuple<RMethodAttributes, string>>
+        private static readonly List<Tuple<RMethodAttributes, string>> _attrToStr = new List
+            <Tuple<RMethodAttributes, string>>
         {
             Tuple.Create(RMethodAttributes.Final, "final"),
             Tuple.Create(RMethodAttributes.Public, "public"),
@@ -142,11 +145,11 @@ namespace CSharpRpp.TypeSystem
             List<string> res = new List<string>();
 
             _attrToStr.Aggregate(res, (list, tuple) =>
-                                      {
-                                          if (attrs.HasFlag(tuple.Item1))
-                                              list.Add(tuple.Item2);
-                                          return list;
-                                      });
+            {
+                if (attrs.HasFlag(tuple.Item1))
+                    list.Add(tuple.Item2);
+                return list;
+            });
 
             return string.Join(" ", res);
         }
@@ -464,7 +467,7 @@ namespace CSharpRpp.TypeSystem
 
             foreach (RppMethodInfo rppMethod in Methods)
             {
-                MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes);
+                MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes, constructor: false);
                 RType returnType = rppMethod.ReturnType;
                 Debug.Assert(returnType != null, "returnType != null");
 
@@ -474,8 +477,9 @@ namespace CSharpRpp.TypeSystem
 
             foreach (RppConstructorInfo rppConstructor in Constructors)
             {
-                MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes);
-                rppConstructor.Native = _typeBuilder.DefineConstructor(attr, CallingConventions.Standard, Type.EmptyTypes);
+                MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes, constructor: true);
+                rppConstructor.Native = _typeBuilder.DefineConstructor(attr, CallingConventions.Standard,
+                    Type.EmptyTypes);
             }
         }
 
@@ -500,7 +504,7 @@ namespace CSharpRpp.TypeSystem
             return attrs;
         }
 
-        private static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes)
+        private static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes, bool constructor)
         {
             MethodAttributes attrs = MethodAttributes.Private;
             if (rAttributes.HasFlag(RMethodAttributes.Public))
@@ -509,7 +513,9 @@ namespace CSharpRpp.TypeSystem
             }
 
             // always virtual, even for statics
-            attrs |= MethodAttributes.Virtual;
+            if (!constructor)
+                attrs |= MethodAttributes.Virtual;
+
             attrs |= MethodAttributes.HideBySig;
 
             if (!rAttributes.HasFlag(RMethodAttributes.Override))

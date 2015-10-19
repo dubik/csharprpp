@@ -274,7 +274,7 @@ namespace CSharpRpp
         private void Initialize(T value)
         {
             Value = value;
-            Type = RppNativeType.Create(typeof (T));
+            Type2 = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof(T)));
         }
 
         protected RppLiteralBase(T value)
@@ -288,7 +288,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppLiteralBase<T> other)
         {
-            return Value.Equals(other.Value) && Type.Equals(other.Type);
+            return Value.Equals(other.Value) && Type2.Equals(other.Type2);
         }
 
         public override bool Equals(object obj)
@@ -312,7 +312,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return (Value.GetHashCode() * 397) ^ Type.GetHashCode();
+                return (Value.GetHashCode() * 397) ^ Type2.GetHashCode();
             }
         }
 
@@ -765,12 +765,12 @@ namespace CSharpRpp
                 var lastExpr = _exprs.Last() as IRppExpr;
                 if (lastExpr != null)
                 {
-                    Type = lastExpr.Type;
+                    Type2 = lastExpr.Type2;
                 }
             }
             else
             {
-                Type = RppNativeType.Create(typeof (void));
+                Type2 = new ResolvableType(RppTypeSystem.UnitTy);
             }
         }
 

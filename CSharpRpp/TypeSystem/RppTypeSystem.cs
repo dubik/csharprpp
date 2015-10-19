@@ -17,7 +17,7 @@ namespace CSharpRpp.TypeSystem
         public static RType NullTy = UnitTy;
 
         private static RType CreatePrimitive(string name, Type systemType)
-        { 
+        {
             return new RType(name, systemType);
         }
 
@@ -60,6 +60,29 @@ namespace CSharpRpp.TypeSystem
         {
             RType type = new RType(systemType.Name, systemType);
             return type;
+        }
+
+        [NotNull]
+        public static RType ImportPrimitive([NotNull] Type type)
+        {
+            if (type == typeof (void))
+                return UnitTy;
+            if (type == typeof (char))
+                return CharTy;
+            if (type == typeof (bool))
+                return BooleanTy;
+            if (type == typeof (short))
+                return ShortTy;
+            if (type == typeof (int))
+                return IntTy;
+            if (type == typeof (long))
+                return LongTy;
+            if (type == typeof (float))
+                return FloatTy;
+            if (type == typeof (double))
+                return DoubleTy;
+
+            throw new Exception($"Can't match {type}");
         }
     }
 }

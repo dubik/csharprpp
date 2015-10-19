@@ -61,7 +61,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitExit(RppClass node)
         {
-            var clazz = node.RuntimeType as TypeBuilder;
+            TypeBuilder clazz = node.Type2.NativeType as TypeBuilder;
             Debug.Assert(clazz != null, "clazz != null");
             try
             {
