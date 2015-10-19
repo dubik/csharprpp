@@ -118,7 +118,7 @@ class Foo
         public void CreateSimpleNativeTypeFromRType()
         {
             RType simpleType = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Public);
-            simpleType.CreateNativeType(_module);
+            simpleType.InitializeNativeType(_module);
         }
 
         private static ModuleBuilder CreateModule()

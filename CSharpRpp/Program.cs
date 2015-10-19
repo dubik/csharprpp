@@ -97,15 +97,16 @@ object Main
                 Environment.Exit(-1);
             }
 
-            TypeBuilderCreator typeBuilderCreator = new TypeBuilderCreator(generator.Module);
-            program.Accept(typeBuilderCreator);
-
+            TypeInitializer typeInitializer = new TypeInitializer(generator.Module);
+            program.Accept(typeInitializer);
+            Type2Creator creator = new Type2Creator();
+            program.Accept(creator);
             generator.Generate();
             generator.Save();
         }
 
         private static void WireRuntime(IEnumerable<RppClass> classes, RppScope scope)
-        {
+        { 
             Assembly runtimeAssembly = GetRuntimeAssembly();
             Type[] types = runtimeAssembly.GetTypes();
             var typesMap = types.ToDictionary(t => t.Name);

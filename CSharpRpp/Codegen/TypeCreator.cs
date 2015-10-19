@@ -134,54 +134,18 @@ namespace CSharpRpp.Codegen
         }
     }
 
-    public class TypeBuilderCreator : RppNodeVisitor
+    public class TypeInitializer : RppNodeVisitor
     {
         [NotNull] private readonly ModuleBuilder _module;
-        private RppClass _class;
 
-        public TypeBuilderCreator([NotNull] ModuleBuilder module)
+        public TypeInitializer([NotNull] ModuleBuilder module)
         {
             _module = module;
         }
 
         public override void VisitEnter(RppClass node)
         {
-            TypeAttributes attrs = GetTypeAttributes(node.Type2.Attributes);
-            TypeBuilder typeBuilder = _module.DefineType(node.Name, attrs);
-            node.Type2.NativeType = typeBuilder;
-            _class = node;
-        }
-
-        private void CreateNativeType(RType type)
-        {
-            TypeAttributes attrs = GetTypeAttributes(type.Attributes);
-            TypeBuilder typeBuilder = _module.DefineType(type.Name, attrs);
-            foreach (RppMethodInfo rppMethod in type.Methods)
-            {
-            }
-
-            foreach (RppConstructorInfo rppConstructor in type.Constructors)
-            {
-            }
-        }
-
-        public override void VisitEnter(RppFunc node)
-        {
-            TypeBuilder typeBuilder = _class.Type2.NativeType as TypeBuilder;
-            var attrs = GetMethodAttributes(node);
-            Debug.Assert(typeBuilder != null, "typeBuilder != null");
-
-            if (node.IsConstructor)
-            {
-                var constructor = typeBuilder.DefineConstructor(GetMethodAttributes(node), CallingConventions.Standard, Type.EmptyTypes);
-                node.ConstructorBuilder = constructor;
-            }
-            else
-            {
-                node.Builder = typeBuilder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
-            }
-
-            // node.
+            node.Type2.InitializeNativeType(_module);
         }
 
         private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
@@ -228,6 +192,14 @@ namespace CSharpRpp.Codegen
             }
 
             return attrs;
+        }
+    }
+
+    public class Type2Creator : RppNodeVisitor
+    {
+        public override void VisitEnter(RppClass node)
+        {
+            node.Type2.CreateNativeType();
         }
     }
 

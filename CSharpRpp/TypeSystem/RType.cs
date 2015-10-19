@@ -107,7 +107,7 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public RType DeclaringType { get; private set; }
 
-        public MethodBuilder Native { get; set; }
+        public MethodBase Native { get; set; }
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes, [CanBeNull] RType returnType,
             [NotNull] RppParameterInfo[] parameters)
@@ -118,6 +118,50 @@ namespace CSharpRpp.TypeSystem
             ReturnType = returnType;
             Parameters = parameters;
         }
+
+        public override string ToString()
+        {
+            var res = new List<string> {ToString(Attributes), Name + ParamsToString(), ":", ReturnType?.ToString()};
+            return string.Join(" ", res);
+        }
+
+        #region ToString
+
+        private static readonly List<Tuple<RMethodAttributes, string>> _attrToStr = new List<Tuple<RMethodAttributes, string>>
+        {
+            Tuple.Create(RMethodAttributes.Final, "final"),
+            Tuple.Create(RMethodAttributes.Public, "public"),
+            Tuple.Create(RMethodAttributes.Private, "public"),
+            Tuple.Create(RMethodAttributes.Abstract, "abstract"),
+            Tuple.Create(RMethodAttributes.Override, "override"),
+            Tuple.Create(RMethodAttributes.Static, "static")
+        };
+
+        private static string ToString(RMethodAttributes attrs)
+        {
+            List<string> res = new List<string>();
+
+            _attrToStr.Aggregate(res, (list, tuple) =>
+                                      {
+                                          if (attrs.HasFlag(tuple.Item1))
+                                              list.Add(tuple.Item2);
+                                          return list;
+                                      });
+
+            return string.Join(" ", res);
+        }
+
+        private string ParamsToString()
+        {
+            if (Parameters != null)
+            {
+                return "(" + string.Join(", ", Parameters.Select(p => p.Name + ": " + p.Type.ToString())) + ")";
+            }
+
+            return "";
+        }
+
+        #endregion
     }
 
     public sealed class RppConstructorInfo : RppMethodInfo
@@ -388,6 +432,15 @@ namespace CSharpRpp.TypeSystem
 
         #endregion
 
+        #region ToString
+
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
+
+        #endregion
+
         public void SetParent(RType type2)
         {
             BaseType = type2;
@@ -402,7 +455,7 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public void CreateNativeType(ModuleBuilder module)
+        public void CreateNativeType()
         {
             if (_typeBuilder == null)
             {

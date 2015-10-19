@@ -7,6 +7,7 @@ using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
@@ -84,7 +85,18 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppFunc node)
         {
             Console.WriteLine("Generating func: " + node.Name);
-            _body = node.Builder.GetILGenerator();
+            _body = GetGenerator(node.MethodInfo.Native);
+        }
+
+        [NotNull]
+        private static ILGenerator GetGenerator([NotNull] MethodBase method)
+        {
+            if (method is ConstructorBuilder)
+            {
+                return ((ConstructorBuilder) method).GetILGenerator();
+            }
+
+            return ((MethodBuilder) method).GetILGenerator();
         }
 
         public override void VisitExit(RppFunc node)
@@ -94,9 +106,12 @@ namespace CSharpRpp.Codegen
             Console.WriteLine("Func generated");
         }
 
-        private static void GenerateRet([NotNull] RppFunc node, [NotNull] ILGenerator generator)
+        private static void GenerateRet([NotNull] RppFunc func, [NotNull] ILGenerator generator)
         {
-            if (node.ReturnType.Runtime == typeof (void) && node.Expr.Type.Runtime != typeof (void))
+            RType funcReturnType = func.ReturnType2.Value;
+            RType expressionType = func.Expr.Type2.Value;
+
+            if (funcReturnType.Equals(RppTypeSystem.UnitTy) && !expressionType.Equals(RppTypeSystem.UnitTy))
             {
                 generator.Emit(OpCodes.Pop);
             }
