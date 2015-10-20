@@ -87,7 +87,7 @@ namespace CSharpRpp.TypeSystem
         {
             unchecked
             {
-                return (Name.GetHashCode()*397) ^ (int) Attributes ^ (DeclaringType?.GetHashCode() ?? 0);
+                return (Name.GetHashCode() * 397) ^ (int) Attributes ^ (DeclaringType?.GetHashCode() ?? 0);
             }
         }
 
@@ -147,7 +147,9 @@ namespace CSharpRpp.TypeSystem
             _attrToStr.Aggregate(res, (list, tuple) =>
             {
                 if (attrs.HasFlag(tuple.Item1))
+                {
                     list.Add(tuple.Item2);
+                }
                 return list;
             });
 
@@ -182,8 +184,9 @@ namespace CSharpRpp.TypeSystem
 
     public class RppParameterInfo
     {
-        public string Name { get; private set; }
-        public RType Type { get; private set; }
+        public string Name { get; }
+        public RType Type { get; }
+        public int Index { get; set; }
 
         public RppParameterInfo(RType type) : this("", type)
         {
@@ -408,7 +411,7 @@ namespace CSharpRpp.TypeSystem
 
         protected bool Equals(RType other)
         {
-            return string.Equals(Name, other.Name);
+            return String.Equals(Name, other.Name);
         }
 
         public override bool Equals(object obj)
@@ -444,16 +447,16 @@ namespace CSharpRpp.TypeSystem
 
         #endregion
 
-        public void SetParent(RType type2)
+        public void SetParent(RType baseType)
         {
-            BaseType = type2;
+            BaseType = baseType;
         }
 
         public void InitializeNativeType(ModuleBuilder module)
         {
             if (_typeBuilder == null)
             {
-                TypeAttributes attrs = GetTypeAttributes(Attributes);
+                TypeAttributes attrs = RTypeUtils.GetTypeAttributes(Attributes);
                 _typeBuilder = module.DefineType(Name, attrs);
             }
         }
@@ -467,68 +470,13 @@ namespace CSharpRpp.TypeSystem
 
             foreach (RppMethodInfo rppMethod in Methods)
             {
-                MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes, constructor: false);
-                RType returnType = rppMethod.ReturnType;
-                Debug.Assert(returnType != null, "returnType != null");
-
-                rppMethod.Native = _typeBuilder.DefineMethod(rppMethod.Name, attr, CallingConventions.Standard,
-                    returnType.NativeType, Type.EmptyTypes);
+                RTypeUtils.DefineNativeTypeFor(_typeBuilder, rppMethod);
             }
 
             foreach (RppConstructorInfo rppConstructor in Constructors)
             {
-                MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes, constructor: true);
-                rppConstructor.Native = _typeBuilder.DefineConstructor(attr, CallingConventions.Standard,
-                    Type.EmptyTypes);
+                RTypeUtils.DefineNativeTypeFor(_typeBuilder, rppConstructor);
             }
-        }
-
-        private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
-        {
-            TypeAttributes attrs = TypeAttributes.Class;
-            if (modifiers.HasFlag(RTypeAttributes.Abstract))
-            {
-                attrs |= TypeAttributes.Abstract;
-            }
-
-            if (modifiers.HasFlag(RTypeAttributes.Sealed))
-            {
-                attrs |= TypeAttributes.Sealed;
-            }
-
-            if (modifiers.HasFlag(RTypeAttributes.Private) || modifiers.HasFlag(RTypeAttributes.Protected))
-            {
-                attrs |= TypeAttributes.NotPublic;
-            }
-
-            return attrs;
-        }
-
-        private static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes, bool constructor)
-        {
-            MethodAttributes attrs = MethodAttributes.Private;
-            if (rAttributes.HasFlag(RMethodAttributes.Public))
-            {
-                attrs = MethodAttributes.Public;
-            }
-
-            // always virtual, even for statics
-            if (!constructor)
-                attrs |= MethodAttributes.Virtual;
-
-            attrs |= MethodAttributes.HideBySig;
-
-            if (!rAttributes.HasFlag(RMethodAttributes.Override))
-            {
-                attrs |= MethodAttributes.NewSlot;
-            }
-
-            if (rAttributes.HasFlag(RMethodAttributes.Abstract))
-            {
-                attrs |= MethodAttributes.Abstract;
-            }
-
-            return attrs;
         }
     }
 }
