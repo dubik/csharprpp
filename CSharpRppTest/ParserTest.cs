@@ -59,7 +59,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseEmptyClassWithOneField()
         {
-            RppField field = new RppField(MutabilityFlag.MF_Val, "length", null, new RppTypeName("Int"));
+            RppField field = new RppField(MutabilityFlag.MF_Val, "length", null, new ResolvableType(new RTypeName("Int")));
             RppClass expected = new RppClass(ClassKind.Class, Collections.NoModifiers, "String", new[] {field}, Collections.NoNodes,
                 Collections.NoVariantTypeParams,
                 RppBaseConstructorCall.Object);
@@ -117,9 +117,9 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestParseClassParam()
         {
-            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
-            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new RppTypeName("Int")));
-            TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new RppTypeName("Int")));
+            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new ResolvableType(new RTypeName("Int"))));
         }
 
         private static void TestClassParam(string code, RppField expected)

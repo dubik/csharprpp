@@ -8,6 +8,7 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using Antlr.Runtime;
@@ -16,7 +17,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    class QualifiedId
+    internal class QualifiedId
     {
         private string _text;
 
@@ -39,7 +40,7 @@ namespace CSharpRpp
         OmAbstract
     }
 
-    class UnexpectedTokenException : Exception
+    internal class UnexpectedTokenException : Exception
     {
         public IToken Actual { get; set; }
         public string Expected { get; set; }
@@ -51,7 +52,7 @@ namespace CSharpRpp
         }
     }
 
-    class SyntaxException : Exception
+    internal class SyntaxException : Exception
     {
         public IToken BadToken { get; private set; }
 
@@ -289,7 +290,7 @@ namespace CSharpRpp
                 throw new Exception("Expected type but found: " + _lastToken.Text);
             }
 
-            classParam = new RppField(mutability, name, null, paramType);
+            classParam = new RppField(mutability, name, null, new ResolvableType(paramType));
             return true;
         }
 
@@ -637,7 +638,7 @@ namespace CSharpRpp
                 expr = ParseExpr();
             }
 
-            return new RppVar(mutabilityFlag, varId, type, expr);
+            return new RppVar(mutabilityFlag, varId, new ResolvableType(type), expr);
         }
 
 

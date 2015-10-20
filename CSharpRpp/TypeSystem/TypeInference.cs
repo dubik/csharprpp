@@ -114,6 +114,8 @@ namespace CSharpRpp.TypeSystem
         {
             if (expr is RppClosure)
             {
+                throw new Exception("Not implemented yet");
+                /*
                 RppClosure closure = (RppClosure) expr;
                 var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type.IsUndefined());
                 if (targetType.IsDefined() && hasUndefinedClosureBinding)
@@ -145,8 +147,9 @@ namespace CSharpRpp.TypeSystem
                         return new RppClosure(newBindings, closure.Expr);
                     }
 
-                    throw new NotSupportedException("Only RppGenericType and RppGenericObjectType is supported at the moment");
+                    throw new NotSupportedException("Only RppGenericType and RppGenericObjectType is supported at the moment");                   
                 }
+                */
             }
 
             return expr;

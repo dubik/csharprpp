@@ -282,18 +282,18 @@ namespace CSharpRpp
 
         public override Type Runtime { get; protected set; }
 
-        public RppArrayType([NotNull] RppType subType) : base(CreateWrappedClass(subType))
+        public RppArrayType([NotNull] RppType subType) : base(CreateWrappedClass(null))
         {
             SubType = subType;
         }
 
-        private static RppClass CreateWrappedClass([NotNull] RppType subType)
+        private static RppClass CreateWrappedClass([NotNull] RType subType)
         {
             var funcs = new[]
             {
                 new RppFunc("length", IntTy) {IsStub = true},
                 new RppFunc("apply", new[] {new RppParam("i", IntTy)}, UnitTy) {IsStub = true}, // TODO not implemented subType, replace UnitN
-                new RppFunc("update", new[] {new RppParam("i", IntTy), new RppParam("x", subType)}, UnitTy) {IsStub = true}
+                new RppFunc("update", new[] {new RppParam("i", IntTy), new RppParam("x", new ResolvableType(subType))}, UnitTy) {IsStub = true}
             };
 
             return new RppClass(ClassKind.Class, Collections.NoModifiers, "Array", Collections.NoFields, funcs, Collections.NoVariantTypeParams,
@@ -304,11 +304,14 @@ namespace CSharpRpp
         {
             SubType = SubType.Resolve(scope);
             Debug.Assert(SubType != null, "resolvedSubType != null");
+            throw new Exception("Not implemented yet");
+            /*
             Class = CreateWrappedClass(SubType);
             var runtime = SubType.Runtime;
             var makeArrayType = runtime.MakeArrayType();
             Runtime = makeArrayType;
             return this;
+            */
         }
     }
 

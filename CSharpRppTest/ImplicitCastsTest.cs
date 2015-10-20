@@ -11,7 +11,7 @@ namespace CSharpRppTest
         public void IntegerBoxing()
         {
             RppInteger sourceExpr = new RppInteger(10);
-            IRppExpr boxingInt = ImplicitCast.CastIfNeeded(sourceExpr, typeof (object));
+            IRppExpr boxingInt = ImplicitCast.CastIfNeeded(sourceExpr, null /* typeof(object) */);
             Assert.AreEqual(new RppBox(sourceExpr), boxingInt);
         }
     }

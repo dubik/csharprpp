@@ -8,10 +8,12 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static CSharpRpp.TypeSystem.ResolvableType;
 
@@ -20,10 +22,10 @@ namespace CSharpRppTest
     [TestClass]
     public class FuncTest
     {
-        private readonly RppParam _intX = new RppParam("x", RppPrimitiveType.IntTy);
-        private readonly RppParam _intY = new RppParam("y", RppPrimitiveType.IntTy);
-        private readonly RppParam _floatY = new RppParam("y", RppPrimitiveType.FloatTy);
-        private readonly RppParam _varArgIntX = new RppParam("x", RppPrimitiveType.IntTy, true);
+        private readonly RppParam _intX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy));
+        private readonly RppParam _intY = new RppParam("y", new ResolvableType(RppTypeSystem.IntTy));
+        private readonly RppParam _floatY = new RppParam("y", new ResolvableType(RppTypeSystem.FloatTy));
+        private readonly RppParam _varArgIntX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy), true);
 
         [TestMethod]
         public void QueryOneToOneOverload()

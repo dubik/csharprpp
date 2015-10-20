@@ -153,7 +153,6 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-
         public void ResolveTypes(RppClassScope scope)
         {
             ReturnType2.Resolve(scope);
@@ -274,10 +273,10 @@ namespace CSharpRpp
         int Index { get; set; }
         bool IsVariadic { get; set; }
 
-        IRppParam CloneWithNewType(RppType newType);
+        IRppParam CloneWithNewType(RType newType);
     }
 
-    [DebuggerDisplay("{Type.ToString()} {Name} [{Type}]")]
+    [DebuggerDisplay("{Name}: {Type2}")]
     public sealed class RppParam : RppMember, IRppParam
     {
         public override RppType Type { get; protected set; }
@@ -287,21 +286,10 @@ namespace CSharpRpp
 
         public bool IsVariadic { get; set; }
 
-        public RppParam([NotNull] string name, [NotNull] RppType type, bool variadic = false) : base(name)
-        {
-            Type = variadic ? new RppArrayType(type) : type;
-            IsVariadic = variadic;
-            if (type is RppTypeName)
-            {
-                Console.WriteLine("Warning: Should use another constructor");
-                
-                
-            }
-        }
-
         public RppParam(string name, ResolvableType type, bool variadic = false) : base(name)
         {
             IsVariadic = variadic;
+            // Type = variadic ? new RppArrayType(type) : type;
             Type2 = type;
         }
 
@@ -316,9 +304,9 @@ namespace CSharpRpp
             return this;
         }
 
-        public IRppParam CloneWithNewType(RppType newType)
+        public IRppParam CloneWithNewType(RType newType)
         {
-            return new RppParam(Name, newType, IsVariadic);
+            return new RppParam(Name, new ResolvableType(newType), IsVariadic);
         }
     }
 }

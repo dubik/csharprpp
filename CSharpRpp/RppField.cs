@@ -14,26 +14,19 @@ namespace CSharpRpp
         MF_Unspecified
     }
 
-    [DebuggerDisplay("Field: {Type.ToString()} {Name}")]
+    [DebuggerDisplay("Field = {Name}: {Type2}")]
     public class RppField : RppVar
     {
         private readonly IList<string> _modifiers;
 
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type)
+        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type)
             : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
         {
             _modifiers = modifiers;
             AddToScope = false;
         }
 
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RTypeName typeName)
-            : base(mutabilityFlag, name, typeName, RppEmptyExpr.Instance)
-        {
-            _modifiers = modifiers;
-            AddToScope = false;
-        }
-
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, RppType type, IRppExpr initExpr)
+        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type, IRppExpr initExpr)
             : base(mutabilityFlag, name, type, initExpr)
         {
             _modifiers = modifiers;
@@ -41,6 +34,8 @@ namespace CSharpRpp
         }
 
         public new FieldBuilder Builder { get; set; }
+
+        public RppFieldInfo FieldInfo { get; set; }
 
         public override void Accept(IRppNodeVisitor visitor)
         {

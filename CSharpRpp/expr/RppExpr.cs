@@ -967,13 +967,15 @@ namespace CSharpRpp
             }
 
             // If generic like 'A', then find real type
-            if (Ref.Type.IsGenericParameter())
+            /*
+            if (Ref.Type2.IsGenericParameter())
             {
                 Type = scope.LookupGenericType(Ref.Type.Runtime.Name);
                 return this;
-            }
+            }*/
 
             Type = Ref.Type;
+            Type2 = Ref.Type2;
             return this;
         }
 

@@ -10,6 +10,7 @@ namespace CSharpRpp.Native
 
         public int Index { get; set; }
         public bool IsVariadic { get; set; }
+
         public RType NewType { get; private set; }
 
         public RppNativeParam(string name, Type paramType, bool variadic = false) : base(name)
@@ -18,7 +19,7 @@ namespace CSharpRpp.Native
             IsVariadic = variadic;
         }
 
-        public IRppParam CloneWithNewType(RppType newType)
+        public IRppParam CloneWithNewType(RType newType)
         {
             throw new NotImplementedException();
         }

@@ -54,9 +54,14 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public RType DeclaringType { get; }
 
-        public RppFieldInfo([NotNull] string name, RFieldAttributes attributes, [NotNull] RType declaringType)
+        public RType Type { get; }
+
+        public FieldInfo Native { get; set; }
+
+        public RppFieldInfo([NotNull] string name, [NotNull] RType fieldType, RFieldAttributes attributes, [NotNull] RType declaringType)
         {
             Name = name;
+            Type = fieldType;
             Attributes = attributes;
             DeclaringType = declaringType;
         }
@@ -65,8 +70,8 @@ namespace CSharpRpp.TypeSystem
 
         private bool Equals(RppFieldInfo other)
         {
-            return string.Equals(Name, other.Name) && Attributes == other.Attributes &&
-                   (DeclaringType == null || DeclaringType.Equals(other.DeclaringType));
+            return string.Equals(Name, other.Name) && Attributes == other.Attributes && Type.Equals(other.Type)
+                   && ((bool) DeclaringType?.Equals(other.DeclaringType));
         }
 
         public override bool Equals(object obj)
@@ -388,9 +393,9 @@ namespace CSharpRpp.TypeSystem
             return method;
         }
 
-        public RppFieldInfo DefineField([NotNull] string name, RFieldAttributes attributes, [NotNull] RType type)
+        public RppFieldInfo DefineField([NotNull] string name, [NotNull] RType type, RFieldAttributes attributes)
         {
-            RppFieldInfo field = new RppFieldInfo(name, attributes, this);
+            RppFieldInfo field = new RppFieldInfo(name, type, attributes, this);
             _fields.Add(field);
             return field;
         }
@@ -477,6 +482,38 @@ namespace CSharpRpp.TypeSystem
             {
                 RTypeUtils.DefineNativeTypeFor(_typeBuilder, rppConstructor);
             }
+
+            foreach (RppFieldInfo rppField in Fields)
+            {
+                FieldAttributes attr = GetAttributes(rppField.Attributes);
+                rppField.Native = _typeBuilder.DefineField(rppField.Name, rppField.Type.NativeType, attr);
+            }
+        }
+
+        private static FieldAttributes GetAttributes(RFieldAttributes attributes)
+        {
+            FieldAttributes attrs = FieldAttributes.Public;
+            if (attributes.HasFlag(RFieldAttributes.Public))
+            {
+                attrs |= FieldAttributes.Public;
+            }
+
+            if (attributes.HasFlag(RFieldAttributes.Private))
+            {
+                attrs |= FieldAttributes.Private;
+            }
+
+            if (attributes.HasFlag(RFieldAttributes.InitOnly))
+            {
+                attrs |= FieldAttributes.InitOnly;
+            }
+
+            if (attributes.HasFlag(RFieldAttributes.Static))
+            {
+                attrs |= FieldAttributes.Static;
+            }
+
+            return attrs;
         }
     }
 }

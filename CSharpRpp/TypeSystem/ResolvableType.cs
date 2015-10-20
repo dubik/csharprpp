@@ -8,6 +8,7 @@ namespace CSharpRpp.TypeSystem
         public static ResolvableType UnitTy = new ResolvableType(RppTypeSystem.UnitTy);
         public static ResolvableType IntTy = new ResolvableType(RppTypeSystem.IntTy);
         public static ResolvableType NullTy = new ResolvableType(RppTypeSystem.UnitTy);
+        public static ResolvableType UndefinedTy = new ResolvableType(new RTypeName("undefined"));
 
         [NotNull]
         public RTypeName Name { get; }
@@ -43,6 +44,16 @@ namespace CSharpRpp.TypeSystem
             {
                 _type = Name.Resolve(scope);
             }
+        }
+
+        public override string ToString()
+        {
+            if (_type != null)
+            {
+                return $"{_type}";
+            }
+
+            return $"'{Name}'";
         }
     }
 }

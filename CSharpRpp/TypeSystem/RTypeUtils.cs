@@ -108,21 +108,21 @@ namespace CSharpRpp.TypeSystem
 
         public static void DefineNativeTypeFor(TypeBuilder typeBuilder, RppConstructorInfo rppConstructor)
         {
-            MethodAttributes attr = RTypeUtils.GetMethodAttributes(rppConstructor.Attributes, constructor: true);
-            Type[] parametersTypes = RTypeUtils.ParametersTypes(rppConstructor.Parameters);
+            MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes, constructor: true);
+            Type[] parametersTypes = ParametersTypes(rppConstructor.Parameters);
             ConstructorBuilder constructor = typeBuilder.DefineConstructor(attr, CallingConventions.Standard, parametersTypes);
-            RTypeUtils.DefineParams(constructor, rppConstructor.Parameters);
-            RTypeUtils.AssignConstructorParamIndex(rppConstructor.Parameters);
+            DefineParams(constructor, rppConstructor.Parameters);
+            AssignConstructorParamIndex(rppConstructor.Parameters);
 
             rppConstructor.Native = constructor;
         }
 
         public static void DefineNativeTypeFor(TypeBuilder typeBuilder, RppMethodInfo rppMethod)
         {
-            MethodAttributes attr = RTypeUtils.GetMethodAttributes(rppMethod.Attributes, constructor: false);
+            MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes, constructor: false);
             MethodBuilder method = typeBuilder.DefineMethod(rppMethod.Name, attr, CallingConventions.Standard);
-            RTypeUtils.DefineReturnType(method, rppMethod.ReturnType);
-            RTypeUtils.DefineParameters(method, rppMethod.Parameters);
+            DefineReturnType(method, rppMethod.ReturnType);
+            DefineParameters(method, rppMethod.Parameters);
 
             rppMethod.Native = method;
         }

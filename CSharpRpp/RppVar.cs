@@ -28,11 +28,11 @@ namespace CSharpRpp
             MutabilityFlag = mutability;
         }
 
-        public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RTypeName type, [NotNull] IRppExpr initExpr) : base(name)
+        public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {
+            Type2 = type;
             InitExpr = initExpr;
             MutabilityFlag = mutability;
-            throw new NotImplementedException("Types not implemented yet");
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -52,25 +52,23 @@ namespace CSharpRpp
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
             // ReSharper disable once PossibleUnintendedReferenceComparison
-            if (Type == RppUndefinedType.Instance)
+            if (Type2 == ResolvableType.UndefinedTy)
             {
                 if (InitExpr is RppEmptyExpr)
                 {
                     throw new Exception("Type is not specified but also initializing expression is missing, I give up");
                 }
 
-                Type = InitExpr.Type;
+                Type2 = InitExpr.Type2;
             }
             else
             {
-                var resolvedType = Type.Resolve(scope);
-                Debug.Assert(resolvedType != null);
-                Type = resolvedType;
+                Type2.Resolve(scope);
             }
 
             if (!(InitExpr is RppEmptyExpr))
             {
-                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type.Runtime);
+                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type2.Value);
             }
 
             return this;

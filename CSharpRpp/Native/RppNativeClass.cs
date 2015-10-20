@@ -39,7 +39,8 @@ namespace CSharpRpp.Native
 
         private static RppField CreateField(FieldInfo field)
         {
-            return new RppField(MutabilityFlag.MF_Val, field.Name, Collections.NoStrings, RppNativeType.Create(field.FieldType));
+            //return new RppField(MutabilityFlag.MF_Val, field.Name, Collections.NoStrings, RppNativeType.Create(field.FieldType));
+            return null;
         }
 
         private static RppVariantTypeParam CreateVariantTypeParam(Type type)

@@ -48,6 +48,18 @@ namespace CSharpRpp.Codegen
             }
         }
 
+        public override void Visit(RppField node)
+        {
+            node.FieldInfo = _currentType.DefineField(node.Name, node.Type2.Value, GetAttributes(node));
+        }
+
+        private static RFieldAttributes GetAttributes(RppField node)
+        {
+            RFieldAttributes attrs = RFieldAttributes.Public;
+
+            return attrs;
+        }
+
         private static RTypeAttributes GetAttributes(ICollection<ObjectModifier> modifiers)
         {
             RTypeAttributes attrs = RTypeAttributes.None;

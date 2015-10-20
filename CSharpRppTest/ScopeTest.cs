@@ -10,10 +10,10 @@ namespace CSharpRppTest
     [TestClass]
     public class ScopeTest
     {
-        private readonly RppParam _intX = new RppParam("x", RppPrimitiveType.IntTy);
-        private readonly RppParam _intY = new RppParam("y", RppPrimitiveType.IntTy);
-        private readonly RppParam _floatY = new RppParam("y", RppPrimitiveType.FloatTy);
-        private readonly RppParam _varArgIntX = new RppParam("x", RppPrimitiveType.IntTy, true);
+        private readonly RppParam _intX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy));
+        private readonly RppParam _intY = new RppParam("y", new ResolvableType(RppTypeSystem.IntTy));
+        private readonly RppParam _floatY = new RppParam("y", new ResolvableType(RppTypeSystem.FloatTy));
+        private readonly RppParam _varArgIntX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy), true);
 
         [TestMethod]
         public void OneLevelLookup()

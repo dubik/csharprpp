@@ -7,7 +7,6 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
-using CSharpRpp.Semantics;
 using CSharpRpp.TypeSystem;
 using RppRuntime;
 
@@ -27,31 +26,20 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo
+class Foo(val k : Int)
 {
-    def length : Int = 12
-    def mkString(k: Int) : Int = 43
-}
-
-object Main
-{
-    def main(args: String*) : Int = {
-        13
-    }
-
-    def mkString() : Unit = {
-    }
 }
 ";
 
             /*
             Create Types (go through classes)
             Create function stubs (no parameters)
-            Create primary constructors (no parameters)
+            Create primary constructors
             Set parent class relationship
             Resolve function parameters types               | Combined
             Resolve primary constructors parameters types   |
-            Resolve fields and add the to types
+            Resolve fields
+            Create 
             Analyze function bodies
             Generate code
             */

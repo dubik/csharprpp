@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Expr
 {
     public class ImplicitCast
     {
-        public static IRppExpr CastIfNeeded(IRppExpr sourceExpr, Type targetType)
+        public static IRppExpr CastIfNeeded(IRppExpr sourceExpr, RType targetType)
         {
-            Type sourceType = sourceExpr.Type.Runtime;
-            if (sourceType == targetType)
+            RType sourceType = sourceExpr.Type2.Value;
+            if (sourceType.Equals(targetType))
             {
                 return sourceExpr;
             }
 
+            /*
             if (sourceType.IsValueType && targetType == typeof (object))
             {
                 return new RppBox(sourceExpr);
             }
-
 
             if (IsAssignableFrom(sourceExpr.Type.Runtime, targetType))
             {
@@ -28,6 +29,7 @@ namespace CSharpRpp.Expr
             {
                 return sourceExpr;
             }
+            */
 
             throw new Exception("Can't cast expression to a specific type");
         }
