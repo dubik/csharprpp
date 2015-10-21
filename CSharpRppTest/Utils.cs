@@ -7,6 +7,7 @@ using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
 using CSharpRpp.Semantics;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RppRuntime;
 
@@ -47,6 +48,9 @@ namespace CSharpRppTest
         public static Assembly CodeGen(RppProgram program)
         {
             RppScope scope = new RppScope(null);
+
+            RppTypeSystem.PopulateBuiltinTypes(scope);
+
             WireRuntime(scope);
             CodeGenerator generator = new CodeGenerator(program);
 
