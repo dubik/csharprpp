@@ -8,6 +8,7 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -153,8 +154,13 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        public void ResolveTypes(RppClassScope scope)
+        /// <summary>
+        /// Resolves parameters and return types
+        /// </summary>
+        /// <param name="scope">class scope</param>
+        public void ResolveTypes([NotNull] RppClassScope scope)
         {
+            Params.ForEach(p => p.Type2.Resolve(scope));
             ReturnType2.Resolve(scope);
         }
 

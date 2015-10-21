@@ -20,20 +20,69 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    public class TypeAndStub2Creator : RppNodeVisitor
+    /// <summary>
+    /// Creates types for all classes
+    /// </summary>
+    public class Type2Creator : RppNodeVisitor
     {
-        private RType _currentType;
-
         public override void VisitEnter(RppClass node)
         {
-            _currentType = new RType(node.Name, GetTypeAttributes(node), null, _currentType);
-            node.Type2 = _currentType;
+            RType classType = new RType(node.Name, GetTypeAttributes(node), null, null);
+            node.Type2 = classType;
         }
+
 
         private static RTypeAttributes GetTypeAttributes(RppClass node)
         {
             RTypeAttributes attr = node.Kind == ClassKind.Class ? RTypeAttributes.Class : RTypeAttributes.Object;
             return attr | GetAttributes(node.Modifiers);
+        }
+
+        private static RTypeAttributes GetAttributes(ICollection<ObjectModifier> modifiers)
+        {
+            RTypeAttributes attrs = RTypeAttributes.None;
+            if (modifiers.Contains(ObjectModifier.OmSealed))
+            {
+                attrs |= RTypeAttributes.Sealed;
+            }
+            if (modifiers.Contains(ObjectModifier.OmAbstract))
+            {
+                attrs |= RTypeAttributes.Abstract;
+            }
+            if (!modifiers.Contains(ObjectModifier.OmPrivate))
+            {
+                attrs |= RTypeAttributes.Public;
+            }
+
+            return attrs;
+        }
+    }
+
+    /// <summary>
+    /// Resoles param types in all functions, including constructors
+    /// </summary>
+    public class ResolveParamTypes : RppNodeVisitor
+    {
+        private RppClass _currentClass;
+
+        public override void VisitEnter(RppClass node)
+        {
+            _currentClass = node;
+        }
+
+        public override void VisitEnter(RppFunc node)
+        {
+            node.ResolveTypes(_currentClass.Scope);
+        }
+    }
+
+    public class CreateRType : RppNodeVisitor
+    {
+        private RType _currentType;
+
+        public override void VisitEnter(RppClass node)
+        {
+            _currentType = node.Type2;
         }
 
         public override void VisitExit(RppFunc node)
@@ -55,27 +104,7 @@ namespace CSharpRpp.Codegen
 
         private static RFieldAttributes GetAttributes(RppField node)
         {
-            RFieldAttributes attrs = RFieldAttributes.Public;
-
-            return attrs;
-        }
-
-        private static RTypeAttributes GetAttributes(ICollection<ObjectModifier> modifiers)
-        {
-            RTypeAttributes attrs = RTypeAttributes.None;
-            if (modifiers.Contains(ObjectModifier.OmSealed))
-            {
-                attrs |= RTypeAttributes.Sealed;
-            }
-            if (modifiers.Contains(ObjectModifier.OmAbstract))
-            {
-                attrs |= RTypeAttributes.Abstract;
-            }
-            if (!modifiers.Contains(ObjectModifier.OmPrivate))
-            {
-                attrs |= RTypeAttributes.Public;
-            }
-
+            const RFieldAttributes attrs = RFieldAttributes.Public;
             return attrs;
         }
 
@@ -119,7 +148,7 @@ namespace CSharpRpp.Codegen
             UpdateReturnType(node, method);
         }
 
-        private void UpdateParameters(RppFunc node, RppMethodInfo method)
+        private static void UpdateParameters(RppFunc node, RppMethodInfo method)
         {
             IRppParam[] funcParams = node.Params;
             if (funcParams.Length != 0)
@@ -129,10 +158,8 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        private RType ResolveType(IRppExpr param)
+        private static RType ResolveType(IRppExpr param)
         {
-            Debug.Assert(_class.Scope != null, "_class.Scope != null");
-            param.Analyze(_class.Scope);
             return param.Type2.Value;
         }
 
@@ -140,17 +167,20 @@ namespace CSharpRpp.Codegen
         {
             if (!node.IsConstructor)
             {
-                node.ResolveTypes(_class.Scope);
                 method.ReturnType = node.ReturnType2.Value;
             }
         }
     }
 
-    public class TypeInitializer : RppNodeVisitor
+    /// <summary>
+    /// Initializing native types, we should just create a type because
+    /// it can be used as a parent or parameter in other class. 
+    /// </summary>
+    public class InitializeNativeTypes : RppNodeVisitor
     {
         [NotNull] private readonly ModuleBuilder _module;
 
-        public TypeInitializer([NotNull] ModuleBuilder module)
+        public InitializeNativeTypes([NotNull] ModuleBuilder module)
         {
             _module = module;
         }
@@ -207,7 +237,7 @@ namespace CSharpRpp.Codegen
         }
     }
 
-    public class Type2Creator : RppNodeVisitor
+    public class CreateNativeTypes : RppNodeVisitor
     {
         public override void VisitEnter(RppClass node)
         {

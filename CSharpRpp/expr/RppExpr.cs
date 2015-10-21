@@ -596,7 +596,7 @@ namespace CSharpRpp
 
         public IRppFunc BaseConstructor { get; private set; }
 
-        public IEnumerable<RppType> BaseClassTypeArgs { get; private set; }
+        public IEnumerable<RppType> BaseClassTypeArgs { get; }
         public IEnumerable<RTypeName> BaseClassTypeArgs2 { get; private set; }
         public ResolvedType BaseClassType { get; private set; }
 
@@ -617,7 +617,6 @@ namespace CSharpRpp
             BaseClassName = baseClassName ?? "Object";
             BaseClassTypeArgs2 = baseClassTypeArgs;
         }
-
 
         public override void Accept(IRppNodeVisitor visitor)
         {

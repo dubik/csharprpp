@@ -365,7 +365,15 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Ldarg_0);
             node.Args.ForEach(arg => arg.Accept(this));
 
+            if (node.BaseConstructor == null)
+            {
+                _body.Emit(OpCodes.Call, typeof(object).GetConstructor(new Type[0]));
+                return;
+            }
+
+
             ConstructorInfo constructor = node.BaseConstructor.ConstructorInfo;
+
             if (node.BaseClassType.Runtime.IsGenericType)
             {
                 constructor = TypeBuilder.GetConstructor(node.BaseClassType.Runtime, constructor);
@@ -469,7 +477,7 @@ namespace CSharpRpp.Codegen
                 RppField field = (RppField) id.Ref;
                 _body.Emit(OpCodes.Ldarg_0);
                 node.Right.Accept(this);
-                _body.Emit(OpCodes.Stfld, field.Builder);
+                _body.Emit(OpCodes.Stfld, field.FieldInfo.Native);
             }
             else if (id.Ref is RppVar)
             {
@@ -485,8 +493,9 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppField node)
         {
-            _body.Emit(OpCodes.Ldarg_0);
-            _body.Emit(OpCodes.Ldfld, node.Builder);
+            // TODO we probably don't need to generate code for field because it should be already generated
+            //_body.Emit(OpCodes.Ldarg_0);
+            //_body.Emit(OpCodes.Ldfld, node.Builder);
         }
 
         public override void Visit(RppBox node)

@@ -33,12 +33,11 @@ class Foo(val k : Int)
 
             /*
             Create Types (go through classes)
-            Create function stubs (no parameters)
-            Create primary constructors
-            Set parent class relationship
-            Resolve function parameters types               | Combined
-            Resolve primary constructors parameters types   |
+            Create scopes and add types to them
+            Create function and resolve parameters
+            Create primary constructors and resolve parameters
             Resolve fields
+            Set parent class relationship
             Create 
             Analyze function bodies
             Generate code
@@ -55,19 +54,19 @@ class Foo(val k : Int)
             CodeGenerator generator = new CodeGenerator(program);
             try
             {
-                TypeAndStub2Creator createCreator2 = new TypeAndStub2Creator();
-                program.Accept(createCreator2);
-                // Set Parent relationship
+                Type2Creator typeCreator = new Type2Creator();
+                program.Accept(typeCreator);
+
                 program.PreAnalyze(scope);
 
-                /*
-                program.PreAnalyze(scope);
-                generator.PreGenerate();
-                */
+                ResolveParamTypes resolver = new ResolveParamTypes();
+                program.Accept(resolver);
 
                 program.Analyze(scope);
-                StubCreator stubs = new StubCreator();
-                program.Accept(stubs);
+
+                CreateRType createRType = new CreateRType();
+                program.Accept(createRType);
+
                 /*
                 SemanticAnalyzer semantic = new SemanticAnalyzer();
                 program.Accept(semantic);
@@ -85,10 +84,12 @@ class Foo(val k : Int)
                 Environment.Exit(-1);
             }
 
-            TypeInitializer typeInitializer = new TypeInitializer(generator.Module);
-            program.Accept(typeInitializer);
-            Type2Creator creator = new Type2Creator();
-            program.Accept(creator);
+            InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
+            program.Accept(initializeNativeTypes);
+
+            CreateNativeTypes createNativeTypes = new CreateNativeTypes();
+            program.Accept(createNativeTypes);
+
             generator.Generate();
             generator.Save();
         }

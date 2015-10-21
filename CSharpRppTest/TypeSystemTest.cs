@@ -31,7 +31,7 @@ class Bar extends Foo
 object Main
 ";
             var program = Utils.Parse(code);
-            var creator = new TypeAndStub2Creator();
+            var creator = new CreateRType();
             program.Accept(creator);
             var classes = program.Classes.ToArray();
             var fooType = classes[0].Type2;
@@ -85,7 +85,7 @@ class Foo[A]
 class Bar extends Foo[Int]
 ";
             var program = Utils.Parse(code);
-            var crea = new TypeAndStub2Creator();
+            var crea = new CreateRType();
             program.Accept(crea);
 
             // Analyze
@@ -101,7 +101,7 @@ class Foo
 }
 ";
             RppProgram program = Utils.Parse(code);
-            TypeAndStub2Creator creator = new TypeAndStub2Creator();
+            CreateRType creator = new CreateRType();
             program.Accept(creator);
             RppScope scope = new RppScope(null);
             program.PreAnalyze(scope);

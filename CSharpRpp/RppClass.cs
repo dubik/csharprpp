@@ -45,38 +45,38 @@ namespace CSharpRpp
 
         public ClassKind Kind { get; private set; }
 
-        [CanBeNull]
-        public RppClassScope Scope { get; private set; }
-
-        public IRppClass BaseClass
-        {
-            get { return BaseConstructorCall.BaseClass; }
-        }
+        private RppClassScope _scope;
 
         [NotNull]
-        public IEnumerable<IRppFunc> Functions
+        public RppClassScope Scope
         {
-            get { return _funcs.AsEnumerable(); }
+            get
+            {
+                if (_scope == null)
+                {
+                    throw new Exception("scope is not initialized");
+                }
+
+                return _scope;
+            }
+
+            private set { _scope = value; }
         }
 
-        public IRppFunc Constructor { get; private set; }
+        public IRppClass BaseClass => BaseConstructorCall.BaseClass;
 
         [NotNull]
-        public IEnumerable<RppField> Fields
-        {
-            get { return _fields.AsEnumerable(); }
-        }
+        public IEnumerable<IRppFunc> Functions => _funcs.AsEnumerable();
+
+        public IRppFunc Constructor { get; }
 
         [NotNull]
-        public IEnumerable<RppField> ClassParams
-        {
-            get { return _classParams.AsEnumerable(); }
-        }
+        public IEnumerable<RppField> Fields => _fields.AsEnumerable();
 
-        public IEnumerable<RppVariantTypeParam> TypeParams
-        {
-            get { return _typeParams.AsEnumerable(); }
-        }
+        [NotNull]
+        public IEnumerable<RppField> ClassParams => _classParams.AsEnumerable();
+
+        public IEnumerable<RppVariantTypeParam> TypeParams => _typeParams.AsEnumerable();
 
         [NotNull]
         public Type RuntimeType { get; set; }
@@ -87,10 +87,7 @@ namespace CSharpRpp
 
         private IList<IRppFunc> _constructors;
 
-        public IEnumerable<IRppFunc> Constructors
-        {
-            get { return _constructors.AsEnumerable(); }
-        }
+        public IEnumerable<IRppFunc> Constructors => _constructors.AsEnumerable();
 
         public RppField InstanceField { get; private set; }
         public RType Type2 { get; set; }
@@ -153,8 +150,8 @@ namespace CSharpRpp
             BaseConstructorCall.ResolveBaseClass(scope);
 
             Scope = new RppClassScope(scope);
-            //_funcs.ForEach(Scope.Add);
 
+            //_funcs.ForEach(Scope.Add);
             //_fields.ForEach(Scope.Add);
 
             if (Kind == ClassKind.Object)
