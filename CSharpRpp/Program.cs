@@ -26,9 +26,12 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(val k : Int)
+object Foo
 {
-    def func(p : Int) : Int = p + 13
+    def calculate : Int = {
+        var k : Int = 13
+        k
+    }
 }
 ";
 

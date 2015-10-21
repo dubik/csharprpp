@@ -121,7 +121,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppVar node)
         {
-            node.Builder = _body.DeclareLocal(node.Type.Runtime);
+            node.Builder = _body.DeclareLocal(node.Type2.Value.NativeType);
 
             if (!(node.InitExpr is RppEmptyExpr))
             {
