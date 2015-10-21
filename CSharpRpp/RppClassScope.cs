@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -9,8 +10,11 @@ namespace CSharpRpp
     {
         public RppClassScope BaseClassScope { get; set; }
 
-        public RppClassScope([CanBeNull] RppScope parentScope) : base(parentScope)
+        public RType Type2 { get; }
+
+        public RppClassScope([CanBeNull] RppScope parentScope, RType type2) : base(parentScope)
         {
+            Type2 = type2;
         }
 
         public override IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)

@@ -42,10 +42,10 @@ namespace CSharpRppTest
         [TestMethod]
         public void BaseClassLookup()
         {
-            RppClassScope parent = new RppClassScope(null);
+            RppClassScope parent = new RppClassScope(null, null);
             RppFunc func = new RppFunc("create", UnitTy);
             parent.Add(func);
-            RppClassScope scope = new RppClassScope(null) {BaseClassScope = parent};
+            RppClassScope scope = new RppClassScope(null, null) {BaseClassScope = parent};
             var res = scope.LookupFunction("create").ToList();
             Assert.AreEqual(1, res.Count);
             Assert.AreSame(func, res[0]);
@@ -54,10 +54,10 @@ namespace CSharpRppTest
         [TestMethod]
         public void TwoFuncsMatchInCurrentAndBase()
         {
-            RppClassScope parent = new RppClassScope(null);
+            RppClassScope parent = new RppClassScope(null, null);
             RppFunc func = new RppFunc("create", UnitTy);
             parent.Add(func);
-            RppClassScope scope = new RppClassScope(null) {BaseClassScope = parent};
+            RppClassScope scope = new RppClassScope(null, null) {BaseClassScope = parent};
 
             RppFunc func1 = new RppFunc("create", new List<IRppParam> {_intX}, UnitTy);
             scope.Add(func1);

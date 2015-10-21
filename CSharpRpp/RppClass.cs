@@ -149,7 +149,7 @@ namespace CSharpRpp
 
             BaseConstructorCall.ResolveBaseClass(scope);
 
-            Scope = new RppClassScope(scope);
+            Scope = new RppClassScope(scope, Type2);
 
             //_funcs.ForEach(Scope.Add);
             //_fields.ForEach(Scope.Add);

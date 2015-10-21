@@ -28,10 +28,12 @@ object Runtime
             const string code = @"
 object Foo
 {
-    def calculate : Int = {
-        var k : Int = 13
-        k
-    }
+    def calculate() : Int = 10
+    def calculate(k : Int) : Int = 13
+
+    def callWithNoArg() : Int = calculate()
+
+    def callWithOneArg() : Int = calculate(13)
 }
 ";
 

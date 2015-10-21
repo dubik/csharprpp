@@ -25,7 +25,7 @@ namespace CSharpRpp.Native
             FieldInfo[] fields = classType.GetFields();
             Fields = fields.Select(CreateField).ToList();
             RuntimeType = classType;
-            Scope = new RppClassScope(null);
+            Scope = new RppClassScope(null, null);
             TypeParams = classType.IsGenericType ? classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList() : Collections.NoVariantTypeParams;
 
             if (classType.BaseType != null)
