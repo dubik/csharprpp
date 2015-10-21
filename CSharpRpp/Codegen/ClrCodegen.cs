@@ -367,7 +367,7 @@ namespace CSharpRpp.Codegen
 
             if (node.BaseConstructor == null)
             {
-                _body.Emit(OpCodes.Call, typeof(object).GetConstructor(new Type[0]));
+                _body.Emit(OpCodes.Call, typeof (object).GetConstructor(new Type[0]));
                 return;
             }
 
@@ -442,7 +442,14 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldarg_3);
                     break;
                 default:
-                    _body.Emit(OpCodes.Ldarg, (short) node.Index);
+                    if (node.Index < 256)
+                    {
+                        _body.Emit(OpCodes.Ldarg_S, (byte) node.Index);
+                    }
+                    else
+                    {
+                        _body.Emit(OpCodes.Ldarg, (short) node.Index);
+                    }
                     break;
             }
         }

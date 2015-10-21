@@ -202,6 +202,11 @@ namespace CSharpRpp.TypeSystem
             Name = name;
             Type = type;
         }
+
+        public override string ToString()
+        {
+            return $"{Name} : {Type}";
+        }
     }
 
     public class RppTypeParameterInfo

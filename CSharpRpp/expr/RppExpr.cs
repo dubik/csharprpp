@@ -667,6 +667,8 @@ namespace CSharpRpp
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             */
+
+            Type2 = UnitTy;
             return this;
         }
 

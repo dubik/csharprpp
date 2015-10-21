@@ -87,13 +87,16 @@ namespace CSharpRpp.Codegen
 
         public override void VisitExit(RppFunc node)
         {
+            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value)).ToArray();
+            node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
+
             if (node.IsConstructor)
             {
-                node.MethodInfo = _currentType.DefineConstructor(GetMethodAttributes(node.Modifiers));
+                node.MethodInfo = _currentType.DefineConstructor(GetMethodAttributes(node.Modifiers), parameters);
             }
             else
             {
-                node.MethodInfo = _currentType.DefineMethod(node.Name, GetMethodAttributes(node.Modifiers));
+                node.MethodInfo = _currentType.DefineMethod(node.Name, GetMethodAttributes(node.Modifiers), node.ReturnType2.Value, parameters);
             }
         }
 
