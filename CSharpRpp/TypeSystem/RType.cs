@@ -374,6 +374,7 @@ namespace CSharpRpp.TypeSystem
             DeclaringType = declaringType;
         }
 
+
         public RppMethodInfo DefineMethod([NotNull] string name, RMethodAttributes attributes)
         {
             return DefineMethod(name, attributes, null, new RppParameterInfo[0]);

@@ -8,6 +8,7 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -129,7 +130,7 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
-            Type = RppNativeType.Create(TypeInference.ResolveCommonType(Left.Type.Runtime, Right.Type.Runtime));
+            Type2 = new ResolvableType(TypeInference.ResolveCommonType(Left.Type2.Value, Right.Type2.Value));
 
             return this;
         }
@@ -274,7 +275,7 @@ namespace CSharpRpp
         private void Initialize(T value)
         {
             Value = value;
-            Type2 = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof(T)));
+            Type2 = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof (T)));
         }
 
         protected RppLiteralBase(T value)
@@ -904,7 +905,7 @@ namespace CSharpRpp
         #endregion
     }
 
-    sealed class ClassAsMemberAdapter : RppMember
+    internal sealed class ClassAsMemberAdapter : RppMember
     {
         public override RppType Type { get; protected set; }
         public override ResolvableType Type2 { get; protected set; }
@@ -915,7 +916,7 @@ namespace CSharpRpp
         }
     }
 
-    public class  RppId : RppMember
+    public class RppId : RppMember
     {
         public override RppType Type { get; protected set; }
         public override ResolvableType Type2 { get; protected set; }

@@ -49,11 +49,25 @@ namespace CSharpRppTest
             RppScope scope = new RppScope(null);
             WireRuntime(scope);
             CodeGenerator generator = new CodeGenerator(program);
+
+            Type2Creator typeCreator = new Type2Creator();
+            program.Accept(typeCreator);
+
             program.PreAnalyze(scope);
-            generator.PreGenerate();
+
+            ResolveParamTypes resolver = new ResolveParamTypes();
+            program.Accept(resolver);
+
             program.Analyze(scope);
-            SemanticAnalyzer semantic = new SemanticAnalyzer();
-            program.Accept(semantic);
+
+            CreateRType createRType = new CreateRType();
+            program.Accept(createRType);
+
+            InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
+            program.Accept(initializeNativeTypes);
+            CreateNativeTypes createNativeTypes = new CreateNativeTypes();
+            program.Accept(createNativeTypes);
+
             generator.Generate();
             return generator.Assembly;
         }

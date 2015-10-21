@@ -40,6 +40,11 @@ namespace CSharpRpp
                    type == typeof (byte) || type == typeof (char);
         }
 
+        public static bool IsNumeric(this RType type)
+        {
+            return type.IsPrimitive && type.NativeType.IsNumeric();
+        }
+
         public static bool IsUndefined(this RppType type)
         {
             return type is RppUndefinedType;

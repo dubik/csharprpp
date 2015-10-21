@@ -28,6 +28,7 @@ object Runtime
             const string code = @"
 class Foo(val k : Int)
 {
+    def func(p : Int) : Int = p + 13
 }
 ";
 
@@ -66,11 +67,6 @@ class Foo(val k : Int)
 
                 CreateRType createRType = new CreateRType();
                 program.Accept(createRType);
-
-                /*
-                SemanticAnalyzer semantic = new SemanticAnalyzer();
-                program.Accept(semantic);
-                */
             }
             catch (TypeMismatchException e)
             {
@@ -86,7 +82,6 @@ class Foo(val k : Int)
 
             InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
             program.Accept(initializeNativeTypes);
-
             CreateNativeTypes createNativeTypes = new CreateNativeTypes();
             program.Accept(createNativeTypes);
 

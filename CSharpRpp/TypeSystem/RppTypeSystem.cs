@@ -11,6 +11,7 @@ namespace CSharpRpp.TypeSystem
         public static RType BooleanTy = CreatePrimitive("Boolean", typeof (bool));
         public static RType ShortTy = CreatePrimitive("Short", typeof (short));
         public static RType IntTy = CreatePrimitive("Int", typeof (int));
+        public static RType ByteTy = CreatePrimitive("Byte", typeof(byte));
         public static RType LongTy = CreatePrimitive("Long", typeof (long));
         public static RType FloatTy = CreatePrimitive("Float", typeof (float));
         public static RType DoubleTy = CreatePrimitive("Double", typeof (double));
