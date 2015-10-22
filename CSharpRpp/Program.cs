@@ -26,14 +26,10 @@ object Runtime
 } 
 ";
             const string code = @"
-object Foo
+object Main
 {
-    def calculate() : Int = 10
-    def calculate(k : Int) : Int = 13
-
-    def callWithNoArg() : Int = calculate()
-
-    def callWithOneArg() : Int = calculate(13)
+    def calc : Int = 13
+    def main : Unit = calc()
 }
 ";
 

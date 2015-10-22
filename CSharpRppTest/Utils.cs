@@ -62,10 +62,10 @@ namespace CSharpRppTest
             ResolveParamTypes resolver = new ResolveParamTypes();
             program.Accept(resolver);
 
-            program.Analyze(scope);
-
             CreateRType createRType = new CreateRType();
             program.Accept(createRType);
+
+            program.Analyze(scope);
 
             InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
             program.Accept(initializeNativeTypes);
