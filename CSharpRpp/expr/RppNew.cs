@@ -31,7 +31,7 @@ namespace CSharpRpp
 
         private readonly IList<RppVariantTypeParam> _typeArgs;
 
-        public IRppFunc Constructor { get; private set; }
+        public RppMethodInfo Constructor { get; private set; }
 
         public RppNew([NotNull] string typeName, [NotNull] IList<IRppExpr> constructorsParams)
         {
@@ -65,11 +65,11 @@ namespace CSharpRpp
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
             // TODO Find correct constructor
-            var constructors = RefClass.Constructors;
-
+            var constructors = RefClass.Type2.Constructors;
             CreateNameToVariantTypeParam();
 
-            var candidates = OverloadQuery.Find(Args.Select(a => a.Type).ToList(), constructors, TypesComparator, CanCast).ToList();
+            List<RType> argTypes = Args.Select(a => a.Type2.Value).ToList();
+            List<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, constructors, TypesComparator, CanCast).ToList();
             if (candidates.Count != 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -93,18 +93,20 @@ namespace CSharpRpp
             }
         }
 
-        private static bool CanCast(RppType source, RppType target)
+        private static bool CanCast(RType source, RType target)
         {
             return ImplicitCast.CanCast(source, target);
         }
 
-        private bool TypesComparator(RppType source, RppType target)
+        private bool TypesComparator(RType source, RType target)
         {
+            /*
             if (target.Runtime.IsGenericParameter)
             {
                 RppVariantTypeParam typeParam = _nameToGenericArg[target.Runtime.Name];
                 return source.Runtime == typeParam.Runtime;
             }
+            */
 
             return source.Equals(target);
         }

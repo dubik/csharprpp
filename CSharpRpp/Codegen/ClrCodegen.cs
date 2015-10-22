@@ -288,60 +288,61 @@ namespace CSharpRpp.Codegen
                 {
                     _body.Emit(OpCodes.Ldarg_0);
                     node.Args.ForEach(arg => arg.Accept(this));
-                    var constructor = node.Function.ConstructorInfo;
+                    var constructor = node.Function.Native as ConstructorInfo;
                     _body.Emit(OpCodes.Call, constructor);
                 }
                 else
                 {
-                    if (!node.Function.IsStatic && !_inSelector)
+                    if (!_inSelector)
                     {
                         _body.Emit(OpCodes.Ldarg_0); // load 'this'
                     }
 
                     if (node.Function.IsStatic)
                     {
-                        var instanceField = node.Function.Class.InstanceField.Builder;
-                        _body.Emit(OpCodes.Ldsfld, instanceField);
+                        throw new NotImplementedException("Static functions not done yet");
+                        //var instanceField = node.Function.Class.InstanceField.Builder;
+                        //_body.Emit(OpCodes.Ldsfld, instanceField);
                     }
 
                     node.Args.ForEach(arg => arg.Accept(this));
 
-                    if (node.Function.IsStub)
+                    //if (node.Function.IsStub)
+                    //{
+                    // Not real functions, like Array.length
+                    //    CodegenForStub(node.Function);
+                    //}
+                    //else
+                    //{
+                    MethodInfo method = node.Function.Native as MethodInfo;
+                    if (node.TargetType is RppGenericObjectType)
                     {
-                        // Not real functions, like Array.length
-                        CodegenForStub(node.Function);
+                        RppGenericObjectType genericObjectType = (RppGenericObjectType) node.TargetType;
+                        try
+                        {
+                            // Getting a specialized method from generic object. genericObjectType.Runtime has specialized type
+                            // and 'method' contains generic version
+                            method = TypeBuilder.GetMethod(genericObjectType.Runtime, method);
+                        }
+                        catch
+                        {
+                            // Above works only for TypeBuilders, for C# imported types it throws an exception, so getting
+                            // method which has the same name and amount of parameters
+                            method = node.TargetType.Runtime
+                                .GetMethods().FirstOrDefault(x => x.Name == method.Name && x.GetParameters().Length == method.GetParameters().Length);
+                        }
                     }
-                    else
+
+                    Debug.Assert(method != null, "method != null");
+
+                    if (method.IsGenericMethod)
                     {
-                        MethodInfo method = node.Function.RuntimeType;
-                        if (node.TargetType is RppGenericObjectType)
-                        {
-                            RppGenericObjectType genericObjectType = (RppGenericObjectType) node.TargetType;
-                            try
-                            {
-                                // Getting a specialized method from generic object. genericObjectType.Runtime has specialized type
-                                // and 'method' contains generic version
-                                method = TypeBuilder.GetMethod(genericObjectType.Runtime, method);
-                            }
-                            catch
-                            {
-                                // Above works only for TypeBuilders, for C# imported types it throws an exception, so getting
-                                // method which has the same name and amount of parameters
-                                method = node.TargetType.Runtime
-                                    .GetMethods().FirstOrDefault(x => x.Name == method.Name && x.GetParameters().Length == method.GetParameters().Length);
-                            }
-                        }
-
-                        Debug.Assert(method != null, "method != null");
-
-                        if (method.IsGenericMethod)
-                        {
-                            var methodTypeArgs = node.TypeArgs.Select(t => t.Runtime).ToArray();
-                            method = method.MakeGenericMethod(methodTypeArgs);
-                        }
-
-                        _body.Emit(OpCodes.Callvirt, method);
+                        var methodTypeArgs = node.TypeArgs.Select(t => t.Runtime).ToArray();
+                        method = method.MakeGenericMethod(methodTypeArgs);
                     }
+
+                    _body.Emit(OpCodes.Callvirt, method);
+                    //}
                 }
             }
         }
@@ -457,19 +458,20 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppNew node)
         {
             node.Args.ForEach(arg => arg.Accept(this));
-            IRppFunc constructor = node.Constructor;
+            RppMethodInfo constructor = node.Constructor;
 
+            ConstructorInfo constructorInfo = constructor.Native as ConstructorInfo;
             if (node.TypeArgs.Any())
             {
                 var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();
                 Type specializedType = node.RefClass.RuntimeType.MakeGenericType(genericArgs);
-                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructor.ConstructorInfo);
+                var specializedConstr = TypeBuilder.GetConstructor(specializedType, constructorInfo);
                 _body.Emit(OpCodes.Newobj, specializedConstr);
             }
             else
             {
                 // TODO RppNativeClass don't have constructor builders, they have constructorinfo instead, fix this
-                _body.Emit(OpCodes.Newobj, constructor.ConstructorInfo);
+                _body.Emit(OpCodes.Newobj, constructorInfo);
             }
         }
 

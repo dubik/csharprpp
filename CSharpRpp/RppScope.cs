@@ -68,24 +68,17 @@ namespace CSharpRpp
         {
             string name = node.Name;
 
-            if (node.IsFunction())
+            if (node.IsObject())
             {
-                Add((RppFunc) node);
+                name = GetObjectName(name);
             }
-            else
+
+            if (_entities.ContainsKey(name))
             {
-                if (node.IsObject())
-                {
-                    name = GetObjectName(name);
-                }
-
-                if (_entities.ContainsKey(name))
-                {
-                    throw new ArgumentException($"Already containes {node.Name}", nameof(node));
-                }
-
-                _entities.Add(name, node);
+                throw new ArgumentException($"Already containes {node.Name}", nameof(node));
             }
+
+            _entities.Add(name, node);
         }
 
         public void Add(string genericName, RppType specializedType)
@@ -110,9 +103,6 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public virtual IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true)
-        {
-            return Collections.NoRFuncsCollection;
-        }
+        public virtual IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true) => ParentScope?.LookupFunction(name,searchParentScope);
     }
 }

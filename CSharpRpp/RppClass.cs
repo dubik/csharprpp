@@ -32,6 +32,8 @@ namespace CSharpRpp
         IRppClass BaseClass { get; }
 
         RppBaseConstructorCall BaseConstructorCall { get; }
+
+        RType Type2 { get; set; }
     }
 
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
@@ -166,7 +168,7 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             Debug.Assert(Scope != null, "Scope != null");
-            Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
+            //Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
 
             RppScope constructorScope = new RppScope(Scope);
             _classParams.ForEach(constructorScope.Add);
@@ -175,7 +177,7 @@ namespace CSharpRpp
             _fields = NodeUtils.Analyze(Scope, _fields);
 
             // Add all constructors to scope, so that they can be accessed by each other
-            Constructors.ForEach(Scope.Add);
+            // Constructors.ForEach(Scope.Add);
 
             _constructors = NodeUtils.Analyze(constructorScope, _constructors);
             _funcs = NodeUtils.Analyze(Scope, _funcs);

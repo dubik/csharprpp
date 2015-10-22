@@ -117,6 +117,7 @@ namespace CSharpRpp.TypeSystem
 
         public MethodBase Native { get; set; }
         public bool IsVariadic { get; private set; }
+        public bool IsStatic { get; private set; }
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
             [CanBeNull] RType returnType,

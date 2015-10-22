@@ -83,7 +83,9 @@ namespace CSharpRpp.Parser
                 bool castRequired; // Flag if we need to cast any argument
                 RppParameterInfo[] candidateParams = candidate.Parameters;
 
-                if (candidate.TypeParameters.Length == typeArgs.Count()
+                int candidateTypeParamCount = candidate.TypeParameters?.Length ?? 0;
+
+                if (candidateTypeParamCount == typeArgs.Count()
                     && SignatureMatched(argTypesArray, typeArgs, candidateParams, comparator, out castRequired))
                 {
                     if (!castRequired)

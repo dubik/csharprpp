@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Native
 {
@@ -16,6 +17,7 @@ namespace CSharpRpp.Native
         public RppClassScope Scope { get; }
         public IRppClass BaseClass { get; }
         public RppBaseConstructorCall BaseConstructorCall { get; }
+        public RType Type2 { get; set; }
 
         public RppNativeClass(Type classType) : base(classType.Name)
         {

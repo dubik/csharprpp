@@ -416,12 +416,12 @@ namespace CSharpRpp
             _typeArgs = typeArgList;
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, RppMethodInfo function, RppType type,
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, RppMethodInfo function, ResolvableType type,
             [NotNull] IList<RppVariantTypeParam> typeArgList)
             : this(name, argList, typeArgList)
         {
             Function = function;
-            Type = type;
+            Type2 = type;
         }
 
         private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
@@ -443,8 +443,9 @@ namespace CSharpRpp
         /// <param name="funcParams">input list of params</param>
         /// <param name="totalNumberOfParams">how many params needs to be</param>
         /// <returns>expanded list of types as in example above</returns>
-        private static IEnumerable<RppType> ExpandVariadicParam(ICollection<IRppParam> funcParams, int totalNumberOfParams)
+        private static IEnumerable<RppType> ExpandVariadicParam(RppParameterInfo[] funcParams, int totalNumberOfParams)
         {
+            /*
             List<RppType> expandedList = funcParams.Where(p => !p.IsVariadic).Select(p => p.Type).ToList();
             if (funcParams.Count > 0 && funcParams.Last().IsVariadic)
             {
@@ -454,6 +455,8 @@ namespace CSharpRpp
             }
 
             return expandedList;
+            */
+            throw new NotImplementedException("Not done yet");
         }
 
         // TODO This needs to be rewritten.
@@ -466,7 +469,8 @@ namespace CSharpRpp
 
             // Search for a function which matches signature and possible gaps in types (for closures)
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, TypeArgs, scope);
-            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
+            //IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
+            var args = ArgList;
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
             if (resolveResults.Function.IsVariadic)
             {
@@ -516,8 +520,10 @@ namespace CSharpRpp
             return newArgList;
         }
 
-        private static RppType GetElementType(RppType arrayType)
+        private static RppType GetElementType(RType arrayType)
         {
+            throw new NotImplementedException("Not done yet");
+            /*
             RppArrayType type = arrayType as RppArrayType;
             if (type != null)
             {
@@ -532,6 +538,7 @@ namespace CSharpRpp
 
             Debug.Assert(false, "arrayType is not arraytype ");
             return null;
+            */
         }
 
         private static IRppExpr BoxIfValueType(IRppExpr arg, RppType targetType)
@@ -673,6 +680,7 @@ namespace CSharpRpp
             return this;
         }
 
+        /*
         private IRppFunc FindMatchingConstructor(IEnumerable<RppType> args)
         {
             var matchedConstructors = OverloadQuery.Find(args, BaseClass.Constructors, TypesComparator, CanCast).ToList();
@@ -699,6 +707,7 @@ namespace CSharpRpp
 
             return OverloadQuery.DefaultTypesComparator(source, target);
         }
+        */
     }
 
     public class RppArray : RppNode, IRppExpr
@@ -846,8 +855,8 @@ namespace CSharpRpp
 
             RppScope classScope = new RppScope(null);
 
-            targetType.Class.Functions.ForEach(classScope.Add);
-            targetType.Class.Fields.ForEach(classScope.Add);
+            // targetType.Class.Functions.ForEach(classScope.Add);
+            // targetType.Class.Fields.ForEach(classScope.Add);
 
             if (Target.Type is RppGenericObjectType)
             {

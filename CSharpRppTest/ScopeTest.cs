@@ -44,7 +44,7 @@ namespace CSharpRppTest
         {
             RppClassScope parent = new RppClassScope(null, null);
             RppFunc func = new RppFunc("create", UnitTy);
-            parent.Add(func);
+            //parent.Add(func);
             RppClassScope scope = new RppClassScope(null, null) {BaseClassScope = parent};
             var res = scope.LookupFunction("create").ToList();
             Assert.AreEqual(1, res.Count);
@@ -56,11 +56,11 @@ namespace CSharpRppTest
         {
             RppClassScope parent = new RppClassScope(null, null);
             RppFunc func = new RppFunc("create", UnitTy);
-            parent.Add(func);
+            //parent.Add(func);
             RppClassScope scope = new RppClassScope(null, null) {BaseClassScope = parent};
 
             RppFunc func1 = new RppFunc("create", new List<IRppParam> {_intX}, UnitTy);
-            scope.Add(func1);
+            //scope.Add(func1);
             var res = scope.LookupFunction("create").ToList();
             Assert.AreEqual(2, res.Count);
             Assert.AreSame(func1, res[0]); // Order is important

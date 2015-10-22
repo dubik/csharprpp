@@ -20,7 +20,7 @@ namespace CSharpRpp
             public virtual IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
                 IList<RppVariantTypeParam> typeArgs)
             {
-                return new RppFuncCall(functionName, resolvedArgList, Function, Function.ReturnType, typeArgs) {TargetType = targetType};
+                return new RppFuncCall(functionName, resolvedArgList, Function, new ResolvableType(Function.ReturnType), typeArgs) {TargetType = targetType};
             }
         }
 
@@ -42,7 +42,10 @@ namespace CSharpRpp
             {
                 var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList, Function, Function.ReturnType, typeArgs.ToList()) {TargetType = (RppObjectType) _expr.Type});
+                    new RppFuncCall("apply", resolvedArgList, Function, new ResolvableType(Function.ReturnType), typeArgs.ToList())
+                    {
+                        TargetType = (RppObjectType) _expr.Type
+                    });
             }
         }
 
@@ -78,7 +81,7 @@ namespace CSharpRpp
         private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
-            
+
             var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
             if (candidates.Count > 1)
             {
@@ -100,6 +103,8 @@ namespace CSharpRpp
             {
                 IRppExpr expr = node as IRppExpr;
 
+                throw new NotImplementedException("Not yet");
+                /*
                 if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
                 {
                     IRppClass clazz = (expr.Type as RppObjectType).Class;
@@ -123,6 +128,7 @@ namespace CSharpRpp
 
                     return new ClosureResolveResults((RppMember) expr, candidates[0], _typeArgs);
                 }
+                */
             }
 
             return null;
@@ -131,7 +137,7 @@ namespace CSharpRpp
         private ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, RppScope scope)
         {
             RppClass obj = scope.LookupObject(name);
-            var applyFunctions = obj.Functions.Where(func => func.Name == "apply").ToList();
+            var applyFunctions = obj.Type2.Methods.Where(func => func.Name == "apply").ToList();
             if (applyFunctions.Count == 0)
             {
                 throw new Exception("Companion object doesn't have apply() with required signature");
