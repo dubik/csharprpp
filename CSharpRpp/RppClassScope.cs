@@ -17,7 +17,7 @@ namespace CSharpRpp
             Type2 = type2;
         }
 
-        public override IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)
+        public override IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true)
         {
             var members = LookupMember(name);
             if (members.Count != 0)
@@ -25,7 +25,7 @@ namespace CSharpRpp
                 return members;
             }
 
-            return searchParentScope && ParentScope != null ? ParentScope.LookupFunction(name) : Collections.NoFuncsCollection;
+            return searchParentScope && ParentScope != null ? ParentScope.LookupFunction(name) : Collections.NoRFuncsCollection;
         }
 
         /// <summary>
@@ -34,12 +34,17 @@ namespace CSharpRpp
         /// <param name="name">name of the member</param>
         /// <returns>list of matching functions</returns>
         [NotNull]
-        protected IReadOnlyCollection<IRppFunc> LookupMember(string name)
+        protected IReadOnlyCollection<RppMethodInfo> LookupMember(string name)
         {
-            var current = DoLookupFunction(name, false).ToList();
-            var baseMembers = BaseClassScope?.LookupMember(name) ?? Collections.NoFuncsCollection;
+            var current = FindMethods(name).ToList();
+            var baseMembers = BaseClassScope?.LookupMember(name) ?? Collections.NoRFuncsCollection;
             current.AddRange(baseMembers);
             return current;
+        }
+
+        private IEnumerable<RppMethodInfo> FindMethods(string name)
+        {
+            return Type2.Methods.Where(m => m.Name == name);
         }
     }
 }

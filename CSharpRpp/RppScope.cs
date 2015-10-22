@@ -11,7 +11,6 @@ namespace CSharpRpp
     {
         [CanBeNull] protected readonly RppScope ParentScope;
         [NotNull] private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
-        [NotNull] private readonly MultiValueDictionary<string, RppFunc> _functions = new MultiValueDictionary<string, RppFunc>();
         [NotNull] private readonly Dictionary<string, RppType> _genericTypes = new Dictionary<string, RppType>();
 
         [NotNull] private readonly Dictionary<string, RType> _types = new Dictionary<string, RType>();
@@ -89,12 +88,6 @@ namespace CSharpRpp
             }
         }
 
-        public void Add(RppFunc func)
-        {
-            CheckFunctionAlreadyExists(func);
-            _functions.Add(func.Name, func);
-        }
-
         public void Add(string genericName, RppType specializedType)
         {
             if (_genericTypes.ContainsKey(genericName))
@@ -116,31 +109,10 @@ namespace CSharpRpp
             return ParentScope?.LookupGenericType(genericName);
         }
 
-        private void CheckFunctionAlreadyExists(RppFunc func)
-        {
-            IReadOnlyCollection<RppFunc> funcs;
-
-            if (_functions.TryGetValue(func.Name, out funcs) && funcs.FirstOrDefault(f => f.SignatureMatch(func)) != null)
-            {
-                throw new Exception("Function " + func.Name + " already exists in the scope");
-            }
-        }
-
         [NotNull]
-        public virtual IReadOnlyCollection<IRppFunc> LookupFunction(string name, bool searchParentScope = true)
+        public virtual IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true)
         {
-            return DoLookupFunction(name, searchParentScope);
-        }
-
-        protected IReadOnlyCollection<IRppFunc> DoLookupFunction(string name, bool searchParentScope)
-        {
-            IReadOnlyCollection<RppFunc> node;
-            if (_functions.TryGetValue(name, out node))
-            {
-                return node;
-            }
-
-            return ParentScope != null && searchParentScope ? ParentScope.LookupFunction(name) : Collections.NoFuncsCollection;
+            return Collections.NoRFuncsCollection;
         }
     }
 }

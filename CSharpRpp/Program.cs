@@ -68,10 +68,10 @@ object Foo
                 ResolveParamTypes resolver = new ResolveParamTypes();
                 program.Accept(resolver);
 
-                program.Analyze(scope);
-
                 CreateRType createRType = new CreateRType();
                 program.Accept(createRType);
+
+                program.Analyze(scope);
             }
             catch (TypeMismatchException e)
             {

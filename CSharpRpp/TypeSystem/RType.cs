@@ -110,10 +110,13 @@ namespace CSharpRpp.TypeSystem
         [CanBeNull]
         public RppParameterInfo[] Parameters { get; set; }
 
+        public RppTypeParameterInfo[] TypeParameters { get; set; }
+
         [NotNull]
         public RType DeclaringType { get; private set; }
 
         public MethodBase Native { get; set; }
+        public bool IsVariadic { get; private set; }
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
             [CanBeNull] RType returnType,
@@ -192,6 +195,8 @@ namespace CSharpRpp.TypeSystem
         public string Name { get; }
         public RType Type { get; }
         public int Index { get; set; }
+
+        public bool IsVariadic { get; private set; }
 
         public RppParameterInfo(RType type) : this("", type)
         {

@@ -18,5 +18,6 @@ namespace CSharpRpp
         public static HashSet<ObjectModifier> NoModifiers = new HashSet<ObjectModifier>();
 
         public static IReadOnlyCollection<IRppFunc> NoFuncsCollection = new List<IRppFunc>();
+        public static IReadOnlyCollection<RppMethodInfo> NoRFuncsCollection = new List<RppMethodInfo>();
     }
 }

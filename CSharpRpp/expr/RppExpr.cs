@@ -398,7 +398,7 @@ namespace CSharpRpp
         protected readonly IList<IRppExpr> ArgList;
 
         [NotNull]
-        public IRppFunc Function { get; }
+        public RppMethodInfo Function { get; }
 
         public bool IsConstructorCall => Name == "this";
 
@@ -416,7 +416,7 @@ namespace CSharpRpp
             _typeArgs = typeArgList;
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, IRppFunc function, RppType type,
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, RppMethodInfo function, RppType type,
             [NotNull] IList<RppVariantTypeParam> typeArgList)
             : this(name, argList, typeArgList)
         {
@@ -424,7 +424,7 @@ namespace CSharpRpp
             Type = type;
         }
 
-        private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, ICollection<IRppParam> funcParams)
+        private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
             var funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
@@ -466,7 +466,7 @@ namespace CSharpRpp
 
             // Search for a function which matches signature and possible gaps in types (for closures)
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, TypeArgs, scope);
-            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Params);
+            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
             if (resolveResults.Function.IsVariadic)
             {
@@ -497,14 +497,14 @@ namespace CSharpRpp
         /// <param name="args">list of expressions</param>
         /// <param name="function">target function</param>
         /// <returns>list of arguments</returns>
-        private static List<IRppExpr> RewriteArgListForVariadicParameter(RppScope scope, IList<IRppExpr> args, IRppFunc function)
+        private static List<IRppExpr> RewriteArgListForVariadicParameter(RppScope scope, IList<IRppExpr> args, RppMethodInfo function)
         {
-            List<IRppParam> funcParams = function.Params.ToList();
+            List<RppParameterInfo> funcParams = function.Parameters.ToList();
             int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
             List<IRppExpr> newArgList = args.Take(variadicIndex).ToList();
             var variadicParams = args.Where((arg, index) => index >= variadicIndex).ToList();
 
-            IRppParam variadicParam = funcParams.Find(p => p.IsVariadic);
+            RppParameterInfo variadicParam = funcParams.Find(p => p.IsVariadic);
 
             var elementType = GetElementType(variadicParam.Type);
             variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();

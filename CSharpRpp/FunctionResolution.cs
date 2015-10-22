@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.Parser;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
@@ -9,9 +10,9 @@ namespace CSharpRpp
     {
         public class ResolveResults
         {
-            public IRppFunc Function { get; }
+            public RppMethodInfo Function { get; }
 
-            public ResolveResults(IRppFunc resolvedFunc)
+            public ResolveResults(RppMethodInfo resolvedFunc)
             {
                 Function = resolvedFunc;
             }
@@ -28,7 +29,7 @@ namespace CSharpRpp
             private readonly RppMember _expr;
             private readonly IEnumerable<Type> _typeArgs;
 
-            public ClosureResolveResults(RppMember expr, IRppFunc resolvedFunc, IEnumerable<Type> typeArgs)
+            public ClosureResolveResults(RppMember expr, RppMethodInfo resolvedFunc, IEnumerable<Type> typeArgs)
                 : base(resolvedFunc)
             {
                 _expr = expr;
@@ -76,7 +77,7 @@ namespace CSharpRpp
 
         private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
         {
-            IReadOnlyCollection<IRppFunc> overloads = scope.LookupFunction(name);
+            IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
             
             var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
             if (candidates.Count > 1)

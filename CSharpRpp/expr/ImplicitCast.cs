@@ -83,8 +83,9 @@ namespace CSharpRpp.Expr
             return Tuple.Create(first, second);
         }
 
-        public static bool CanCast(RppType source, RppType dest)
+        public static bool CanCast(RType source, RType dest)
         {
+            /*
             if (source is RppPrimitiveType && dest is RppPrimitiveType)
             {
                 RppPrimitiveType sourceType = (RppPrimitiveType) source;
@@ -97,8 +98,8 @@ namespace CSharpRpp.Expr
             {
                 return source.Runtime.IsValueType && dest.Runtime == typeof (object);
             }
-
-            return false;
+            */
+            return source.Name == dest.Name;
         }
     }
 }

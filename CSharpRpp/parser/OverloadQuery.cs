@@ -4,6 +4,7 @@ using System.Linq;
 using CSharpRpp.Expr;
 using JetBrains.Annotations;
 using System;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Parser
 {
@@ -29,33 +30,33 @@ namespace CSharpRpp.Parser
 
     public interface ITypesComparator<in T>
     {
-        bool Compare(T source, RppType target);
-        bool CanCast(T source, RppType target);
+        bool Compare(T source, RType target);
+        bool CanCast(T source, RType target);
     }
 
     public class OverloadQuery
     {
-        public delegate bool TypesComparator<in T>(T source, RppType target);
+        public delegate bool TypesComparator<in T>(T source, RType target);
 
-        public delegate bool CanCast<in T>(T source, RppType target);
+        public delegate bool CanCast<in T>(T source, RType target);
 
-        public static bool DefaultTypesComparator(RppType source, RppType target)
+        public static bool DefaultTypesComparator(RType source, RType target)
         {
             return source.Equals(target);
         }
 
-        public static bool DefaultCanCast(RppType source, RppType target)
+        public static bool DefaultCanCast(RType source, RType target)
         {
             return ImplicitCast.CanCast(source, target);
         }
 
         [NotNull]
-        public static IEnumerable<IRppFunc> Find([NotNull] IEnumerable<RppType> argTypes, [NotNull] IEnumerable<IRppFunc> overloads)
+        public static IEnumerable<RppMethodInfo> Find([NotNull] IEnumerable<RType> argTypes, [NotNull] IEnumerable<RppMethodInfo> overloads)
         {
             return Find(argTypes, overloads, DefaultTypesComparator, DefaultCanCast);
         }
 
-        public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<IRppFunc> overloads,
+        public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<RppMethodInfo> overloads,
             ITypesComparator<T> comparator)
         {
             return Find(argTypes, Collections.NoRuntimeTypes, overloads, comparator);
@@ -70,24 +71,24 @@ namespace CSharpRpp.Parser
         /// <param name="overloads"></param>
         /// <param name="comparator"></param>
         /// <returns></returns>
-        public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<Type> typeArgs,
-            [NotNull] IEnumerable<IRppFunc> overloads,
+        public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<Type> typeArgs,
+            [NotNull] IEnumerable<RppMethodInfo> overloads,
             ITypesComparator<T> comparator)
         {
             var argTypesArray = argTypes.ToArray();
 
-            var candidates = new List<IRppFunc>();
+            var candidates = new List<RppMethodInfo>();
             foreach (var candidate in overloads)
             {
                 bool castRequired; // Flag if we need to cast any argument
-                IRppParam[] candidateParams = candidate.Params;
+                RppParameterInfo[] candidateParams = candidate.Parameters;
 
-                if (candidate.TypeParams.Count == typeArgs.Count() 
+                if (candidate.TypeParameters.Length == typeArgs.Count()
                     && SignatureMatched(argTypesArray, typeArgs, candidateParams, comparator, out castRequired))
                 {
                     if (!castRequired)
                     {
-                        return new List<IRppFunc> {candidate};
+                        return new List<RppMethodInfo> {candidate};
                     }
 
                     candidates.Add(candidate);
@@ -98,13 +99,14 @@ namespace CSharpRpp.Parser
         }
 
         [NotNull]
-        public static IEnumerable<IRppFunc> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<IRppFunc> overloads,
+        public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<RppMethodInfo> overloads,
             TypesComparator<T> typesComparator, CanCast<T> canCast)
         {
             return Find(argTypes, overloads, new DelegateTypeComparator<T>(typesComparator, canCast));
         }
 
-        public static bool SignatureMatched<T>(IList<T> items, IEnumerable<Type> typeArgs, IList<IRppParam> candidateParams, ITypesComparator<T> comparator,
+        public static bool SignatureMatched<T>(IList<T> items, IEnumerable<Type> typeArgs, IList<RppParameterInfo> candidateParams,
+            ITypesComparator<T> comparator,
             out bool castRequired)
         {
             castRequired = false;
@@ -129,12 +131,13 @@ namespace CSharpRpp.Parser
             int candidateParamIndex = 0;
             foreach (T item in items)
             {
-                IRppParam param = candidateParams[candidateParamIndex];
-                RppType paramType = param.Type;
+                RppParameterInfo param = candidateParams[candidateParamIndex];
+                RType paramType = param.Type;
 
                 if (param.IsVariadic)
                 {
-                    paramType = ((RppArrayType) paramType).SubType;
+                    throw new NotImplementedException("Variadic is not implemented yet");
+                    // paramType = ((RppArrayType) paramType).SubType;
                 }
                 else
                 {
@@ -148,10 +151,11 @@ namespace CSharpRpp.Parser
                 //    def func(x: A)...
                 // }
                 // from class description, then we should skip, it will be taken care of in the comparator
+                /*
                 if (paramType.Runtime.IsGenericParameter && typeArgs.Any())
                 {
                     paramType = RppNativeType.Create(typeArgs.ElementAt(paramType.Runtime.GenericParameterPosition));
-                }
+                }*/
 
                 if (!comparator.Compare(item, paramType))
                 {

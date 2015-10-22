@@ -1,4 +1,6 @@
-﻿namespace CSharpRpp.Parser
+﻿using CSharpRpp.TypeSystem;
+
+namespace CSharpRpp.Parser
 {
     /// <summary>
     /// Implementation of <code>ITypesComparator</code> which delegates types comparision to delegates.
@@ -17,12 +19,12 @@
             _canCast = canCast;
         }
 
-        public bool CanCast(T source, RppType target)
+        public bool CanCast(T source, RType target)
         {
             return _canCast(source, target);
         }
 
-        public bool Compare(T source, RppType target)
+        public bool Compare(T source, RType target)
         {
             return _typesComparator(source, target);
         }
