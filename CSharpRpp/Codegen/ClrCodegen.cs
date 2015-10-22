@@ -53,8 +53,25 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             Console.WriteLine("Genering class: " + node.Name);
-            _typeBuilder = node.RuntimeType as TypeBuilder;
+            _typeBuilder = node.Type2.NativeType as TypeBuilder;
+            Debug.Assert(_typeBuilder != null, "_typeBuilder != null");
             _closureId = 1;
+
+            if (node.IsObject())
+            {
+                node.InstanceField.Builder = _typeBuilder.DefineField(node.InstanceField.Name, _typeBuilder, FieldAttributes.Public | FieldAttributes.Static);
+                CreateStaticConstructor(_typeBuilder, node);
+            }
+        }
+
+        private static void CreateStaticConstructor(TypeBuilder typeBuilder, RppClass obj)
+        {
+            ConstructorBuilder staticConstructor = typeBuilder.DefineTypeInitializer();
+            ILGenerator body = staticConstructor.GetILGenerator();
+            ConstructorInfo constructor = obj.Type2.Constructors[0].Native as ConstructorInfo;
+            body.Emit(OpCodes.Newobj, constructor);
+            body.Emit(OpCodes.Stsfld, obj.InstanceField.Builder);
+            body.Emit(OpCodes.Ret);
         }
 
         private readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
@@ -148,7 +165,6 @@ namespace CSharpRpp.Codegen
             {"==", OpCodes.Ceq},
             {"!=", OpCodes.Ceq}
         };
-
 
         public override void Visit(RppLogicalBinOp node)
         {

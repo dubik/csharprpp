@@ -1,16 +1,4 @@
-﻿// ----------------------------------------------------------------------
-// Copyright © 2014 Microsoft Mobile. All rights reserved.
-// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
-//  
-// This software, including documentation, is protected by copyright controlled by
-// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
-// adapting or translating, any or all of this material requires the prior written consent of
-// Microsoft Mobile. This material also contains confidential information which may not
-// be disclosed to others without the prior written consent of Microsoft Mobile.
-// ----------------------------------------------------------------------
-
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -27,10 +15,9 @@ namespace CSharpRpp.Codegen
     {
         public override void VisitEnter(RppClass node)
         {
-            RType classType = new RType(node.Name, GetTypeAttributes(node), null, null);
+            RType classType = new RType(node.GetNativeName(), GetTypeAttributes(node), null, null);
             node.Type2 = classType;
         }
-
 
         private static RTypeAttributes GetTypeAttributes(RppClass node)
         {
