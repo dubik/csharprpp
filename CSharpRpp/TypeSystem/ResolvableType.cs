@@ -55,5 +55,35 @@ namespace CSharpRpp.TypeSystem
 
             return $"'{Name}'";
         }
+
+        protected bool Equals(ResolvableType other)
+        {
+            if (_type != null && other._type != null)
+                return _type.Equals(other._type);
+
+            return Name.Equals(other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+            return Equals((ResolvableType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
     }
 }
