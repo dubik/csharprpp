@@ -26,14 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(var k : Int)
+object Bar
 {
-    k = 13
-}
-
-object Main
-{
-    def main() : Foo = new Foo(1)
+    def concat(args: Int*) : Int = {
+        args.length()
+    }
 }
 ";
 

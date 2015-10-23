@@ -331,6 +331,13 @@ namespace CSharpRpp.Codegen
                     //else
                     //{
                     MethodInfo method = node.Function.Native as MethodInfo;
+
+                    if (method == null) // This is a stub, so generate code for it
+                    {
+                        CodegenForStub(node.Function);
+                        return;
+                    }
+
                     if (node.TargetType is RppGenericObjectType)
                     {
                         RppGenericObjectType genericObjectType = (RppGenericObjectType) node.TargetType;
@@ -361,6 +368,17 @@ namespace CSharpRpp.Codegen
                     //}
                 }
             }
+        }
+
+        private void CodegenForStub(RppMethodInfo function)
+        {
+            if (function.DeclaringType.Name == "Array" && function.Name == "length")
+            {
+                _body.Emit(OpCodes.Ldlen);
+                return;
+            }
+
+            throw new NotImplementedException("Other funcs are not implemented");
         }
 
         private void CodegenForStub(IRppFunc function)

@@ -29,6 +29,7 @@ namespace CSharpRpp
 
         // TODO perhaps it would make more sense to add target to constructor as a parameter (not type, but node)
         public RppObjectType TargetType { get; set; }
+        public RType TargetType2 { get; set; }
 
         protected RppMember(string name) : base(name)
         {
@@ -849,11 +850,11 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             Target.Analyze(scope);
-            RppObjectType targetType = Target.Type as RppObjectType;
+            RType targetType = Target.Type2.Value;
 
             Debug.Assert(targetType != null, "targetType != null");
 
-            RppScope classScope = new RppScope(null);
+            RppClassScope classScope = new RppClassScope(null, targetType);
 
             // targetType.Class.Functions.ForEach(classScope.Add);
             // targetType.Class.Fields.ForEach(classScope.Add);
@@ -867,10 +868,11 @@ namespace CSharpRpp
                 }
             }
 
-            Path.TargetType = targetType;
+            //Path.TargetType = targetType;
+            Path.TargetType2 = targetType;
             Path = (RppMember) Path.Analyze(classScope);
-            Type = Path.Type.Runtime.IsGenericParameter ? classScope.LookupGenericType(Path.Type.Runtime.Name) : Path.Type;
-
+            //Type = Path.Type.Runtime.IsGenericParameter ? classScope.LookupGenericType(Path.Type.Runtime.Name) : Path.Type;
+            Type2 = Path.Type2;
             return this;
         }
 

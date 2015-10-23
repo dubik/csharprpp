@@ -295,7 +295,7 @@ namespace CSharpRpp
         public RppParam(string name, ResolvableType type, bool variadic = false) : base(name)
         {
             IsVariadic = variadic;
-            // Type = variadic ? new RppArrayType(type) : type;
+            //Type = variadic ? new RppArrayType(type) : type;
             Type2 = type;
         }
 
@@ -307,6 +307,11 @@ namespace CSharpRpp
         public override IRppNode Analyze(RppScope scope)
         {
             Type2.Resolve(scope);
+            if (IsVariadic)
+            {
+                Type2 = new ResolvableType(Type2.Value.MakeArrayType());
+            }
+
             return this;
         }
 
