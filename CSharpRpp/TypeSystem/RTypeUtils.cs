@@ -79,10 +79,10 @@ namespace CSharpRpp.TypeSystem
 
         public static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes, bool constructor)
         {
-            MethodAttributes attrs = MethodAttributes.Private;
-            if (rAttributes.HasFlag(RMethodAttributes.Public))
+            MethodAttributes attrs = MethodAttributes.Public;
+            if (rAttributes.HasFlag(RMethodAttributes.Private))
             {
-                attrs = MethodAttributes.Public;
+                attrs = MethodAttributes.Private;
             }
 
             // always virtual, even for statics

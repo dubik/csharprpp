@@ -17,7 +17,7 @@ namespace CSharpRpp
         public Type RuntimeType { get; private set; }
 
         [NotNull]
-        public IRppClass RefClass { get; private set; }
+        public RType RefType2 { get; private set; }
 
         public IEnumerable<RppType> ArgumentTypes { get; private set; }
 
@@ -58,14 +58,14 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, _constructorsParams);
 
-            var refClass = scope.Lookup(_typeName) as IRppClass;
-            Debug.Assert(refClass != null);
-            RefClass = refClass;
+            var refClass = scope.LookupType(_typeName);
+
+            RefType2 = refClass;
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
             // TODO Find correct constructor
-            var constructors = RefClass.Type2.Constructors;
+            var constructors = RefType2.Constructors;
             CreateNameToVariantTypeParam();
 
             List<RType> argTypes = Args.Select(a => a.Type2.Value).ToList();
@@ -77,8 +77,8 @@ namespace CSharpRpp
 
             Constructor = candidates[0];
 
-            Type = CreateType();
-
+            //Type = CreateType();
+            Type2 = new ResolvableType(RefType2);
             return this;
         }
 
@@ -86,7 +86,7 @@ namespace CSharpRpp
         {
             _nameToGenericArg = new Dictionary<string, RppVariantTypeParam>();
             int index = 0;
-            foreach (var typeParam in RefClass.TypeParams)
+            foreach (var typeParam in RefType2.TypeParameters)
             {
                 _nameToGenericArg.Add(typeParam.Name, _typeArgs[index]);
                 index++;
@@ -115,15 +115,17 @@ namespace CSharpRpp
         /// Creates type of 'new' expression, if required it creates generic arguments.
         /// </summary>
         /// <returns>type of the 'new' expression</returns>
+        /*
         private ResolvedType CreateType()
         {
             if (_typeArgs.Count > 0)
             {
                 var genericArgs = _typeArgs.Select(arg => arg.Runtime).ToArray();
-                return new RppGenericObjectType((RppClass) RefClass, genericArgs, RefClass.RuntimeType.MakeGenericType(genericArgs));
+                return new RppGenericObjectType((RppClass) RefType2, genericArgs, RefType2.RuntimeType.MakeGenericType(genericArgs));
             }
 
-            return RppNativeType.Create(RefClass.RuntimeType);
+            return RppNativeType.Create(RefType2.RuntimeType);
         }
+        */
     }
 }

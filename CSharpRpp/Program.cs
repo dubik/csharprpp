@@ -26,10 +26,14 @@ object Runtime
 } 
 ";
             const string code = @"
+class Foo(var k : Int)
+{
+    k = 13
+}
+
 object Main
 {
-    def calc : Int = 13
-    def main : Unit = calc()
+    def main() : Foo = new Foo(1)
 }
 ";
 
