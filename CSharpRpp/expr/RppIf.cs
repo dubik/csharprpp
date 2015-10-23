@@ -7,7 +7,7 @@ namespace CSharpRpp.Expr
     {
         public RppType Type { get; private set; }
 
-        public ResolvableType Type2 { get; }
+        public ResolvableType Type2 { get; private set; }
 
         [NotNull]
         public IRppExpr Condition { get; private set; }
@@ -31,7 +31,7 @@ namespace CSharpRpp.Expr
             ThenExpr = (IRppExpr) ThenExpr.Analyze(scope);
             ElseExpr = (IRppExpr) ElseExpr.Analyze(scope);
 
-            Type = ThenExpr.Type;
+            Type2 = ThenExpr.Type2;
 
             return this;
         }
