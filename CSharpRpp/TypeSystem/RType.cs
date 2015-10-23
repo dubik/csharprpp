@@ -156,13 +156,13 @@ namespace CSharpRpp.TypeSystem
             List<string> res = new List<string>();
 
             _attrToStr.Aggregate(res, (list, tuple) =>
-            {
-                if (attrs.HasFlag(tuple.Item1))
-                {
-                    list.Add(tuple.Item2);
-                }
-                return list;
-            });
+                                      {
+                                          if (attrs.HasFlag(tuple.Item1))
+                                          {
+                                              list.Add(tuple.Item2);
+                                          }
+                                          return list;
+                                      });
 
             return string.Join(" ", res);
         }
@@ -334,7 +334,7 @@ namespace CSharpRpp.TypeSystem
 
         [CanBeNull] private TypeBuilder _typeBuilder;
 
-        [CanBeNull] private readonly Type _type;
+        [CanBeNull] private Type _type;
 
         [NotNull]
         public Type NativeType
@@ -348,6 +348,25 @@ namespace CSharpRpp.TypeSystem
 
                 if (_typeBuilder == null)
                 {
+                    // Array is a special type, when native type is requested
+                    // we need to get underlying type and make array out of it
+                    // however we do not store that type, there is no place in the class
+                    // (we could create subclass RArrayType but already been there, don't want
+                    // So we get subtype by looking at return type of apply() method
+                    if (Name == "Array") 
+                    {
+                        if (Methods.Count < 2 && Methods[1].Name != "apply")
+                            throw new Exception("For Array second method should be apply");
+
+                        var returnType = Methods[1].ReturnType;
+
+                        if (returnType == null)
+                            throw new Exception("Return type is not defined so we can't create array type");
+
+                        _type = returnType.NativeType.MakeArrayType();
+                        return _type;
+                    }
+
                     throw new Exception("Native type is not initialized, call CreateNativeType method");
                 }
 

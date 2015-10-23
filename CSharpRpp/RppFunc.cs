@@ -160,7 +160,7 @@ namespace CSharpRpp
         /// <param name="scope">class scope</param>
         public void ResolveTypes([NotNull] RppClassScope scope)
         {
-            Params.ForEach(p => p.Type2.Resolve(scope));
+            NodeUtils.Analyze(scope, Params);
             ReturnType2.Resolve(scope);
         }
 
@@ -176,7 +176,6 @@ namespace CSharpRpp
                 _scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
             }
 
-            NodeUtils.Analyze(_scope, Params);
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);
 
             return this;
