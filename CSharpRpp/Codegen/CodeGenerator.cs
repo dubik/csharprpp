@@ -40,8 +40,8 @@ namespace CSharpRpp.Codegen
         public void Generate()
         {
             // Setup parent classes
-            InheritanceConfigurator configurator = new InheritanceConfigurator();
-            _program.Accept(configurator);
+            //InheritanceConfigurator configurator = new InheritanceConfigurator();
+            //_program.Accept(configurator);
 
             // GenerateMethodStubs();
 

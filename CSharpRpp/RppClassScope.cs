@@ -44,6 +44,11 @@ namespace CSharpRpp
 
         private IEnumerable<RppMethodInfo> FindMethods(string name)
         {
+            if (name == "this")
+            {
+                return Type2.Constructors;
+            }
+
             return Type2.Methods.Where(m => m.Name == name);
         }
     }

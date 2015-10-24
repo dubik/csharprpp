@@ -62,6 +62,9 @@ namespace CSharpRppTest
             ResolveParamTypes resolver = new ResolveParamTypes();
             program.Accept(resolver);
 
+            InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
+            program.Accept(configurator);
+
             CreateRType createRType = new CreateRType();
             program.Accept(createRType);
 

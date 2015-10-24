@@ -106,6 +106,26 @@ namespace CSharpRpp.TypeSystem
             return attrs;
         }
 
+        public static RMethodAttributes GetRMethodAttributes(MethodAttributes attributes)
+        {
+            RMethodAttributes attrs = 0;
+            if (attributes.HasFlag(MethodAttributes.Private))
+            {
+                attrs |= RMethodAttributes.Private;
+            }
+            else
+            {
+                attrs |= RMethodAttributes.Public;
+            }
+
+            if (attributes.HasFlag(MethodAttributes.NewSlot))
+            {
+                attrs |= RMethodAttributes.Override;
+            }
+
+            return attrs;
+        }
+
         public static void DefineNativeTypeFor(TypeBuilder typeBuilder, RppConstructorInfo rppConstructor)
         {
             MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes, constructor: true);

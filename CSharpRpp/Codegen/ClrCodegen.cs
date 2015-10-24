@@ -406,13 +406,14 @@ namespace CSharpRpp.Codegen
                 return;
             }
 
+            ConstructorInfo constructor = node.BaseConstructor.Native as ConstructorInfo;
 
-            ConstructorInfo constructor = node.BaseConstructor.ConstructorInfo;
-
+            /*
             if (node.BaseClassType.Runtime.IsGenericType)
             {
                 constructor = TypeBuilder.GetConstructor(node.BaseClassType.Runtime, constructor);
             }
+            */
 
             Debug.Assert(constructor != null, "constructor != null, we should have figure out which constructor to use before");
             _body.Emit(OpCodes.Call, constructor);

@@ -603,7 +603,7 @@ namespace CSharpRpp
 
         public IRppClass BaseClass { get; private set; }
 
-        public IRppFunc BaseConstructor { get; private set; }
+        public RppMethodInfo BaseConstructor { get; private set; }
 
         public IEnumerable<RppType> BaseClassTypeArgs { get; }
         public IEnumerable<RTypeName> BaseClassTypeArgs2 { get; private set; }
@@ -637,9 +637,11 @@ namespace CSharpRpp
             switch (BaseClassName)
             {
                 case "Object":
+                    BaseClassType2 = new RType("Object", typeof (object));
                     BaseClass = new RppNativeClass(typeof (object));
                     break;
                 case "Exception":
+                    BaseClassType2 = new RType("Exception", typeof (Exception));
                     BaseClass = new RppNativeClass(typeof (Exception));
                     break;
                 default:
@@ -676,23 +678,31 @@ namespace CSharpRpp
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             */
-
+            RppClassScope sc = new RppClassScope(null, BaseClassType2);
+            BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type2 = UnitTy;
             return this;
         }
 
-        /*
-        private IRppFunc FindMatchingConstructor(IEnumerable<RppType> args)
+        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, RppScope scope)
         {
-            var matchedConstructors = OverloadQuery.Find(args, BaseClass.Constructors, TypesComparator, CanCast).ToList();
-            if (matchedConstructors.Count != 1)
+            IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction("this");
+            IEnumerable<Type> typeArgs = Collections.NoRuntimeTypes;
+            var candidates = OverloadQuery.Find(args, typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
+            if (candidates.Count > 1)
             {
-                throw new Exception("Can't find correct constructor");
+                throw new Exception("Can't figure out which overload to use");
             }
 
-            return matchedConstructors[0];
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+
+            return candidates[0];
         }
 
+        /*
         private static bool CanCast(RppType source, RppType target)
         {
             return OverloadQuery.DefaultCanCast(source, target);

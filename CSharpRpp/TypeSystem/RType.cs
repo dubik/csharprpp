@@ -314,7 +314,7 @@ namespace CSharpRpp.TypeSystem
         public RType DeclaringType { get; }
 
         [CanBeNull]
-        public RType BaseType { get; private set; }
+        public RType BaseType { get; set; }
 
         public RTypeAttributes Attributes { get; }
 
@@ -353,7 +353,7 @@ namespace CSharpRpp.TypeSystem
                     // however we do not store that type, there is no place in the class
                     // (we could create subclass RArrayType but already been there, don't want
                     // So we get subtype by looking at return type of apply() method
-                    if (Name == "Array") 
+                    if (Name == "Array")
                     {
                         if (Methods.Count < 2 && Methods[1].Name != "apply")
                             throw new Exception("For Array second method should be apply");
@@ -380,7 +380,18 @@ namespace CSharpRpp.TypeSystem
 
         public IReadOnlyList<RppTypeParameterInfo> TypeParameters => _typeParameters;
 
-        public IReadOnlyList<RppConstructorInfo> Constructors => _constructors;
+        public IReadOnlyList<RppConstructorInfo> Constructors
+        {
+            get
+            {
+                if (_constructors.Count == 0 && _type != null)
+                {
+                    InitNativeConstructors();
+                }
+
+                return _constructors;
+            }
+        }
 
         private readonly List<RppTypeParameterInfo> _typeParameters = new List<RppTypeParameterInfo>();
         private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
@@ -392,7 +403,27 @@ namespace CSharpRpp.TypeSystem
         {
             Name = name;
             _type = type;
-            // TODO initialize fields and method maps
+        }
+
+        private void InitNativeConstructors()
+        {
+            Debug.Assert(_type != null, "_type != null");
+            var constructors = _type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Select(Convert);
+            _constructors.AddRange(constructors);
+        }
+
+        public static RppConstructorInfo Convert(ConstructorInfo constructor)
+        {
+            Type declaringType = constructor.DeclaringType;
+            Debug.Assert(declaringType != null, "declaringType != null");
+
+            var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
+            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppConstructorInfo rppConstructor = new RppConstructorInfo(rMethodAttributes, parameters, new RType(declaringType.Name, declaringType))
+            {
+                Native = constructor
+            };
+            return rppConstructor;
         }
 
         public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.None)
@@ -507,11 +538,6 @@ namespace CSharpRpp.TypeSystem
 
         #endregion
 
-        public void SetParent(RType baseType)
-        {
-            BaseType = baseType;
-        }
-
         public void InitializeNativeType(ModuleBuilder module)
         {
             if (_typeBuilder == null)
@@ -526,6 +552,11 @@ namespace CSharpRpp.TypeSystem
             if (_typeBuilder == null)
             {
                 throw new Exception("This instance is wrapping runtime type so can't create native type out of it");
+            }
+
+            if (BaseType != null)
+            {
+                _typeBuilder.SetParent(BaseType.NativeType);
             }
 
             foreach (RppMethodInfo rppMethod in Methods)

@@ -26,12 +26,7 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
-{
-    def concat(args: Int*) : Int = {
-        args.length()
-    }
-}
+class MyException extends Exception
 ";
 
             /*
@@ -64,6 +59,9 @@ object Bar
 
                 ResolveParamTypes resolver = new ResolveParamTypes();
                 program.Accept(resolver);
+
+                InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
+                program.Accept(configurator);
 
                 CreateRType createRType = new CreateRType();
                 program.Accept(createRType);
