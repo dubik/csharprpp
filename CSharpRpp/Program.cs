@@ -26,10 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-abstract class Foo
-{
-    def length: Int
-}
+class Bar
+
+class Foo(val id: Int)
+
+class Oor extends Bar
 ";
 
             /*

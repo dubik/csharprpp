@@ -645,8 +645,8 @@ namespace CSharpRpp
                     BaseClass = new RppNativeClass(typeof (Exception));
                     break;
                 default:
-                    BaseClass = (RppClass) scope.Lookup(BaseClassName);
-                    if (BaseClass == null)
+                    BaseClassType2 = scope.LookupType(BaseClassName);
+                    if (BaseClassType2 == null)
                     {
                         throw new Exception($"Can't find {BaseClassName} class");
                     }
