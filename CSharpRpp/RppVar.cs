@@ -78,8 +78,8 @@ namespace CSharpRpp
 
         protected bool Equals(RppVar other)
         {
-            Debug.Assert(other.Type != null, "other.Type != null");
-            return Name.Equals(other.Name) && Type.Equals(other.Type);
+            Debug.Assert(other.Type2 != null, "other.Type != null");
+            return Name.Equals(other.Name) && Type2.Equals(other.Type2);
         }
 
         public override bool Equals(object obj)

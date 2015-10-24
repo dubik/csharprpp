@@ -132,7 +132,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestVarDef()
         {
-            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MF_Val, "k", new RppTypeName("Int"), RppEmptyExpr.Instance));
+            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MF_Val, "k", new ResolvableType(new RTypeName("Int")), RppEmptyExpr.Instance));
         }
 
         private static void TestVarDef(string code, RppVar expected)

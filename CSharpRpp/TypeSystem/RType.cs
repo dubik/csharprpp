@@ -302,6 +302,32 @@ namespace CSharpRpp.TypeSystem
 
             return Name;
         }
+
+        #region Equality
+
+        protected bool Equals(RTypeName other)
+        {
+            // TODO need to Equals also generic params
+            return string.Equals(Name, other.Name);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((RTypeName) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((_params?.GetHashCode() ?? 0) * 397) ^ (Name?.GetHashCode() ?? 0);
+            }
+        }
+
+        #endregion
     }
 
     [DebuggerDisplay("Name = {Name}")]

@@ -104,7 +104,7 @@ namespace CSharpRpp
             _constructors = Collections.NoFuncs;
         }
 
-        public RppBaseConstructorCall BaseConstructorCall { get; private set; }
+        public RppBaseConstructorCall BaseConstructorCall { get; }
 
         public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams,
             [NotNull] IEnumerable<IRppNode> classBody, [NotNull] IList<RppVariantTypeParam> typeParams, RppBaseConstructorCall baseConstructorCall) : base(name)

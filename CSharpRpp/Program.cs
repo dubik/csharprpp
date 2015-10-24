@@ -26,7 +26,10 @@ object Runtime
 } 
 ";
             const string code = @"
-class MyException extends Exception
+abstract class Foo
+{
+    def length: Int
+}
 ";
 
             /*
@@ -67,6 +70,12 @@ class MyException extends Exception
                 program.Accept(createRType);
 
                 program.Analyze(scope);
+
+                InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
+                program.Accept(initializeNativeTypes);
+                CreateNativeTypes createNativeTypes = new CreateNativeTypes();
+                program.Accept(createNativeTypes);
+
             }
             catch (TypeMismatchException e)
             {
@@ -80,10 +89,6 @@ class MyException extends Exception
                 Environment.Exit(-1);
             }
 
-            InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
-            program.Accept(initializeNativeTypes);
-            CreateNativeTypes createNativeTypes = new CreateNativeTypes();
-            program.Accept(createNativeTypes);
 
             generator.Generate();
             generator.Save();

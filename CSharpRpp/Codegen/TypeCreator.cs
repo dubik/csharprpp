@@ -83,7 +83,13 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                node.MethodInfo = _currentType.DefineMethod(node.Name, GetMethodAttributes(node.Modifiers), node.ReturnType2.Value, parameters);
+                var rMethodAttributes = GetMethodAttributes(node.Modifiers);
+                if (node.IsAbstract)
+                {
+                    rMethodAttributes |= RMethodAttributes.Abstract;
+                }
+
+                node.MethodInfo = _currentType.DefineMethod(node.Name, rMethodAttributes, node.ReturnType2.Value, parameters);
             }
         }
 
