@@ -30,6 +30,10 @@ namespace CSharpRpp.Expr
                 return sourceExpr;
             }
             */
+            if (sourceType.IsSubclassOf(targetType))
+            {
+                return sourceExpr;
+            }
 
             throw new Exception("Can't cast expression to a specific type");
         }

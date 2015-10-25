@@ -15,7 +15,7 @@ namespace CSharpRpp
         public override ResolvableType Type2 { get; protected set; }
 
         [CanBeNull]
-        public RppField Field { get; private set; }
+        public RppFieldInfo Field { get; private set; }
 
         public RppFieldSelector([NotNull] string name) : base(name)
         {
@@ -23,32 +23,36 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(RppScope scope)
         {
-            if (TargetType == null)
+            if (TargetType2 == null)
             {
                 throw new Exception("TargetType should be specified before anaylyze is called");
             }
 
-            IRppClass obj = TargetType.Class;
-            IEnumerable<RppType> typeArgs = obj.BaseConstructorCall.BaseClassTypeArgs;
+            //IEnumerable<RppType> typeArgs = T.BaseConstructorCall.BaseClassTypeArgs;
 
-            while (obj != null && Field == null)
+            RType classType = TargetType2;
+            
+            // TODO It's kinda weird to have resolution here and not in the scope, because similar
+            // lookup is done for methods
+            while (classType != null && Field == null)
             {
-                Field = obj.Fields.FirstOrDefault(f => f.Name == Name);
+                Field = classType.Fields.FirstOrDefault(f => f.Name == Name);
                 if (Field != null)
                 {
                     break;
                 }
 
-                obj = obj.BaseClass;
+                classType = classType.BaseType;
             }
 
             if (Field == null)
             {
-                throw new Exception(string.Format("Can't find field {0} for type {1}", Name, TargetType));
+                throw new Exception($"Can't find field {Name} for type {TargetType}");
             }
 
-            Debug.Assert(obj != null, "obj != null");
+            Debug.Assert(classType != null, "obj != null");
 
+            /*
             if (Field.Type.IsGenericParameter())
             {
                 // Figure out generic args from the type of the target type
@@ -58,7 +62,7 @@ namespace CSharpRpp
                 // class Some[A](val k : A)
                 // is TargetType (RppGenericObjectType)
 
-                ClassType = FindSpecializedClassInHierarchy(obj.Name);
+                ClassType = FindSpecializedClassInHierarchy(classType.Name);
                 Debug.Assert(ClassType != null, "ClassType can't be null because we found that earlier");
 
                 RppGenericObjectType genericClassType = ClassType as RppGenericObjectType;
@@ -69,10 +73,13 @@ namespace CSharpRpp
             }
             else
             {
-                Debug.Assert(obj != null, "obj != null");
-                ClassType = new RppObjectType(obj);
+                Debug.Assert(classType != null, "obj != null");
+                ClassType = new RppObjectType(classType);
                 Type = Field.Type;
             }
+            */
+
+            Type2 = new ResolvableType(Field.Type);
 
             return this;
         }

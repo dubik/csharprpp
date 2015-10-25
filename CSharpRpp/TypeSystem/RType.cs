@@ -627,5 +627,15 @@ namespace CSharpRpp.TypeSystem
 
             return attrs;
         }
+
+        public bool IsSubclassOf(RType targetType)
+        {
+            if (string.Equals(Name, targetType.Name))
+            {
+                return true;
+            }
+
+            return BaseType?.IsSubclassOf(targetType) ?? false;
+        }
     }
 }
