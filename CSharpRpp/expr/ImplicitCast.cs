@@ -103,6 +103,12 @@ namespace CSharpRpp.Expr
                 return source.Runtime.IsValueType && dest.Runtime == typeof (object);
             }
             */
+
+            if (source.IsPrimitive && Equals(dest, RppTypeSystem.AnyTy))
+            {
+                return true;
+            }
+
             return source.Name == dest.Name;
         }
     }

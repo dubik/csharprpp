@@ -265,8 +265,10 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppArray node)
         {
-            var elementType = node.Type.Runtime.GetElementType();
-            LocalBuilder arrVar = _body.DeclareLocal(node.Type.Runtime);
+            var arrayType = node.Type2.Value.NativeType;
+            Type elementType = arrayType.GetElementType();
+
+            LocalBuilder arrVar = _body.DeclareLocal(arrayType);
             ClrCodegenUtils.LoadInt(node.Size, _body);
             _body.Emit(OpCodes.Newarr, elementType);
 
@@ -545,7 +547,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppBox node)
         {
             node.Expression.Accept(this);
-            _body.Emit(OpCodes.Box, node.Expression.Type.Runtime);
+            _body.Emit(OpCodes.Box, node.Expression.Type2.Value.NativeType);
         }
 
         public override void Visit(RppWhile node)

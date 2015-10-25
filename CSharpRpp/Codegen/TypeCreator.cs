@@ -74,7 +74,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitExit(RppFunc node)
         {
-            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value)).ToArray();
+            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value, p.IsVariadic) ).ToArray();
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
 
             if (node.IsConstructor)

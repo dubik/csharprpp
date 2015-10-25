@@ -138,8 +138,9 @@ namespace CSharpRpp.Parser
 
                 if (param.IsVariadic)
                 {
-                    throw new NotImplementedException("Variadic is not implemented yet");
+                    //throw new NotImplementedException("Variadic is not implemented yet");
                     // paramType = ((RppArrayType) paramType).SubType;
+                    paramType = param.Type.SubType();
                 }
                 else
                 {

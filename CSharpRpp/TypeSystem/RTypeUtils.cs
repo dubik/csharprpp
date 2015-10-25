@@ -7,6 +7,32 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
+    internal static class RTypeExtensions
+    {
+        /// <summary>
+        /// Returns sub type of array type
+        /// </summary>
+        /// <param name="type">array type</param>
+        /// <returns>type of element of array</returns>
+        public static RType SubType(this RType type)
+        {
+            if (!type.IsArray)
+            {
+                throw new ArgumentException("Expected array type", nameof(type));
+            }
+
+            if (type.Methods.Count < 2 && type.Methods[1].Name != "apply")
+                throw new Exception("For Array second method should be apply");
+
+            var returnType = type.Methods[1].ReturnType;
+
+            if (returnType == null)
+                throw new Exception("Return type is not defined so we can't create array type");
+
+            return returnType;
+        }
+    }
+
     internal class RTypeUtils
     {
         public static void DefineParams(ConstructorBuilder constructorBuilder, IEnumerable<RppParameterInfo> constructorParams)

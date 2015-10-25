@@ -511,7 +511,7 @@ namespace CSharpRpp
 
             RppParameterInfo variadicParam = funcParams.Find(p => p.IsVariadic);
 
-            var elementType = GetElementType(variadicParam.Type);
+            RType elementType = GetElementType(variadicParam.Type);
             variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
             RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
@@ -521,9 +521,9 @@ namespace CSharpRpp
             return newArgList;
         }
 
-        private static RppType GetElementType(RType arrayType)
+        private static RType GetElementType(RType arrayType)
         {
-            throw new NotImplementedException("Not done yet");
+            return arrayType.SubType();
             /*
             RppArrayType type = arrayType as RppArrayType;
             if (type != null)
@@ -542,9 +542,9 @@ namespace CSharpRpp
             */
         }
 
-        private static IRppExpr BoxIfValueType(IRppExpr arg, RppType targetType)
+        private static IRppExpr BoxIfValueType(IRppExpr arg, RType targetType)
         {
-            if ((arg.Type.Runtime == Types.Int || arg.Type.Runtime == Types.Float) && targetType.Runtime == typeof (object))
+            if ((Equals(arg.Type2.Value, RppTypeSystem.IntTy) || Equals(arg.Type2.Value, RppTypeSystem.FloatTy)) && targetType == RppTypeSystem.AnyTy)
             {
                 return new RppBox(arg);
             }
@@ -730,18 +730,22 @@ namespace CSharpRpp
 
         public int Size { get; private set; }
 
-        public RppArray(RppType type, IEnumerable<IRppExpr> initializers)
+        private readonly RType _elementType;
+
+        public RppArray(RType type, IEnumerable<IRppExpr> initializers)
         {
-            Type = new RppArrayType(type);
+            _elementType = type;
             Initializers = initializers;
             Size = Initializers.Count();
         }
 
         public override IRppNode Analyze(RppScope scope)
         {
-            var resolvedType = Type.Resolve(scope);
-            Debug.Assert(resolvedType != null);
-            Type = resolvedType;
+            Type2 = new ResolvableType(_elementType.MakeArrayType());
+
+            //var resolvedType = Type.Resolve(scope);
+            //Debug.Assert(resolvedType != null);
+            //Type = resolvedType;
 
             return this;
         }
@@ -1049,8 +1053,9 @@ namespace CSharpRpp
         public RppBox([NotNull] IRppExpr expr)
         {
             Expression = expr;
-            Debug.Assert(expr.Type.Runtime.IsValueType);
-            Type = RppNativeType.Create(typeof (object));
+//            Debug.Assert(expr.Type.Runtime.IsValueType);
+//            Type = RppNativeType.Create(typeof (object));
+            Type2 = new ResolvableType(RppTypeSystem.AnyTy);
         }
 
         public override void Accept(IRppNodeVisitor visitor)

@@ -16,6 +16,7 @@ namespace CSharpRpp.TypeSystem
         public static RType FloatTy = CreatePrimitive("Float", typeof (float));
         public static RType DoubleTy = CreatePrimitive("Double", typeof (double));
         public static RType NullTy = UnitTy;
+        public static RType AnyTy = ImportClass("Any", typeof (object));
 
         private static RType CreatePrimitive(string name, Type systemType)
         {
@@ -55,11 +56,18 @@ namespace CSharpRpp.TypeSystem
             scope.Add(FloatTy);
             scope.Add(DoubleTy);
             scope.Add(ImportClass(typeof (string)));
+            scope.Add(AnyTy);
         }
 
         public static RType ImportClass(Type systemType)
         {
             RType type = new RType(systemType.Name, systemType);
+            return type;
+        }
+
+        public static RType ImportClass(string name, Type systemType)
+        {
+            RType type = new RType(name, systemType);
             return type;
         }
 

@@ -208,14 +208,15 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsVariadic { get; private set; }
 
-        public RppParameterInfo(RType type) : this("", type)
+        public RppParameterInfo(RType type) : this("", type, false)
         {
         }
 
-        public RppParameterInfo(string name, RType type)
+        public RppParameterInfo(string name, RType type, bool variadic = false)
         {
             Name = name;
             Type = type;
+            IsVariadic = variadic;
         }
 
         public override string ToString()
@@ -381,15 +382,8 @@ namespace CSharpRpp.TypeSystem
                     // So we get subtype by looking at return type of apply() method
                     if (Name == "Array")
                     {
-                        if (Methods.Count < 2 && Methods[1].Name != "apply")
-                            throw new Exception("For Array second method should be apply");
-
-                        var returnType = Methods[1].ReturnType;
-
-                        if (returnType == null)
-                            throw new Exception("Return type is not defined so we can't create array type");
-
-                        _type = returnType.NativeType.MakeArrayType();
+                        RType subType = this.SubType();
+                        _type = subType.NativeType.MakeArrayType();
                         return _type;
                     }
 
