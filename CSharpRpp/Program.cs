@@ -26,11 +26,13 @@ object Runtime
 } 
 ";
             const string code = @"
-class Bar
+class Foo(var k : Int)
+{
+}
 
-class Foo(val id: Int)
-
-class Oor extends Bar
+class Bar(var k: Int) extends Foo(k)
+{
+}
 ";
 
             /*

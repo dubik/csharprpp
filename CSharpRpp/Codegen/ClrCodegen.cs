@@ -441,7 +441,7 @@ namespace CSharpRpp.Codegen
 
 
                 RppField field = (RppField) node.Ref;
-                FieldInfo cilField = field.Builder;
+                FieldInfo cilField = field.FieldInfo.Native;
                 // TODO this is wierd, we should have all info in the fieldSelector
                 if (_selectorType != null && _selectorType.Runtime.IsGenericType)
                 {
