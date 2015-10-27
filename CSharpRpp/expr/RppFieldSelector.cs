@@ -21,7 +21,7 @@ namespace CSharpRpp
         {
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             if (TargetType2 == null)
             {

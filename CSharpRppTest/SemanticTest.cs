@@ -27,8 +27,8 @@ object Bar
 ";
             RppProgram program = Utils.ParseAndAnalyze(code);
             RppId id = program.First<RppId>("k");
-            RppObjectType objectType = id.Type as RppObjectType;
-            Assert.IsNotNull(objectType, "Identifier should have been resolved to RppObjectType");
+            RType objectType = id.Type2.Value;
+            Assert.IsNotNull(objectType, "Identifier should have been resolved to RType");
         }
 
         [TestMethod]

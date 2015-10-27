@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using JetBrains.Annotations;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
-    public class RppScope
+    public class RppScopeOld
     {
-        [CanBeNull] protected readonly RppScope ParentScope;
+        [CanBeNull] protected readonly RppScopeOld ParentScope;
         [NotNull] private readonly Dictionary<string, IRppNamedNode> _entities = new Dictionary<string, IRppNamedNode>();
         [NotNull] private readonly Dictionary<string, RppType> _genericTypes = new Dictionary<string, RppType>();
 
         [NotNull] private readonly Dictionary<string, RType> _types = new Dictionary<string, RType>();
 
-        public RppScope(RppScope parentScope)
+        public RppScopeOld(RppScopeOld parentScope)
         {
             ParentScope = parentScope;
         }
 
-        public IRppNamedNode Lookup(string name)
+        public virtual IRppNamedNode Lookup(string name)
         {
             IRppNamedNode node;
             if (_entities.TryGetValue(name, out node))
@@ -42,7 +41,7 @@ namespace CSharpRpp
             return ParentScope?.LookupType(name);
         }
 
-        public RppClass LookupObject(string name)
+        public RppClass  LookupObject(string name)
         {
             RppClass obj = (RppClass) Lookup(GetObjectName(name));
             Debug.Assert(obj.Kind == ClassKind.Object);
@@ -103,6 +102,7 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public virtual IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true) => ParentScope?.LookupFunction(name,searchParentScope);
+        public virtual IReadOnlyCollection<RppMethodInfo> LookupFunction(string name, bool searchParentScope = true)
+            => ParentScope?.LookupFunction(name, searchParentScope);
     }
 }

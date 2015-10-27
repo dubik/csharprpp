@@ -6,13 +6,13 @@ using JetBrains.Annotations;
 namespace CSharpRpp
 {
     // TODO don't like the way search is done, need to redo
-    public class RppClassScope : RppScope
+    public class RppClassScopeOld : RppScopeOld
     {
-        public RppClassScope BaseClassScope { get; set; }
+        public RppClassScopeOld BaseClassScope { get; set; }
 
         public RType Type2 { get; }
 
-        public RppClassScope([CanBeNull] RppScope parentScope, RType type2) : base(parentScope)
+        public RppClassScopeOld([CanBeNull] RppScopeOld parentScope, RType type2) : base(parentScope)
         {
             Type2 = type2;
         }
@@ -50,6 +50,20 @@ namespace CSharpRpp
             }
 
             return Type2.Methods.Where(m => m.Name == name);
+        }
+
+        public override IRppNamedNode Lookup(string name)
+        {
+            RppFieldInfo field = Type2.Fields.FirstOrDefault(f => f.Name == name);
+            if (field == null)
+            {
+                if (BaseClassScope != null)
+                {
+                    //field = BaseClassScope.Lookup(name);
+                }
+            }
+
+            return base.Lookup(name);
         }
     }
 }

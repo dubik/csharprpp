@@ -54,13 +54,12 @@ namespace CSharpRpp
 
         private Dictionary<string, RppVariantTypeParam> _nameToGenericArg;
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             NodeUtils.Analyze(scope, _constructorsParams);
 
-            var refClass = scope.LookupType(_typeName);
-
-            RefType2 = refClass;
+            var refClassSymbol = scope.LookupType(_typeName);
+            RefType2 = refClassSymbol.Type;
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 

@@ -8,11 +8,13 @@
 // Microsoft Mobile. This material also contains confidential information which may not
 // be disclosed to others without the prior written consent of Microsoft Mobile.
 // ----------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Native;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 using static CSharpRpp.TypeSystem.ResolvableType;
@@ -73,7 +75,7 @@ namespace CSharpRpp
         public virtual Type Runtime { get; protected set; }
 
         [CanBeNull]
-        public abstract ResolvedType Resolve([NotNull] RppScope scope);
+        public abstract ResolvedType Resolve([NotNull] Symbols.SymbolTable scope);
 
         public virtual bool IsSubclassOf(RppType type)
         {
@@ -119,7 +121,7 @@ namespace CSharpRpp
 
     public class ResolvedType : RppType
     {
-        public override ResolvedType Resolve(RppScope scope)
+        public override ResolvedType Resolve(Symbols.SymbolTable scope)
         {
             return this;
         }
@@ -211,7 +213,7 @@ namespace CSharpRpp
             return PrimitiveTypesMap.TryGetValue(name, out type);
         }
 
-        public override ResolvedType Resolve(RppScope scope)
+        public override ResolvedType Resolve(Symbols.SymbolTable scope)
         {
             return SystemTypesMap[PrimitiveType];
         }
@@ -305,7 +307,7 @@ namespace CSharpRpp
                 RppBaseConstructorCall.Object);
         }
 
-        public override ResolvedType Resolve(RppScope scope)
+        public override ResolvedType Resolve(Symbols.SymbolTable scope)
         {
             SubType = SubType.Resolve(scope);
             Debug.Assert(SubType != null, "resolvedSubType != null");
@@ -338,7 +340,7 @@ namespace CSharpRpp
             _params.Add(param);
         }
 
-        public override ResolvedType Resolve(RppScope scope)
+        public override ResolvedType Resolve(Symbols.SymbolTable scope)
         {
             // var paramsType = _params.Select(par => par.Resolve(scope)).ToList();
             // RppNamedNode genericType = scope.Lookup(_typeName.Name);
@@ -376,8 +378,9 @@ namespace CSharpRpp
         /// <param name="genericArgCount">how many generic arguments</param>
         /// <param name="scope">scope where to look</param>
         /// <returns></returns>
-        private static IRppNamedNode LookupGenericType(string name, int genericArgCount, RppScope scope)
+        private static IRppNamedNode LookupGenericType(string name, int genericArgCount, SymbolTable scope)
         {
+            /*
             IRppNamedNode node = scope.Lookup(name);
             if (node != null)
             {
@@ -385,6 +388,8 @@ namespace CSharpRpp
             }
 
             return scope.Lookup(name + '`' + genericArgCount); // 1 accounts for return type
+            */
+            throw new NotImplementedException();
         }
 
         public override string ToString()
@@ -477,7 +482,7 @@ namespace CSharpRpp
             Name = name;
         }
 
-        public override ResolvedType Resolve(RppScope scope)
+        public override ResolvedType Resolve(SymbolTable scope)
         {
             RppPrimitiveType primitiveType;
 
@@ -506,7 +511,9 @@ namespace CSharpRpp
                 return RppNativeType.Create(typeof (object));
             }
 
-            IRppNamedNode node = scope.Lookup(Name);
+            throw new NotImplementedException("Forget to call me");
+            /*
+            Symbol node = scope.Lookup(Name);
             if (node is RppVariantTypeParam)
             {
                 return RppNativeType.Create((node as RppVariantTypeParam).Runtime);
@@ -516,6 +523,7 @@ namespace CSharpRpp
             RppClass clazz = node as RppClass;
             Debug.Assert(clazz != null);
             return new RppObjectType(clazz);
+            */
         }
 
         public override string ToString()
@@ -583,7 +591,7 @@ namespace CSharpRpp
             Variant = variant;
         }
 
-        public void Resolve(RppScope scope)
+        public void Resolve(Symbols.SymbolTable scope)
         {
             if (Runtime == null)
             {

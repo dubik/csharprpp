@@ -14,6 +14,11 @@ namespace CSharpRpp.Expr
                 return sourceExpr;
             }
 
+            if (sourceType.IsPrimitive && targetType == RppTypeSystem.AnyTy)
+            {
+                return new RppBox(sourceExpr);
+            }
+
             /*
             if (sourceType.IsValueType && targetType == typeof (object))
             {

@@ -283,14 +283,14 @@ namespace CSharpRpp.TypeSystem
             _params.Add(genericArgument);
         }
 
-        public RType Resolve([NotNull] RppScope scope)
+        public RType Resolve([NotNull] Symbols.SymbolTable scope)
         {
             if (_params.Any())
             {
                 throw new NotImplementedException("Generics not implemented yet");
             }
 
-            return scope.LookupType(Name);
+            return scope.LookupType(Name).Type;
         }
 
         public override string ToString()

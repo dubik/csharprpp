@@ -4,7 +4,7 @@
     {
         public static string GetNativeName(this RppClass clazz)
         {
-            return clazz.Kind == ClassKind.Object ? RppScope.GetObjectName(clazz.Name) : clazz.Name;
+            return clazz.Kind == ClassKind.Object ? Symbols.SymbolTable.GetObjectName(clazz.Name) : clazz.Name;
         }
     }
 }

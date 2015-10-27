@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -26,7 +27,7 @@ namespace CSharpRpp
         IEnumerable<RppVariantTypeParam> TypeParams { get; }
 
         Type RuntimeType { get; }
-        RppClassScope Scope { get; }
+        Symbols.SymbolTable Scope { get; }
 
         [CanBeNull]
         IRppClass BaseClass { get; }
@@ -47,10 +48,10 @@ namespace CSharpRpp
 
         public ClassKind Kind { get; private set; }
 
-        private RppClassScope _scope;
+        private Symbols.SymbolTable _scope;
 
         [NotNull]
-        public RppClassScope Scope
+        public Symbols.SymbolTable Scope
         {
             get
             {
@@ -145,33 +146,33 @@ namespace CSharpRpp
 
         #region Semantic
 
-        public void PreAnalyze(RppScope scope)
+        public void PreAnalyze(SymbolTable scope)
         {
             Debug.Assert(scope != null, "scope != null");
 
             BaseConstructorCall.ResolveBaseClass(scope);
 
-            Scope = new RppClassScope(scope, Type2);
+            Scope = new SymbolTable(scope, Type2, BaseClass?.Scope);
 
             //_funcs.ForEach(Scope.Add);
             //_fields.ForEach(Scope.Add);
 
             if (Kind == ClassKind.Object)
             {
-                string objectName = RppScope.GetObjectName(Name);
+                string objectName = Symbols.SymbolTable.GetObjectName(Name);
                 InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new ResolvableType(new RTypeName(objectName)));
             }
 
-            _typeParams.ForEach(Scope.Add);
+//            _typeParams.ForEach(Scope.Add);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             Debug.Assert(Scope != null, "Scope != null");
             //Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
 
-            RppScope constructorScope = new RppScope(Scope);
-            _classParams.ForEach(constructorScope.Add);
+            SymbolTable constructorScope = new SymbolTable(Scope, Type2, null);
+            //_classParams.ForEach(constructorScope.Add);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams);
             _fields = NodeUtils.Analyze(Scope, _fields);

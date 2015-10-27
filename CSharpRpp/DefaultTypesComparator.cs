@@ -1,17 +1,16 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
 using CSharpRpp.Expr;
 using CSharpRpp.Parser;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
-    class DefaultTypesComparator : ITypesComparator<IRppExpr>
+    internal class DefaultTypesComparator : ITypesComparator<IRppExpr>
     {
-        private readonly RppScope _scope;
+        private readonly SymbolTable _scope;
 
-        public DefaultTypesComparator(RppScope scope)
+        public DefaultTypesComparator(Symbols.SymbolTable scope)
         {
             _scope = scope;
         }

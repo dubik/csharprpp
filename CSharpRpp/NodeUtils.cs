@@ -6,14 +6,14 @@ namespace CSharpRpp
 {
     internal class NodeUtils
     {
-        public static T AnalyzeNode<T>(RppScope scope, T node) where T : class, IRppNode
+        public static T AnalyzeNode<T>(Symbols.SymbolTable scope, T node) where T : class, IRppNode
         {
             T analyzedNode = node.Analyze(scope) as T;
             Debug.Assert(analyzedNode != null);
             return analyzedNode;
         }
 
-        public static void PreAnalyze(RppScope parentScope, IList<RppClass> nodes)
+        public static void PreAnalyze(Symbols.SymbolTable parentScope, IList<RppClass> nodes)
         {
             foreach (var node in nodes)
             {
@@ -21,7 +21,7 @@ namespace CSharpRpp
             }
         }
 
-        public static IList<T> Analyze<T>(RppScope parentScope, IEnumerable<T> nodes) where T : class, IRppNode
+        public static IList<T> Analyze<T>(Symbols.SymbolTable parentScope, IEnumerable<T> nodes) where T : class, IRppNode
         {
             return nodes.Select(rppClass =>
             {

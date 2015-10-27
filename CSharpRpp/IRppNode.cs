@@ -9,7 +9,7 @@ namespace CSharpRpp
         IToken Token { get; }
 
         [NotNull]
-        IRppNode Analyze([NotNull] RppScope scope);
+        IRppNode Analyze([NotNull] Symbols.SymbolTable scope);
 
         void Accept([NotNull] IRppNodeVisitor visitor);
     }
@@ -28,7 +28,7 @@ namespace CSharpRpp
     {
         public IToken Token { get; set; }
 
-        public virtual IRppNode Analyze(RppScope scope)
+        public virtual IRppNode Analyze(Symbols.SymbolTable scope)
         {
             return this;
         }

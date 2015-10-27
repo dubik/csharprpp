@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 using static CSharpRpp.TypeSystem.ResolvableType;
@@ -71,7 +72,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -111,7 +112,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -127,7 +128,7 @@ namespace CSharpRpp
         {
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -188,7 +189,7 @@ namespace CSharpRpp
             Right = right;
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Left = Left.Analyze(scope) as IRppExpr;
             Debug.Assert(Left != null);
@@ -461,7 +462,7 @@ namespace CSharpRpp
         }
 
         // TODO This needs to be rewritten.
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             // Skip closures because they may have missing types
             NodeUtils.Analyze(scope, ArgListWithoutClosures(ArgList));
@@ -502,7 +503,7 @@ namespace CSharpRpp
         /// <param name="args">list of expressions</param>
         /// <param name="function">target function</param>
         /// <returns>list of arguments</returns>
-        private static List<IRppExpr> RewriteArgListForVariadicParameter(RppScope scope, IList<IRppExpr> args, RppMethodInfo function)
+        private static List<IRppExpr> RewriteArgListForVariadicParameter(Symbols.SymbolTable scope, IList<IRppExpr> args, RppMethodInfo function)
         {
             List<RppParameterInfo> funcParams = function.Parameters.ToList();
             int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
@@ -632,7 +633,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public void ResolveBaseClass(RppScope scope)
+        public void ResolveBaseClass(SymbolTable scope)
         {
             switch (BaseClassName)
             {
@@ -645,7 +646,7 @@ namespace CSharpRpp
                     BaseClass = new RppNativeClass(typeof (Exception));
                     break;
                 default:
-                    BaseClassType2 = scope.LookupType(BaseClassName);
+                    BaseClassType2 = scope.LookupType(BaseClassName).Type;
                     if (BaseClassType2 == null)
                     {
                         throw new Exception($"Can't find {BaseClassName} class");
@@ -654,7 +655,7 @@ namespace CSharpRpp
             }
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             NodeUtils.Analyze(scope, ArgList);
 
@@ -678,13 +679,13 @@ namespace CSharpRpp
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             */
-            RppClassScope sc = new RppClassScope(null, BaseClassType2);
+            SymbolTable sc = new SymbolTable(null, BaseClassType2, BaseClass.Scope);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type2 = UnitTy;
             return this;
         }
 
-        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, RppScope scope)
+        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction("this");
             IEnumerable<Type> typeArgs = Collections.NoRuntimeTypes;
@@ -739,7 +740,7 @@ namespace CSharpRpp
             Size = Initializers.Count();
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Type2 = new ResolvableType(_elementType.MakeArrayType());
 
@@ -775,7 +776,7 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             _exprs = NodeUtils.Analyze(scope, _exprs);
 
@@ -861,18 +862,19 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             Target.Analyze(scope);
             RType targetType = Target.Type2.Value;
 
             Debug.Assert(targetType != null, "targetType != null");
 
-            RppClassScope classScope = new RppClassScope(null, targetType);
+            SymbolTable classScope = new SymbolTable(null, targetType, null);
 
             // targetType.Class.Functions.ForEach(classScope.Add);
             // targetType.Class.Fields.ForEach(classScope.Add);
 
+            /*
             if (Target.Type is RppGenericObjectType)
             {
                 RppGenericObjectType targetGenericType = (RppGenericObjectType) Target.Type;
@@ -881,7 +883,7 @@ namespace CSharpRpp
                     classScope.Add(pair.Item1.Name, RppNativeType.Create(pair.Item2));
                 }
             }
-
+            */
             //Path.TargetType = targetType;
             Path.TargetType2 = targetType;
             Path = (RppMember) Path.Analyze(classScope);
@@ -963,7 +965,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             if (Ref == null)
             {
@@ -971,8 +973,10 @@ namespace CSharpRpp
                 var node = scope.Lookup(Name) ?? scope.LookupObject(Name);
 
                 RppMember member = null;
+                throw new NotImplementedException();
 
                 // Reference to object, e.g. String.isNull(..)
+                /*
                 if (node is RppClass)
                 {
                     RppClass clazz = (RppClass) node;
@@ -987,7 +991,7 @@ namespace CSharpRpp
                 {
                     member = node as RppMember;
                 }
-
+                */
                 Debug.Assert(member != null);
 
                 Ref = member;

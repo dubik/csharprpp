@@ -14,7 +14,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             base.Analyze(scope);
 

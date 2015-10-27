@@ -38,7 +38,7 @@ namespace CSharpRpp.TypeSystem
             Name = new RTypeName(type.Name); // TODO this doesn't work for generics
         }
 
-        public void Resolve([NotNull] RppScope scope)
+        public void Resolve([NotNull] Symbols.SymbolTable scope)
         {
             if (_type == null)
             {

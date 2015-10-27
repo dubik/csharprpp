@@ -15,6 +15,7 @@ namespace CSharpRppTest
         private readonly RppParam _floatY = new RppParam("y", new ResolvableType(RppTypeSystem.FloatTy));
         private readonly RppParam _varArgIntX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy), true);
 
+        /*
         [TestMethod]
         public void OneLevelLookup()
         {
@@ -66,5 +67,6 @@ namespace CSharpRppTest
             Assert.AreSame(func1, res[0]); // Order is important
             Assert.AreSame(func, res[1]);
         }
+        */
     }
 }

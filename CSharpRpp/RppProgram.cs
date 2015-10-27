@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 using RppRuntime;
 
@@ -42,14 +43,14 @@ namespace CSharpRpp
             _classes.Add(clazz);
         }
 
-        public void PreAnalyze(RppScope scope)
+        public void PreAnalyze(SymbolTable scope)
         {
             _context.CreateAssembly(Name);
             _context.CreateModuleBuilder();
 
             BootstrapRuntime(scope);
 
-            _classes.ForEach(c => scope.Add(c.Type2));
+            _classes.ForEach(c => scope.AddType(c.Type2));
 
             NodeUtils.PreAnalyze(scope, _classes);
         }
@@ -60,7 +61,7 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.Accept(visitor));
         }
 
-        private void BootstrapRuntime([NotNull] RppScope scope)
+        private void BootstrapRuntime([NotNull] SymbolTable scope)
         {
             foreach (MethodInfo methodInfo in typeof (Runtime).GetMethods(BindingFlags.Static))
             {
@@ -68,7 +69,7 @@ namespace CSharpRpp
             }
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             _classes = NodeUtils.Analyze(scope, _classes);
             return this;

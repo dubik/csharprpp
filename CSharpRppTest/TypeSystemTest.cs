@@ -91,6 +91,7 @@ class Bar extends Foo[Int]
             // Analyze
         }
 
+        /*
         [TestMethod]
         public void TypeCreation()
         {
@@ -107,6 +108,7 @@ class Foo
             program.PreAnalyze(scope);
             program.Analyze(scope);
         }
+        */
 
         [TestInitialize]
         public void SetUp()

@@ -63,7 +63,7 @@ namespace CSharpRpp.Parser
                                              {
                                                  if (RppPrimitiveType.UnitTy.Equals(param.Type))
                                                  {
-                                                     throw new Exception(string.Format("Parameter {0} can't be Unit", param.Name));
+                                                     throw new Exception($"Parameter {param.Name} can't be Unit");
                                                  }
                                              });
         }

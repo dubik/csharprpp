@@ -111,6 +111,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Symbols\Symbol.cs" />
+    <Compile Include="Symbols\SymbolTable.cs" />
     <Compile Include="TypeSystem\ResolvableType.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />

@@ -45,18 +45,18 @@ namespace CSharpRpp.TypeSystem
             return PrimitiveTypesMap[name];
         }
 
-        public static void PopulateBuiltinTypes([NotNull] RppScope scope)
+        public static void PopulateBuiltinTypes([NotNull] Symbols.SymbolTable scope)
         {
-            scope.Add(UnitTy);
-            scope.Add(CharTy);
-            scope.Add(BooleanTy);
-            scope.Add(ShortTy);
-            scope.Add(IntTy);
-            scope.Add(LongTy);
-            scope.Add(FloatTy);
-            scope.Add(DoubleTy);
-            scope.Add(ImportClass(typeof (string)));
-            scope.Add(AnyTy);
+            scope.AddType(UnitTy);
+            scope.AddType(CharTy);
+            scope.AddType(BooleanTy);
+            scope.AddType(ShortTy);
+            scope.AddType(IntTy);
+            scope.AddType(LongTy);
+            scope.AddType(FloatTy);
+            scope.AddType(DoubleTy);
+            scope.AddType(ImportClass(typeof (string)));
+            scope.AddType(AnyTy);
         }
 
         public static RType ImportClass(Type systemType)

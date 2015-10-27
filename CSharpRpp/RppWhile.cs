@@ -18,7 +18,7 @@ namespace CSharpRpp
             Body = body;
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Condition = (IRppExpr) Condition.Analyze(scope);
             Body = Body.Analyze(scope);

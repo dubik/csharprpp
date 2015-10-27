@@ -14,6 +14,7 @@ namespace CSharpRppTest
     [TestClass]
     public class SelectorTest
     {
+        /*
         [TestMethod]
         public void SelectorShouldHaveProperType()
         {
@@ -27,5 +28,6 @@ namespace CSharpRppTest
             Assert.IsNotNull(fieldSelector.Type, "field selector should have the same type as k");
             Assert.AreEqual(typeof(int), fieldSelector.Type.Runtime);
         }
+        */
     }
 }

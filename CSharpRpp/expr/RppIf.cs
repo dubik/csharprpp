@@ -25,7 +25,7 @@ namespace CSharpRpp.Expr
             ElseExpr = elseExpr;
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Condition = (IRppExpr) Condition.Analyze(scope);
             ThenExpr = (IRppExpr) ThenExpr.Analyze(scope);

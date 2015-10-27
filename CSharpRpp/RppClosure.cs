@@ -20,10 +20,10 @@ namespace CSharpRpp
             Expr = body;
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            RppScope closureScope = new RppScope(scope);
-            Bindings.ForEach(closureScope.Add);
+            Symbols.SymbolTable closureScope = new Symbols.SymbolTable(scope);
+            //Bindings.ForEach(closureScope.Add);
             NodeUtils.Analyze(closureScope, Bindings);
             Expr = NodeUtils.AnalyzeNode(closureScope, Expr);
 
@@ -38,7 +38,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        private ResolvedType CreateClosureType(RppScope scope)
+        private ResolvedType CreateClosureType(Symbols.SymbolTable scope)
         {
             RppGenericType closureType = new RppGenericType("Function" + Bindings.Count());
             Bindings.Select(b => b.Type).ForEach(closureType.AddParam);

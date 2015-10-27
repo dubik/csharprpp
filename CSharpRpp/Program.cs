@@ -26,14 +26,18 @@ object Runtime
 } 
 ";
             const string code = @"
+class Foo(val k : Int)
+{
+    def calculate(x : Int) : Int = {
+        k + x
+    }
+}
+
 object Bar
 {
-    def varargs(args: Any*) : Int = {
-        args.length()
-    }
-
-    def invoke() : Int = {
-        varargs(10, 3)
+    def create : Int = {
+        val p : Foo = new Foo(10)
+        p.calculate(13)
     }
 }
 ";
@@ -51,11 +55,11 @@ object Bar
             */
 
             RppProgram runtime = Parse(runtimeCode);
-            RppScope runtimeScope = new RppScope(null);
+            Symbols.SymbolTable runtimeScope = new Symbols.SymbolTable();
             WireRuntime(runtime.Classes, runtimeScope);
             RppProgram program = Parse(code);
             program.Name = "Sample";
-            RppScope scope = new RppScope(runtimeScope);
+            Symbols.SymbolTable scope = new Symbols.SymbolTable(runtimeScope);
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
             CodeGenerator generator = new CodeGenerator(program);
@@ -100,7 +104,7 @@ object Bar
             generator.Save();
         }
 
-        private static void WireRuntime(IEnumerable<RppClass> classes, RppScope scope)
+        private static void WireRuntime(IEnumerable<RppClass> classes, Symbols.SymbolTable scope)
         { 
             Assembly runtimeAssembly = GetRuntimeAssembly();
             Type[] types = runtimeAssembly.GetTypes();
@@ -111,7 +115,7 @@ object Bar
                 if (typesMap.TryGetValue(clazz.Name, out matchingType))
                 {
                     IRppClass runtimeClass = new RppNativeClass(matchingType);
-                    scope.Add(runtimeClass);
+//                    scope.Add(runtimeClass);
                     if (runtimeClass.Name == "Runtime")
                     {
                         AddFunctionsToScope(runtimeClass.Functions, scope);
@@ -123,18 +127,18 @@ object Bar
                 }
             }
 
-            scope.Add(new RppNativeClass(typeof (Exception)));
-            scope.Add(new RppNativeClass(typeof (Function0<>)));
-            scope.Add(new RppNativeClass(typeof (Function1<,>)));
-            scope.Add(new RppNativeClass(typeof (Function2<,,>)));
-            scope.Add(new RppNativeClass(typeof (Function3<,,,>)));
-            scope.Add(new RppNativeClass(typeof (Function4<,,,,>)));
-            scope.Add(new RppNativeClass(typeof (Function5<,,,,,>)));
+            scope.AddType(new RType("Exception", typeof(Exception)));
+            scope.AddType(new RType("Function0", typeof(Function0<>)));
+            scope.AddType(new RType("Function1", typeof(Function1<,>)));
+            scope.AddType(new RType("Function2", typeof(Function2<,,>)));
+            scope.AddType(new RType("Function3", typeof(Function3<,,,>)));
+            scope.AddType(new RType("Function4", typeof(Function4<,,,,>)));
+            scope.AddType(new RType("Function5", typeof(Function5<,,,,,>)));
         }
 
-        private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, RppScope scope)
+        private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, Symbols.SymbolTable scope)
         {
-            funcs.ForEach(scope.Add);
+//            funcs.ForEach(scope.Add);
         }
 
         private static Assembly GetRuntimeAssembly()

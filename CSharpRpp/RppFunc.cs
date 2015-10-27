@@ -54,7 +54,7 @@ namespace CSharpRpp
     public class RppFunc : RppNamedNode, IRppFunc
     {
         public IRppExpr Expr { get; private set; }
-        private RppScope _scope;
+        private Symbols.SymbolTable _scope;
 
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
 
@@ -158,22 +158,22 @@ namespace CSharpRpp
         /// Resolves parameters and return types
         /// </summary>
         /// <param name="scope">class scope</param>
-        public void ResolveTypes([NotNull] RppClassScope scope)
+        public void ResolveTypes([NotNull] Symbols.SymbolTable scope)
         {
             NodeUtils.Analyze(scope, Params);
             ReturnType2.Resolve(scope);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            _scope = new RppScope(scope);
-            Params.ForEach(_scope.Add);
+            _scope = new Symbols.SymbolTable(scope);
+            Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type2.Value));
             // TODO this is probably not needed , because next line adds generic params to the scope
-            TypeParams.ForEach(_scope.Add);
+            //TypeParams.ForEach(_scope.Add);
 
             foreach (var typeParam in TypeParams)
             {
-                _scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
+                //_scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
             }
 
             Expr = NodeUtils.AnalyzeNode(_scope, Expr);
@@ -303,7 +303,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Type2.Resolve(scope);
             if (IsVariadic)

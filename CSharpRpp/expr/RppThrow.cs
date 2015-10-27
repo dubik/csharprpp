@@ -16,7 +16,7 @@ namespace CSharpRpp.Expr
             Type2 = ResolvableType.UnitTy;
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
             Expr = Expr.Analyze(scope) as IRppExpr;
             return this;

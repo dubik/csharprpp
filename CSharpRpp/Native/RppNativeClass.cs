@@ -14,7 +14,7 @@ namespace CSharpRpp.Native
         public IEnumerable<IRppFunc> Constructors { get; }
         public IEnumerable<RppVariantTypeParam> TypeParams { get; }
         public Type RuntimeType { get; }
-        public RppClassScope Scope { get; }
+        public Symbols.SymbolTable Scope { get; }
         public IRppClass BaseClass { get; }
         public RppBaseConstructorCall BaseConstructorCall { get; }
         public RType Type2 { get; set; }
@@ -27,7 +27,7 @@ namespace CSharpRpp.Native
             FieldInfo[] fields = classType.GetFields();
             Fields = fields.Select(CreateField).ToList();
             RuntimeType = classType;
-            Scope = new RppClassScope(null, null);
+            Scope = new Symbols.SymbolTable();
             TypeParams = classType.IsGenericType ? classType.GetGenericArguments().Select(CreateVariantTypeParam).ToList() : Collections.NoVariantTypeParams;
 
             if (classType.BaseType != null)

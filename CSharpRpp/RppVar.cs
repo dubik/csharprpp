@@ -40,13 +40,8 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(RppScope scope)
+        public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            if (AddToScope)
-            {
-                scope.Add(this);
-            }
-
             InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
 
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
@@ -64,6 +59,11 @@ namespace CSharpRpp
             else
             {
                 Type2.Resolve(scope);
+            }
+
+            if (AddToScope)
+            {
+                scope.AddLocalVar(Name, Type2.Value);
             }
 
             if (!(InitExpr is RppEmptyExpr))

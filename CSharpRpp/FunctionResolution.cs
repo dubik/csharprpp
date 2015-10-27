@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.Parser;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
@@ -56,7 +57,8 @@ namespace CSharpRpp
             _typeArgs = typeArgs;
         }
 
-        public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RppVariantTypeParam> typeArgs, RppScope scope)
+        public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RppVariantTypeParam> typeArgs,
+            Symbols.SymbolTable scope)
         {
             IEnumerable<IRppExpr> argsList = args as IList<IRppExpr> ?? args.ToList();
             IList<Type> typeArgsList = typeArgs.Select(a => a.Runtime).ToList();
@@ -78,7 +80,7 @@ namespace CSharpRpp
             return res;
         }
 
-        private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, RppScope scope)
+        private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
 
@@ -96,13 +98,12 @@ namespace CSharpRpp
             return new ResolveResults(candidates[0]);
         }
 
-        private ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, RppScope scope)
+        private ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
-            IRppNamedNode node = scope.Lookup(name);
-            if (node is IRppExpr) // () applied to expression, so it could be closure
+            Symbol symbol = scope.Lookup(name);
+            if (symbol is LocalVarSymbol) // () applied to expression, so it could be closure
             {
-                IRppExpr expr = node as IRppExpr;
-
+                //IRppExpr expr = node as IRppExpr;
                 throw new NotImplementedException("Not yet");
                 /*
                 if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
@@ -134,10 +135,10 @@ namespace CSharpRpp
             return null;
         }
 
-        private ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, RppScope scope)
+        private ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
-            RppClass obj = scope.LookupObject(name);
-            var applyFunctions = obj.Type2.Methods.Where(func => func.Name == "apply").ToList();
+            TypeSymbol obj = scope.LookupType(name);
+            var applyFunctions = obj.Type.Methods.Where(func => func.Name == "apply").ToList();
             if (applyFunctions.Count == 0)
             {
                 throw new Exception("Companion object doesn't have apply() with required signature");

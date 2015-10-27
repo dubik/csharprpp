@@ -5,15 +5,14 @@ using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.Codegen;
-using CSharpRpp.Native;
-using CSharpRpp.Semantics;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RppRuntime;
 
 namespace CSharpRppTest
 {
-    class Utils
+    internal class Utils
     {
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
@@ -47,7 +46,7 @@ namespace CSharpRppTest
 
         public static Assembly CodeGen(RppProgram program)
         {
-            RppScope scope = new RppScope(null);
+            SymbolTable scope = new SymbolTable(null);
 
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
@@ -79,15 +78,15 @@ namespace CSharpRppTest
             return generator.Assembly;
         }
 
-        private static void WireRuntime(RppScope scope)
+        private static void WireRuntime(SymbolTable scope)
         {
-            scope.Add(new RppNativeClass(typeof(Exception)));
-            scope.Add(new RppNativeClass(typeof(Function0<>)));
-            scope.Add(new RppNativeClass(typeof(Function1<,>)));
-            scope.Add(new RppNativeClass(typeof(Function2<,,>)));
-            scope.Add(new RppNativeClass(typeof(Function3<,,,>)));
-            scope.Add(new RppNativeClass(typeof(Function4<,,,,>)));
-            scope.Add(new RppNativeClass(typeof(Function5<,,,,,>)));
+            scope.AddType(new RType("Exception", typeof (Exception)));
+            scope.AddType(new RType("Function0", typeof (Function0<>)));
+            scope.AddType(new RType("Function1", typeof (Function1<,>)));
+            scope.AddType(new RType("Function2", typeof (Function2<,,>)));
+            scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
+            scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
+            scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
         }
 
         public static RppProgram Parse(string code)
