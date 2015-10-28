@@ -1076,7 +1076,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppBox other)
         {
-            return Type.Equals(other.Type) && Equals(Expression, other.Expression);
+            return Type2.Equals(other.Type2) && Equals(Expression, other.Expression);
         }
 
         public override bool Equals(object obj)

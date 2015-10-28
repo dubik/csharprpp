@@ -1,5 +1,6 @@
 ﻿using CSharpRpp;
 using CSharpRpp.Expr;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -11,7 +12,7 @@ namespace CSharpRppTest
         public void IntegerBoxing()
         {
             RppInteger sourceExpr = new RppInteger(10);
-            IRppExpr boxingInt = ImplicitCast.CastIfNeeded(sourceExpr, null /* typeof(object) */);
+            IRppExpr boxingInt = ImplicitCast.CastIfNeeded(sourceExpr, RppTypeSystem.AnyTy);
             Assert.AreEqual(new RppBox(sourceExpr), boxingInt);
         }
     }
