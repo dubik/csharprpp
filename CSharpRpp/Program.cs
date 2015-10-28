@@ -26,11 +26,13 @@ object Runtime
 } 
 ";
             const string code = @"
-class Bar
-
-class Foo(val id: Int)
-
-class Oor extends Bar
+object Foo
+{
+    def main() : Int = {
+        val k = 10
+        k
+    }
+}
 ";
 
             /*

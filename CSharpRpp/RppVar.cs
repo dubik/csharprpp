@@ -47,7 +47,7 @@ namespace CSharpRpp
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 
             // ReSharper disable once PossibleUnintendedReferenceComparison
-            if (Type2 == ResolvableType.UndefinedTy)
+            if (Type2.Equals(ResolvableType.UndefinedTy))
             {
                 if (InitExpr is RppEmptyExpr)
                 {
