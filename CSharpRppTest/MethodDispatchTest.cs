@@ -28,6 +28,7 @@ object Foo
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void DefineGenericFunc()
         {
             const string code = @"

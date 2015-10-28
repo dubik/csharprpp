@@ -25,6 +25,7 @@ object Foo
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void FigureOutTypeForVarDeclarationWithClosureInitExpression()
         {
             const string code = @"
@@ -44,6 +45,7 @@ object Foo
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void FigureOutTypeOfClosureBasedVariableType()
         {
             const string code = @"
@@ -60,6 +62,7 @@ object Foo
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void PassClosureAsAParam()
         {
             const string code = @"

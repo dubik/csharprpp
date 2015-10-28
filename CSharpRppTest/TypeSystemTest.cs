@@ -77,6 +77,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void TestExtendGenericClass()
         {
             const string code = @"

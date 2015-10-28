@@ -209,6 +209,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ParseClassGenericArg()
         {
             const string code = @"
@@ -221,6 +222,7 @@ class Foo[T]
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void DeclareGenericField()
         {
             const string code = @"
@@ -232,6 +234,7 @@ class Foo[T](val k : T)
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void InstantiateGenericClass()
         {
             const string code = @"
@@ -374,6 +377,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void GenericBaseConstructor()
         {
             const string code = @"
@@ -394,6 +398,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void AssignGenericFieldToAVar()
         {
             const string code = @"
@@ -414,6 +419,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void SpecifyTypesForBaseClass()
         {
             const string code = @"
@@ -435,6 +441,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void OptionMonad()
         {
             const string code = @"

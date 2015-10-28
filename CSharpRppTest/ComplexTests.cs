@@ -6,6 +6,7 @@ namespace CSharpRppTest
     public class ComplexTests
     {
         [TestMethod]
+        [TestCategory("Generics")]
         public void TestOptionMoand()
         {
             const string code = @"

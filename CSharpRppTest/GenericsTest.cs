@@ -7,6 +7,7 @@ namespace CSharpRppTest
     public class GenericsTest
     {
         [TestMethod]
+        [TestCategory("Generics")]
         public void GenericStaticFunction()
         {
             const string code = @"
@@ -23,6 +24,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void SimpleGenericClass()
         {
             const string code = @"
@@ -39,6 +41,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ExtendingSpecializedGeneric()
         {
             const string code = @"
@@ -57,6 +60,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ExtendingSpecializedGenericAndDefineOneMoreGenericParameter()
         {
             const string code = @"
@@ -75,6 +79,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ClosureLikeClass()
         {
             const string code = @"

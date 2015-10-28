@@ -7,6 +7,7 @@ namespace CSharpRppTest
     public class ClosuresTest
     {
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void ParseAndResolveClosureType()
         {
             const string code = @"
@@ -21,6 +22,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void ParseSimpleClosure()
         {
             const string code = @"
@@ -39,6 +41,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void CallClosure()
         {
             const string code = @"
@@ -57,6 +60,7 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void PassClosureAsAParam()
         {
             const string code = @"
@@ -79,6 +83,7 @@ object Bar
 
         [Ignore]
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
         public void ABitSimpler()
         {
             const string code = @"
@@ -94,4 +99,3 @@ object Bar
         }
     }
 }
-

@@ -88,6 +88,7 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ParseGenericType()
         {
             RppGenericType expected = new RppGenericType("Array");
@@ -97,6 +98,7 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void ParseMultiGenericType()
         {
             RppGenericType expected = new RppGenericType("Array");
