@@ -26,20 +26,11 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(val k : Int)
-{
-    def calculate(x : Int) : Int = {
-        k + x
-    }
-}
+class Bar
 
-object Bar
-{
-    def create : Int = {
-        val p : Foo = new Foo(10)
-        p.calculate(13)
-    }
-}
+class Foo(val id: Int)
+
+class Oor extends Bar
 ";
 
             /*

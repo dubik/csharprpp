@@ -669,7 +669,7 @@ namespace CSharpRpp
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             */
-            SymbolTable sc = new SymbolTable(null, BaseClassType2, BaseClass.Scope);
+            SymbolTable sc = new SymbolTable(null, BaseClassType2, BaseClass?.Scope);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type2 = UnitTy;
             return this;
