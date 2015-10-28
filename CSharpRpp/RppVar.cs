@@ -63,7 +63,7 @@ namespace CSharpRpp
 
             if (AddToScope)
             {
-                scope.AddLocalVar(Name, Type2.Value);
+                scope.AddLocalVar(Name, Type2.Value, this);
             }
 
             if (!(InitExpr is RppEmptyExpr))

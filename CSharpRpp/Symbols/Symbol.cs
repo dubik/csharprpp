@@ -9,7 +9,7 @@ namespace CSharpRpp.Symbols
 
         public bool IsClass { get; protected set; }
         public bool IsField { get; protected set; }
-        public bool IsLocalVar { get; protected set; }
+        public bool IsLocal { get; protected set; }
 
         public Symbol(string name, RType type)
         {
@@ -17,7 +17,7 @@ namespace CSharpRpp.Symbols
             Type = type;
             IsClass = false;
             IsField = false;
-            IsLocalVar = false;
+            IsLocal = false;
         }
     }
 
@@ -39,9 +39,12 @@ namespace CSharpRpp.Symbols
 
     public class LocalVarSymbol : Symbol
     {
-        public LocalVarSymbol(string name, RType type) : base(name, type)
+        public IRppNamedNode Var { get; set; }
+
+        public LocalVarSymbol(string name, RType type, IRppNamedNode var) : base(name, type)
         {
-            IsLocalVar = true;
+            IsLocal = true;
+            Var = var;
         }
     }
 }

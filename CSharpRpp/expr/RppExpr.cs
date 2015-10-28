@@ -1,18 +1,8 @@
-﻿// ----------------------------------------------------------------------
-// Copyright © 2014 Microsoft Mobile. All rights reserved.
-// Contact: Sergiy Dubovik <sergiy.dubovik@microsoft.com>
-//  
-// This software, including documentation, is protected by copyright controlled by
-// Microsoft Mobile. All rights are reserved. Copying, including reproducing, storing,
-// adapting or translating, any or all of this material requires the prior written consent of
-// Microsoft Mobile. This material also contains confidential information which may not
-// be disclosed to others without the prior written consent of Microsoft Mobile.
-// ----------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
@@ -948,8 +938,12 @@ namespace CSharpRpp
         public override RppType Type { get; protected set; }
         public override ResolvableType Type2 { get; protected set; }
 
-        [CanBeNull]
-        public RppMember Ref { get; private set; }
+        public bool IsVar => Ref is RppVar;
+        public bool IsField => Field != null;
+        public bool IsParam => Ref is RppParam;
+        public IRppNamedNode Ref { get; private set; }
+
+        public RppFieldInfo Field { get; private set; }
 
         public RppId([NotNull] string name) : base(name)
         {
@@ -957,7 +951,7 @@ namespace CSharpRpp
 
         public RppId([NotNull] string name, [NotNull] RppMember targetRef) : base(name)
         {
-            Ref = targetRef;
+            throw new NotImplementedException();
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -965,18 +959,36 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        // TODO Replace RppId with something like RppFieldAcces, RppParamAccess and so on those Ref and Field looks very bad
+        public override IRppNode Analyze(SymbolTable scope)
         {
-            if (Ref == null)
+            // Lookup <name> or <name>$
+            Symbol symbol = scope.Lookup(Name);
+            if (symbol != null)
             {
-                // Lookup <name> or <name>$
-                var node = scope.Lookup(Name) ?? scope.LookupObject(Name);
+                if (symbol.IsLocal)
+                {
+                    Type2 = new ResolvableType(symbol.Type);
+                    Ref = ((LocalVarSymbol) symbol).Var;
+                }
+            }
+            else
+            {
+                RppFieldInfo fieldSymbol = scope.LookupField(Name);
+                if (fieldSymbol != null)
+                {
+                    Field = fieldSymbol;
+                    Type2 = new ResolvableType(fieldSymbol.Type);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
 
-                RppMember member = null;
-                throw new NotImplementedException();
 
-                // Reference to object, e.g. String.isNull(..)
-                /*
+            // Reference to object, e.g. String.isNull(..)
+            /*
                 if (node is RppClass)
                 {
                     RppClass clazz = (RppClass) node;
@@ -992,10 +1004,6 @@ namespace CSharpRpp
                     member = node as RppMember;
                 }
                 */
-                Debug.Assert(member != null);
-
-                Ref = member;
-            }
 
             // If generic like 'A', then find real type
             /*
@@ -1005,10 +1013,9 @@ namespace CSharpRpp
                 return this;
             }*/
 
-            Type = Ref.Type;
-            Type2 = Ref.Type2;
             return this;
         }
+
 
         public override string ToString()
         {

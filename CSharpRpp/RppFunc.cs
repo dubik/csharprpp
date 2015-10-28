@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -158,16 +159,16 @@ namespace CSharpRpp
         /// Resolves parameters and return types
         /// </summary>
         /// <param name="scope">class scope</param>
-        public void ResolveTypes([NotNull] Symbols.SymbolTable scope)
+        public void ResolveTypes([NotNull] SymbolTable scope)
         {
             NodeUtils.Analyze(scope, Params);
             ReturnType2.Resolve(scope);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
-            _scope = new Symbols.SymbolTable(scope);
-            Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type2.Value));
+            _scope = new SymbolTable(scope);
+            Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type2.Value, p));
             // TODO this is probably not needed , because next line adds generic params to the scope
             //TypeParams.ForEach(_scope.Add);
 

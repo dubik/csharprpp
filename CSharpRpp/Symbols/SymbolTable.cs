@@ -56,9 +56,10 @@ namespace CSharpRpp.Symbols
             Add(type.Name, new TypeSymbol(type));
         }
 
-        public void AddLocalVar(string name, RType type)
+        // TODO associating ast node with symbol is quite weird, we need to map symbols to builders but may be using some other means
+        public void AddLocalVar(string name, RType type, IRppNamedNode obj)
         {
-            Add(name, new LocalVarSymbol(name, type));
+            Add(name, new LocalVarSymbol(name, type, obj));
         }
 
         protected void Add(string name, Symbol symbol)
@@ -89,9 +90,15 @@ namespace CSharpRpp.Symbols
             return Parent != null ? Parent.LookupFunction(name) : Collections.NoRFuncsCollection;
         }
 
-        public IReadOnlyCollection<RppFieldInfo> LookupField(string name)
+        public RppFieldInfo LookupField(string name)
         {
-            throw new NotImplementedException("Not yet");
+            if (_classType != null)
+            {
+                var field = _classType.Fields.FirstOrDefault(f => f.Name == name);
+                return field ?? _baseClassSymbolTable?.LookupField(name);
+            }
+
+            return Parent?.LookupField(name);
         }
 
         public static string GetObjectName(string name)

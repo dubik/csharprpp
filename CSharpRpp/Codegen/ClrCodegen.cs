@@ -434,7 +434,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppId node)
         {
-            if (node.Ref is RppField)
+            if (node.IsField)
             {
                 if (!_inSelector)
                 {
@@ -442,24 +442,25 @@ namespace CSharpRpp.Codegen
                 }
 
 
-                RppField field = (RppField) node.Ref;
-                FieldInfo cilField = field.FieldInfo.Native;
+                FieldInfo cilField = node.Field.Native;
                 // TODO this is wierd, we should have all info in the fieldSelector
+                /*
                 if (_selectorType != null && _selectorType.Runtime.IsGenericType)
                 {
                     cilField = TypeBuilder.GetField(_selectorType.Runtime, field.Builder);
                 }
+                */
 
                 Debug.Assert(cilField != null, "cilField != null");
                 _body.Emit(OpCodes.Ldfld, cilField);
             }
-            else if (node.Ref is RppVar)
+            else if (node.IsVar)
             {
                 _body.Emit(OpCodes.Ldloc, ((RppVar) node.Ref).Builder);
             }
-            else if (node.Ref is RppParam)
+            else if (node.IsParam)
             {
-                node.Ref.Accept(this);
+                ((RppParam) node.Ref).Accept(this);
             }
         }
 
@@ -518,20 +519,19 @@ namespace CSharpRpp.Codegen
 
             Debug.Assert(id != null, "id != null");
 
-            if (id.Ref is RppField)
+            if (id.IsField)
             {
-                RppField field = (RppField) id.Ref;
                 _body.Emit(OpCodes.Ldarg_0);
                 node.Right.Accept(this);
-                _body.Emit(OpCodes.Stfld, field.FieldInfo.Native);
+                _body.Emit(OpCodes.Stfld, id.Field.Native);
             }
-            else if (id.Ref is RppVar)
+            else if (id.IsVar)
             {
                 RppVar var = (RppVar) id.Ref;
                 node.Right.Accept(this);
                 ClrCodegenUtils.StoreLocal(var.Builder, _body);
             }
-            else if (id.Ref is RppParam)
+            else if (id.IsParam)
             {
                 throw new Exception("Not implemented");
             }

@@ -209,7 +209,6 @@ object Bar
             Assert.AreEqual(2, res);
         }
 
-
         [TestMethod]
         public void ImplicitBoxing()
         {
