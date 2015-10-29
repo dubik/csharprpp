@@ -982,7 +982,11 @@ namespace CSharpRpp
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    TypeSymbol objectType = scope.LookupObject(Name);
+                    if (objectType != null)
+                    {
+                        Type2 = new ResolvableType(objectType.Type);
+                    }
                 }
             }
 

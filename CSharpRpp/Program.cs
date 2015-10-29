@@ -28,9 +28,13 @@ object Runtime
             const string code = @"
 object Foo
 {
-    def main() : Int = {
-        val k = 10
-        k
+    def length() : Int = 10
+}
+
+object Bar
+{
+    def invoke() : Int = {
+        Foo.length()
     }
 }
 ";

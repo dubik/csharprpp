@@ -119,7 +119,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsVariadic => Parameters != null && Parameters.Any() && Parameters.Last().IsVariadic;
 
-        public bool IsStatic { get; private set; }
+        public bool IsStatic => DeclaringType.Name.EndsWith("$");
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
             [CanBeNull] RType returnType,

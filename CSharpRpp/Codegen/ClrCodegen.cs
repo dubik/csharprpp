@@ -302,11 +302,12 @@ namespace CSharpRpp.Codegen
             else
             {
                 // TODO Probably makes more sense to make RppConstructorCall ast, instead of boolean
+                var rppMethodInfo = node.Function;
                 if (node.IsConstructorCall)
                 {
                     _body.Emit(OpCodes.Ldarg_0);
                     node.Args.ForEach(arg => arg.Accept(this));
-                    var constructor = node.Function.Native as ConstructorInfo;
+                    var constructor = rppMethodInfo.Native as ConstructorInfo;
                     _body.Emit(OpCodes.Call, constructor);
                 }
                 else
@@ -316,11 +317,12 @@ namespace CSharpRpp.Codegen
                         _body.Emit(OpCodes.Ldarg_0); // load 'this'
                     }
 
-                    if (node.Function.IsStatic)
+                    if (rppMethodInfo.IsStatic)
                     {
-                        throw new NotImplementedException("Static functions not done yet");
-                        //var instanceField = node.Function.Class.InstanceField.Builder;
-                        //_body.Emit(OpCodes.Ldsfld, instanceField);
+                        Debug.Assert(rppMethodInfo.Native.DeclaringType != null, "rppMethodInfo.Native.DeclaringType != null");
+                        var instanceField = rppMethodInfo.Native.DeclaringType.GetField("_instance", BindingFlags.Public | BindingFlags.Static);
+                        Debug.Assert(instanceField != null, "instanceField != null");
+                        _body.Emit(OpCodes.Ldsfld, instanceField);
                     }
 
                     node.Args.ForEach(arg => arg.Accept(this));
@@ -332,11 +334,11 @@ namespace CSharpRpp.Codegen
                     //}
                     //else
                     //{
-                    MethodInfo method = node.Function.Native as MethodInfo;
+                    MethodInfo method = rppMethodInfo.Native as MethodInfo;
 
                     if (method == null) // This is a stub, so generate code for it
                     {
-                        CodegenForStub(node.Function);
+                        CodegenForStub(rppMethodInfo);
                         return;
                     }
 
