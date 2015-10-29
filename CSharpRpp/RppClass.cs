@@ -27,7 +27,7 @@ namespace CSharpRpp
         IEnumerable<RppVariantTypeParam> TypeParams { get; }
 
         Type RuntimeType { get; }
-        Symbols.SymbolTable Scope { get; }
+        SymbolTable Scope { get; }
 
         [CanBeNull]
         IRppClass BaseClass { get; }
@@ -46,12 +46,12 @@ namespace CSharpRpp
         private IList<RppField> _classParams = Collections.NoFields;
         private readonly List<IRppExpr> _constrExprs;
 
-        public ClassKind Kind { get; private set; }
+        public ClassKind Kind { get; }
 
-        private Symbols.SymbolTable _scope;
+        private SymbolTable _scope;
 
         [NotNull]
-        public Symbols.SymbolTable Scope
+        public SymbolTable Scope
         {
             get
             {
@@ -127,6 +127,13 @@ namespace CSharpRpp
 
             Constructor = CreatePrimaryConstructor(_constrExprs);
             _constructors.Add(Constructor);
+
+            if (kind == ClassKind.Object)
+            {
+                string objectName = SymbolTable.GetObjectName(Name);
+                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new ResolvableType(new RTypeName(objectName)));
+                _fields.Add(InstanceField);
+            }
         }
 
         private void DefineFunc(IRppFunc func)
@@ -156,12 +163,6 @@ namespace CSharpRpp
 
             //_funcs.ForEach(Scope.Add);
             //_fields.ForEach(Scope.Add);
-
-            if (Kind == ClassKind.Object)
-            {
-                string objectName = Symbols.SymbolTable.GetObjectName(Name);
-                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new ResolvableType(new RTypeName(objectName)));
-            }
 
 //            _typeParams.ForEach(Scope.Add);
         }

@@ -61,6 +61,11 @@ namespace CSharpRpp.Codegen
         {
             node.ResolveTypes(_currentClass.Scope);
         }
+
+        public override void Visit(RppField node)
+        {
+            node.ResolveType(_currentClass.Scope);
+        }
     }
 
     public class CreateRType : RppNodeVisitor
@@ -74,7 +79,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitExit(RppFunc node)
         {
-            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value, p.IsVariadic) ).ToArray();
+            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value, p.IsVariadic)).ToArray();
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
 
             if (node.IsConstructor)
@@ -100,7 +105,12 @@ namespace CSharpRpp.Codegen
 
         private static RFieldAttributes GetAttributes(RppField node)
         {
-            const RFieldAttributes attrs = RFieldAttributes.Public;
+            RFieldAttributes attrs = RFieldAttributes.Public;
+            if (node.Name == "_instance")
+            {
+                attrs |= RFieldAttributes.Static;
+            }
+
             return attrs;
         }
 

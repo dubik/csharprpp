@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 
@@ -75,5 +76,10 @@ namespace CSharpRpp
         }
 
         #endregion
+
+        public void ResolveType(SymbolTable scope)
+        {
+            Type2?.Resolve(scope);
+        }
     }
 }

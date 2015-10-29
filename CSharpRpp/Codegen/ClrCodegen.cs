@@ -59,18 +59,18 @@ namespace CSharpRpp.Codegen
 
             if (node.IsObject())
             {
-                node.InstanceField.Builder = _typeBuilder.DefineField(node.InstanceField.Name, _typeBuilder, FieldAttributes.Public | FieldAttributes.Static);
-                CreateStaticConstructor(_typeBuilder, node);
+                FieldInfo instanceField = node.InstanceField.FieldInfo.Native;
+                CreateStaticConstructor(_typeBuilder, instanceField, node);
             }
         }
 
-        private static void CreateStaticConstructor(TypeBuilder typeBuilder, RppClass obj)
+        private static void CreateStaticConstructor(TypeBuilder typeBuilder, FieldInfo instanceField, RppClass obj)
         {
             ConstructorBuilder staticConstructor = typeBuilder.DefineTypeInitializer();
             ILGenerator body = staticConstructor.GetILGenerator();
             ConstructorInfo constructor = obj.Type2.Constructors[0].Native as ConstructorInfo;
             body.Emit(OpCodes.Newobj, constructor);
-            body.Emit(OpCodes.Stsfld, obj.InstanceField.Builder);
+            body.Emit(OpCodes.Stsfld, instanceField);
             body.Emit(OpCodes.Ret);
         }
 
@@ -302,7 +302,7 @@ namespace CSharpRpp.Codegen
             else
             {
                 // TODO Probably makes more sense to make RppConstructorCall ast, instead of boolean
-                var rppMethodInfo = node.Function;
+                RppMethodInfo rppMethodInfo = node.Function;
                 if (node.IsConstructorCall)
                 {
                     _body.Emit(OpCodes.Ldarg_0);
@@ -312,7 +312,7 @@ namespace CSharpRpp.Codegen
                 }
                 else
                 {
-                    if (!_inSelector)
+                    if (!_inSelector && !rppMethodInfo.IsStatic)
                     {
                         _body.Emit(OpCodes.Ldarg_0); // load 'this'
                     }
@@ -320,9 +320,10 @@ namespace CSharpRpp.Codegen
                     if (rppMethodInfo.IsStatic)
                     {
                         Debug.Assert(rppMethodInfo.Native.DeclaringType != null, "rppMethodInfo.Native.DeclaringType != null");
-                        var instanceField = rppMethodInfo.Native.DeclaringType.GetField("_instance", BindingFlags.Public | BindingFlags.Static);
+                        // TODO Fix this, this is weird also if we are inside object, we shouldn't probably load instance through the field because we have it in the parameter
+                        var instanceField = rppMethodInfo.DeclaringType.Fields.First(f => f.Name == "_instance");
                         Debug.Assert(instanceField != null, "instanceField != null");
-                        _body.Emit(OpCodes.Ldsfld, instanceField);
+                        _body.Emit(OpCodes.Ldsfld, instanceField.Native);
                     }
 
                     node.Args.ForEach(arg => arg.Accept(this));

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using CSharpRpp.Native;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
@@ -62,7 +61,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -102,7 +101,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -118,7 +117,7 @@ namespace CSharpRpp
         {
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             base.Analyze(scope);
 
@@ -179,7 +178,7 @@ namespace CSharpRpp
             Right = right;
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             Left = Left.Analyze(scope) as IRppExpr;
             Debug.Assert(Left != null);
@@ -210,7 +209,7 @@ namespace CSharpRpp
             {
                 return true;
             }
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
@@ -219,11 +218,8 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = (Op != null ? Op.GetHashCode() : 0);
-                return hashCode;
-            }
+            var hashCode = (Op != null ? Op.GetHashCode() : 0);
+            return hashCode;
         }
 
         #endregion
@@ -452,7 +448,7 @@ namespace CSharpRpp
         }
 
         // TODO This needs to be rewritten.
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             // Skip closures because they may have missing types
             NodeUtils.Analyze(scope, ArgListWithoutClosures(ArgList));
@@ -493,7 +489,7 @@ namespace CSharpRpp
         /// <param name="args">list of expressions</param>
         /// <param name="function">target function</param>
         /// <returns>list of arguments</returns>
-        private static List<IRppExpr> RewriteArgListForVariadicParameter(Symbols.SymbolTable scope, IList<IRppExpr> args, RppMethodInfo function)
+        private static List<IRppExpr> RewriteArgListForVariadicParameter(SymbolTable scope, IList<IRppExpr> args, RppMethodInfo function)
         {
             List<RppParameterInfo> funcParams = function.Parameters.ToList();
             int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
@@ -675,7 +671,7 @@ namespace CSharpRpp
             return this;
         }
 
-        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
+        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction("this");
             IEnumerable<Type> typeArgs = Collections.NoRuntimeTypes;
@@ -730,7 +726,7 @@ namespace CSharpRpp
             Size = Initializers.Count();
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             Type2 = new ResolvableType(_elementType.MakeArrayType());
 
@@ -766,7 +762,7 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope)
         {
             _exprs = NodeUtils.Analyze(scope, _exprs);
 
