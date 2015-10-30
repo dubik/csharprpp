@@ -26,15 +26,14 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
+class Foo
 {
-    def concat(args: Int*) : Int = {
-        args.length()
-    }
+    def calculate(k : Int) : Int = k + 10
+}
 
-    def invokeConcat() : Int = {
-        concat(10, 20)
-    }
+class Bar extends Foo
+{
+    def main() : Int = calculate(13)
 }
 ";
 

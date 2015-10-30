@@ -82,8 +82,14 @@ namespace CSharpRpp.Symbols
                 }
 
                 var methods = _classType.Methods.Where(m => m.Name == name).ToList();
-                var baseMethods = _baseClassSymbolTable?.LookupFunction(name) ?? Collections.NoRFuncsCollection;
-                methods.AddRange(baseMethods);
+                RType baseClass = _classType.BaseType;
+                while (baseClass != null)
+                {
+                    var baseMethods = baseClass.Methods.Where(m => m.Name == name).ToList();
+                    methods.AddRange(baseMethods);
+                    baseClass = baseClass.BaseType;
+                }
+
                 return methods;
             }
 
