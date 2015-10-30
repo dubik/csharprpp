@@ -26,14 +26,21 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo
+class Foo(val id: Int)
 {
-    def calculate(k : Int) : Int = k + 10
 }
 
-class Bar extends Foo
+object Foo
 {
-    def main() : Int = calculate(13)
+    def apply(id: Int) : Foo = new Foo(id)
+}
+
+object Bar
+{
+    def create() : Int = {
+        val foo : Foo = Foo(10)
+        foo.id
+    }
 }
 ";
 

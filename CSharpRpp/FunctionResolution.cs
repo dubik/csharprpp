@@ -137,7 +137,7 @@ namespace CSharpRpp
 
         private ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
-            TypeSymbol obj = scope.LookupType(name);
+            TypeSymbol obj = scope.LookupObject(name);
             var applyFunctions = obj.Type.Methods.Where(func => func.Name == "apply").ToList();
             if (applyFunctions.Count == 0)
             {
