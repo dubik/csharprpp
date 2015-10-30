@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Odbc;
 using System.Linq;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Parser
 {
@@ -43,7 +43,7 @@ namespace CSharpRpp.Parser
 
         private static void CheckReturnValue(RppFunc function, RppFunc foundFunc)
         {
-            if (!foundFunc.ReturnType.Equals(function.ReturnType))
+            if (!foundFunc.ReturnType2.Equals(function.ReturnType2))
             {
                 throw new Exception("Return type should match for the functions with the same name");
             }
@@ -61,7 +61,7 @@ namespace CSharpRpp.Parser
         {
             function.Params.ForEachWithIndex((index, param) =>
                                              {
-                                                 if (RppPrimitiveType.UnitTy.Equals(param.Type))
+                                                 if (RppTypeSystem.UnitTy.Equals(param.Type2.Value))
                                                  {
                                                      throw new Exception($"Parameter {param.Name} can't be Unit");
                                                  }
