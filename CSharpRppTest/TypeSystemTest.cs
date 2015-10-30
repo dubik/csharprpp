@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using CSharpRpp;
 using CSharpRpp.Codegen;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,6 +32,16 @@ class Bar extends Foo
 object Main
 ";
             var program = Utils.Parse(code);
+
+            SymbolTable scope = new SymbolTable();
+
+            Type2Creator typeCreator = new Type2Creator();
+            program.Accept(typeCreator);
+            program.PreAnalyze(scope);
+            ResolveParamTypes resolver = new ResolveParamTypes();
+            program.Accept(resolver);
+            InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
+            program.Accept(configurator);
             var creator = new CreateRType();
             program.Accept(creator);
             var classes = program.Classes.ToArray();

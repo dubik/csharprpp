@@ -84,7 +84,7 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseSimpleType()
         {
-            TestType("Array", new RppTypeName("Array"));
+            TestType("Array", new RTypeName("Array"));
         }
 
         [TestMethod]

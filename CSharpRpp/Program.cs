@@ -7,6 +7,7 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using RppRuntime;
 
@@ -26,20 +27,15 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo(val id: Int)
-{
-}
+class Bar
+class Foo
 
-object Foo
+object Main
 {
-    def apply(id: Int) : Foo = new Foo(id)
-}
-
-object Bar
-{
-    def create() : Int = {
-        val foo : Foo = Foo(10)
-        foo.id
+    def main() : Unit = {
+        var foo : Foo = new Foo()
+        var bar: Bar = new Bar()
+        foo = bar
     }
 }
 ";
@@ -57,11 +53,11 @@ object Bar
             */
 
             RppProgram runtime = Parse(runtimeCode);
-            Symbols.SymbolTable runtimeScope = new Symbols.SymbolTable();
+            SymbolTable runtimeScope = new Symbols.SymbolTable();
             WireRuntime(runtime.Classes, runtimeScope);
             RppProgram program = Parse(code);
             program.Name = "Sample";
-            Symbols.SymbolTable scope = new Symbols.SymbolTable(runtimeScope);
+            SymbolTable scope = new SymbolTable(runtimeScope);
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
             CodeGenerator generator = new CodeGenerator(program);

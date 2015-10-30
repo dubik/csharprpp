@@ -18,11 +18,11 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
-            if (!Equals(Left.Type, Right.Type))
+            if (!Equals(Left.Type2, Right.Type2))
             {
-                if (!Right.Type.IsSubclassOf(Left.Type))
+                if (!Right.Type2.Value.IsSubclassOf(Left.Type2.Value))
                 {
-                    throw new TypeMismatchException(Right.Token, Right.Type.Runtime.ToString(), Left.Type.Runtime.ToString());
+                    throw new TypeMismatchException(Right.Token, Right.Type2.Value.ToString(), Left.Type2.Value.ToString());
                 }
             }
 
