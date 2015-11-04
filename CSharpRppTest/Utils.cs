@@ -5,6 +5,7 @@ using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.Codegen;
+using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -68,6 +69,9 @@ namespace CSharpRppTest
             program.Accept(createRType);
 
             program.Analyze(scope);
+
+            SemanticAnalyzer semantic = new SemanticAnalyzer();
+            program.Accept(semantic);
 
             InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
             program.Accept(initializeNativeTypes);

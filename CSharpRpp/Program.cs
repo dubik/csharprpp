@@ -7,6 +7,7 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Native;
+using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using RppRuntime;
@@ -79,11 +80,13 @@ object Main
 
                 program.Analyze(scope);
 
+                SemanticAnalyzer semantic = new SemanticAnalyzer();
+                program.Accept(semantic);
+
                 InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
                 program.Accept(initializeNativeTypes);
                 CreateNativeTypes createNativeTypes = new CreateNativeTypes();
                 program.Accept(createNativeTypes);
-
             }
             catch (TypeMismatchException e)
             {
@@ -103,7 +106,7 @@ object Main
         }
 
         private static void WireRuntime(IEnumerable<RppClass> classes, Symbols.SymbolTable scope)
-        { 
+        {
             Assembly runtimeAssembly = GetRuntimeAssembly();
             Type[] types = runtimeAssembly.GetTypes();
             var typesMap = types.ToDictionary(t => t.Name);
@@ -125,13 +128,13 @@ object Main
                 }
             }
 
-            scope.AddType(new RType("Exception", typeof(Exception)));
-            scope.AddType(new RType("Function0", typeof(Function0<>)));
-            scope.AddType(new RType("Function1", typeof(Function1<,>)));
-            scope.AddType(new RType("Function2", typeof(Function2<,,>)));
-            scope.AddType(new RType("Function3", typeof(Function3<,,,>)));
-            scope.AddType(new RType("Function4", typeof(Function4<,,,,>)));
-            scope.AddType(new RType("Function5", typeof(Function5<,,,,,>)));
+            scope.AddType(new RType("Exception", typeof (Exception)));
+            scope.AddType(new RType("Function0", typeof (Function0<>)));
+            scope.AddType(new RType("Function1", typeof (Function1<,>)));
+            scope.AddType(new RType("Function2", typeof (Function2<,,>)));
+            scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
+            scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
+            scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
         }
 
         private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, Symbols.SymbolTable scope)

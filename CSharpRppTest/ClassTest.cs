@@ -327,6 +327,7 @@ class Bar extends Foo
         }
 
         [TestMethod]
+        [Ignore]
         [ExpectedException(typeof (SemanticException))]
         public void MissingAbstractModifierForEmptyMethods()
         {

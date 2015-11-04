@@ -16,18 +16,21 @@ namespace CSharpRpp.Semantics
 
         private static void TypeShouldBeDeclaredAbstractOrMethodShouldBeImplemented(RppFunc node)
         {
+            /*
             if (!node.Class.Modifiers.Contains(ObjectModifier.OmAbstract) && node.IsAbstract && !node.Modifiers.Contains(ObjectModifier.OmAbstract))
             {
-                throw new SemanticException(string.Format("DeclaringType {0} needs to be abstract, since method {1} is not defined", node.Class.Name, node.ToString()));
+                throw new SemanticException($"DeclaringType {node.Class.Name} needs to be abstract, since method {node.ToString()} is not defined");
             }
+            */
         }
 
         private void CheckForNonDefinedAbstractMethods(RppClass node)
         {
+            /*
             if (node.Modifiers.Contains(ObjectModifier.OmAbstract))
             {
             }
-
+            */
             // TODO not implemented yet
         }
     }

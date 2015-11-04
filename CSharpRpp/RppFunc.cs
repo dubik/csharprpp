@@ -55,7 +55,7 @@ namespace CSharpRpp
     public class RppFunc : RppNamedNode, IRppFunc
     {
         public IRppExpr Expr { get; private set; }
-        private Symbols.SymbolTable _scope;
+        private SymbolTable _scope;
 
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
 
@@ -213,7 +213,7 @@ namespace CSharpRpp
             unchecked
             {
                 var hashCode = ReturnType.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Params != null ? Params.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Params?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsAbstract.GetHashCode();
