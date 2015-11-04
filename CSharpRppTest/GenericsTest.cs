@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -6,6 +7,30 @@ namespace CSharpRppTest
     [TestClass]
     public class GenericsTest
     {
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void SimplestPossibleGeneric()
+        {
+            const string code = @"
+class Foo[T]
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void SimplestPossibleGenericWithGenericField()
+        {
+            const string code = @"
+class Foo[T](val k: T)
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+        }
+
         [TestMethod]
         [TestCategory("Generics")]
         public void GenericStaticFunction()

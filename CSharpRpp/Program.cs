@@ -28,17 +28,7 @@ object Runtime
 } 
 ";
             const string code = @"
-class Bar
-class Foo
-
-object Main
-{
-    def main() : Unit = {
-        var foo : Foo = new Foo()
-        var bar: Bar = new Bar()
-        foo = bar
-    }
-}
+class Foo[T](val k: T)
 ";
 
             /*

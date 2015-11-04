@@ -190,13 +190,25 @@ namespace CSharpRpp.TypeSystem
 
     public class RppGenericParameter
     {
-        public string Name { get; private set; }
-        public RType BaseType { get; set; }
+        public string Name { get; }
+        public RType Type { get; set; }
         public int Position { get; set; }
+        public GenericTypeParameterBuilder Native { get; set; }
 
         public RppGenericParameter(string name)
         {
             Name = name;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
+
+        public void SetGenericTypeParameterBuilder(GenericTypeParameterBuilder builder)
+        {
+            Native = builder;
+            Type.ReplaceType(builder);
         }
     }
 
@@ -331,7 +343,6 @@ namespace CSharpRpp.TypeSystem
         #endregion
     }
 
-    [DebuggerDisplay("Name = {Name}")]
     public class RType
     {
         [NotNull]
@@ -355,9 +366,11 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsArray { get; private set; }
 
-        public bool IsGenericType => _typeParameters.Count != 0;
+        public bool IsGenericType => _genericParameters.Any();
 
         public bool IsPrimitive => !IsClass;
+
+        public bool IsGenericParameter { get; private set; }
 
         [CanBeNull] private TypeBuilder _typeBuilder;
 
@@ -412,6 +425,8 @@ namespace CSharpRpp.TypeSystem
                 return _constructors;
             }
         }
+
+        public IReadOnlyCollection<RppGenericParameter> GenericParameters => _genericParameters;
 
         private readonly List<RppTypeParameterInfo> _typeParameters = new List<RppTypeParameterInfo>();
         private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
@@ -513,9 +528,28 @@ namespace CSharpRpp.TypeSystem
             return newType;
         }
 
-        private RppGenericParameter[] DefineGenericParameter(string[] genericParameterName)
+        public RppGenericParameter[] DefineGenericParameters(string[] genericParameterName)
         {
-            throw new NotImplementedException();
+            if (_genericParameters.Any())
+            {
+                throw new Exception("there were generic paremeters defined already");
+            }
+
+            genericParameterName.Select(CreateGenericParameter).ForEach(_genericParameters.Add);
+            return _genericParameters.ToArray();
+        }
+
+        private RppGenericParameter CreateGenericParameter(string name)
+        {
+            RppGenericParameter genericParameter = new RppGenericParameter(name);
+            RType type = new RType(name, RTypeAttributes.None, null, this) {IsGenericParameter = true};
+            genericParameter.Type = type;
+            return genericParameter;
+        }
+
+        internal void ReplaceType(Type type)
+        {
+            _type = type;
         }
 
         #region Equality
@@ -553,6 +587,12 @@ namespace CSharpRpp.TypeSystem
 
         public override string ToString()
         {
+            if (IsGenericType)
+            {
+                string genericParameters = string.Join(", ", _genericParameters.Select(p => p.ToString()));
+                return $"{Name}[{genericParameters}]";
+            }
+
             return $"{Name}";
         }
 
@@ -564,6 +604,13 @@ namespace CSharpRpp.TypeSystem
             {
                 TypeAttributes attrs = RTypeUtils.GetTypeAttributes(Attributes);
                 _typeBuilder = module.DefineType(Name, attrs);
+
+                if (IsGenericType)
+                {
+                    string[] genericParameterNames = _genericParameters.Select(p => p.Name).ToArray();
+                    GenericTypeParameterBuilder[] nativeGenericParameter = _typeBuilder.DefineGenericParameters(genericParameterNames);
+                    _genericParameters.ForEachWithIndex((index, genericParameter) => genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]));
+                }
             }
         }
 

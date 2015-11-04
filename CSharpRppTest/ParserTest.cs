@@ -59,11 +59,10 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseEmptyClassWithOneField()
         {
-            RppField field = new RppField(MutabilityFlag.MF_Val, "length", null, new ResolvableType(RppTypeSystem.IntTy));
-            RppClass expected = new RppClass(ClassKind.Class, Collections.NoModifiers, "String", new[] {field}, Collections.NoNodes,
-                Collections.NoVariantTypeParams,
-                RppBaseConstructorCall.Object);
-            Assert.AreEqual(ParseClass("class String(length: Int)"), expected);
+            RppClass rppClass = ParseClass("class String(val length: Int)");
+            Assert.AreEqual(1, rppClass.Fields.Count());
+            Assert.AreEqual("length", rppClass.Fields.First().Name);
+            Assert.AreEqual("String", rppClass.Name);
         }
 
         private RppClass ParseClass(string code)

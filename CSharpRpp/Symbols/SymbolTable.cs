@@ -27,6 +27,16 @@ namespace CSharpRpp.Symbols
             Parent = parent;
             _classType = classType;
             _baseClassSymbolTable = baseClassSymbolTable;
+
+            AddGenericParametersToScope(_classType);
+        }
+
+        private void AddGenericParametersToScope(RType classType)
+        {
+            if (classType.IsGenericType)
+            {
+                classType.GenericParameters.ForEach(p => AddType(p.Type));
+            }
         }
 
         public Symbol Lookup(string name)

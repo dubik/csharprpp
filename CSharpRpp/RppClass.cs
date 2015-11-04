@@ -92,7 +92,7 @@ namespace CSharpRpp
 
         public IEnumerable<IRppFunc> Constructors => _constructors.AsEnumerable();
 
-        public RppField InstanceField { get; private set; }
+        public RppField InstanceField { get; }
         public RType Type2 { get; set; }
 
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)

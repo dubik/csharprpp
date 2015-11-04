@@ -122,7 +122,8 @@ namespace VisitorThingy
             PrintlnSomething();
              */
 
-            HindleyMilner.DoMain();
+            //HindleyMilner.DoMain();
+            Generics.MainA();
         }
 
         public static void Println(string format, params object[] args)

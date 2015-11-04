@@ -17,6 +17,9 @@ namespace CSharpRpp.Codegen
         {
             RType classType = new RType(node.GetNativeName(), GetTypeAttributes(node), null, null);
             node.Type2 = classType;
+
+            string[] typeParamsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
+            classType.DefineGenericParameters(typeParamsNames);
         }
 
         private static RTypeAttributes GetTypeAttributes(RppClass node)
