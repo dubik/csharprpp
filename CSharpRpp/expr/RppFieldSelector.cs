@@ -93,6 +93,7 @@ namespace CSharpRpp
         /// <returns>specialized base type type</returns>
         private ResolvedType FindSpecializedClassInHierarchy(string name)
         {
+            /*
             IRppClass clazz = TargetType.Class;
             if (clazz.Name == name)
             {
@@ -107,6 +108,8 @@ namespace CSharpRpp
             }
 
             return baseRppType;
+            */
+            return null;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

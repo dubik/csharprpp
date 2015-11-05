@@ -152,7 +152,7 @@ namespace CSharpRpp.TypeSystem
             return attrs;
         }
 
-        public static void DefineNativeTypeFor(TypeBuilder typeBuilder, RppConstructorInfo rppConstructor)
+        public static void DefineNativeTypeForConstructor(TypeBuilder typeBuilder, RppMethodInfo rppConstructor)
         {
             MethodAttributes attr = GetMethodAttributes(rppConstructor.Attributes, constructor: true);
             Type[] parametersTypes = ParametersTypes(rppConstructor.Parameters);

@@ -378,8 +378,8 @@ namespace CSharpRpp
 
     public class RppFuncCall : RppMember
     {
-        public override sealed RppType Type { get; protected set; }
-        public override sealed ResolvableType Type2 { get; protected set; }
+        public sealed override RppType Type { get; protected set; }
+        public sealed override ResolvableType Type2 { get; protected set; }
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
@@ -586,32 +586,16 @@ namespace CSharpRpp
 
     public class RppBaseConstructorCall : RppFuncCall
     {
-        public string BaseClassName { get; }
-
-        public IRppClass BaseClass { get; private set; }
-
         public RppMethodInfo BaseConstructor { get; private set; }
 
-        public IEnumerable<RppType> BaseClassTypeArgs { get; }
-        public IEnumerable<RTypeName> BaseClassTypeArgs2 { get; private set; }
-        public ResolvedType BaseClassType { get; private set; }
+        public ResolvableType BaseClassType2 { get; private set; }
 
-        public RType BaseClassType2 { get; private set; }
+        public static RppBaseConstructorCall Object = new RppBaseConstructorCall(AnyTy, Collections.NoExprs);
 
-        public static RppBaseConstructorCall Object = new RppBaseConstructorCall("Object", Collections.NoExprs, Collections.NoTypes);
-
-        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IEnumerable<RppType> baseClassTypeArgs)
+        public RppBaseConstructorCall([NotNull] ResolvableType baseClassType, [NotNull] IList<IRppExpr> argList)
             : base("ctor()", argList)
         {
-            BaseClassName = baseClassName ?? "Object";
-            BaseClassTypeArgs = baseClassTypeArgs;
-        }
-
-        public RppBaseConstructorCall([CanBeNull] string baseClassName, [NotNull] IList<IRppExpr> argList, IEnumerable<RTypeName> baseClassTypeArgs)
-            : base("ctor()", argList)
-        {
-            BaseClassName = baseClassName ?? "Object";
-            BaseClassTypeArgs2 = baseClassTypeArgs;
+            BaseClassType2 = baseClassType;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -621,6 +605,7 @@ namespace CSharpRpp
 
         public void ResolveBaseClass(SymbolTable scope)
         {
+            /*
             switch (BaseClassName)
             {
                 case "Object":
@@ -639,6 +624,9 @@ namespace CSharpRpp
                     }
                     break;
             }
+            */
+
+            BaseClassType2.Resolve(scope);
         }
 
         public override IRppNode Analyze(SymbolTable scope)
@@ -665,7 +653,7 @@ namespace CSharpRpp
             // parent constructor is a special case, so don't resolve function
             Type = RppNativeType.Create(typeof (void));
             */
-            SymbolTable sc = new SymbolTable(null, BaseClassType2, BaseClass?.Scope);
+            SymbolTable sc = new SymbolTable(null, BaseClassType2.Value);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type2 = UnitTy;
             return this;
@@ -706,6 +694,11 @@ namespace CSharpRpp
             return OverloadQuery.DefaultTypesComparator(source, target);
         }
         */
+
+        public override string ToString()
+        {
+            return $"{BaseClassType2}::{Name}";
+        }
     }
 
     public class RppArray : RppNode, IRppExpr
@@ -855,7 +848,7 @@ namespace CSharpRpp
 
             Debug.Assert(targetType != null, "targetType != null");
 
-            SymbolTable classScope = new SymbolTable(null, targetType, null);
+            SymbolTable classScope = new SymbolTable(null, targetType);
 
             // targetType.Class.Functions.ForEach(classScope.Add);
             // targetType.Class.Fields.ForEach(classScope.Add);

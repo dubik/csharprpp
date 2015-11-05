@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
@@ -112,14 +113,21 @@ namespace CSharpRpp.TypeSystem
 
         public RppTypeParameterInfo[] TypeParameters { get; set; }
 
-        [NotNull]
-        public RType DeclaringType { get; private set; }
+        public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
 
-        public MethodBase Native { get; set; }
+        [NotNull]
+        public RType DeclaringType { get; }
+
+        public virtual MethodBase Native { get; set; }
 
         public bool IsVariadic => Parameters != null && Parameters.Any() && Parameters.Last().IsVariadic;
 
         public bool IsStatic => DeclaringType.Name.EndsWith("$");
+
+        public bool IsGenericMethod
+            => ReturnType.IsGenericType || ReturnType.IsGenericParameter || Parameters.Any(p => p.Type.IsGenericType || p.Type.IsGenericParameter);
+
+        public RppMethodInfo GenericMethodDefinition { get; set; }
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
             [CanBeNull] RType returnType,
@@ -132,13 +140,13 @@ namespace CSharpRpp.TypeSystem
             Parameters = parameters;
         }
 
+        #region ToString
+
         public override string ToString()
         {
             var res = new List<string> {ToString(Attributes), Name + ParamsToString(), ":", ReturnType?.ToString()};
             return string.Join(" ", res);
         }
-
-        #region ToString
 
         private static readonly List<Tuple<RMethodAttributes, string>> _attrToStr = new List
             <Tuple<RMethodAttributes, string>>
@@ -178,14 +186,6 @@ namespace CSharpRpp.TypeSystem
         }
 
         #endregion
-    }
-
-    public sealed class RppConstructorInfo : RppMethodInfo
-    {
-        public RppConstructorInfo(RMethodAttributes attributes, RppParameterInfo[] parameterTypes, RType declaringType)
-            : base("ctor", declaringType, attributes, RppTypeSystem.UnitTy, parameterTypes)
-        {
-        }
     }
 
     public class RppGenericParameter
@@ -252,7 +252,7 @@ namespace CSharpRpp.TypeSystem
     public interface IRppTypeDefinition
     {
         RppTypeParameterInfo[] TypeParameters { get; }
-        RppConstructorInfo[] Constructors { get; }
+        RppMethodInfo[] Constructors { get; }
         RppFieldInfo[] Fields { get; }
         RppMethodInfo[] Methods { get; }
     }
@@ -262,14 +262,14 @@ namespace CSharpRpp.TypeSystem
         public static IRppTypeDefinition Instance = new EmptyTypeDefinition();
 
         public RppTypeParameterInfo[] TypeParameters { get; }
-        public RppConstructorInfo[] Constructors { get; }
+        public RppMethodInfo[] Constructors { get; }
         public RppFieldInfo[] Fields { get; }
         public RppMethodInfo[] Methods { get; }
 
         private EmptyTypeDefinition()
         {
             TypeParameters = new RppTypeParameterInfo[0];
-            Constructors = new RppConstructorInfo[0];
+            Constructors = new RppMethodInfo[0];
             Fields = new RppFieldInfo[0];
             Methods = new RppMethodInfo[0];
         }
@@ -295,14 +295,22 @@ namespace CSharpRpp.TypeSystem
             _params.Add(genericArgument);
         }
 
-        public RType Resolve([NotNull] Symbols.SymbolTable scope)
+        public RType Resolve([NotNull] SymbolTable scope)
         {
+            RType type = scope.LookupType(Name).Type;
+
             if (_params.Any())
             {
-                throw new NotImplementedException("Generics not implemented yet");
+                if (!type.IsGenericType)
+                {
+                    throw new Exception($"Non generic type '{type}' has generic arguments");
+                }
+
+                RType[] genericArguments = _params.Select(p => p.Resolve(scope)).ToArray();
+                return type.MakeGenericType(genericArguments);
             }
 
-            return scope.LookupType(Name).Type;
+            return type;
         }
 
         public override string ToString()
@@ -372,12 +380,14 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsGenericParameter { get; private set; }
 
+        public RType DefinitionType { get; protected set; }
+
         [CanBeNull] private TypeBuilder _typeBuilder;
 
         [CanBeNull] private Type _type;
 
         [NotNull]
-        public Type NativeType
+        public virtual Type NativeType
         {
             get
             {
@@ -407,13 +417,11 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public IReadOnlyList<RppFieldInfo> Fields => _fields;
+        public virtual IReadOnlyList<RppFieldInfo> Fields => _fields;
 
-        public IReadOnlyList<RppMethodInfo> Methods => _methods;
+        public virtual IReadOnlyList<RppMethodInfo> Methods => _methods;
 
-        public IReadOnlyList<RppTypeParameterInfo> TypeParameters => _typeParameters;
-
-        public IReadOnlyList<RppConstructorInfo> Constructors
+        public virtual IReadOnlyList<RppMethodInfo> Constructors
         {
             get
             {
@@ -426,13 +434,15 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
+        public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
+
         public IReadOnlyCollection<RppGenericParameter> GenericParameters => _genericParameters;
 
-        private readonly List<RppTypeParameterInfo> _typeParameters = new List<RppTypeParameterInfo>();
-        private readonly List<RppConstructorInfo> _constructors = new List<RppConstructorInfo>();
+        private readonly List<RppMethodInfo> _constructors = new List<RppMethodInfo>();
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
         private readonly List<RppGenericParameter> _genericParameters = new List<RppGenericParameter>();
+        private readonly List<RType> _genericArguments = new List<RType>();
 
         public RType([NotNull] string name, [NotNull] Type type)
         {
@@ -447,14 +457,15 @@ namespace CSharpRpp.TypeSystem
             _constructors.AddRange(constructors);
         }
 
-        public static RppConstructorInfo Convert(ConstructorInfo constructor)
+        public static RppMethodInfo Convert(ConstructorInfo constructor)
         {
             Type declaringType = constructor.DeclaringType;
             Debug.Assert(declaringType != null, "declaringType != null");
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
             var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppConstructorInfo rppConstructor = new RppConstructorInfo(rMethodAttributes, parameters, new RType(declaringType.Name, declaringType))
+            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", new RType(declaringType.Name, declaringType), rMethodAttributes,
+                RppTypeSystem.UnitTy, parameters)
             {
                 Native = constructor
             };
@@ -511,9 +522,9 @@ namespace CSharpRpp.TypeSystem
             return DefineConstructor(attributes, new RppParameterInfo[0]);
         }
 
-        public RppConstructorInfo DefineConstructor(RMethodAttributes attributes, RppParameterInfo[] parameterTypes)
+        public RppMethodInfo DefineConstructor(RMethodAttributes attributes, RppParameterInfo[] parameterTypes)
         {
-            RppConstructorInfo constructor = new RppConstructorInfo(attributes, parameterTypes, this);
+            RppMethodInfo constructor = new RppMethodInfo("ctor", this, attributes, RppTypeSystem.UnitTy, parameterTypes);
             _constructors.Add(constructor);
             return constructor;
         }
@@ -526,6 +537,12 @@ namespace CSharpRpp.TypeSystem
             newType.DefineMethod("update", RMethodAttributes.Public, this,
                 new[] {new RppParameterInfo("index", RppTypeSystem.IntTy), new RppParameterInfo("value", this)}, new RppGenericParameter[0]);
             return newType;
+        }
+
+        public RType MakeGenericType(RType[] genericArguments)
+        {
+            RInflatedType inflatedType = new RInflatedType(this, genericArguments);
+            return inflatedType;
         }
 
         public RppGenericParameter[] DefineGenericParameters(string[] genericParameterName)
@@ -609,7 +626,8 @@ namespace CSharpRpp.TypeSystem
                 {
                     string[] genericParameterNames = _genericParameters.Select(p => p.Name).ToArray();
                     GenericTypeParameterBuilder[] nativeGenericParameter = _typeBuilder.DefineGenericParameters(genericParameterNames);
-                    _genericParameters.ForEachWithIndex((index, genericParameter) => genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]));
+                    _genericParameters.ForEachWithIndex(
+                        (index, genericParameter) => genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]));
                 }
             }
         }
@@ -631,9 +649,9 @@ namespace CSharpRpp.TypeSystem
                 RTypeUtils.DefineNativeTypeFor(_typeBuilder, rppMethod);
             }
 
-            foreach (RppConstructorInfo rppConstructor in Constructors)
+            foreach (RppMethodInfo rppConstructor in Constructors)
             {
-                RTypeUtils.DefineNativeTypeFor(_typeBuilder, rppConstructor);
+                RTypeUtils.DefineNativeTypeForConstructor(_typeBuilder, rppConstructor);
             }
 
             foreach (RppFieldInfo rppField in Fields)

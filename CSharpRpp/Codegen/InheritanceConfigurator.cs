@@ -8,12 +8,12 @@ namespace CSharpRpp.Codegen
     {
         public override void VisitEnter(RppClass node)
         {
-            if (node.BaseConstructorCall.BaseClassName != "Object")
+            if (node.BaseConstructorCall.BaseClassType2.Value.Name != "Object")
             {
                 TypeBuilder builder = node.Type2.NativeType as TypeBuilder;
                 Debug.Assert(builder != null, "builder != null");
 
-                builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
+                //builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
             }
         }
     }
@@ -22,14 +22,14 @@ namespace CSharpRpp.Codegen
     {
         public override void VisitEnter(RppClass node)
         {
-            if (node.BaseConstructorCall.BaseClassName != "Object")
+            if (node.BaseConstructorCall.BaseClassType2.Value.Name != "Object")
             {
                 //TypeBuilder builder = node.RuntimeType as TypeBuilder;
                 //Debug.Assert(builder != null, "builder != null");
 
                 //builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
 
-                node.Type2.BaseType = node.BaseConstructorCall.BaseClassType2;
+                node.Type2.BaseType = node.BaseConstructorCall.BaseClassType2.Value;
             }
         }
     }

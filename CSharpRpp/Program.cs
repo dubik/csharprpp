@@ -28,7 +28,8 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo[T](val k: T)
+class Bar[T]
+class Foo[T] extends Bar[Int]
 ";
 
             /*

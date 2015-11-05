@@ -29,9 +29,6 @@ namespace CSharpRpp
         Type RuntimeType { get; }
         SymbolTable Scope { get; }
 
-        [CanBeNull]
-        IRppClass BaseClass { get; }
-
         RppBaseConstructorCall BaseConstructorCall { get; }
 
         RType Type2 { get; set; }
@@ -65,8 +62,6 @@ namespace CSharpRpp
 
             private set { _scope = value; }
         }
-
-        public IRppClass BaseClass => BaseConstructorCall.BaseClass;
 
         [NotNull]
         public IEnumerable<IRppFunc> Functions => _funcs.AsEnumerable();
@@ -159,7 +154,7 @@ namespace CSharpRpp
 
             BaseConstructorCall.ResolveBaseClass(scope);
 
-            Scope = new SymbolTable(scope, Type2, BaseClass?.Scope);
+            Scope = new SymbolTable(scope, Type2);
 
             //_funcs.ForEach(Scope.Add);
             //_fields.ForEach(Scope.Add);
@@ -172,7 +167,7 @@ namespace CSharpRpp
             Debug.Assert(Scope != null, "Scope != null");
             //Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
 
-            SymbolTable constructorScope = new SymbolTable(Scope, Type2, null);
+            SymbolTable constructorScope = new SymbolTable(Scope, Type2);
             //_classParams.ForEach(constructorScope.Add);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams);

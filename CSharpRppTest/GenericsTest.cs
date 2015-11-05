@@ -33,6 +33,34 @@ class Foo[T](val k: T)
 
         [TestMethod]
         [TestCategory("Generics")]
+        public void ExtendingSimpleGenericClass()
+        {
+            const string code = @"
+class Bar[T]
+class Foo[T] extends Bar[T]
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void ExtendingSimpleGenericClassWithPredefinedGenericArgument()
+        {
+            const string code = @"
+class Bar[T]
+class Foo[T] extends Bar[Int]
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsTrue(fooTy.IsGenericType);
+            Assert.AreEqual(typeof (int), fooTy.BaseType?.GenericTypeArguments[0]);
+        }
+
+
+        [TestMethod]
+        [TestCategory("Generics")]
         public void GenericStaticFunction()
         {
             const string code = @"

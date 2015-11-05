@@ -9,7 +9,6 @@ namespace CSharpRpp.Symbols
     {
         protected readonly SymbolTable Parent;
         private readonly RType _classType;
-        private readonly SymbolTable _baseClassSymbolTable;
 
         private readonly Dictionary<string, Symbol> _symbols = new Dictionary<string, Symbol>();
 
@@ -22,11 +21,10 @@ namespace CSharpRpp.Symbols
             Parent = parent;
         }
 
-        public SymbolTable(SymbolTable parent, RType classType, SymbolTable baseClassSymbolTable)
+        public SymbolTable(SymbolTable parent, RType classType)
         {
             Parent = parent;
             _classType = classType;
-            _baseClassSymbolTable = baseClassSymbolTable;
 
             AddGenericParametersToScope(_classType);
         }
@@ -111,7 +109,19 @@ namespace CSharpRpp.Symbols
             if (_classType != null)
             {
                 var field = _classType.Fields.FirstOrDefault(f => f.Name == name);
-                return field ?? _baseClassSymbolTable?.LookupField(name);
+                if (field != null)
+                    return field;
+
+                RType baseClass = _classType.BaseType;
+                while (baseClass != null)
+                {
+                    field = _classType.Fields.FirstOrDefault(f => f.Name == name);
+                    if (field != null)
+                        return field;
+                    baseClass = baseClass.BaseType;
+                }
+
+                return null;
             }
 
             return Parent?.LookupField(name);

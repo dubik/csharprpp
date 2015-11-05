@@ -222,12 +222,18 @@ namespace CSharpRpp
                 string name = _lastToken.Text;
                 IList<RppVariantTypeParam> typeParams = ParseTypeParams();
                 IList<RppField> classParams = ParseClassParamClause();
-                string baseClassName;
                 IList<IRppExpr> baseClassArgs;
-                IList<RTypeName> baseClassTypeArgs;
-                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
+                RTypeName baseClassTypeName;
+                IList<IRppNode> nodes = ParseClassTemplateOpt(out baseClassTypeName, out baseClassArgs);
+
+                ResolvableType baseClass = ResolvableType.AnyTy;
+                if (baseClassTypeName != null)
+                {
+                    baseClass = new ResolvableType(baseClassTypeName);
+                }
+
                 return new RppClass(ClassKind.Class, modifiers, name, classParams, nodes, typeParams,
-                    new RppBaseConstructorCall(baseClassName, baseClassArgs, baseClassTypeArgs));
+                    new RppBaseConstructorCall(baseClass, baseClassArgs));
             }
 
             throw new Exception("Expected identifier but got : " + _lastToken.Text);
@@ -295,6 +301,7 @@ namespace CSharpRpp
         }
 
         // [T, N]
+        [NotNull]
         private IList<RTypeName> ParseTypeParamClause()
         {
             IList<RTypeName> typeParams = new List<RTypeName>();
@@ -378,16 +385,15 @@ namespace CSharpRpp
             return false;
         }
 
-        public IList<IRppNode> ParseClassTemplateOpt(out string baseClassName, out IList<IRppExpr> baseClassArgs, out IList<RTypeName> baseClassTypeParams)
+        public IList<IRppNode> ParseClassTemplateOpt(out RTypeName baseClassType, out IList<IRppExpr> constrArgs)
         {
-            baseClassName = null;
-            baseClassArgs = Collections.NoExprs;
-            baseClassTypeParams = Collections.NoTypeNames;
+            baseClassType = null;
+            constrArgs = Collections.NoExprs;
             if (Require(RppLexer.KW_Extends))
             {
                 if (Require(RppLexer.Id))
                 {
-                    baseClassName = _lastToken.Text;
+                    baseClassType = new RTypeName(_lastToken.Text);
                 }
                 else
                 {
@@ -395,9 +401,9 @@ namespace CSharpRpp
                 }
 
                 IList<RTypeName> typeArgs = ParseTypeParamClause();
-                baseClassTypeParams = typeArgs;
+                typeArgs.ForEach(baseClassType.AddGenericArgument);
                 var args = ParseArgsOpt();
-                baseClassArgs = args;
+                constrArgs = args;
             }
 
             return ParseTemplateBody();
@@ -766,12 +772,18 @@ namespace CSharpRpp
             Expect(RppLexer.Id);
             string objectName = _lastToken.Text;
 
-            string baseClassName;
+            RTypeName baseClassTypeName;
             IList<IRppExpr> baseClassArgs;
-            IList<RTypeName> baseClassTypeArgs;
-            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassName, out baseClassArgs, out baseClassTypeArgs);
+            IList<IRppNode> stats = ParseClassTemplateOpt(out baseClassTypeName, out baseClassArgs);
+
+            ResolvableType baseClass = ResolvableType.AnyTy;
+            if (baseClassTypeName != null)
+            {
+                baseClass = new ResolvableType(baseClassTypeName);
+            }
+
             return new RppClass(ClassKind.Object, modifiers, objectName, Collections.NoFields, stats, Collections.NoVariantTypeParams,
-                new RppBaseConstructorCall(baseClassName, Collections.NoExprs, baseClassTypeArgs));
+                new RppBaseConstructorCall(baseClass, Collections.NoExprs));
         }
 
         private static readonly Dictionary<int, ObjectModifier> TokenToObjectModifierMap = new Dictionary<int, ObjectModifier>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Expr;
 using CSharpRpp.Parser;
@@ -85,7 +84,7 @@ namespace CSharpRpp
         {
             _nameToGenericArg = new Dictionary<string, RppVariantTypeParam>();
             int index = 0;
-            foreach (var typeParam in RefType2.TypeParameters)
+            foreach (var typeParam in RefType2.GenericArguments)
             {
                 _nameToGenericArg.Add(typeParam.Name, _typeArgs[index]);
                 index++;
