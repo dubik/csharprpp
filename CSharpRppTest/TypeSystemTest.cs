@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -86,41 +85,6 @@ object Main
             Assert.IsTrue(t.IsClass);
             Assert.IsTrue(t.IsAbstract);
         }
-
-        [TestMethod]
-        [TestCategory("Generics")]
-        public void TestExtendGenericClass()
-        {
-            const string code = @"
-class Foo[A]
-
-class Bar extends Foo[Int]
-";
-            var program = Utils.Parse(code);
-            var crea = new CreateRType();
-            program.Accept(crea);
-
-            // Analyze
-        }
-
-        /*
-        [TestMethod]
-        public void TypeCreation()
-        {
-            const string code = @"
-class Foo
-{
-    def length(k: Int) : Int = 13
-}
-";
-            RppProgram program = Utils.Parse(code);
-            CreateRType creator = new CreateRType();
-            program.Accept(creator);
-            RppScope scope = new RppScope(null);
-            program.PreAnalyze(scope);
-            program.Analyze(scope);
-        }
-        */
 
         [TestInitialize]
         public void SetUp()

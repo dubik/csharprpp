@@ -58,6 +58,20 @@ class Foo[T] extends Bar[Int]
             Assert.AreEqual(typeof (int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
 
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void ExtendingClassWithPredefinedGenericArgument()
+        {
+            const string code = @"
+class Bar[T]
+class Foo extends Bar[Int]
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            Assert.IsFalse(fooTy.IsGenericType);
+            Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
+        }
+
 
         [TestMethod]
         [TestCategory("Generics")]
