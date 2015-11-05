@@ -28,8 +28,15 @@ object Runtime
 } 
 ";
             const string code = @"
-class Bar[T]
-class Foo[T] extends Bar[Int]
+class Foo[T]
+
+object Bar
+{
+    def main() : Foo[Int] = {
+        val k : Foo[Int] = new Foo[Int]()
+        k
+    }
+}
 ";
 
             /*

@@ -502,17 +502,7 @@ namespace CSharpRpp.Codegen
             RppMethodInfo constructor = node.Constructor;
 
             ConstructorInfo constructorInfo = constructor.Native as ConstructorInfo;
-            if (node.TypeArgs.Any())
-            {
-                /*
-                var genericArgs = node.TypeArgs.Select(variant => variant.Runtime).ToArray();
-                Type specializedType = node.RefType2.RuntimeType.MakeGenericType(genericArgs);
-                constructorInfo = TypeBuilder.GetConstructor(specializedType, constructorInfo);
-                */
-                throw new NotImplementedException();
-            }
 
-            // TODO RppNativeClass don't have constructor builders, they have constructorinfo instead, fix this
             _body.Emit(OpCodes.Newobj, constructorInfo);
         }
 

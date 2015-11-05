@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Expr;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
@@ -219,9 +220,15 @@ namespace CSharpRpp
         {
             Expect(RppLexer.Id);
             string name = _lastToken.Text;
-            IList<RppVariantTypeParam> typeArgs = ParseTypeParams();
+            RTypeName typeName = new RTypeName(name);
+            if (Peek(RppLexer.OP_LBracket))
+            {
+                IList<RTypeName> genericArguments = ParseTypeParamClause();
+                genericArguments.ForEach(typeName.AddGenericArgument);
+            }
+
             IList<IRppExpr> args = ParseArgsOpt();
-            return new RppNew(name, args, typeArgs);
+            return new RppNew(new ResolvableType(typeName), args);
         }
 
         /*
