@@ -13,18 +13,13 @@ namespace CSharpRpp
     public class RppNew : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-        public ResolvableType Type2 { get; private set; }
-        public Type RuntimeType { get; private set; }
+        public ResolvableType Type2 { get; }
 
         public IEnumerable<RppType> ArgumentTypes { get; private set; }
 
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 
         private readonly IList<IRppExpr> _arguments;
-
-        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgs.AsEnumerable();
-
-        private readonly IList<RppVariantTypeParam> _typeArgs;
 
         public RppMethodInfo Constructor { get; private set; }
 

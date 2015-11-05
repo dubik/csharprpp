@@ -152,14 +152,9 @@ namespace CSharpRpp
         {
             Debug.Assert(scope != null, "scope != null");
 
-            BaseConstructorCall.ResolveBaseClass(scope);
-
             Scope = new SymbolTable(scope, Type2);
 
-            //_funcs.ForEach(Scope.Add);
-            //_fields.ForEach(Scope.Add);
-
-//            _typeParams.ForEach(Scope.Add);
+            BaseConstructorCall.ResolveBaseClass(Scope);
         }
 
         public override IRppNode Analyze(SymbolTable scope)
