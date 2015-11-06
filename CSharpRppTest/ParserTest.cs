@@ -65,7 +65,7 @@ namespace CSharpRppTest
             Assert.AreEqual("String", rppClass.Name);
         }
 
-        private RppClass ParseClass(string code)
+        private static RppClass ParseClass(string code)
         {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
@@ -90,8 +90,8 @@ namespace CSharpRppTest
         [TestCategory("Generics")]
         public void ParseGenericType()
         {
-            RppGenericType expected = new RppGenericType("Array");
-            expected.AddParam(new RppTypeName("String"));
+            RTypeName expected = new RTypeName("Array");
+            expected.AddGenericArgument(new RTypeName("String"));
 
             TestType("Array[String]", expected);
         }
@@ -100,9 +100,9 @@ namespace CSharpRppTest
         [TestCategory("Generics")]
         public void ParseMultiGenericType()
         {
-            RppGenericType expected = new RppGenericType("Array");
-            expected.AddParam(new RppTypeName("String"));
-            expected.AddParam(new RppTypeName("Int"));
+            RTypeName expected = new RTypeName("Array");
+            expected.AddGenericArgument(new RTypeName("String"));
+            expected.AddGenericArgument(new RTypeName("Int"));
 
             TestType("Array[String, Int]", expected);
         }
