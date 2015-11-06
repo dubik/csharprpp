@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -32,6 +33,21 @@ namespace CSharpRpp.TypeSystem
             set { throw new NotImplementedException(); }
         }
 
+        private RppParameterInfo[] _parameters;
+
+        public override RppParameterInfo[] Parameters
+        {
+            get
+            {
+                if (_parameters == null)
+                {
+                    _parameters = GenericMethodDefinition?.Parameters?.Select(InflateParameter).ToArray();
+                }
+
+                return _parameters;
+            }
+        }
+
         private readonly RType[] _genericArguments;
         private MethodBase _nativeMethod;
 
@@ -40,6 +56,17 @@ namespace CSharpRpp.TypeSystem
         {
             GenericMethodDefinition = genericMethodDefinition;
             _genericArguments = genericArguments;
+        }
+
+        private RppParameterInfo InflateParameter(RppParameterInfo p)
+        {
+            if (p.Type.IsGenericParameter)
+            {
+                RType substitutedType = _genericArguments[p.Type.GenericParameterPosition];
+                return p.CloneWithNewType(substitutedType);
+            }
+
+            return p;
         }
     }
 }

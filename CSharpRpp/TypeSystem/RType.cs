@@ -109,7 +109,7 @@ namespace CSharpRpp.TypeSystem
         public RType ReturnType { get; set; }
 
         [CanBeNull]
-        public RppParameterInfo[] Parameters { get; set; }
+        public virtual RppParameterInfo[] Parameters { get; set; }
 
         public RppTypeParameterInfo[] TypeParameters { get; set; }
 
@@ -164,13 +164,13 @@ namespace CSharpRpp.TypeSystem
             List<string> res = new List<string>();
 
             _attrToStr.Aggregate(res, (list, tuple) =>
-                                      {
-                                          if (attrs.HasFlag(tuple.Item1))
-                                          {
-                                              list.Add(tuple.Item2);
-                                          }
-                                          return list;
-                                      });
+            {
+                if (attrs.HasFlag(tuple.Item1))
+                {
+                    list.Add(tuple.Item2);
+                }
+                return list;
+            });
 
             return string.Join(" ", res);
         }
@@ -215,10 +215,10 @@ namespace CSharpRpp.TypeSystem
     public class RppParameterInfo
     {
         public string Name { get; }
-        public RType Type { get; }
+        public RType Type { get; private set; }
         public int Index { get; set; }
 
-        public bool IsVariadic { get; private set; }
+        public bool IsVariadic { get; }
 
         public RppParameterInfo(RType type) : this("", type, false)
         {
@@ -234,6 +234,13 @@ namespace CSharpRpp.TypeSystem
         public override string ToString()
         {
             return $"{Name} : {Type}";
+        }
+
+        public RppParameterInfo CloneWithNewType(RType type)
+        {
+            var instance = (RppParameterInfo) MemberwiseClone();
+            instance.Type = type;
+            return instance;
         }
     }
 
@@ -334,9 +341,18 @@ namespace CSharpRpp.TypeSystem
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
             return Equals((RTypeName) obj);
         }
 
@@ -437,6 +453,8 @@ namespace CSharpRpp.TypeSystem
         public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
 
         public IReadOnlyCollection<RppGenericParameter> GenericParameters => _genericParameters;
+
+        public int GenericParameterPosition { get; set; }
 
         private readonly List<RppMethodInfo> _constructors = new List<RppMethodInfo>();
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
@@ -552,15 +570,26 @@ namespace CSharpRpp.TypeSystem
                 throw new Exception("there were generic paremeters defined already");
             }
 
-            genericParameterName.Select(CreateGenericParameter).ForEach(_genericParameters.Add);
+            int genericArgumentPosition = 0;
+            foreach (var genericParamName in genericParameterName)
+            {
+                RppGenericParameter genericParameter = CreateGenericParameter(genericParamName, genericArgumentPosition++);
+                _genericParameters.Add(genericParameter);
+            }
+
             return _genericParameters.ToArray();
         }
 
-        private RppGenericParameter CreateGenericParameter(string name)
+        private RppGenericParameter CreateGenericParameter(string name, int genericArgumentPosition)
         {
             RppGenericParameter genericParameter = new RppGenericParameter(name);
-            RType type = new RType(name, RTypeAttributes.None, null, this) {IsGenericParameter = true};
+            RType type = new RType(name, RTypeAttributes.None, null, this)
+            {
+                IsGenericParameter = true,
+                GenericParameterPosition = genericArgumentPosition
+            };
             genericParameter.Type = type;
+            genericParameter.Position = genericArgumentPosition;
             return genericParameter;
         }
 
