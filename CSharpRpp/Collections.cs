@@ -20,5 +20,6 @@ namespace CSharpRpp
         public static IReadOnlyCollection<IRppFunc> NoFuncsCollection = new List<IRppFunc>();
         public static IReadOnlyCollection<RppMethodInfo> NoRFuncsCollection = new List<RppMethodInfo>();
         public static IReadOnlyCollection<RType> NoRTypes = new List<RType>().AsReadOnly();
+        public static IList<ResolvableType>  NoResolvableTypes = new List<ResolvableType>().AsReadOnly();
     }
 }

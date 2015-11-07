@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Expr;
@@ -393,20 +394,21 @@ namespace CSharpRpp
 
             if (Peek(RppLexer.OP_LBracket))
             {
-                IList<RppVariantTypeParam> typeArgs = ParseTypeParams();
+                IList<RTypeName> typeArgs = ParseTypeParamClause();
                 if (!Peek(RppLexer.OP_LParen))
                 {
                     throw new SyntaxException("Expecting function call after type arguments", _lastToken);
                 }
 
                 IList<IRppExpr> args = ParseArgs();
-                return ParseSimpleExprRest(MakeCall(expr, args, typeArgs));
+                IList<ResolvableType> genericArguments = typeArgs.Select(ta => new ResolvableType(ta)).ToList();
+                return ParseSimpleExprRest(MakeCall(expr, args, genericArguments));
             }
 
             if (Peek(RppLexer.OP_LParen))
             {
                 IList<IRppExpr> args = ParseArgs();
-                return ParseSimpleExprRest(MakeCall(expr, args, Collections.NoVariantTypeParams));
+                return ParseSimpleExprRest(MakeCall(expr, args, Collections.NoResolvableTypes));
             }
 
             return expr;
@@ -422,7 +424,7 @@ namespace CSharpRpp
             return Collections.NoExprs;
         }
 
-        private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args, IList<RppVariantTypeParam> typeArgs)
+        private static IRppExpr MakeCall(IRppExpr expr, IList<IRppExpr> args, IList<ResolvableType> typeArgs)
         {
             if (expr is RppId)
             {

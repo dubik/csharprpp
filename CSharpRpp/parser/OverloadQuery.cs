@@ -59,7 +59,7 @@ namespace CSharpRpp.Parser
         public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<RppMethodInfo> overloads,
             ITypesComparator<T> comparator)
         {
-            return Find(argTypes, Collections.NoRuntimeTypes, overloads, comparator);
+            return Find(argTypes, Collections.NoRTypes, overloads, comparator);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace CSharpRpp.Parser
         /// <param name="overloads"></param>
         /// <param name="comparator"></param>
         /// <returns></returns>
-        public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<Type> typeArgs,
+        public static IEnumerable<RppMethodInfo> Find<T>([NotNull] IEnumerable<T> argTypes, [NotNull] IEnumerable<RType> typeArgs,
             [NotNull] IEnumerable<RppMethodInfo> overloads,
             ITypesComparator<T> comparator)
         {
@@ -83,10 +83,10 @@ namespace CSharpRpp.Parser
                 bool castRequired; // Flag if we need to cast any argument
                 RppParameterInfo[] candidateParams = candidate.Parameters;
 
-                int candidateTypeParamCount = candidate.TypeParameters?.Length ?? 0;
+                int candidateTypeParamCount = candidate.GenericParameters?.Length ?? 0;
 
                 if (candidateTypeParamCount == typeArgs.Count()
-                    && SignatureMatched(argTypesArray, typeArgs, candidateParams, comparator, out castRequired))
+                    && SignatureMatched(argTypesArray, candidateParams, comparator, out castRequired))
                 {
                     if (!castRequired)
                     {
@@ -107,7 +107,7 @@ namespace CSharpRpp.Parser
             return Find(argTypes, overloads, new DelegateTypeComparator<T>(typesComparator, canCast));
         }
 
-        public static bool SignatureMatched<T>(IList<T> items, IEnumerable<Type> typeArgs, IList<RppParameterInfo> candidateParams,
+        public static bool SignatureMatched<T>(IList<T> items, IList<RppParameterInfo> candidateParams,
             ITypesComparator<T> comparator,
             out bool castRequired)
         {

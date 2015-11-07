@@ -29,7 +29,19 @@ namespace CSharpRpp.Symbols
             AddGenericParametersToScope(_classType);
         }
 
-        
+        public SymbolTable(SymbolTable parent, RppMethodInfo methodInfo)
+        {
+            Parent = parent;
+            AddGenericParametersToScope(methodInfo);
+        }
+
+        private void AddGenericParametersToScope(RppMethodInfo methodInfo)
+        {
+            if (methodInfo.GenericParameters != null && methodInfo.GenericParameters.Any())
+            {
+                methodInfo.GenericParameters.ForEach(p => AddType(p.Type));
+            }
+        }
 
         private void AddGenericParametersToScope(RType classType)
         {

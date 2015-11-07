@@ -92,6 +92,13 @@ namespace CSharpRpp.Codegen
             }
 
             RppMethodInfo method = _currentType.DefineMethod(methodName, rMethodAttributes);
+            node.MethodInfo = method;
+
+            if (node.TypeParams.Any())
+            {
+                string[] genericArgumentsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
+                method.DefineGenericParameters(genericArgumentsNames);
+            }
 
             node.ResolveTypes(_currentClass.Scope);
 
@@ -100,8 +107,6 @@ namespace CSharpRpp.Codegen
 
             method.Parameters = parameters;
             method.ReturnType = node.ReturnType2.Value;
-
-            node.MethodInfo = method;
         }
 
         public override void Visit(RppField node)

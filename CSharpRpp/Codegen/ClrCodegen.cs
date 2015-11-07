@@ -365,7 +365,7 @@ namespace CSharpRpp.Codegen
 
                     if (method.IsGenericMethod)
                     {
-                        var methodTypeArgs = node.TypeArgs.Select(t => t.Runtime).ToArray();
+                        Type[] methodTypeArgs = node.TypeArgs.Select(t => t.Value.NativeType).ToArray();
                         method = method.MakeGenericMethod(methodTypeArgs);
                     }
 

@@ -19,9 +19,13 @@ namespace CSharpRpp
             }
 
             public virtual IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
-                IList<RppVariantTypeParam> typeArgs)
+                IList<RType> typeArgs)
             {
-                return new RppFuncCall(functionName, resolvedArgList, Function, new ResolvableType(Function.ReturnType), typeArgs) {TargetType = targetType};
+                var resolvableTypeArgs = typeArgs.Select(t => new ResolvableType(t)).ToList();
+                return new RppFuncCall(functionName, resolvedArgList, Function, new ResolvableType(Function.ReturnType), resolvableTypeArgs)
+                {
+                    TargetType = targetType
+                };
             }
         }
 
@@ -39,30 +43,32 @@ namespace CSharpRpp
 
             // For closures we don't specify types explicitely, they are deduced during resolution
             public override IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
-                IList<RppVariantTypeParam> unused)
+                IList<RType> unused)
             {
+                /*
                 var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
                     new RppFuncCall("apply", resolvedArgList, Function, new ResolvableType(Function.ReturnType), typeArgs.ToList())
                     {
                         TargetType = (RppObjectType) _expr.Type
                     });
+                    */
+                throw new NotImplementedException();
             }
         }
 
-        private IEnumerable<Type> _typeArgs;
+        private RType[] _typeArgs;
 
-        private FunctionResolution(IEnumerable<Type> typeArgs)
+        private FunctionResolution(IEnumerable<RType> typeArgs)
         {
-            _typeArgs = typeArgs;
+            _typeArgs = typeArgs.ToArray();
         }
 
-        public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RppVariantTypeParam> typeArgs,
-            Symbols.SymbolTable scope)
+        public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RType> typeArgs,
+            SymbolTable scope)
         {
             IEnumerable<IRppExpr> argsList = args as IList<IRppExpr> ?? args.ToList();
-            IList<Type> typeArgsList = typeArgs.Select(a => a.Runtime).ToList();
-            FunctionResolution resolution = new FunctionResolution(typeArgsList);
+            FunctionResolution resolution = new FunctionResolution(typeArgs);
 
             ResolveResults res = resolution.SearchInFunctions(name, argsList, scope);
             if (res != null)
@@ -80,11 +86,11 @@ namespace CSharpRpp
             return res;
         }
 
-        private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
+        private ResolveResults SearchInFunctions(string name, IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
 
-            var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
+            var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(_typeArgs)).ToList();
             if (candidates.Count > 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -98,7 +104,7 @@ namespace CSharpRpp
             return new ResolveResults(candidates[0]);
         }
 
-        private ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
+        private ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             Symbol symbol = scope.Lookup(name);
             if (symbol is LocalVarSymbol) // () applied to expression, so it could be closure

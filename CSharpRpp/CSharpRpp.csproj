@@ -147,7 +147,9 @@
     <Compile Include="TypeSystem\RInflatedType.cs" />
     <Compile Include="TypeSystem\RppInflatedFieldInfo.cs" />
     <Compile Include="TypeSystem\RppInflatedMethodInfo.cs" />
+    <Compile Include="TypeSystem\RppMethodInfo.cs" />
     <Compile Include="TypeSystem\RType.cs" />
+    <Compile Include="TypeSystem\RTypeName.cs" />
     <Compile Include="TypeSystem\RTypeUtils.cs" />
     <Compile Include="TypeSystem\TypeInference.cs" />
     <Compile Include="TypeSystem\RppTypeSystem.cs" />

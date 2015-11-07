@@ -161,13 +161,15 @@ namespace CSharpRpp
         /// <param name="scope">class scope</param>
         public void ResolveTypes([NotNull] SymbolTable scope)
         {
-            NodeUtils.Analyze(scope, Params);
-            ReturnType2.Resolve(scope);
+            // This will make generic parameters available as well
+            SymbolTable tempScope = new SymbolTable(scope, MethodInfo);
+            NodeUtils.Analyze(tempScope, Params);
+            ReturnType2.Resolve(tempScope);
         }
 
         public override IRppNode Analyze(SymbolTable scope)
         {
-            _scope = new SymbolTable(scope);
+            _scope = new SymbolTable(scope, MethodInfo);
             Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type2.Value, p));
             // TODO this is probably not needed , because next line adds generic params to the scope
             //TypeParams.ForEach(_scope.Add);

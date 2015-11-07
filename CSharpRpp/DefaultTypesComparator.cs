@@ -1,18 +1,17 @@
 using System;
 using CSharpRpp.Expr;
 using CSharpRpp.Parser;
-using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
     internal class DefaultTypesComparator : ITypesComparator<IRppExpr>
     {
-        private readonly SymbolTable _scope;
+        private readonly RType[] _genericArguments;
 
-        public DefaultTypesComparator(Symbols.SymbolTable scope)
+        public DefaultTypesComparator(RType[] genericArguments)
         {
-            _scope = scope;
+            _genericArguments = genericArguments;
         }
 
         public bool Compare(IRppExpr source, RType target)
@@ -25,19 +24,18 @@ namespace CSharpRpp
             return ImplicitCast.CanCast(source.Type2.Value, target);
         }
 
-
         private bool TypesComparator(IRppExpr source, RType target)
         {
+            RType sourceType = source.Type2.Value;
             RType targetType = target;
 
-            /*
-            if (target.IsGenericParameter())
+            if (target.IsGenericParameter)
             {
+                targetType = _genericArguments[target.GenericParameterPosition];
                 // TODO should be consistent with RppNew
-                var genericParameterName = targetType.Runtime.Name;
-                targetType = _scope.LookupGenericType(genericParameterName);
+                //var genericParameterName = targetType.Runtime.Name;
+                //targetType = _scope.LookupGenericType(genericParameterName);
             }
-            */
 
             if (source is RppClosure)
             {
@@ -55,7 +53,7 @@ namespace CSharpRpp
                 }
             }
 
-            return targetType.Equals(source.Type);
+            return targetType.Equals(sourceType);
         }
     }
 }

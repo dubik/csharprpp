@@ -390,22 +390,22 @@ namespace CSharpRpp
 
         public bool IsConstructorCall => Name == "this";
 
-        private readonly IList<RppVariantTypeParam> _typeArgs;
+        private readonly IList<ResolvableType> _typeArgs;
 
-        public IEnumerable<RppVariantTypeParam> TypeArgs => _typeArgs;
+        public IEnumerable<ResolvableType> TypeArgs => _typeArgs;
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoVariantTypeParams)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoResolvableTypes)
         {
         }
 
-        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<RppVariantTypeParam> typeArgList) : base(name)
+        public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, [NotNull] IList<ResolvableType> typeArgList) : base(name)
         {
             ArgList = argList;
             _typeArgs = typeArgList;
         }
 
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList, RppMethodInfo function, ResolvableType type,
-            [NotNull] IList<RppVariantTypeParam> typeArgList)
+            [NotNull] IList<ResolvableType> typeArgList)
             : this(name, argList, typeArgList)
         {
             Function = function;
@@ -455,8 +455,10 @@ namespace CSharpRpp
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
+            List<RType> genericArguments = _typeArgs.Select(ta => ta.Value).ToList();
+
             // Search for a function which matches signature and possible gaps in types (for closures)
-            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, TypeArgs, scope);
+            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
             //IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
             var args = ArgList;
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
@@ -465,7 +467,7 @@ namespace CSharpRpp
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
             }
 
-            return resolveResults.RewriteFunctionCall(TargetType, Name, args, _typeArgs);
+            return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);
         }
 
         private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
@@ -662,8 +664,8 @@ namespace CSharpRpp
         private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction("this");
-            IEnumerable<Type> typeArgs = Collections.NoRuntimeTypes;
-            var candidates = OverloadQuery.Find(args, typeArgs, overloads, new DefaultTypesComparator(scope)).ToList();
+            IEnumerable<RType> typeArgs = Collections.NoRTypes;
+            var candidates = OverloadQuery.Find(args, typeArgs, overloads, new DefaultTypesComparator(null)).ToList();
             if (candidates.Count > 1)
             {
                 throw new Exception("Can't figure out which overload to use");

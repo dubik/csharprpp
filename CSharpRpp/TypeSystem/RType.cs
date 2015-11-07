@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
@@ -107,100 +106,12 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    public class RppMethodInfo
-    {
-        public string Name { get; }
-        public RMethodAttributes Attributes { get; }
-
-        [CanBeNull]
-        public RType ReturnType { get; set; }
-
-        [CanBeNull]
-        public virtual RppParameterInfo[] Parameters { get; set; }
-
-        public RppTypeParameterInfo[] TypeParameters { get; set; }
-
-        public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
-
-        [NotNull]
-        public RType DeclaringType { get; }
-
-        public virtual MethodBase Native { get; set; }
-
-        public bool IsVariadic => Parameters != null && Parameters.Any() && Parameters.Last().IsVariadic;
-
-        public bool IsStatic => DeclaringType.Name.EndsWith("$");
-
-        public bool IsGenericMethod
-            => ReturnType.IsGenericType || ReturnType.IsGenericParameter || Parameters.Any(p => p.Type.IsGenericType || p.Type.IsGenericParameter);
-
-        public RppMethodInfo GenericMethodDefinition { get; set; }
-
-        public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
-            [CanBeNull] RType returnType,
-            [NotNull] RppParameterInfo[] parameters)
-        {
-            Name = name;
-            DeclaringType = declaringType;
-            Attributes = attributes;
-            ReturnType = returnType;
-            Parameters = parameters;
-        }
-
-        #region ToString
-
-        public override string ToString()
-        {
-            var res = new List<string> {ToString(Attributes), Name + ParamsToString(), ":", ReturnType?.ToString()};
-            return string.Join(" ", res);
-        }
-
-        private static readonly List<Tuple<RMethodAttributes, string>> _attrToStr = new List
-            <Tuple<RMethodAttributes, string>>
-        {
-            Tuple.Create(RMethodAttributes.Final, "final"),
-            Tuple.Create(RMethodAttributes.Public, "public"),
-            Tuple.Create(RMethodAttributes.Private, "public"),
-            Tuple.Create(RMethodAttributes.Abstract, "abstract"),
-            Tuple.Create(RMethodAttributes.Override, "override"),
-            Tuple.Create(RMethodAttributes.Static, "static")
-        };
-
-        private static string ToString(RMethodAttributes attrs)
-        {
-            List<string> res = new List<string>();
-
-            _attrToStr.Aggregate(res, (list, tuple) =>
-                                      {
-                                          if (attrs.HasFlag(tuple.Item1))
-                                          {
-                                              list.Add(tuple.Item2);
-                                          }
-                                          return list;
-                                      });
-
-            return string.Join(" ", res);
-        }
-
-        private string ParamsToString()
-        {
-            if (Parameters != null)
-            {
-                return "(" + string.Join(", ", Parameters.Select(p => p.Name + ": " + p.Type.ToString())) + ")";
-            }
-
-            return "";
-        }
-
-        #endregion
-    }
-
     public class RppGenericParameter
     {
         public string Name { get; }
         public RType Type { get; set; }
         public int Position { get; set; }
-        public GenericTypeParameterBuilder Native { get; set; }
+        public GenericTypeParameterBuilder Native { get; private set; }
 
         public RppGenericParameter(string name)
         {
@@ -289,91 +200,6 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    public class RTypeName
-    {
-        public static RTypeName Undefined = new RTypeName("Undefined");
-        public static RTypeName UnitN = new RTypeName("Unit");
-        public static RTypeName IntN = new RTypeName("Int");
-
-        public string Name { get; }
-
-        private readonly IList<RTypeName> _params = new List<RTypeName>();
-
-        public RTypeName(string name)
-        {
-            Name = name;
-        }
-
-        public void AddGenericArgument(RTypeName genericArgument)
-        {
-            _params.Add(genericArgument);
-        }
-
-        public RType Resolve([NotNull] SymbolTable scope)
-        {
-            RType type = scope.LookupType(Name).Type;
-
-            if (_params.Any())
-            {
-                if (!type.IsGenericType)
-                {
-                    throw new Exception($"Non generic type '{type}' has generic arguments");
-                }
-
-                RType[] genericArguments = _params.Select(p => p.Resolve(scope)).ToArray();
-                return type.MakeGenericType(genericArguments);
-            }
-
-            return type;
-        }
-
-        public override string ToString()
-        {
-            if (_params.Any())
-            {
-                var paramsString = string.Join(", ", _params.Select(p => p.ToString()));
-                return $"{Name}[{paramsString}]";
-            }
-
-            return Name;
-        }
-
-        #region Equality
-
-        protected bool Equals(RTypeName other)
-        {
-            // TODO need to Equals also generic params
-            return string.Equals(Name, other.Name);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            if (obj.GetType() != this.GetType())
-            {
-                return false;
-            }
-            return Equals((RTypeName) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return ((_params?.GetHashCode() ?? 0) * 397) ^ (Name?.GetHashCode() ?? 0);
-            }
-        }
-
-        #endregion
-    }
-
     public class RType
     {
         [NotNull]
@@ -401,7 +227,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsPrimitive => !IsClass;
 
-        public bool IsGenericParameter { get; private set; }
+        public bool IsGenericParameter { get; internal set; }
 
         public RType DefinitionType { get; protected set; }
 
@@ -466,7 +292,7 @@ namespace CSharpRpp.TypeSystem
         private readonly List<RppMethodInfo> _constructors = new List<RppMethodInfo>();
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
-        private readonly List<RppGenericParameter> _genericParameters = new List<RppGenericParameter>();
+        private RppGenericParameter[] _genericParameters = new RppGenericParameter[0];
         private readonly List<RType> _genericArguments = new List<RType>();
 
         public RType([NotNull] string name, [NotNull] Type type)
@@ -584,27 +410,8 @@ namespace CSharpRpp.TypeSystem
                 throw new Exception("there were generic paremeters defined already");
             }
 
-            int genericArgumentPosition = 0;
-            foreach (var genericParamName in genericParameterName)
-            {
-                RppGenericParameter genericParameter = CreateGenericParameter(genericParamName, genericArgumentPosition++);
-                _genericParameters.Add(genericParameter);
-            }
-
-            return _genericParameters.ToArray();
-        }
-
-        private RppGenericParameter CreateGenericParameter(string name, int genericArgumentPosition)
-        {
-            RppGenericParameter genericParameter = new RppGenericParameter(name);
-            RType type = new RType(name, RTypeAttributes.None, null, this)
-            {
-                IsGenericParameter = true,
-                GenericParameterPosition = genericArgumentPosition
-            };
-            genericParameter.Type = type;
-            genericParameter.Position = genericArgumentPosition;
-            return genericParameter;
+            _genericParameters = RTypeUtils.CreateGenericParameters(genericParameterName, this).ToArray();
+            return _genericParameters;
         }
 
         internal void ReplaceType(Type type)

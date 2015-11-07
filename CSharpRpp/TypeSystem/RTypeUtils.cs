@@ -167,10 +167,45 @@ namespace CSharpRpp.TypeSystem
         {
             MethodAttributes attr = GetMethodAttributes(rppMethod.Attributes, constructor: false);
             MethodBuilder method = typeBuilder.DefineMethod(rppMethod.Name, attr, CallingConventions.Standard);
+
+            if (rppMethod.HasGenericParameters())
+            {
+                // TODO missing constraints for generics
+                string[] genericParametersNames = rppMethod.GenericParameters.Select(gp => gp.Name).ToArray();
+                GenericTypeParameterBuilder[] builders = method.DefineGenericParameters(genericParametersNames);
+                for (int i = 0; i < rppMethod.GenericParameters.Length; i++)
+                {
+                    rppMethod.GenericParameters[i].SetGenericTypeParameterBuilder(builders[i]);
+                }
+            }
+
             DefineReturnType(method, rppMethod.ReturnType);
             DefineParameters(method, rppMethod.Parameters);
 
             rppMethod.Native = method;
+        }
+
+        public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType)
+        {
+            int genericArgumentPosition = 0;
+            foreach (var genericParamName in genericParameterName)
+            {
+                RppGenericParameter genericParameter = CreateGenericParameter(genericParamName, genericArgumentPosition++, declaringType);
+                yield return genericParameter;
+            }
+        }
+
+        private static RppGenericParameter CreateGenericParameter(string name, int genericArgumentPosition, RType declaringType)
+        {
+            RppGenericParameter genericParameter = new RppGenericParameter(name);
+            RType type = new RType(name, RTypeAttributes.None, null, declaringType)
+            {
+                IsGenericParameter = true,
+                GenericParameterPosition = genericArgumentPosition
+            };
+            genericParameter.Type = type;
+            genericParameter.Position = genericArgumentPosition;
+            return genericParameter;
         }
     }
 }
