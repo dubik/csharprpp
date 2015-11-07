@@ -634,14 +634,6 @@ namespace CSharpRpp.Codegen
             Debug.Assert(fieldSelector.Field != null, "fieldSelector.Field != null");
 
             FieldInfo field = fieldSelector.Field.Native;
-            //Type targetType = fieldSelector.ClassType.Runtime;
-
-            /*
-            if (field.FieldType.ContainsGenericParameters)
-            {
-                field = TypeBuilder.GetField(targetType, field);
-            }
-            */
 
             Debug.Assert(field != null, "field != null");
             _body.Emit(OpCodes.Ldfld, field);

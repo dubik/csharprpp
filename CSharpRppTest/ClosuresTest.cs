@@ -41,7 +41,7 @@ object Bar
         }
 
         [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [TestCategory("Closures")]
         public void CallClosure()
         {
             const string code = @"

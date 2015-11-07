@@ -58,15 +58,15 @@ namespace CSharpRpp.TypeSystem
             _genericArguments = genericArguments;
         }
 
-        private RppParameterInfo InflateParameter(RppParameterInfo p)
+        private RppParameterInfo InflateParameter(RppParameterInfo parameter)
         {
-            if (p.Type.IsGenericParameter)
+            if (parameter.Type.IsGenericParameter)
             {
-                RType substitutedType = _genericArguments[p.Type.GenericParameterPosition];
-                return p.CloneWithNewType(substitutedType);
+                RType substitutedType = _genericArguments[parameter.Type.GenericParameterPosition];
+                return parameter.CloneWithNewType(substitutedType);
             }
 
-            return p;
+            return parameter;
         }
     }
 }

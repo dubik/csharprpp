@@ -59,8 +59,8 @@ namespace CSharpRppTest
 
             program.PreAnalyze(scope);
 
-            ResolveParamTypes resolver = new ResolveParamTypes();
-            program.Accept(resolver);
+//            ResolveParamTypes resolver = new ResolveParamTypes();
+//            program.Accept(resolver);
 
             InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
             program.Accept(configurator);

@@ -29,6 +29,8 @@ namespace CSharpRpp.Symbols
             AddGenericParametersToScope(_classType);
         }
 
+        
+
         private void AddGenericParametersToScope(RType classType)
         {
             if (classType.IsGenericType)

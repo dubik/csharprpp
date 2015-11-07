@@ -54,12 +54,12 @@ namespace CSharpRpp.TypeSystem
 
         private RppFieldInfo[] InflateFields(IEnumerable<RppFieldInfo> fields)
         {
-            foreach (RppFieldInfo field in fields)
-            {
-                throw new NotImplementedException();
-            }
+            return fields.Select(InflateField).ToArray();
+        }
 
-            throw new NotImplementedException();
+        private RppFieldInfo InflateField(RppFieldInfo field)
+        {
+            return new RppInflatedField(field, _genericArguments, this);
         }
 
         private RppMethodInfo[] InflateConstructors(IEnumerable<RppMethodInfo> constructors)

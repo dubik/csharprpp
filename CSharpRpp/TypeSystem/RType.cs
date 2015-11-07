@@ -45,7 +45,7 @@ namespace CSharpRpp.TypeSystem
         Static = 16
     }
 
-    public sealed class RppFieldInfo
+    public class RppFieldInfo
     {
         [NotNull]
         public string Name { get; }
@@ -55,9 +55,9 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public RType DeclaringType { get; }
 
-        public RType Type { get; }
+        public virtual RType Type { get; private set; }
 
-        public FieldInfo Native { get; set; }
+        public virtual FieldInfo Native { get; set; }
 
         public RppFieldInfo([NotNull] string name, [NotNull] RType fieldType, RFieldAttributes attributes, [NotNull] RType declaringType)
         {
@@ -98,6 +98,13 @@ namespace CSharpRpp.TypeSystem
         }
 
         #endregion
+
+        public RppFieldInfo CloneWithNewType(RType substitutedType)
+        {
+            RppFieldInfo newField = (RppFieldInfo) MemberwiseClone();
+            newField.Type = substitutedType;
+            return newField;
+        }
     }
 
     public class RppMethodInfo
@@ -164,13 +171,13 @@ namespace CSharpRpp.TypeSystem
             List<string> res = new List<string>();
 
             _attrToStr.Aggregate(res, (list, tuple) =>
-            {
-                if (attrs.HasFlag(tuple.Item1))
-                {
-                    list.Add(tuple.Item2);
-                }
-                return list;
-            });
+                                      {
+                                          if (attrs.HasFlag(tuple.Item1))
+                                          {
+                                              list.Add(tuple.Item2);
+                                          }
+                                          return list;
+                                      });
 
             return string.Join(" ", res);
         }
@@ -524,7 +531,14 @@ namespace CSharpRpp.TypeSystem
             [NotNull] RppGenericParameter[] genericParameters)
         {
             RppMethodInfo method = new RppMethodInfo(name, this, attributes, returnType, parameterTypes);
-            _methods.Add(method);
+            if (name == "ctor")
+            {
+                _constructors.Add(method);
+            }
+            else
+            {
+                _methods.Add(method);
+            }
             return method;
         }
 

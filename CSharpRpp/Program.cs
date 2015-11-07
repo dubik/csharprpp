@@ -28,11 +28,11 @@ object Runtime
 } 
 ";
             const string code = @"
-class Foo[T](val id: T)
-
 object Bar
 {
-    def main : Foo[Int] = new Foo[Int](10)
+    def func[A](x: A) : A = x
+
+    def main(name: Int) : Int = func[Int](10)
 }
 ";
 
@@ -64,8 +64,8 @@ object Bar
 
                 program.PreAnalyze(scope);
 
-                ResolveParamTypes resolver = new ResolveParamTypes();
-                program.Accept(resolver);
+                //ResolveParamTypes resolver = new ResolveParamTypes();
+                //program.Accept(resolver);
 
                 InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
                 program.Accept(configurator);

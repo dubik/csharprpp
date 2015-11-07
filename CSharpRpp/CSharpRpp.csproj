@@ -145,6 +145,7 @@
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Semantics\SemanticAnalyzer.cs" />
     <Compile Include="TypeSystem\RInflatedType.cs" />
+    <Compile Include="TypeSystem\RppInflatedFieldInfo.cs" />
     <Compile Include="TypeSystem\RppInflatedMethodInfo.cs" />
     <Compile Include="TypeSystem\RType.cs" />
     <Compile Include="TypeSystem\RTypeUtils.cs" />

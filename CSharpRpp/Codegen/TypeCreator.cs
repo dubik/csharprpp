@@ -74,35 +74,39 @@ namespace CSharpRpp.Codegen
     public class CreateRType : RppNodeVisitor
     {
         private RType _currentType;
+        private RppClass _currentClass;
 
         public override void VisitEnter(RppClass node)
         {
+            _currentClass = node;
             _currentType = node.Type2;
         }
 
         public override void VisitExit(RppFunc node)
         {
+            string methodName = node.IsConstructor ? "ctor" : node.Name;
+            var rMethodAttributes = GetMethodAttributes(node.Modifiers);
+            if (node.IsAbstract)
+            {
+                rMethodAttributes |= RMethodAttributes.Abstract;
+            }
+
+            RppMethodInfo method = _currentType.DefineMethod(methodName, rMethodAttributes);
+
+            node.ResolveTypes(_currentClass.Scope);
+
             RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value, p.IsVariadic)).ToArray();
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
 
-            if (node.IsConstructor)
-            {
-                node.MethodInfo = _currentType.DefineConstructor(GetMethodAttributes(node.Modifiers), parameters);
-            }
-            else
-            {
-                var rMethodAttributes = GetMethodAttributes(node.Modifiers);
-                if (node.IsAbstract)
-                {
-                    rMethodAttributes |= RMethodAttributes.Abstract;
-                }
+            method.Parameters = parameters;
+            method.ReturnType = node.ReturnType2.Value;
 
-                node.MethodInfo = _currentType.DefineMethod(node.Name, rMethodAttributes, node.ReturnType2.Value, parameters);
-            }
+            node.MethodInfo = method;
         }
 
         public override void Visit(RppField node)
         {
+            node.ResolveType(_currentClass.Scope);
             node.FieldInfo = _currentType.DefineField(node.Name, node.Type2.Value, GetAttributes(node));
         }
 
