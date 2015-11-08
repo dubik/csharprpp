@@ -826,7 +826,7 @@ namespace CSharpRpp
     public class RppSelector : RppNode, IRppExpr
     {
         public RppType Type { get; private set; }
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type2 => Path.Type2;
         public Type RuntimeType { get; private set; }
 
         public IRppExpr Target { get; }
@@ -869,7 +869,6 @@ namespace CSharpRpp
             Path.TargetType2 = targetType;
             Path = (RppMember) Path.Analyze(classScope);
             //Type = Path.Type.Runtime.IsGenericParameter ? classScope.LookupGenericType(Path.Type.Runtime.Name) : Path.Type;
-            Type2 = Path.Type2;
             return this;
         }
 
@@ -940,9 +939,9 @@ namespace CSharpRpp
         {
         }
 
-        public RppId([NotNull] string name, [NotNull] RppMember targetRef) : base(name)
+        public RppId([NotNull] string name, [NotNull] IRppNamedNode targetRef) : base(name)
         {
-            throw new NotImplementedException();
+            Ref = targetRef;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

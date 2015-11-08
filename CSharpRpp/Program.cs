@@ -46,8 +46,8 @@ abstract class Function2[T1, T2, TResult]
 object Bar
 {
     def main() : Int = {
-        var func: (Int, Int) => Boolean = (x: Int, y: Int) => x < y
-        10
+        var func: (Int, Int) => Int = (x: Int, y: Int) => x + y
+        func(10, 13)
     }
 }
 ";

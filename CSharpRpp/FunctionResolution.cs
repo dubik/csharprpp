@@ -32,28 +32,19 @@ namespace CSharpRpp
         public class ClosureResolveResults : ResolveResults
         {
             private readonly RppMember _expr;
-            private readonly IEnumerable<Type> _typeArgs;
 
-            public ClosureResolveResults(RppMember expr, RppMethodInfo resolvedFunc, IEnumerable<Type> typeArgs)
+            public ClosureResolveResults(RppMember expr, RppMethodInfo resolvedFunc)
                 : base(resolvedFunc)
             {
                 _expr = expr;
-                _typeArgs = typeArgs;
             }
 
             // For closures we don't specify types explicitely, they are deduced during resolution
             public override IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
                 IList<RType> unused)
             {
-                /*
-                var typeArgs = _typeArgs.Select(type => new RppVariantTypeParam(type));
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall("apply", resolvedArgList, Function, new ResolvableType(Function.ReturnType), typeArgs.ToList())
-                    {
-                        TargetType = (RppObjectType) _expr.Type
-                    });
-                    */
-                throw new NotImplementedException();
+                    new RppFuncCall(Function.Name, resolvedArgList, Function, new ResolvableType(Function.ReturnType), Collections.NoResolvableTypes));
             }
         }
 
@@ -109,33 +100,23 @@ namespace CSharpRpp
             Symbol symbol = scope.Lookup(name);
             if (symbol is LocalVarSymbol) // () applied to expression, so it could be closure
             {
-                //IRppExpr expr = node as IRppExpr;
-                throw new NotImplementedException("Not yet");
-                /*
-                if (expr.Type.Runtime.IsClass || expr.Type.Runtime.IsAbstract)
+                List<RppMethodInfo> applyMethods = symbol.Type.Methods.Where(m => m.Name == "apply").ToList();
+
+                List<RType> argTypes = args.Select(a => a.Type2.Value).ToList();
+                IEnumerable<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, applyMethods).ToList();
+
+                if (candidates.Count() > 1)
                 {
-                    IRppClass clazz = (expr.Type as RppObjectType).Class;
-                    if (expr.Type is RppGenericObjectType)
-                    {
-                        var objectType = expr.Type as RppGenericObjectType;
-                        _typeArgs = objectType.GenericArguments;
-                    }
-
-                    // We should have only one function - 'apply'
-                    var candidates = clazz.Functions.ToList();
-                    if (candidates.Count > 1)
-                    {
-                        throw new Exception("Can't figure out which overload to use");
-                    }
-
-                    if (!candidates.Any())
-                    {
-                        return null;
-                    }
-
-                    return new ClosureResolveResults((RppMember) expr, candidates[0], _typeArgs);
+                    throw new Exception("Can't figure out which overload to use");
                 }
-                */
+
+                if (!candidates.Any())
+                {
+                    return null;
+                }
+
+                var member = (RppMember) ((LocalVarSymbol) symbol).Var; // TODO too many casts
+                return new ClosureResolveResults(member, candidates.First());
             }
 
             return null;
