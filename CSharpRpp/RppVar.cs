@@ -42,7 +42,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
+            InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type2);
 
             InitExpr = (IRppExpr) InitExpr.Analyze(scope);
 

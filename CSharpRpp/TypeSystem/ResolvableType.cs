@@ -9,6 +9,7 @@ namespace CSharpRpp.TypeSystem
         public static ResolvableType IntTy = new ResolvableType(RppTypeSystem.IntTy);
         public static ResolvableType NullTy = new ResolvableType(RppTypeSystem.NullTy);
         public static ResolvableType AnyTy = new ResolvableType(RppTypeSystem.AnyTy);
+        public static ResolvableType BooleanTy = new ResolvableType(RppTypeSystem.BooleanTy);
         public static ResolvableType UndefinedTy = new ResolvableType(new RTypeName("Undefined"));
 
         [NotNull]
@@ -85,6 +86,19 @@ namespace CSharpRpp.TypeSystem
         public override int GetHashCode()
         {
             return Name.GetHashCode();
+        }
+    }
+
+    public static class ResolvableTypeExtension
+    {
+        public static bool IsDefined(this ResolvableType resolvableType)
+        {
+            return Equals(resolvableType, ResolvableType.UndefinedTy);
+        }
+
+        public static bool IsUndefined(this ResolvableType resolvableType)
+        {
+            return !resolvableType.IsDefined();
         }
     }
 }

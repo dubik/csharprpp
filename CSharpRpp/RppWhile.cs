@@ -23,7 +23,7 @@ namespace CSharpRpp
             Condition = (IRppExpr) Condition.Analyze(scope);
             Body = Body.Analyze(scope);
 
-            if (Condition.Type.Runtime != typeof (bool))
+            if (!Equals(Condition.Type2, ResolvableType.BooleanTy))
             {
                 throw new Exception("Condition should be boolean not " + Condition.Type.Runtime);
             }

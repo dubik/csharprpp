@@ -103,12 +103,12 @@ abstract class Function0[TResult]
     def apply : TResult
 }
 
-abstract class Function1[TResult, T1]
+abstract class Function1[T1, TResult]
 {
     def apply(arg1: T1) : TResult
 }
 
-abstract class Function2[TResult, T1, T2]
+abstract class Function2[T1, T2, TResult]
 {
     def apply(arg1: T1, arg2: T2) : TResult
 }

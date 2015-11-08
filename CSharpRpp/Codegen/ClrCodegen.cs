@@ -581,11 +581,10 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppClosure node)
         {
-            Type[] argTypes = node.Bindings.Select(p => p.Type.Runtime).ToArray();
+            Type[] argTypes = node.Bindings.Select(p => p.Type2.Value.NativeType).ToArray();
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
-                typeof (object),
-                new[] {node.Type.Runtime});
+                node.Type2.Value.NativeType);
 
             string[] genericTypes = argTypes.Where(arg => arg.IsGenericParameter).Select(arg => arg.Name).ToArray();
             if (genericTypes.Length > 0)
@@ -594,11 +593,11 @@ namespace CSharpRpp.Codegen
             }
 
             MethodBuilder applyMethod = closureClass.DefineMethod("apply",
-                MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
+                MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
                 CallingConventions.Standard);
 
             applyMethod.SetParameters(argTypes);
-            applyMethod.SetReturnType(node.ReturnType.Runtime);
+            applyMethod.SetReturnType(node.ReturnType2.Value.NativeType);
 
             int index = 1;
             foreach (var param in node.Bindings)

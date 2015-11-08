@@ -33,21 +33,21 @@ abstract class Function0[TResult]
     def apply : TResult
 }
 
-abstract class Function1[TResult, T1]
+abstract class Function1[T1, TResult]
 {
     def apply(arg1: T1) : TResult
 }
 
-abstract class Function2[TResult, T1, T2]
+abstract class Function2[T1, T2, TResult]
 {
     def apply(arg1: T1, arg2: T2) : TResult
 }
 
 object Bar
 {
-    def main : Int = {
-        var k : (Int, Int) => Int = null
-        13
+    def main() : Int = {
+        var func: (Int, Int) => Boolean = (x: Int, y: Int) => x < y
+        10
     }
 }
 ";
@@ -157,8 +157,9 @@ object Bar
             generics.AddRange(paramsList);
             RppGenericParameter[] genericParameters = functionType.DefineGenericParameters(generics.ToArray());
 
-            var applyParameters = genericParameters.Skip(1).Select(gp => new RppParameterInfo($"arg{gp.Position}", gp.Type)).ToArray();
-            functionType.DefineMethod("apply", RMethodAttributes.Abstract | RMethodAttributes.Public, genericParameters[0].Type, applyParameters);
+            var applyParameters =
+                genericParameters.Take(genericParameters.Length - 1).Select(gp => new RppParameterInfo($"arg{gp.Position}", gp.Type)).ToArray();
+            functionType.DefineMethod("apply", RMethodAttributes.Abstract | RMethodAttributes.Public, genericParameters.Last().Type, applyParameters);
 
             return functionType;
         }

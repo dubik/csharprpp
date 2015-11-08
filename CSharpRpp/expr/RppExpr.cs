@@ -93,7 +93,7 @@ namespace CSharpRpp
         // 10 == 10
         public RppRelationalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
-            Type = RppNativeType.Create(Types.Bool);
+            Type2 = BooleanTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -415,7 +415,7 @@ namespace CSharpRpp
         private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
-            var funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
+            IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
             return rppExprs.Zip(funcParamTypes, TypeInference.ReplaceUndefinedClosureTypesIfNeeded).ToList();
         }
 
@@ -431,7 +431,7 @@ namespace CSharpRpp
         /// <param name="funcParams">input list of params</param>
         /// <param name="totalNumberOfParams">how many params needs to be</param>
         /// <returns>expanded list of types as in example above</returns>
-        private static IEnumerable<RppType> ExpandVariadicParam(RppParameterInfo[] funcParams, int totalNumberOfParams)
+        private static IEnumerable<ResolvableType> ExpandVariadicParam(RppParameterInfo[] funcParams, int totalNumberOfParams)
         {
             /*
             List<RppType> expandedList = funcParams.Where(p => !p.IsVariadic).Select(p => p.Type).ToList();
