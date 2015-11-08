@@ -7,7 +7,7 @@ namespace CSharpRpp.TypeSystem
     {
         public static ResolvableType UnitTy = new ResolvableType(RppTypeSystem.UnitTy);
         public static ResolvableType IntTy = new ResolvableType(RppTypeSystem.IntTy);
-        public static ResolvableType NullTy = new ResolvableType(RppTypeSystem.UnitTy);
+        public static ResolvableType NullTy = new ResolvableType(RppTypeSystem.NullTy);
         public static ResolvableType AnyTy = new ResolvableType(RppTypeSystem.AnyTy);
         public static ResolvableType UndefinedTy = new ResolvableType(new RTypeName("Undefined"));
 

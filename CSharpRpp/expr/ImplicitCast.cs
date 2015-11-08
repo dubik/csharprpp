@@ -40,6 +40,11 @@ namespace CSharpRpp.Expr
                 return sourceExpr;
             }
 
+            if (targetType.IsClass && sourceType == RppTypeSystem.NullTy)
+            {
+                return sourceExpr;
+            }
+
             throw new Exception("Can't cast expression to a specific type");
         }
 

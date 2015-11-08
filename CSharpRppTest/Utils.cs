@@ -85,17 +85,36 @@ namespace CSharpRppTest
         private static void WireRuntime(SymbolTable scope)
         {
             scope.AddType(new RType("Exception", typeof (Exception)));
+            /*
             scope.AddType(new RType("Function0", typeof (Function0<>)));
             scope.AddType(new RType("Function1", typeof (Function1<,>)));
             scope.AddType(new RType("Function2", typeof (Function2<,,>)));
             scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
             scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
             scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
+            */
         }
 
         public static RppProgram Parse(string code)
         {
-            RppParser parser = CreateParser(code);
+            const string runtime = @"
+abstract class Function0[TResult]
+{
+    def apply : TResult
+}
+
+abstract class Function1[TResult, T1]
+{
+    def apply(arg1: T1) : TResult
+}
+
+abstract class Function2[TResult, T1, T2]
+{
+    def apply(arg1: T1, arg2: T2) : TResult
+}
+
+";
+            RppParser parser = CreateParser(runtime + code);
             RppProgram compilationUnit = parser.CompilationUnit();
             compilationUnit.Name = "TestedAssembly";
             return compilationUnit;

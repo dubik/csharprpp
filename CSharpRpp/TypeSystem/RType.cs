@@ -215,7 +215,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsAbstract => Attributes.HasFlag(RTypeAttributes.Abstract);
 
-        public bool IsClass => Attributes.HasFlag(RTypeAttributes.Class);
+        public bool IsClass => Attributes.HasFlag(RTypeAttributes.Class) || Attributes.HasFlag(RTypeAttributes.Interface);
 
         public bool IsObject => Attributes.HasFlag(RTypeAttributes.Object);
 

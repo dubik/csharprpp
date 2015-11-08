@@ -59,7 +59,7 @@ OP_Star : '*';
 OP_Ops : '+' | '-' | '/' | OP_Star | '%' | '<' | '>' | '||';
 
 BooleanLiteral   :  'true' | 'false';
-Id : ('a' .. 'z'| 'A' .. 'Z')+ ; 
+Id : ('a' .. 'z' | 'A' .. 'Z')  ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9')*; 
 
 NewLine               :  '\r'? '\n';
 IntegerLiteral : (DecimalNumber) ('L' | 'l')?;

@@ -15,7 +15,7 @@ namespace CSharpRpp.TypeSystem
         public static RType LongTy = CreatePrimitive("Long", typeof (long));
         public static RType FloatTy = CreatePrimitive("Float", typeof (float));
         public static RType DoubleTy = CreatePrimitive("Double", typeof (double));
-        public static RType NullTy = UnitTy;
+        public static RType NullTy = ImportClass("Null", typeof(object));
         public static RType AnyTy = ImportClass("Any", typeof (object));
 
         private static RType CreatePrimitive(string name, Type systemType)

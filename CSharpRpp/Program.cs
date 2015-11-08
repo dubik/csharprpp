@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
-using CSharpRpp.Native;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -25,25 +24,30 @@ object Runtime
 {
     def println(line: String) : Unit = { }
     def printFormat(format: String, args: Any*) : Unit = { }
-} 
+}
+
 ";
             const string code = @"
-abstract class Func[R, T]
+abstract class Function0[TResult]
 {
-    def apply(arg : T) : R
+    def apply : TResult
 }
 
-class MyClosure extends Func[Int, Float]
+abstract class Function1[TResult, T1]
 {
-    override def apply(f: Float) : Int = {
-        10
-    }
+    def apply(arg1: T1) : TResult
 }
 
-object Bar {
+abstract class Function2[TResult, T1, T2]
+{
+    def apply(arg1: T1, arg2: T2) : TResult
+}
+
+object Bar
+{
     def main : Int = {
-        val f : Func[Int, Float] = new MyClosure()
-        f.apply(12.3)
+        var k : (Int, Int) => Int = null
+        13
     }
 }
 ";
@@ -61,7 +65,7 @@ object Bar {
             */
 
             RppProgram runtime = Parse(runtimeCode);
-            SymbolTable runtimeScope = new Symbols.SymbolTable();
+            SymbolTable runtimeScope = new SymbolTable();
             WireRuntime(runtime.Classes, runtimeScope);
             RppProgram program = Parse(code);
             program.Name = "Sample";
@@ -111,6 +115,7 @@ object Bar {
 
         private static void WireRuntime(IEnumerable<RppClass> classes, Symbols.SymbolTable scope)
         {
+            /*
             Assembly runtimeAssembly = GetRuntimeAssembly();
             Type[] types = runtimeAssembly.GetTypes();
             var typesMap = types.ToDictionary(t => t.Name);
@@ -131,14 +136,31 @@ object Bar {
                     throw new Exception($"Can't find {clazz.Name} class from runtime assembly");
                 }
             }
-
+            */
             scope.AddType(new RType("Exception", typeof (Exception)));
-            scope.AddType(new RType("Function0", typeof (Function0<>)));
-            scope.AddType(new RType("Function1", typeof (Function1<,>)));
-            scope.AddType(new RType("Function2", typeof (Function2<,,>)));
-            scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
-            scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
-            scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
+
+            //Enumerable.Range(0, 5).Select(CreateFunctionInterfaceType).ForEach(scope.AddType);
+
+            //scope.AddType(new RType("Function0", typeof (Function0<>)));
+            //scope.AddType(new RType("Function1", typeof (Function1<,>)));
+            //scope.AddType(new RType("Function2", typeof (Function2<,,>)));
+            //scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
+            //scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
+            //scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
+        }
+
+        private static RType CreateFunctionInterfaceType(int paramsCount)
+        {
+            RType functionType = new RType($"Function{paramsCount}", RTypeAttributes.Interface | RTypeAttributes.Public);
+            List<string> generics = new List<string>(new[] {"TResult"});
+            var paramsList = Enumerable.Range(0, paramsCount).Select(r => $"T{r + 1}");
+            generics.AddRange(paramsList);
+            RppGenericParameter[] genericParameters = functionType.DefineGenericParameters(generics.ToArray());
+
+            var applyParameters = genericParameters.Skip(1).Select(gp => new RppParameterInfo($"arg{gp.Position}", gp.Type)).ToArray();
+            functionType.DefineMethod("apply", RMethodAttributes.Abstract | RMethodAttributes.Public, genericParameters[0].Type, applyParameters);
+
+            return functionType;
         }
 
         private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, Symbols.SymbolTable scope)
