@@ -28,11 +28,23 @@ object Runtime
 } 
 ";
             const string code = @"
-object Bar
+abstract class Func[R, T]
 {
-    def func[A](x: A) : A = x
+    def apply(arg : T) : R
+}
 
-    def main(name: Int) : Int = func[Int](10)
+class MyClosure extends Func[Int, Float]
+{
+    override def apply(f: Float) : Int = {
+        10
+    }
+}
+
+object Bar {
+    def main : Int = {
+        val f : Func[Int, Float] = new MyClosure()
+        f.apply(12.3)
+    }
 }
 ";
 
@@ -63,9 +75,6 @@ object Bar
                 program.Accept(typeCreator);
 
                 program.PreAnalyze(scope);
-
-                //ResolveParamTypes resolver = new ResolveParamTypes();
-                //program.Accept(resolver);
 
                 InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
                 program.Accept(configurator);

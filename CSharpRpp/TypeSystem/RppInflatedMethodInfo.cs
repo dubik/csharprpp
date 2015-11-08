@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
@@ -34,39 +35,41 @@ namespace CSharpRpp.TypeSystem
         }
 
         private RppParameterInfo[] _parameters;
+        public override RppParameterInfo[] Parameters => _parameters ?? (_parameters = InflateParameters());
 
-        public override RppParameterInfo[] Parameters
-        {
-            get
-            {
-                if (_parameters == null)
-                {
-                    _parameters = GenericMethodDefinition?.Parameters?.Select(InflateParameter).ToArray();
-                }
-
-                return _parameters;
-            }
-        }
+        private RType _returnType;
+        public override RType ReturnType => _returnType ?? (_returnType = SubstitutedType(GenericMethodDefinition.ReturnType));
 
         private readonly RType[] _genericArguments;
         private MethodBase _nativeMethod;
 
-        public RppInflatedMethodInfo(RppMethodInfo genericMethodDefinition, RType[] genericArguments, RType declaringType)
+        public RppInflatedMethodInfo([NotNull] RppMethodInfo genericMethodDefinition, RType[] genericArguments, RType declaringType)
             : base(genericMethodDefinition.Name, declaringType, genericMethodDefinition.Attributes, null, new RppParameterInfo[0])
         {
             GenericMethodDefinition = genericMethodDefinition;
             _genericArguments = genericArguments;
         }
 
+        private RppParameterInfo[] InflateParameters()
+        {
+            return GenericMethodDefinition?.Parameters?.Select(InflateParameter).ToArray();
+        }
+
         private RppParameterInfo InflateParameter(RppParameterInfo parameter)
         {
             if (parameter.Type.IsGenericParameter)
             {
-                RType substitutedType = _genericArguments[parameter.Type.GenericParameterPosition];
+                var substitutedType = SubstitutedType(parameter.Type);
                 return parameter.CloneWithNewType(substitutedType);
             }
 
             return parameter;
+        }
+
+        private RType SubstitutedType(RType type)
+        {
+            RType substitutedType = _genericArguments[type.GenericParameterPosition];
+            return substitutedType;
         }
     }
 }

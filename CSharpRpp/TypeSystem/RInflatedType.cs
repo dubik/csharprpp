@@ -9,11 +9,12 @@ namespace CSharpRpp.TypeSystem
     {
         private RppFieldInfo[] _fields;
         private RppMethodInfo[] _constructors;
+        private RppMethodInfo[] _methods;
 
         public override IReadOnlyList<RppFieldInfo> Fields => _fields ?? (_fields = InflateFields(DefinitionType.Fields));
 
-        public override IReadOnlyList<RppMethodInfo> Methods { get; }
-        public override IReadOnlyList<RppMethodInfo> Constructors => _constructors ?? (_constructors = InflateConstructors(DefinitionType.Constructors));
+        public override IReadOnlyList<RppMethodInfo> Methods => _methods ?? (_methods = InflateMethods(DefinitionType.Methods));
+        public override IReadOnlyList<RppMethodInfo> Constructors => _constructors ?? (_constructors = InflateMethods(DefinitionType.Constructors));
 
         public override IReadOnlyCollection<RType> GenericArguments => _genericArguments;
 
@@ -62,12 +63,12 @@ namespace CSharpRpp.TypeSystem
             return new RppInflatedField(field, _genericArguments, this);
         }
 
-        private RppMethodInfo[] InflateConstructors(IEnumerable<RppMethodInfo> constructors)
+        private RppMethodInfo[] InflateMethods(IEnumerable<RppMethodInfo> constructors)
         {
-            return constructors.Select(InflateConstructor).ToArray();
+            return constructors.Select(InflateMethod).ToArray();
         }
 
-        private RppMethodInfo InflateConstructor(RppMethodInfo constructor)
+        private RppMethodInfo InflateMethod(RppMethodInfo constructor)
         {
             return new RppInflatedMethodInfo(constructor, _genericArguments, this);
         }

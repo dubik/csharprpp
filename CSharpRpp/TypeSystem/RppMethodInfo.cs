@@ -12,7 +12,7 @@ namespace CSharpRpp.TypeSystem
         public RMethodAttributes Attributes { get; }
 
         [CanBeNull]
-        public RType ReturnType { get; set; }
+        public virtual RType ReturnType { get; set; }
 
         [CanBeNull]
         public virtual RppParameterInfo[] Parameters { get; set; }
