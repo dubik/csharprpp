@@ -20,6 +20,7 @@ namespace CSharpRpp
         {
             Bindings = bindings;
             Expr = body;
+            Type2 = ResolvableType.UndefinedTy;
         }
 
         public override IRppNode Analyze(SymbolTable scope)

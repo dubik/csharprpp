@@ -433,18 +433,15 @@ namespace CSharpRpp
         /// <returns>expanded list of types as in example above</returns>
         private static IEnumerable<ResolvableType> ExpandVariadicParam(RppParameterInfo[] funcParams, int totalNumberOfParams)
         {
-            /*
-            List<RppType> expandedList = funcParams.Where(p => !p.IsVariadic).Select(p => p.Type).ToList();
-            if (funcParams.Count > 0 && funcParams.Last().IsVariadic)
+            List<RType> expandedList = funcParams.Where(p => !p.IsVariadic).Select(p => p.Type).ToList();
+            if (funcParams.Any() && funcParams.Last().IsVariadic)
             {
                 // Variadic param is an array, so extract sub type.
-                RppType variadicParamType = ((RppArrayType) funcParams.Last().Type).SubType;
+                RType variadicParamType = ((RType) funcParams.Last().Type).SubType();
                 Enumerable.Range(0, totalNumberOfParams - expandedList.Count).ForEach(i => expandedList.Add(variadicParamType));
             }
 
-            return expandedList;
-            */
-            throw new NotImplementedException("Not done yet");
+            return expandedList.Select(t => new ResolvableType(t));
         }
 
         // TODO This needs to be rewritten.
@@ -459,8 +456,8 @@ namespace CSharpRpp
 
             // Search for a function which matches signature and possible gaps in types (for closures)
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
-            //IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
-            var args = ArgList;
+            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
+            //var args = ArgList;
             NodeUtils.Analyze(scope, ArgListOfClosures(args));
             if (resolveResults.Function.IsVariadic)
             {

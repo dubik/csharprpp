@@ -26,6 +26,11 @@ namespace CSharpRpp
 
         private bool TypesComparator(IRppExpr source, RType target)
         {
+            if (source.Type2 == ResolvableType.UndefinedTy)
+            {
+                return true;
+            }
+
             RType sourceType = source.Type2.Value;
             RType targetType = target;
 
