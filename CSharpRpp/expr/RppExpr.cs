@@ -415,7 +415,7 @@ namespace CSharpRpp
         private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
-            IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count());
+            IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count()).ToList();
             return rppExprs.Zip(funcParamTypes, TypeInference.ReplaceUndefinedClosureTypesIfNeeded).ToList();
         }
 

@@ -11,12 +11,13 @@ namespace CSharpRpp.TypeSystem
         public static RType BooleanTy = CreatePrimitive("Boolean", typeof (bool));
         public static RType ShortTy = CreatePrimitive("Short", typeof (short));
         public static RType IntTy = CreatePrimitive("Int", typeof (int));
-        public static RType ByteTy = CreatePrimitive("Byte", typeof(byte));
+        public static RType ByteTy = CreatePrimitive("Byte", typeof (byte));
         public static RType LongTy = CreatePrimitive("Long", typeof (long));
         public static RType FloatTy = CreatePrimitive("Float", typeof (float));
         public static RType DoubleTy = CreatePrimitive("Double", typeof (double));
-        public static RType NullTy = ImportClass("Null", typeof(object));
+        public static RType NullTy = ImportClass("Null", typeof (object));
         public static RType AnyTy = ImportClass("Any", typeof (object));
+        public static RType StringTy = ImportClass("String", typeof (string));
 
         private static RType CreatePrimitive(string name, Type systemType)
         {
@@ -75,21 +76,49 @@ namespace CSharpRpp.TypeSystem
         public static RType ImportPrimitive([NotNull] Type type)
         {
             if (type == typeof (void))
+            {
                 return UnitTy;
+            }
+
             if (type == typeof (char))
+            {
                 return CharTy;
+            }
+
             if (type == typeof (bool))
+            {
                 return BooleanTy;
+            }
+
             if (type == typeof (short))
+            {
                 return ShortTy;
+            }
+
             if (type == typeof (int))
+            {
                 return IntTy;
+            }
+
             if (type == typeof (long))
+            {
                 return LongTy;
+            }
+
             if (type == typeof (float))
+            {
                 return FloatTy;
+            }
+
             if (type == typeof (double))
+            {
                 return DoubleTy;
+            }
+
+            if (type == typeof (string))
+            {
+                return StringTy;
+            }
 
             throw new Exception($"Can't match {type}");
         }

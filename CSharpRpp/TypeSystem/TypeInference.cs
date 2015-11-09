@@ -121,34 +121,10 @@ namespace CSharpRpp.TypeSystem
                 var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type2.IsUndefined());
                 if (targetType.IsDefined() && hasUndefinedClosureBinding)
                 {
-                    /*
-                    if (targetType is RppGenericObjectType)
-                    {
-                        RppGenericObjectType varType = (RppGenericObjectType) targetType;
-                        var newBindgings =
-                            varType.GenericArguments.Zip(closure.Bindings,
-                                (varTypeGenArg, binding) => binding.CloneWithNewType(RppNativeType.Create(varTypeGenArg))).ToList();
-                        return new RppClosure(newBindgings, closure.Expr);
-                    }
-
-                    if (targetType is RppGenericType)
-                    {
-                        RppGenericType varType = (RppGenericType) targetType;
-                        //var newBindings = varType.Params.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
-                        //return new RppClosure(newBindings, closure.Expr);
-                    }
-
-                    if (targetType is RppNativeType)
-                    {
-                        Type[] genericTypes = targetType.Runtime.GetGenericArguments();
-                        var newBindings =
-                            genericTypes.Take(genericTypes.Length - 1) // -1 is for return type
-                                .Zip(closure.Bindings, (genArg, binding) => binding.CloneWithNewType(RppNativeType.Create(genArg)))
-                                .ToList();
-                        return new RppClosure(newBindings, closure.Expr);
-                    }
-                    */
-                    throw new NotSupportedException("Only RppGenericType and RppGenericObjectType is supported at the moment");
+                    RType type = targetType.Value;
+                    IReadOnlyCollection<RType> genericArguments = type.GenericArguments;
+                    List<IRppParam> newBindings = genericArguments.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
+                    return new RppClosure(newBindings, closure.Expr);
                 }
             }
 

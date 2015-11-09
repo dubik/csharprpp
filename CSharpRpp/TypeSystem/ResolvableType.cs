@@ -93,12 +93,12 @@ namespace CSharpRpp.TypeSystem
     {
         public static bool IsDefined(this ResolvableType resolvableType)
         {
-            return Equals(resolvableType, ResolvableType.UndefinedTy);
+            return !IsUndefined(resolvableType);
         }
 
         public static bool IsUndefined(this ResolvableType resolvableType)
         {
-            return !resolvableType.IsDefined();
+            return Equals(resolvableType, ResolvableType.UndefinedTy);
         }
     }
 }

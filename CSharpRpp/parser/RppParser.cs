@@ -588,16 +588,19 @@ namespace CSharpRpp
 
             string name = _lastToken.Text;
 
-            RTypeName type = RTypeName.Undefined;
+            ResolvableType type = ResolvableType.UndefinedTy;
             if (Require(RppLexer.OP_Colon))
             {
-                if (!ParseType(out type))
+                RTypeName typeName;
+                if (!ParseType(out typeName))
                 {
                     throw new Exception("Expected type but got " + _lastToken.Text);
                 }
+
+                type = new ResolvableType(typeName);
             }
 
-            binding = new RppParam(name, new ResolvableType(type));
+            binding = new RppParam(name, type);
             return true;
         }
 
