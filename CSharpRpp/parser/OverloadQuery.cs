@@ -1,33 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Expr;
 using JetBrains.Annotations;
-using System;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Parser
 {
-    /*
-     case class OverloadQuery(functions: List[RppFunc], implicitCastRules: ImplicitCastRule) {
-        val funcByName = functions.groupBy(_.name)
-
-        def find(name: String, args: List[Type]): List[RppFunc] = {
-            val candidates = funcByName(name).filter(_.argsTypes.length == args.length)
-            findDirectMatch(args, candidates) match {
-                case Some(x) => List(x)
-                case None => findImplicitMatchedFunctions(args, candidates)
-            }
-        }
-
-        private def findDirectMatch(args: List[Type], overloads: List[RppFunc]): Option[RppFunc] =
-            overloads.find(_.argsTypes == args)
-
-        private def findImplicitMatchedFunctions(args: List[Type], overloads: List[RppFunc]): List[RppFunc] =
-            overloads.filter(func => implicitCastRules.canCast(args, func.argsTypes))
-    }
-     */
-
     public interface ITypesComparator<in T>
     {
         bool Compare(T source, RType target);
@@ -146,19 +124,6 @@ namespace CSharpRpp.Parser
                 {
                     candidateParamIndex++;
                 }
-
-                // If generic parameter, replace it with specialized type
-                // def func[A](x: A)...
-                // Though this only works for generic methods. If generic parameter comes
-                // class Foo[A] {
-                //    def func(x: A)...
-                // }
-                // from class description, then we should skip, it will be taken care of in the comparator
-                /*
-                if (paramType.Runtime.IsGenericParameter && typeArgs.Any())
-                {
-                    paramType = RppNativeType.Create(typeArgs.ElementAt(paramType.Runtime.GenericParameterPosition));
-                }*/
 
                 if (!comparator.Compare(item, paramType))
                 {

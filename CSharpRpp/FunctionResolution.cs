@@ -46,7 +46,7 @@ namespace CSharpRpp
             }
         }
 
-        private RType[] _typeArgs;
+        private readonly RType[] _typeArgs;
 
         private FunctionResolution(IEnumerable<RType> typeArgs)
         {

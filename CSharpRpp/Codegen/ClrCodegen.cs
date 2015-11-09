@@ -152,11 +152,7 @@ namespace CSharpRpp.Codegen
             Console.WriteLine("Block expr");
         }
 
-        public override void VisitExit(RppBlockExpr node)
-        {
-        }
-
-        private readonly Dictionary<string, OpCode> logToIl = new Dictionary<string, OpCode>
+        private readonly Dictionary<string, OpCode> _logToIl = new Dictionary<string, OpCode>
         {
             {"&&", OpCodes.Ceq},
             {"||", OpCodes.Sub},
@@ -360,20 +356,6 @@ namespace CSharpRpp.Codegen
             throw new NotImplementedException("Other funcs are not implemented");
         }
 
-        private void CodegenForStub(IRppFunc function)
-        {
-            if (function.Class.Name == "Array")
-            {
-                if (function.Name == "length")
-                {
-                    _body.Emit(OpCodes.Ldlen);
-                    return;
-                }
-            }
-
-            throw new NotImplementedException("Other funcs are not implemented");
-        }
-
         public override void Visit(RppBaseConstructorCall node)
         {
             _body.Emit(OpCodes.Ldarg_0);
@@ -386,13 +368,6 @@ namespace CSharpRpp.Codegen
             }
 
             ConstructorInfo constructor = node.BaseConstructor.Native as ConstructorInfo;
-
-            /*
-            if (node.BaseClassType.Runtime.IsGenericType)
-            {
-                constructor = TypeBuilder.GetConstructor(node.BaseClassType.Runtime, constructor);
-            }
-            */
 
             Debug.Assert(constructor != null, "constructor != null, we should have figure out which constructor to use before");
             _body.Emit(OpCodes.Call, constructor);
@@ -415,16 +390,7 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldarg_0);
                 }
 
-
                 FieldInfo cilField = node.Field.Native;
-                // TODO this is wierd, we should have all info in the fieldSelector
-                /*
-                if (_selectorType != null && _selectorType.Runtime.IsGenericType)
-                {
-                    cilField = TypeBuilder.GetField(_selectorType.Runtime, field.Builder);
-                }
-                */
-
                 Debug.Assert(cilField != null, "cilField != null");
                 _body.Emit(OpCodes.Ldfld, cilField);
             }
@@ -499,13 +465,6 @@ namespace CSharpRpp.Codegen
             {
                 throw new Exception("Not implemented");
             }
-        }
-
-        public override void Visit(RppField node)
-        {
-            // TODO we probably don't need to generate code for field because it should be already generated
-            //_body.Emit(OpCodes.Ldarg_0);
-            //_body.Emit(OpCodes.Ldfld, node.Builder);
         }
 
         public override void Visit(RppBox node)
