@@ -37,7 +37,10 @@ namespace CLRCodeGen
     {
         public override int func()
         {
-            return 27;
+            int k = 10;
+            int p = k;
+
+            return 27 + k + p;
         }
     }
 

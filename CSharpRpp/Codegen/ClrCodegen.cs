@@ -171,7 +171,7 @@ namespace CSharpRpp.Codegen
                 _logicalGen = true;
                 _trueLabel = _body.DefineLabel();
                 _exitLabel = _body.DefineLabel();
-                _logicalTemp = _body.DeclareLocal(typeof(bool));
+                _logicalTemp = _body.DeclareLocal(typeof (bool));
             }
 
             if (node.Op == "||")

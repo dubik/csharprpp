@@ -371,7 +371,7 @@ namespace CSharpRpp
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
-        protected readonly IList<IRppExpr> ArgList;
+        protected IList<IRppExpr> ArgList;
 
         [NotNull]
         public RppMethodInfo Function { get; }
@@ -436,7 +436,7 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope)
         {
             // Skip closures because they may have missing types
-            NodeUtils.Analyze(scope, ArgListWithoutClosures(ArgList));
+            ArgList = NodeUtils.AnalyzeWithPredicate(scope, ArgList, node => !(node is RppClosure));
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
@@ -446,7 +446,7 @@ namespace CSharpRpp
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
             IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
             //var args = ArgList;
-            NodeUtils.Analyze(scope, ArgListOfClosures(args));
+            NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure);
             if (resolveResults.Function.IsVariadic)
             {
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
