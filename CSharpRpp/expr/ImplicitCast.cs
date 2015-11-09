@@ -104,6 +104,11 @@ namespace CSharpRpp.Expr
                 return true;
             }
 
+            if ((dest.IsClass || dest.IsGenericParameter) && Equals(source, RppTypeSystem.NullTy))
+            {
+                return true;
+            }
+
             return source.Name == dest.Name;
         }
     }
