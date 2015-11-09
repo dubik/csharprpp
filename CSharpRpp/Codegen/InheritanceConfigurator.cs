@@ -10,7 +10,7 @@ namespace CSharpRpp.Codegen
         {
             if (node.BaseConstructorCall.BaseClassType2.Value.Name != "Object")
             {
-                TypeBuilder builder = node.Type2.NativeType as TypeBuilder;
+                TypeBuilder builder = node.Type.NativeType as TypeBuilder;
                 Debug.Assert(builder != null, "builder != null");
 
                 //builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
 
                 //builder.SetParent(node.BaseConstructorCall.BaseClassType.Runtime);
 
-                node.Type2.BaseType = node.BaseConstructorCall.BaseClassType2.Value;
+                node.Type.BaseType = node.BaseConstructorCall.BaseClassType2.Value;
             }
         }
     }

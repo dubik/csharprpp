@@ -166,7 +166,7 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope)
         {
             _scope = new SymbolTable(scope, MethodInfo);
-            Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type2.Value, p));
+            Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type.Value, p));
             // TODO this is probably not needed , because next line adds generic params to the scope
             //TypeParams.ForEach(_scope.Add);
 
@@ -251,7 +251,7 @@ namespace CSharpRpp
 
         private string ParamsToString()
         {
-            return string.Join(", ", Params.Select(p => p.Name + ": " + p.Type2.ToString()));
+            return string.Join(", ", Params.Select(p => p.Name + ": " + p.Type.ToString()));
         }
 
         #endregion
@@ -263,7 +263,7 @@ namespace CSharpRpp
 
         public bool Equals(IRppParam x, IRppParam y)
         {
-            return x.Type2.Equals(y.Type2);
+            return x.Type.Equals(y.Type);
         }
 
         public int GetHashCode(IRppParam obj)
@@ -280,10 +280,10 @@ namespace CSharpRpp
         IRppParam CloneWithNewType(RType newType);
     }
 
-    [DebuggerDisplay("{Name}: {Type2}")]
+    [DebuggerDisplay("{Name}: {Type}")]
     public sealed class RppParam : RppMember, IRppParam
     {
-        public override ResolvableType Type2 { get; protected set; }
+        public override ResolvableType Type { get; protected set; }
 
         public int Index { get; set; }
 
@@ -293,7 +293,7 @@ namespace CSharpRpp
         {
             IsVariadic = variadic;
             //Type = variadic ? new RppArrayType(type) : type;
-            Type2 = type;
+            Type = type;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -303,10 +303,10 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            Type2.Resolve(scope);
+            Type.Resolve(scope);
             if (IsVariadic)
             {
-                Type2 = new ResolvableType(Type2.Value.MakeArrayType());
+                Type = new ResolvableType(Type.Value.MakeArrayType());
             }
 
             return this;

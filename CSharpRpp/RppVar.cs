@@ -9,7 +9,7 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public override sealed ResolvableType Type2 { get; protected set; }
+        public override sealed ResolvableType Type { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
 
@@ -22,7 +22,7 @@ namespace CSharpRpp
 
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {
-            Type2 = type;
+            Type = type;
             InitExpr = initExpr;
             MutabilityFlag = mutability;
         }
@@ -37,11 +37,11 @@ namespace CSharpRpp
             // We have 2 cases when type is omited, so we need to get it from initializing expression
             // and when type is specified so we need to resolve it and if there is a closure, propagate that
             // to init expression
-            if (Type2.IsDefined())
+            if (Type.IsDefined())
             {
-                Type2.Resolve(scope);
+                Type.Resolve(scope);
 
-                InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type2);
+                InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
                 InitExpr = (IRppExpr)InitExpr.Analyze(scope);
             }
             else
@@ -52,18 +52,18 @@ namespace CSharpRpp
                 }
 
                 InitExpr = (IRppExpr)InitExpr.Analyze(scope);
-                Type2 = InitExpr.Type2;
+                Type = InitExpr.Type;
             }
 
 
             if (AddToScope)
             {
-                scope.AddLocalVar(Name, Type2.Value, this);
+                scope.AddLocalVar(Name, Type.Value, this);
             }
 
             if (!(InitExpr is RppEmptyExpr))
             {
-                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type2.Value);
+                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type.Value);
             }
 
             return this;
@@ -73,8 +73,8 @@ namespace CSharpRpp
 
         protected bool Equals(RppVar other)
         {
-            Debug.Assert(other.Type2 != null, "other.Type != null");
-            return Name.Equals(other.Name) && Type2.Equals(other.Type2);
+            Debug.Assert(other.Type != null, "other.Type != null");
+            return Name.Equals(other.Name) && Type.Equals(other.Type);
         }
 
         public override bool Equals(object obj)

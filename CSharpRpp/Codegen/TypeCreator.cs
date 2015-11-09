@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -16,7 +15,7 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             RType classType = new RType(node.GetNativeName(), GetTypeAttributes(node), null, null);
-            node.Type2 = classType;
+            node.Type = classType;
 
             string[] typeParamsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
             classType.DefineGenericParameters(typeParamsNames);
@@ -79,7 +78,7 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             _currentClass = node;
-            _currentType = node.Type2;
+            _currentType = node.Type;
         }
 
         public override void VisitExit(RppFunc node)
@@ -102,7 +101,7 @@ namespace CSharpRpp.Codegen
 
             node.ResolveTypes(_currentClass.Scope);
 
-            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type2.Value, p.IsVariadic)).ToArray();
+            RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type.Value, p.IsVariadic)).ToArray();
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
 
             method.Parameters = parameters;
@@ -112,7 +111,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppField node)
         {
             node.ResolveType(_currentClass.Scope);
-            node.FieldInfo = _currentType.DefineField(node.Name, node.Type2.Value, GetAttributes(node));
+            node.FieldInfo = _currentType.DefineField(node.Name, node.Type.Value, GetAttributes(node));
         }
 
         private static RFieldAttributes GetAttributes(RppField node)
@@ -178,7 +177,7 @@ namespace CSharpRpp.Codegen
 
         private static RType ResolveType(IRppExpr param)
         {
-            return param.Type2.Value;
+            return param.Type.Value;
         }
 
         private void UpdateReturnType(RppFunc node, RppMethodInfo method)
@@ -205,7 +204,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppClass node)
         {
-            node.Type2.InitializeNativeType(_module);
+            node.Type.InitializeNativeType(_module);
         }
 
         private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
@@ -259,91 +258,7 @@ namespace CSharpRpp.Codegen
     {
         public override void VisitEnter(RppClass node)
         {
-            node.Type2.CreateNativeType();
-        }
-    }
-
-    internal class TypeCreator : RppNodeVisitor
-    {
-        private readonly ModuleBuilder _module;
-        private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
-
-        public TypeCreator([NotNull] ModuleBuilder module, [NotNull] Dictionary<RppClass, TypeBuilder> typeBuilders)
-        {
-            _module = module;
-            _typeBuilders = typeBuilders;
-        }
-
-        public override void VisitEnter(RppClass node)
-        {
-            TypeAttributes attrs = GetTypeAttributes(node.Modifiers);
-            TypeBuilder classType = _module.DefineType(node.GetNativeName(), attrs);
-            IEnumerable<RppVariantTypeParam> typeParams = node.TypeParams;
-            GenericsSupport.DefineGenericParams(typeParams, classType);
-
-            _typeBuilders.Add(node, classType);
-            node.RuntimeType = classType;
-        }
-
-        public override void VisitEnter(RppFunc node)
-        {
-            TypeBuilder builder = node.Class.RuntimeType as TypeBuilder;
-            Debug.Assert(builder != null, "builder != null");
-
-            var attrs = GetMethodAttributes(node);
-
-            MethodBuilder method = builder.DefineMethod(node.Name, attrs, CallingConventions.Standard);
-
-            GenericsSupport.DefineGenericParams(node.TypeParams, method);
-
-            node.Builder = method;
-        }
-
-        // TODO there is inconstistency between method and type attributes, should be fixed
-        private static MethodAttributes GetMethodAttributes(IRppFunc node)
-        {
-            MethodAttributes attrs = MethodAttributes.Private;
-
-            if (node.IsPublic)
-            {
-                attrs = MethodAttributes.Public;
-            }
-
-            // always virtual, even for statics
-            attrs |= MethodAttributes.Virtual;
-            attrs |= MethodAttributes.HideBySig;
-            if (!node.IsOverride)
-            {
-                attrs |= MethodAttributes.NewSlot;
-            }
-
-            if (node.IsAbstract)
-            {
-                attrs |= MethodAttributes.Abstract;
-            }
-
-            return attrs;
-        }
-
-        private static TypeAttributes GetTypeAttributes(ICollection<ObjectModifier> modifiers)
-        {
-            TypeAttributes attrs = TypeAttributes.Class;
-            if (modifiers.Contains(ObjectModifier.OmAbstract))
-            {
-                attrs |= TypeAttributes.Abstract;
-            }
-
-            if (modifiers.Contains(ObjectModifier.OmSealed))
-            {
-                attrs |= TypeAttributes.Sealed;
-            }
-
-            if (modifiers.Contains(ObjectModifier.OmPrivate) || modifiers.Contains(ObjectModifier.OmProtected))
-            {
-                attrs |= TypeAttributes.NotPublic;
-            }
-
-            return attrs;
+            node.Type.CreateNativeType();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace CSharpRpp
         public IRppExpr Condition { get; private set; }
         public IRppNode Body { get; private set; }
 
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type { get; private set; }
 
         public RppWhile(IRppExpr condition, IRppNode body)
         {
@@ -21,9 +21,9 @@ namespace CSharpRpp
             Condition = (IRppExpr) Condition.Analyze(scope);
             Body = Body.Analyze(scope);
 
-            if (!Equals(Condition.Type2, ResolvableType.BooleanTy))
+            if (!Equals(Condition.Type, ResolvableType.BooleanTy))
             {
-                throw new Exception("Condition should be boolean not " + Condition.Type2);
+                throw new Exception("Condition should be boolean not " + Condition.Type);
             }
 
             return this;

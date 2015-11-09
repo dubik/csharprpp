@@ -8,7 +8,7 @@ namespace CSharpRpp.Expr
     {
         public static IRppExpr CastIfNeeded(IRppExpr sourceExpr, RType targetType)
         {
-            RType sourceType = sourceExpr.Type2.Value;
+            RType sourceType = sourceExpr.Type.Value;
             if (sourceType.Equals(targetType))
             {
                 return sourceExpr;

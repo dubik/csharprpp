@@ -100,7 +100,7 @@ namespace CSharpRpp
             {
                 List<RppMethodInfo> applyMethods = symbol.Type.Methods.Where(m => m.Name == "apply").ToList();
 
-                List<RType> argTypes = args.Select(a => a.Type2.Value).ToList();
+                List<RType> argTypes = args.Select(a => a.Type.Value).ToList();
                 IEnumerable<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, applyMethods).ToList();
 
                 if (candidates.Count() > 1)

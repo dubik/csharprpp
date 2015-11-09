@@ -10,7 +10,7 @@ namespace CSharpRpp
 {
     public class RppNew : RppNode, IRppExpr
     {
-        public ResolvableType Type2 { get; }
+        public ResolvableType Type { get; }
 
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 
@@ -20,7 +20,7 @@ namespace CSharpRpp
 
         public RppNew([NotNull] ResolvableType type, [NotNull] IList<IRppExpr> arguments)
         {
-            Type2 = type;
+            Type = type;
             _arguments = arguments;
         }
 
@@ -33,10 +33,10 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, _arguments);
 
-            Type2.Resolve(scope);
+            Type.Resolve(scope);
 
-            List<RType> argTypes = Args.Select(a => a.Type2.Value).ToList();
-            var constructors = Type2.Value.Constructors;
+            List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
+            var constructors = Type.Value.Constructors;
 
             List<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, constructors).ToList();
             if (candidates.Count != 1)

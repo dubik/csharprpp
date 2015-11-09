@@ -14,25 +14,8 @@ namespace CSharpRpp
         Object
     }
 
-    public interface IRppClass : IRppNamedNode
-    {
-        IEnumerable<IRppFunc> Functions { get; }
-
-        IEnumerable<RppField> Fields { get; }
-
-        [NotNull]
-        IEnumerable<IRppFunc> Constructors { get; }
-
-        Type RuntimeType { get; }
-        SymbolTable Scope { get; }
-
-        RppBaseConstructorCall BaseConstructorCall { get; }
-
-        RType Type2 { get; set; }
-    }
-
     [DebuggerDisplay("{Kind} {Name}, Fields = {_fields.Count}, Funcs = {_funcs.Count}")]
-    public class RppClass : RppNamedNode, IRppClass
+    public class RppClass : RppNamedNode
     {
         private const string Constrparam = "constrparam";
         private IList<IRppFunc> _funcs;
@@ -73,9 +56,6 @@ namespace CSharpRpp
 
         public IEnumerable<RppVariantTypeParam> TypeParams => _typeParams.AsEnumerable();
 
-        [NotNull]
-        public Type RuntimeType { get; set; }
-
         private readonly IList<RppVariantTypeParam> _typeParams;
 
         public HashSet<ObjectModifier> Modifiers { get; private set; }
@@ -85,7 +65,7 @@ namespace CSharpRpp
         public IEnumerable<IRppFunc> Constructors => _constructors.AsEnumerable();
 
         public RppField InstanceField { get; }
-        public RType Type2 { get; set; }
+        public RType Type { get; set; }
 
         public RppClass(ClassKind kind, [NotNull] string name) : base(name)
         {
@@ -149,7 +129,7 @@ namespace CSharpRpp
         {
             Debug.Assert(scope != null, "scope != null");
 
-            Scope = new SymbolTable(scope, Type2);
+            Scope = new SymbolTable(scope, Type);
 
             BaseConstructorCall.ResolveBaseClass(Scope);
         }
@@ -157,16 +137,11 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope)
         {
             Debug.Assert(Scope != null, "Scope != null");
-            //Scope.BaseClassScope = BaseConstructorCall.BaseClass.Scope;
 
-            SymbolTable constructorScope = new SymbolTable(Scope, Type2);
-            //_classParams.ForEach(constructorScope.Add);
+            SymbolTable constructorScope = new SymbolTable(Scope, Type);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams);
             _fields = NodeUtils.Analyze(Scope, _fields);
-
-            // Add all constructors to scope, so that they can be accessed by each other
-            // Constructors.ForEach(Scope.Add);
 
             _constructors = NodeUtils.Analyze(constructorScope, _constructors);
             _funcs = NodeUtils.Analyze(Scope, _funcs);
@@ -177,7 +152,7 @@ namespace CSharpRpp
         [NotNull]
         private RppFunc CreatePrimaryConstructor(IEnumerable<IRppExpr> exprs)
         {
-            var p = _classParams.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type2)).ToList();
+            var p = _classParams.Select(rppVar => new RppParam(MakeConstructorArgName(rppVar.Name), rppVar.Type)).ToList();
             List<IRppNode> assignExprs = new List<IRppNode>();
 
             foreach (var classParam in _fields)
@@ -217,42 +192,6 @@ namespace CSharpRpp
         private IRppExpr CreateParentConstructorCall()
         {
             return BaseConstructorCall;
-        }
-
-        #endregion
-
-        #region Equality
-
-        protected bool Equals(RppClass other)
-        {
-            return Kind == other.Kind && _funcs.SequenceEqual(other._funcs) && _fields.SequenceEqual(other._fields) && Name == other.Name;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-            return Equals((RppClass) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = Name.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) Kind;
-                return hashCode;
-            }
         }
 
         #endregion

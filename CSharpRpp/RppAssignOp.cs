@@ -7,7 +7,7 @@ namespace CSharpRpp
     {
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
-            Type2 = ResolvableType.UnitTy;
+            Type = ResolvableType.UnitTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -19,11 +19,11 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
-            if (!Equals(Left.Type2, Right.Type2))
+            if (!Equals(Left.Type, Right.Type))
             {
-                if (!Right.Type2.Value.IsSubclassOf(Left.Type2.Value))
+                if (!Right.Type.Value.IsSubclassOf(Left.Type.Value))
                 {
-                    throw new TypeMismatchException(Right.Token, Right.Type2.Value.ToString(), Left.Type2.Value.ToString());
+                    throw new TypeMismatchException(Right.Token, Right.Type.Value.ToString(), Left.Type.Value.ToString());
                 }
             }
 

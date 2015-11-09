@@ -50,7 +50,7 @@ namespace CSharpRpp
 
             BootstrapRuntime(scope);
 
-            _classes.ForEach(c => scope.AddType(c.Type2));
+            _classes.ForEach(c => scope.AddType(c.Type));
 
             NodeUtils.PreAnalyze(scope, _classes);
         }

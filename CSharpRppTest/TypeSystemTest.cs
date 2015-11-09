@@ -42,9 +42,9 @@ object Main
             var creator = new CreateRType();
             program.Accept(creator);
             var classes = program.Classes.Where(c => !c.Name.Contains("Function")).ToArray(); // Remove Functions* from runtime
-            var fooType = classes[0].Type2;
-            var barType = classes[1].Type2;
-            var mainType = classes[2].Type2;
+            var fooType = classes[0].Type;
+            var barType = classes[1].Type;
+            var mainType = classes[2].Type;
 
             Assert.IsTrue(fooType.IsClass);
             Assert.IsFalse(fooType.IsAbstract);

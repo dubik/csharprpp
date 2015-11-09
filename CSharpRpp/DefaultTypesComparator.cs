@@ -21,17 +21,17 @@ namespace CSharpRpp
 
         public bool CanCast(IRppExpr source, RType target)
         {
-            return ImplicitCast.CanCast(source.Type2.Value, target);
+            return ImplicitCast.CanCast(source.Type.Value, target);
         }
 
         private bool TypesComparator(IRppExpr source, RType target)
         {
-            if (source.Type2 == ResolvableType.UndefinedTy)
+            if (source.Type == ResolvableType.UndefinedTy)
             {
                 return true;
             }
 
-            RType sourceType = source.Type2.Value;
+            RType sourceType = source.Type.Value;
             RType targetType = target;
 
             if (target.IsGenericParameter)
@@ -45,7 +45,7 @@ namespace CSharpRpp
             if (source is RppClosure)
             {
                 RppClosure closure = (RppClosure) source;
-                if (closure.Type2 == null)
+                if (closure.Type == null)
                 {
                     /*
                     Debug.Assert(targetType.Runtime != null, "Only runtime is supported at this moment");

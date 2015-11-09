@@ -15,7 +15,7 @@ namespace CSharpRpp
         MF_Unspecified
     }
 
-    [DebuggerDisplay("Field = {Name}: {Type2}")]
+    [DebuggerDisplay("Field = {Name}: {Type}")]
     public class RppField : RppVar
     {
         private readonly IList<string> _modifiers;
@@ -47,7 +47,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppField other)
         {
-            return Equals(Name, other.Name) && Equals(Type2, other.Type2) && Equals(_modifiers, other._modifiers);
+            return Equals(Name, other.Name) && Equals(Type, other.Type) && Equals(_modifiers, other._modifiers);
         }
 
         public override bool Equals(object obj)
@@ -79,7 +79,7 @@ namespace CSharpRpp
 
         public void ResolveType(SymbolTable scope)
         {
-            Type2?.Resolve(scope);
+            Type?.Resolve(scope);
         }
     }
 }

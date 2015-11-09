@@ -53,7 +53,7 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             Console.WriteLine("Genering class: " + node.Name);
-            _typeBuilder = node.Type2.NativeType as TypeBuilder;
+            _typeBuilder = node.Type.NativeType as TypeBuilder;
             Debug.Assert(_typeBuilder != null, "_typeBuilder != null");
             _closureId = 1;
 
@@ -68,7 +68,7 @@ namespace CSharpRpp.Codegen
         {
             ConstructorBuilder staticConstructor = typeBuilder.DefineTypeInitializer();
             ILGenerator body = staticConstructor.GetILGenerator();
-            ConstructorInfo constructor = obj.Type2.Constructors[0].Native as ConstructorInfo;
+            ConstructorInfo constructor = obj.Type.Constructors[0].Native as ConstructorInfo;
             body.Emit(OpCodes.Newobj, constructor);
             body.Emit(OpCodes.Stsfld, instanceField);
             body.Emit(OpCodes.Ret);
@@ -78,7 +78,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitExit(RppClass node)
         {
-            TypeBuilder clazz = node.Type2.NativeType as TypeBuilder;
+            TypeBuilder clazz = node.Type.NativeType as TypeBuilder;
             Debug.Assert(clazz != null, "clazz != null");
             try
             {
@@ -126,7 +126,7 @@ namespace CSharpRpp.Codegen
         private static void GenerateRet([NotNull] RppFunc func, [NotNull] ILGenerator generator)
         {
             RType funcReturnType = func.ReturnType2.Value;
-            RType expressionType = func.Expr.Type2.Value;
+            RType expressionType = func.Expr.Type.Value;
 
             if (funcReturnType.Equals(RppTypeSystem.UnitTy) && !expressionType.Equals(RppTypeSystem.UnitTy))
             {
@@ -138,7 +138,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppVar node)
         {
-            node.Builder = _body.DeclareLocal(node.Type2.Value.NativeType);
+            node.Builder = _body.DeclareLocal(node.Type.Value.NativeType);
 
             if (!(node.InitExpr is RppEmptyExpr))
             {
@@ -261,7 +261,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppArray node)
         {
-            var arrayType = node.Type2.Value.NativeType;
+            var arrayType = node.Type.Value.NativeType;
             Type elementType = arrayType.GetElementType();
 
             LocalBuilder arrVar = _body.DeclareLocal(arrayType);
@@ -470,7 +470,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppBox node)
         {
             node.Expression.Accept(this);
-            _body.Emit(OpCodes.Box, node.Expression.Type2.Value.NativeType);
+            _body.Emit(OpCodes.Box, node.Expression.Type.Value.NativeType);
         }
 
         public override void Visit(RppWhile node)
@@ -511,10 +511,10 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppClosure node)
         {
-            Type[] argTypes = node.Bindings.Select(p => p.Type2.Value.NativeType).ToArray();
+            Type[] argTypes = node.Bindings.Select(p => p.Type.Value.NativeType).ToArray();
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
-                node.Type2.Value.NativeType);
+                node.Type.Value.NativeType);
 
             string[] genericTypes = argTypes.Where(arg => arg.IsGenericParameter).Select(arg => arg.Name).ToArray();
             if (genericTypes.Length > 0)
@@ -527,7 +527,7 @@ namespace CSharpRpp.Codegen
                 CallingConventions.Standard);
 
             applyMethod.SetParameters(argTypes);
-            applyMethod.SetReturnType(node.ReturnType2.Value.NativeType);
+            applyMethod.SetReturnType(node.ReturnType.Value.NativeType);
 
             int index = 1;
             foreach (var param in node.Bindings)

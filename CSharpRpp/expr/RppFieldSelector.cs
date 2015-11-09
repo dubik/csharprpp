@@ -8,7 +8,7 @@ namespace CSharpRpp
 {
     public class RppFieldSelector : RppMember
     {
-        public override ResolvableType Type2 { get; protected set; }
+        public override ResolvableType Type { get; protected set; }
 
         [CanBeNull]
         public RppFieldInfo Field { get; private set; }
@@ -75,7 +75,7 @@ namespace CSharpRpp
             }
             */
 
-            Type2 = new ResolvableType(Field.Type);
+            Type = new ResolvableType(Field.Type);
 
             return this;
         }

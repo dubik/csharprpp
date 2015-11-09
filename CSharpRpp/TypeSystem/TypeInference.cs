@@ -130,7 +130,7 @@ namespace CSharpRpp.TypeSystem
             if (expr is RppClosure)
             {
                 RppClosure closure = (RppClosure) expr;
-                var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type2.IsUndefined());
+                var hasUndefinedClosureBinding = closure.Bindings.Any(b => b.Type.IsUndefined());
                 if (targetType.IsDefined() && hasUndefinedClosureBinding)
                 {
                     RType type = targetType.Value;

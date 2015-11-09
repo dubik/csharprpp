@@ -61,7 +61,7 @@ namespace CSharpRpp.Parser
         {
             function.Params.ForEachWithIndex((index, param) =>
                                              {
-                                                 if (RppTypeSystem.UnitTy.Equals(param.Type2.Value))
+                                                 if (RppTypeSystem.UnitTy.Equals(param.Type.Value))
                                                  {
                                                      throw new Exception($"Parameter {param.Name} can't be Unit");
                                                  }

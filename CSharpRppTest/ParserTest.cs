@@ -50,10 +50,8 @@ namespace CSharpRppTest
         [TestMethod]
         public void ParseEmptyClass()
         {
-            RppClass expected = new RppClass(ClassKind.Class, Collections.NoModifiers, "String", Collections.NoFields, Collections.NoNodes,
-                Collections.NoVariantTypeParams,
-                RppBaseConstructorCall.Object);
-            Assert.AreEqual(ParseClass("class String"), expected);
+            RppClass rppClass = ParseClass("class String");
+            Assert.AreEqual("String", rppClass.Name);
         }
 
         [TestMethod]

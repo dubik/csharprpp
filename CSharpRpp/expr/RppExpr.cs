@@ -13,7 +13,7 @@ namespace CSharpRpp
     // Base class for RppId and RppFuncCall
     public abstract class RppMember : RppNamedNode, IRppExpr
     {
-        public abstract ResolvableType Type2 { get; protected set; }
+        public abstract ResolvableType Type { get; protected set; }
 
         public RType TargetType2 { get; set; }
 
@@ -26,12 +26,12 @@ namespace CSharpRpp
     {
         public static RppEmptyExpr Instance = new RppEmptyExpr();
 
-        public ResolvableType Type2 => UnitTy;
+        public ResolvableType Type => UnitTy;
     }
 
     public class RppNull : RppNode, IRppExpr
     {
-        public ResolvableType Type2 => NullTy;
+        public ResolvableType Type => NullTy;
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -59,8 +59,8 @@ namespace CSharpRpp
             // 10 || left
             // isOk && notRunning
 
-            EnsureType(Left.Type2.Value, RppTypeSystem.BooleanTy);
-            EnsureType(Right.Type2.Value, RppTypeSystem.BooleanTy);
+            EnsureType(Left.Type.Value, RppTypeSystem.BooleanTy);
+            EnsureType(Right.Type.Value, RppTypeSystem.BooleanTy);
 
             return this;
         }
@@ -84,7 +84,7 @@ namespace CSharpRpp
         // 10 == 10
         public RppRelationalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
-            Type2 = BooleanTy;
+            Type = BooleanTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -112,7 +112,7 @@ namespace CSharpRpp
         {
             base.Analyze(scope);
 
-            Type2 = new ResolvableType(TypeInference.ResolveCommonType(Left.Type2.Value, Right.Type2.Value));
+            Type = new ResolvableType(TypeInference.ResolveCommonType(Left.Type.Value, Right.Type.Value));
 
             return this;
         }
@@ -127,7 +127,7 @@ namespace CSharpRpp
     [DebuggerDisplay("Op = {Op}")]
     public class BinOp : RppNode, IRppExpr
     {
-        public ResolvableType Type2 { get; protected set; }
+        public ResolvableType Type { get; protected set; }
 
         [NotNull]
         public string Op { get; private set; }
@@ -241,7 +241,7 @@ namespace CSharpRpp
     {
         public T Value { get; private set; }
 
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type { get; private set; }
 
         protected RppLiteralBase(string valueStr)
         {
@@ -252,7 +252,7 @@ namespace CSharpRpp
         private void Initialize(T value)
         {
             Value = value;
-            Type2 = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof (T)));
+            Type = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof (T)));
         }
 
         protected RppLiteralBase(T value)
@@ -266,7 +266,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppLiteralBase<T> other)
         {
-            return Value.Equals(other.Value) && Type2.Equals(other.Type2);
+            return Value.Equals(other.Value) && Type.Equals(other.Type);
         }
 
         public override bool Equals(object obj)
@@ -290,7 +290,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return (Value.GetHashCode() * 397) ^ Type2.GetHashCode();
+                return (Value.GetHashCode() * 397) ^ Type.GetHashCode();
             }
         }
 
@@ -367,7 +367,7 @@ namespace CSharpRpp
 
     public class RppFuncCall : RppMember
     {
-        public override sealed ResolvableType Type2 { get; protected set; }
+        public override sealed ResolvableType Type { get; protected set; }
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
@@ -397,7 +397,7 @@ namespace CSharpRpp
             : this(name, argList, typeArgList)
         {
             Function = function;
-            Type2 = type;
+            Type = type;
         }
 
         private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
@@ -518,7 +518,7 @@ namespace CSharpRpp
 
         private static IRppExpr BoxIfValueType(IRppExpr arg, RType targetType)
         {
-            if ((Equals(arg.Type2.Value, RppTypeSystem.IntTy) || Equals(arg.Type2.Value, RppTypeSystem.FloatTy)) && targetType == RppTypeSystem.AnyTy)
+            if ((Equals(arg.Type.Value, RppTypeSystem.IntTy) || Equals(arg.Type.Value, RppTypeSystem.FloatTy)) && targetType == RppTypeSystem.AnyTy)
             {
                 return new RppBox(arg);
             }
@@ -642,7 +642,7 @@ namespace CSharpRpp
             */
             SymbolTable sc = new SymbolTable(null, BaseClassType2.Value);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
-            Type2 = UnitTy;
+            Type = UnitTy;
             return this;
         }
 
@@ -690,7 +690,7 @@ namespace CSharpRpp
 
     public class RppArray : RppNode, IRppExpr
     {
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type { get; private set; }
 
         public IEnumerable<IRppExpr> Initializers { get; private set; }
 
@@ -707,7 +707,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope)
         {
-            Type2 = new ResolvableType(_elementType.MakeArrayType());
+            Type = new ResolvableType(_elementType.MakeArrayType());
 
             //var resolvedType = Type.Resolve(scope);
             //Debug.Assert(resolvedType != null);
@@ -724,7 +724,7 @@ namespace CSharpRpp
 
     public class RppBlockExpr : RppNode, IRppExpr
     {
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type { get; private set; }
 
         private IList<IRppNode> _exprs;
 
@@ -756,12 +756,12 @@ namespace CSharpRpp
                 var lastExpr = _exprs.Last() as IRppExpr;
                 if (lastExpr != null)
                 {
-                    Type2 = lastExpr.Type2;
+                    Type = lastExpr.Type;
                 }
             }
             else
             {
-                Type2 = new ResolvableType(RppTypeSystem.UnitTy);
+                Type = new ResolvableType(RppTypeSystem.UnitTy);
             }
         }
 
@@ -808,7 +808,7 @@ namespace CSharpRpp
 
     public class RppSelector : RppNode, IRppExpr
     {
-        public ResolvableType Type2 => Path.Type2;
+        public ResolvableType Type => Path.Type;
         public Type RuntimeType { get; private set; }
 
         public IRppExpr Target { get; }
@@ -828,7 +828,7 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope)
         {
             Target.Analyze(scope);
-            RType targetType = Target.Type2.Value;
+            RType targetType = Target.Type.Value;
 
             Debug.Assert(targetType != null, "targetType != null");
 
@@ -896,7 +896,7 @@ namespace CSharpRpp
 
     public class RppId : RppMember
     {
-        public override ResolvableType Type2 { get; protected set; }
+        public override ResolvableType Type { get; protected set; }
 
         public bool IsVar => Ref is RppVar;
         public bool IsField => Field != null;
@@ -928,7 +928,7 @@ namespace CSharpRpp
             {
                 if (symbol.IsLocal)
                 {
-                    Type2 = new ResolvableType(symbol.Type);
+                    Type = new ResolvableType(symbol.Type);
                     Ref = ((LocalVarSymbol) symbol).Var;
                 }
             }
@@ -938,14 +938,14 @@ namespace CSharpRpp
                 if (fieldSymbol != null)
                 {
                     Field = fieldSymbol;
-                    Type2 = new ResolvableType(fieldSymbol.Type);
+                    Type = new ResolvableType(fieldSymbol.Type);
                 }
                 else
                 {
                     TypeSymbol objectType = scope.LookupObject(Name);
                     if (objectType != null)
                     {
-                        Type2 = new ResolvableType(objectType.Type);
+                        Type = new ResolvableType(objectType.Type);
                     }
                 }
             }
@@ -971,7 +971,7 @@ namespace CSharpRpp
 
             // If generic like 'A', then find real type
             /*
-            if (Ref.Type2.IsGenericParameter())
+            if (Ref.Type.IsGenericParameter())
             {
                 Type = scope.LookupGenericType(Ref.Type.Runtime.Name);
                 return this;
@@ -1020,7 +1020,7 @@ namespace CSharpRpp
 
     public class RppBox : RppNode, IRppExpr
     {
-        public ResolvableType Type2 { get; private set; }
+        public ResolvableType Type { get; private set; }
 
         public IRppExpr Expression { get; }
 
@@ -1029,7 +1029,7 @@ namespace CSharpRpp
             Expression = expr;
 //            Debug.Assert(expr.Type.Runtime.IsValueType);
 //            Type = RppNativeType.Create(typeof (object));
-            Type2 = new ResolvableType(RppTypeSystem.AnyTy);
+            Type = new ResolvableType(RppTypeSystem.AnyTy);
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -1039,7 +1039,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppBox other)
         {
-            return Type2.Equals(other.Type2) && Equals(Expression, other.Expression);
+            return Type.Equals(other.Type) && Equals(Expression, other.Expression);
         }
 
         public override bool Equals(object obj)
@@ -1063,7 +1063,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                return (Type2.GetHashCode() * 397) ^ (Expression?.GetHashCode() ?? 0);
+                return (Type.GetHashCode() * 397) ^ (Expression?.GetHashCode() ?? 0);
             }
         }
     }
