@@ -9,7 +9,6 @@ using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RppRuntime;
 
 namespace CSharpRppTest
 {
@@ -59,9 +58,6 @@ namespace CSharpRppTest
 
             program.PreAnalyze(scope);
 
-//            ResolveParamTypes resolver = new ResolveParamTypes();
-//            program.Accept(resolver);
-
             InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
             program.Accept(configurator);
 
@@ -85,14 +81,6 @@ namespace CSharpRppTest
         private static void WireRuntime(SymbolTable scope)
         {
             scope.AddType(new RType("Exception", typeof (Exception)));
-            /*
-            scope.AddType(new RType("Function0", typeof (Function0<>)));
-            scope.AddType(new RType("Function1", typeof (Function1<,>)));
-            scope.AddType(new RType("Function2", typeof (Function2<,,>)));
-            scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
-            scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
-            scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
-            */
         }
 
         public static RppProgram Parse(string code)

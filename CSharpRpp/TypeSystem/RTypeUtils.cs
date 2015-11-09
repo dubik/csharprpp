@@ -22,12 +22,16 @@ namespace CSharpRpp.TypeSystem
             }
 
             if (type.Methods.Count < 2 && type.Methods[1].Name != "apply")
+            {
                 throw new Exception("For Array second method should be apply");
+            }
 
             var returnType = type.Methods[1].ReturnType;
 
             if (returnType == null)
+            {
                 throw new Exception("Return type is not defined so we can't create array type");
+            }
 
             return returnType;
         }
@@ -93,6 +97,11 @@ namespace CSharpRpp.TypeSystem
             if (modifiers.HasFlag(RTypeAttributes.Sealed))
             {
                 attrs |= TypeAttributes.Sealed;
+            }
+
+            if (modifiers.HasFlag(RTypeAttributes.Public))
+            {
+                attrs |= TypeAttributes.Public;
             }
 
             if (modifiers.HasFlag(RTypeAttributes.Private) || modifiers.HasFlag(RTypeAttributes.Protected))

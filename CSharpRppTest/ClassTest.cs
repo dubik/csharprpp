@@ -501,5 +501,13 @@ object Main
             var res = Utils.InvokeStatic(mainTy, "get");
             Assert.AreEqual(27, res);
         }
+
+        [TestMethod]
+        public void CreateSealedClass()
+        {
+            const string code = @"sealed class Foo";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsTrue(fooTy.IsSealed);
+        }
     }
 }

@@ -72,18 +72,6 @@ object Main
 }
 ";
 
-            /*
-            Create Types (go through classes)
-            Create scopes and add types to them
-            Create function and resolve parameters
-            Create primary constructors and resolve parameters
-            Resolve fields
-            Set parent class relationship
-            Create 
-            Analyze function bodies
-            Generate code
-            */
-
             RppProgram runtime = Parse(runtimeCode);
             SymbolTable runtimeScope = new SymbolTable();
             WireRuntime(runtime.Classes, runtimeScope);
