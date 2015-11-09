@@ -42,24 +42,27 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(Symbols.SymbolTable scope)
         {
-            InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type2);
+            // We have 2 cases when type is omited, so we need to get it from initializing expression
+            // and when type is specified so we need to resolve it and if there is a closure, propagate that
+            // to init expression
+            if (Type2.IsDefined())
+            {
+                Type2.Resolve(scope);
 
-            InitExpr = (IRppExpr) InitExpr.Analyze(scope);
-
-            // ReSharper disable once PossibleUnintendedReferenceComparison
-            if (Type2.Equals(ResolvableType.UndefinedTy))
+                InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type2);
+                InitExpr = (IRppExpr)InitExpr.Analyze(scope);
+            }
+            else
             {
                 if (InitExpr is RppEmptyExpr)
                 {
                     throw new Exception("Type is not specified but also initializing expression is missing, I give up");
                 }
 
+                InitExpr = (IRppExpr)InitExpr.Analyze(scope);
                 Type2 = InitExpr.Type2;
             }
-            else
-            {
-                Type2.Resolve(scope);
-            }
+
 
             if (AddToScope)
             {
