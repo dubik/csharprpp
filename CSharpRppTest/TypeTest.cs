@@ -39,8 +39,9 @@ object Foo
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             var res = Utils.InvokeStatic(fooTy, "main");
-            Function1<int, int> func = (Function1<int, int>) res;
-            var ret = func.apply(13);
+            MethodInfo applyMethod = res.GetType().GetMethod("apply");
+            Assert.IsNotNull(applyMethod);
+            var ret = applyMethod.Invoke(res, new object[] {13});
             Assert.AreEqual(23, ret);
         }
 
