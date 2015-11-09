@@ -18,7 +18,7 @@ namespace CSharpRpp
     public class RppClass : RppNamedNode
     {
         private const string Constrparam = "constrparam";
-        private IList<IRppFunc> _funcs;
+        private IList<RppFunc> _funcs;
         private IList<RppField> _fields = Collections.NoFields;
         private IList<RppField> _classParams = Collections.NoFields;
         private readonly List<IRppExpr> _constrExprs;
@@ -44,9 +44,9 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public IEnumerable<IRppFunc> Functions => _funcs.AsEnumerable();
+        public IEnumerable<RppFunc> Functions => _funcs.AsEnumerable();
 
-        public IRppFunc Constructor { get; }
+        public RppFunc Constructor { get; }
 
         [NotNull]
         public IEnumerable<RppField> Fields => _fields.AsEnumerable();
@@ -60,9 +60,9 @@ namespace CSharpRpp
 
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
-        private IList<IRppFunc> _constructors;
+        private IList<RppFunc> _constructors;
 
-        public IEnumerable<IRppFunc> Constructors => _constructors.AsEnumerable();
+        public IEnumerable<RppFunc> Constructors => _constructors.AsEnumerable();
 
         public RppField InstanceField { get; }
         public RType Type { get; set; }
@@ -87,13 +87,13 @@ namespace CSharpRpp
             _classParams = classParams;
 
             IEnumerable<IRppNode> rppNodes = classBody as IList<IRppNode> ?? classBody.ToList();
-            _funcs = rppNodes.OfType<IRppFunc>().Where(f => !f.IsConstructor).ToList();
+            _funcs = rppNodes.OfType<RppFunc>().Where(f => !f.IsConstructor).ToList();
             _funcs.ForEach(DefineFunc);
             _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
             _typeParams = typeParams;
             Modifiers = modifiers;
 
-            _constructors = rppNodes.OfType<IRppFunc>().Where(f => f.IsConstructor).ToList();
+            _constructors = rppNodes.OfType<RppFunc>().Where(f => f.IsConstructor).ToList();
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
 
@@ -108,7 +108,7 @@ namespace CSharpRpp
             }
         }
 
-        private void DefineFunc(IRppFunc func)
+        private void DefineFunc(RppFunc func)
         {
             func.IsStatic = Kind == ClassKind.Object;
             func.Class = this;

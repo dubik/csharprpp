@@ -57,7 +57,7 @@ namespace CSharpRpp.Parser
             }
         }
 
-        private static void Validate(IRppFunc function)
+        private static void Validate(RppFunc function)
         {
             function.Params.ForEachWithIndex((index, param) =>
                                              {

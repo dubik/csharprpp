@@ -21,35 +21,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    public interface IRppFunc : IRppNode, IRppNamedNode
-    {
-        [NotNull]
-        IRppParam[] Params { get; }
-
-        IRppExpr Expr { get; }
-
-        MethodInfo RuntimeType { get; set; }
-
-        MethodBuilder Builder { get; set; }
-
-        bool IsStatic { get; set; }
-        bool IsPublic { get; set; }
-        bool IsAbstract { get; set; }
-        bool IsVariadic { get; set; }
-        bool IsOverride { get; set; }
-        bool IsConstructor { get; }
-
-        bool IsSynthesized { get; set; }
-        bool IsStub { get; set; }
-
-        RppClass Class { get; set; }
-        ConstructorInfo ConstructorInfo { get; set; }
-
-        [NotNull]
-        IList<RppVariantTypeParam> TypeParams { get; set; }
-    }
-
-    public class RppFunc : RppNamedNode, IRppFunc
+    public class RppFunc : RppNamedNode
     {
         public IRppExpr Expr { get; private set; }
         private SymbolTable _scope;

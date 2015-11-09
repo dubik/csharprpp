@@ -206,52 +206,6 @@ namespace CSharpRpp.Codegen
         {
             node.Type.InitializeNativeType(_module);
         }
-
-        private static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
-        {
-            TypeAttributes attrs = TypeAttributes.Class;
-            if (modifiers.HasFlag(RTypeAttributes.Abstract))
-            {
-                attrs |= TypeAttributes.Abstract;
-            }
-
-            if (modifiers.HasFlag(RTypeAttributes.Sealed))
-            {
-                attrs |= TypeAttributes.Sealed;
-            }
-
-            if (modifiers.HasFlag(RTypeAttributes.Private) || modifiers.HasFlag(RTypeAttributes.Protected))
-            {
-                attrs |= TypeAttributes.NotPublic;
-            }
-
-            return attrs;
-        }
-
-        private static MethodAttributes GetMethodAttributes(IRppFunc node)
-        {
-            MethodAttributes attrs = MethodAttributes.Private;
-
-            if (node.IsPublic)
-            {
-                attrs = MethodAttributes.Public;
-            }
-
-            // always virtual, even for statics
-            attrs |= MethodAttributes.Virtual;
-            attrs |= MethodAttributes.HideBySig;
-            if (!node.IsOverride)
-            {
-                attrs |= MethodAttributes.NewSlot;
-            }
-
-            if (node.IsAbstract)
-            {
-                attrs |= MethodAttributes.Abstract;
-            }
-
-            return attrs;
-        }
     }
 
     public class CreateNativeTypes : RppNodeVisitor

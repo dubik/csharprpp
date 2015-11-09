@@ -172,7 +172,7 @@ object Main
             return functionType;
         }
 
-        private static void AddFunctionsToScope(IEnumerable<IRppFunc> funcs, Symbols.SymbolTable scope)
+        private static void AddFunctionsToScope(IEnumerable<RppFunc> funcs, SymbolTable scope)
         {
 //            funcs.ForEach(scope.Add);
         }
