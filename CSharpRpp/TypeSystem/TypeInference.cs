@@ -7,6 +7,18 @@ using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRpp.TypeSystem
 {
+    public class Types
+    {
+        public static Type Int = typeof (int);
+        public static Type Long = typeof (long);
+        public static Type Char = typeof (char);
+        public static Type Short = typeof (short);
+        public static Type Bool = typeof (bool);
+        public static Type Byte = typeof (byte);
+        public static Type Float = typeof (float);
+        public static Type Double = typeof (double);
+    }
+
     public class TypeInference
     {
         private static readonly Dictionary<Type, RType> FtChar = new Dictionary<Type, RType>
@@ -123,7 +135,8 @@ namespace CSharpRpp.TypeSystem
                 {
                     RType type = targetType.Value;
                     IReadOnlyCollection<RType> genericArguments = type.GenericArguments;
-                    List<IRppParam> newBindings = genericArguments.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
+                    List<IRppParam> newBindings =
+                        genericArguments.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
                     return new RppClosure(newBindings, closure.Expr);
                 }
             }

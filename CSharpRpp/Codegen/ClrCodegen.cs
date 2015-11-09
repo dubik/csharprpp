@@ -175,7 +175,7 @@ namespace CSharpRpp.Codegen
                 _logicalGen = true;
                 _trueLabel = _body.DefineLabel();
                 _exitLabel = _body.DefineLabel();
-                _logicalTemp = _body.DeclareLocal(Types.Bool);
+                _logicalTemp = _body.DeclareLocal(typeof(bool));
             }
 
             if (node.Op == "||")
@@ -211,7 +211,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppRelationalBinOp node)
         {
-            LocalBuilder tempVar = _body.DeclareLocal(Types.Bool);
+            LocalBuilder tempVar = _body.DeclareLocal(typeof (bool));
             node.Left.Accept(this);
             node.Right.Accept(this);
 
@@ -328,37 +328,12 @@ namespace CSharpRpp.Codegen
 
                     node.Args.ForEach(arg => arg.Accept(this));
 
-                    //if (node.Function.IsStub)
-                    //{
-                    // Not real functions, like Array.length
-                    //    CodegenForStub(node.Function);
-                    //}
-                    //else
-                    //{
                     MethodInfo method = rppMethodInfo.Native as MethodInfo;
 
                     if (method == null) // This is a stub, so generate code for it
                     {
                         CodegenForStub(rppMethodInfo);
                         return;
-                    }
-
-                    if (node.TargetType is RppGenericObjectType)
-                    {
-                        RppGenericObjectType genericObjectType = (RppGenericObjectType) node.TargetType;
-                        try
-                        {
-                            // Getting a specialized method from generic object. genericObjectType.Runtime has specialized type
-                            // and 'method' contains generic version
-                            method = TypeBuilder.GetMethod(genericObjectType.Runtime, method);
-                        }
-                        catch
-                        {
-                            // Above works only for TypeBuilders, for C# imported types it throws an exception, so getting
-                            // method which has the same name and amount of parameters
-                            method = node.TargetType.Runtime
-                                .GetMethods().FirstOrDefault(x => x.Name == method.Name && x.GetParameters().Length == method.GetParameters().Length);
-                        }
                     }
 
                     Debug.Assert(method != null, "method != null");
@@ -370,7 +345,6 @@ namespace CSharpRpp.Codegen
                     }
 
                     _body.Emit(OpCodes.Callvirt, method);
-                    //}
                 }
             }
         }
@@ -424,12 +398,9 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Call, constructor);
         }
 
-        private RppType _selectorType;
-
         public override void Visit(RppSelector node)
         {
             node.Target.Accept(this);
-            _selectorType = node.Target.Type;
             _inSelector = true;
             node.Path.Accept(this);
             _inSelector = false;

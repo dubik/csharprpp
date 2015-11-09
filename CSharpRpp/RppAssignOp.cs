@@ -1,3 +1,4 @@
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -6,7 +7,7 @@ namespace CSharpRpp
     {
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
-            Type = RppPrimitiveType.UnitTy;
+            Type2 = ResolvableType.UnitTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

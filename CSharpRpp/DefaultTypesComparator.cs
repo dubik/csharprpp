@@ -45,7 +45,7 @@ namespace CSharpRpp
             if (source is RppClosure)
             {
                 RppClosure closure = (RppClosure) source;
-                if (closure.Type == null)
+                if (closure.Type2 == null)
                 {
                     /*
                     Debug.Assert(targetType.Runtime != null, "Only runtime is supported at this moment");

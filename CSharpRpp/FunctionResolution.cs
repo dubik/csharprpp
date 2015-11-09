@@ -18,13 +18,12 @@ namespace CSharpRpp
                 Function = resolvedFunc;
             }
 
-            public virtual IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
-                IList<RType> typeArgs)
+            public virtual IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> typeArgs)
             {
                 var resolvableTypeArgs = typeArgs.Select(t => new ResolvableType(t)).ToList();
                 return new RppFuncCall(functionName, resolvedArgList, Function, new ResolvableType(Function.ReturnType), resolvableTypeArgs)
                 {
-                    TargetType = targetType
+                    TargetType2 = targetType
                 };
             }
         }
@@ -40,8 +39,7 @@ namespace CSharpRpp
             }
 
             // For closures we don't specify types explicitely, they are deduced during resolution
-            public override IRppExpr RewriteFunctionCall(RppObjectType targetType, string functionName, IList<IRppExpr> resolvedArgList,
-                IList<RType> unused)
+            public override IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> unused)
             {
                 return new RppSelector(new RppId(_expr.Name, _expr),
                     new RppFuncCall(Function.Name, resolvedArgList, Function, new ResolvableType(Function.ReturnType), Collections.NoResolvableTypes));

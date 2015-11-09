@@ -88,10 +88,8 @@
     <Compile Include="Codegen\ClrCodegen.cs" />
     <Compile Include="Codegen\ClrCodegenUtils.cs" />
     <Compile Include="Codegen\CodeGenerator.cs" />
-    <Compile Include="Codegen\ConstructorGenerator.cs" />
     <Compile Include="Codegen\GenericsSupport.cs" />
     <Compile Include="Codegen\InheritanceConfigurator.cs" />
-    <Compile Include="Codegen\StubsCreator.cs" />
     <Compile Include="Codegen\TypeCreator.cs" />
     <Compile Include="Collections.cs" />
     <Compile Include="DefaultTypesComparator.cs" />
@@ -111,6 +109,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RppVariantTypeParam.cs" />
     <Compile Include="Symbols\Symbol.cs" />
     <Compile Include="Symbols\SymbolTable.cs" />
     <Compile Include="TypeSystem\ResolvableType.cs" />
@@ -121,25 +120,19 @@
     </Compile>
     <Compile Include="IRppNode.cs" />
     <Compile Include="IRppNodeVisitor.cs" />
-    <Compile Include="Native\RppNativeClass.cs" />
     <Compile Include="NodeUtils.cs" />
     <Compile Include="Parser\RppParserExpr.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RppClass.cs" />
     <Compile Include="Expr\RppExpr.cs" />
-    <Compile Include="RppClassScope.cs" />
     <Compile Include="RppClosure.cs" />
     <Compile Include="RppField.cs" />
     <Compile Include="RppFunc.cs" />
     <Compile Include="RppNamedNode.cs" />
-    <Compile Include="Native\RppNativeParam.cs" />
-    <Compile Include="Native\RppNativeFunc.cs" />
     <Compile Include="Parser\RppParser.cs" />
     <Compile Include="RppPatDef.cs" />
     <Compile Include="RppProgram.cs" />
-    <Compile Include="RppScope.cs" />
-    <Compile Include="RppType.cs" />
     <Compile Include="RppVar.cs" />
     <Compile Include="RppWhile.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />

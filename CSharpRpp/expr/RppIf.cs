@@ -5,8 +5,6 @@ namespace CSharpRpp.Expr
 {
     public class RppIf : RppNode, IRppExpr
     {
-        public RppType Type { get; private set; }
-
         public ResolvableType Type2 { get; private set; }
 
         [NotNull]

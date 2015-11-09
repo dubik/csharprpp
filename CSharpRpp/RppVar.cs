@@ -9,7 +9,6 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public override sealed RppType Type { get; protected set; }
         public override sealed ResolvableType Type2 { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
@@ -20,13 +19,6 @@ namespace CSharpRpp
         public LocalBuilder Builder { get; set; }
 
         protected bool AddToScope = true;
-
-        public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] RppType type, [NotNull] IRppExpr initExpr) : base(name)
-        {
-            Type = type;
-            InitExpr = initExpr;
-            MutabilityFlag = mutability;
-        }
 
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {

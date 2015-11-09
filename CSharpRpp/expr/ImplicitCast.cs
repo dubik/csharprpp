@@ -82,21 +82,6 @@ namespace CSharpRpp.Expr
             return true;
         }
 
-        private static readonly HashSet<Tuple<RppType, RppType>> _implicitConversions = new HashSet<Tuple<RppType, RppType>>()
-        {
-            Zip(RppPrimitiveType.CharTy, RppPrimitiveType.IntTy),
-            Zip(RppPrimitiveType.ShortTy, RppPrimitiveType.IntTy),
-            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.IntTy),
-            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.FloatTy),
-            Zip(RppPrimitiveType.IntTy, RppPrimitiveType.DoubleTy),
-            Zip(RppPrimitiveType.FloatTy, RppPrimitiveType.DoubleTy),
-        };
-
-        private static Tuple<RppType, RppType> Zip(RppType first, RppType second)
-        {
-            return Tuple.Create(first, second);
-        }
-
         public static bool CanCast(RType source, RType dest)
         {
             /*

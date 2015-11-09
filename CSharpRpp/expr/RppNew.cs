@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpRpp.Expr;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
-using Mono.Collections.Generic;
 
 namespace CSharpRpp
 {
     public class RppNew : RppNode, IRppExpr
     {
-        public RppType Type { get; private set; }
         public ResolvableType Type2 { get; }
-
-        public IEnumerable<RppType> ArgumentTypes { get; private set; }
 
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 

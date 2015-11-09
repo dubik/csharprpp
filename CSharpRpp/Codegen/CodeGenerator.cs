@@ -57,12 +57,6 @@ namespace CSharpRpp.Codegen
             _program.Accept(codegen);
         }
 
-        private void GenerateMethodStubs()
-        {
-            StubsCreator stubsCreator = new StubsCreator(_funcBuilders);
-            _program.Accept(stubsCreator);
-        }
-
         private void CreateModule()
         {
             _assemblyName = new AssemblyName(_program.Name);

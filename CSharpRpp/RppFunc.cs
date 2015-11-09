@@ -24,9 +24,6 @@ namespace CSharpRpp
     public interface IRppFunc : IRppNode, IRppNamedNode
     {
         [NotNull]
-        RppType ReturnType { get; }
-
-        [NotNull]
         IRppParam[] Params { get; }
 
         IRppExpr Expr { get; }
@@ -59,7 +56,6 @@ namespace CSharpRpp
 
         public static IList<IRppParam> EmptyParams = new List<IRppParam>();
 
-        public RppType ReturnType { get; private set; }
         public IRppParam[] Params { get; private set; }
 
         public MethodInfo RuntimeType
@@ -188,7 +184,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppFunc other)
         {
-            return Equals(Name, other.Name) && Equals(ReturnType, other.ReturnType) && Equals(Params, other.Params) &&
+            return Equals(Name, other.Name) && Equals(ReturnType2, other.ReturnType2) && Equals(Params, other.Params) &&
                    IsStatic.Equals(other.IsStatic) &&
                    IsPublic.Equals(other.IsPublic) && IsAbstract.Equals(other.IsAbstract);
         }
@@ -214,7 +210,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                var hashCode = ReturnType.GetHashCode();
+                var hashCode = ReturnType2.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Params?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
@@ -229,7 +225,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return $"{ModifiersToString()} def {Name}({ParamsToString()}) : {ReturnType}";
+            return $"{ModifiersToString()} def {Name}({ParamsToString()}) : {ReturnType2}";
         }
 
         public string ModifiersToString()
@@ -255,7 +251,7 @@ namespace CSharpRpp
 
         private string ParamsToString()
         {
-            return string.Join(", ", Params.Select(p => p.Name + ": " + p.Type.ToString()));
+            return string.Join(", ", Params.Select(p => p.Name + ": " + p.Type2.ToString()));
         }
 
         #endregion
@@ -267,7 +263,7 @@ namespace CSharpRpp
 
         public bool Equals(IRppParam x, IRppParam y)
         {
-            return x.Type.Equals(y.Type);
+            return x.Type2.Equals(y.Type2);
         }
 
         public int GetHashCode(IRppParam obj)
@@ -287,7 +283,6 @@ namespace CSharpRpp
     [DebuggerDisplay("{Name}: {Type2}")]
     public sealed class RppParam : RppMember, IRppParam
     {
-        public override RppType Type { get; protected set; }
         public override ResolvableType Type2 { get; protected set; }
 
         public int Index { get; set; }

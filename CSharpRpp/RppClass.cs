@@ -23,9 +23,6 @@ namespace CSharpRpp
         [NotNull]
         IEnumerable<IRppFunc> Constructors { get; }
 
-        [NotNull]
-        IEnumerable<RppVariantTypeParam> TypeParams { get; }
-
         Type RuntimeType { get; }
         SymbolTable Scope { get; }
 

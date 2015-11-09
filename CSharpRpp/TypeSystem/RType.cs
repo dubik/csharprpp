@@ -546,5 +546,10 @@ namespace CSharpRpp.TypeSystem
 
             return BaseType?.IsSubclassOf(targetType) ?? false;
         }
+
+        public bool IsNumeric()
+        {
+            return Name == "Int" || Name == "Float" || Name == "Double" || Name == "Char" || Name == "Short" || Name == "Byte";
+        }
     }
 }

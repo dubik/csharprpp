@@ -1,6 +1,4 @@
-﻿using CSharpRpp;
-using CSharpRpp.Native;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {

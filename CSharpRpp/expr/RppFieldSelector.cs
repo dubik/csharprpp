@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.TypeSystem;
@@ -9,9 +8,6 @@ namespace CSharpRpp
 {
     public class RppFieldSelector : RppMember
     {
-        public override RppType Type { get; protected set; }
-
-        public RppType ClassType { get; private set; }
         public override ResolvableType Type2 { get; protected set; }
 
         [CanBeNull]
@@ -47,7 +43,7 @@ namespace CSharpRpp
 
             if (Field == null)
             {
-                throw new Exception($"Can't find field {Name} for type {TargetType}");
+                throw new Exception($"Can't find field {Name} for type {TargetType2}");
             }
 
             Debug.Assert(classType != null, "obj != null");
@@ -91,7 +87,7 @@ namespace CSharpRpp
         /// </summary>
         /// <param name="name">name of the base class</param>
         /// <returns>specialized base type type</returns>
-        private ResolvedType FindSpecializedClassInHierarchy(string name)
+        private ResolvableType FindSpecializedClassInHierarchy(string name)
         {
             /*
             IRppClass clazz = TargetType.Class;

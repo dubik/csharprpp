@@ -11,7 +11,6 @@ namespace CSharpRpp
         public static IList<IRppFunc> NoFuncs = new List<IRppFunc>().AsReadOnly();
         public static IList<string> NoStrings = new List<string>().AsReadOnly();
         public static IList<IRppExpr> NoExprs = new List<IRppExpr>().AsReadOnly();
-        public static IList<RppType> NoTypes = new List<RppType>().AsReadOnly();
         public static IList<RTypeName> NoTypeNames = new List<RTypeName>().AsReadOnly();
         public static IList<Type> NoRuntimeTypes = new List<Type>().AsReadOnly();
         public static IList<RppVariantTypeParam> NoVariantTypeParams = new List<RppVariantTypeParam>().AsReadOnly();
