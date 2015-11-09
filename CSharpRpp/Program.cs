@@ -44,14 +44,30 @@ abstract class Function2[T1, T2, TResult]
     def apply(arg1: T1, arg2: T2) : TResult
 }
 
-object Bar
+abstract class Option[A]
 {
-    def invoker(func: (Int, Int) => Int) : Int = {
-        func(10, 24)
-    }
+    def isEmpty : Boolean
+    def get: A
+}
 
-    def main() : Int = {
-        invoker((x, y) => x + y)
+class Some[A](val x: A) extends Option[A]
+{
+    override def isEmpty : Boolean = false
+    override def get : A = x
+}
+
+class None extends Option[Nothing]
+{
+    override def isEmpty : Boolean = true
+    override def get : Nothing = throw new Exception(""Nothing to get"")
+}
+
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.x
+        p
     }
 }
 ";

@@ -18,6 +18,7 @@ namespace CSharpRpp.TypeSystem
         public static RType NullTy = ImportClass("Null", typeof (object));
         public static RType AnyTy = ImportClass("Any", typeof (object));
         public static RType StringTy = ImportClass("String", typeof (string));
+        public static RType NothingTy = ImportClass("Nothing", typeof (object));
 
         private static RType CreatePrimitive(string name, Type systemType)
         {
@@ -58,6 +59,7 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(DoubleTy);
             scope.AddType(ImportClass(typeof (string)));
             scope.AddType(AnyTy);
+            scope.AddType(NothingTy);
         }
 
         public static RType ImportClass(Type systemType)
