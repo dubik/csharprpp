@@ -14,7 +14,7 @@ namespace CSharpRpp
 
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 
-        private readonly IList<IRppExpr> _arguments;
+        private IList<IRppExpr> _arguments;
 
         public RppMethodInfo Constructor { get; private set; }
 
@@ -31,7 +31,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope)
         {
-            NodeUtils.Analyze(scope, _arguments);
+            _arguments = NodeUtils.Analyze(scope, _arguments);
 
             Type.Resolve(scope);
 

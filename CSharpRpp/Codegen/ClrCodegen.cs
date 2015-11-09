@@ -22,13 +22,15 @@ namespace CSharpRpp.Codegen
 
         private TypeBuilder _typeBuilder;
 
-        private readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
+        private static readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
         {
             {"+", OpCodes.Add},
             {"-", OpCodes.Sub},
             {"*", OpCodes.Mul},
             {"/", OpCodes.Div}
         };
+
+        private static readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
         private bool _logicalGen;
         private Label _trueLabel;
@@ -45,8 +47,13 @@ namespace CSharpRpp.Codegen
         /// specific function.
         /// </summary>
         /// <param name="body"></param>
-        public ClrCodegen(ILGenerator body)
+        public ClrCodegen(ILGenerator body) : this(null, body)
         {
+        }
+
+        public ClrCodegen(TypeBuilder builder, ILGenerator body)
+        {
+            _typeBuilder = builder;
             _body = body;
         }
 
@@ -73,8 +80,6 @@ namespace CSharpRpp.Codegen
             body.Emit(OpCodes.Stsfld, instanceField);
             body.Emit(OpCodes.Ret);
         }
-
-        private readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
         public override void VisitExit(RppClass node)
         {
@@ -322,7 +327,10 @@ namespace CSharpRpp.Codegen
                         _body.Emit(OpCodes.Ldsfld, instanceField.Native);
                     }
 
-                    node.Args.ForEach(arg => arg.Accept(this));
+                    // Create own code generator for arguments because they can have RppSelectors which may interfer with already existing RppSelector
+                    // myField.CallFunc(anotherInstanceFunc()) would set _inSelector to true and no 'this' will be loaded
+                    ClrCodegen codegen = new ClrCodegen(_typeBuilder, _body);
+                    node.Args.ForEach(arg => arg.Accept(codegen));
 
                     MethodInfo method = rppMethodInfo.Native as MethodInfo;
 

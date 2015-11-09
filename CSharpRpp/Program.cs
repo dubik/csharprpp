@@ -49,8 +49,7 @@ abstract class Option[A]
     def isEmpty : Boolean
     def get: A
     def map[B](f: (A) => B): Option[B] = if(isEmpty()) new None() else{
-        val out : B = f(get())
-        new Some[B](out)
+        new Some[B](f(get()))
     }
 }
 
