@@ -520,22 +520,64 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppClosure node)
         {
             Type[] argTypes = node.Bindings.Select(p => p.Type.Value.NativeType).ToArray();
+            Type parentType = node.Type.Value.NativeType;
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
-                TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate,
-                node.Type.Value.NativeType);
+                TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate);
 
-            string[] genericTypes = argTypes.Where(arg => arg.IsGenericParameter).Select(arg => arg.Name).ToArray();
-            if (genericTypes.Length > 0)
+            Type returnType = node.ReturnType.Value.NativeType;
+
+            // We need to create closure's own generic parameters because we can't reuse function's ones
+            /*
+                def myFunc[A] = {
+                    val k = (x : A) = x
+                }
+
+                will be expanded into
+                class _Closure[_A] extends Function1[_A, _A]
+                {
+                    def apply(x: _A) = x
+                }
+
+                def myFunc[A] = {
+                    val k: _Closure[A] = new _Closure[A]()
+                }
+
+                So _Closure needs to have it's own generic parameter _A which will be substituted with A
+
+                So we make an array with params:
+                [T1, T2, ..., TRes] then find generic params, then define generic params for closure, then
+                replace them with [_T1, _T2, ...., _TRes] (excluding non generic params)
+            */
+            Type[] closureSignature = argTypes.Concat(returnType).ToArray();
+            Type[] closureGenericArguments = closureSignature.Where(t => t.IsGenericParameter).ToArray();
+            string[] closureGenericArgumentsNames = closureGenericArguments.Select(arg => "T" + arg.Name).ToArray();
+            if (closureGenericArgumentsNames.Length > 0)
             {
-                closureClass.DefineGenericParameters(genericTypes);
+                GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
+                var targetSignature = closureSignature.Select(t =>
+                {
+                    if (t.IsGenericParameter)
+                    {
+                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                        return closureGenericArgument;
+                    }
+                    return t;
+                }).ToArray();
+
+                Type genericTypeDef = parentType.GetGenericTypeDefinition();
+                parentType = genericTypeDef.MakeGenericType(targetSignature);
+                returnType = targetSignature.Last();
+                argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
             }
+
+            closureClass.SetParent(parentType);
 
             MethodBuilder applyMethod = closureClass.DefineMethod("apply",
                 MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
                 CallingConventions.Standard);
 
             applyMethod.SetParameters(argTypes);
-            applyMethod.SetReturnType(node.ReturnType.Value.NativeType);
+            applyMethod.SetReturnType(returnType);
 
             int index = 1;
             foreach (var param in node.Bindings)
@@ -550,6 +592,12 @@ namespace CSharpRpp.Codegen
             body.Emit(OpCodes.Ret);
 
             ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Public);
+            if (closureGenericArgumentsNames.Length > 0)
+            {
+                Type spec = closureClass.MakeGenericType(closureSignature);
+                defaultClosureConstructor = TypeBuilder.GetConstructor(spec, defaultClosureConstructor);
+            }
+
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
             closureClass.CreateType();

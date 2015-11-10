@@ -326,6 +326,8 @@ class Bar extends Foo
             Utils.ParseAndCreateType(code, "Bar");
         }
 
+        // TODO enable this
+        /*
         [TestMethod]
         [Ignore]
         [ExpectedException(typeof (SemanticException))]
@@ -339,6 +341,7 @@ class Foo
 ";
             Utils.ParseAndCreateType(code, "Foo");
         }
+        */
 
         [TestMethod]
         public void SecondaryConstructor()

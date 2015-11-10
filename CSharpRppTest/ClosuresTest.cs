@@ -81,7 +81,6 @@ object Bar
             Assert.AreEqual(34, res);
         }
 
-        [Ignore]
         [TestMethod]
         [TestCategory("Closures"), TestCategory("Generics")]
         public void ABitSimpler()

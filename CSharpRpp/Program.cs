@@ -44,33 +44,12 @@ abstract class Function2[T1, T2, TResult]
     def apply(arg1: T1, arg2: T2) : TResult
 }
 
-abstract class Option[A]
+object Bar
 {
-    def isEmpty : Boolean
-    def get: A
-    def map[B](f: (A) => B): Option[B] = if(isEmpty()) new None() else{
-        new Some[B](f(get()))
-    }
-}
-
-class Some[A](val x: A) extends Option[A]
-{
-    override def isEmpty : Boolean = false
-    override def get : A = x
-}
-
-class None extends Option[Nothing]
-{
-    override def isEmpty : Boolean = true
-    override def get : Nothing = throw new Exception(""Nothing to get"")
-}
-
-object Main
-{
-    def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
-        val p = k.x
-        p
+    def func[A](k : A) : A =  {
+         val l: (Int) => Int = (x: Int) => x
+         val f: (A) => A = (x : A) => x
+         f[A](k)
     }
 }
 ";

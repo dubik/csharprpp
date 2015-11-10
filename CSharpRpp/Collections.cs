@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
@@ -19,6 +20,11 @@ namespace CSharpRpp
         public static IReadOnlyCollection<RppFunc> NoFuncsCollection = new List<RppFunc>();
         public static IReadOnlyCollection<RppMethodInfo> NoRFuncsCollection = new List<RppMethodInfo>();
         public static IReadOnlyCollection<RType> NoRTypes = new List<RType>().AsReadOnly();
-        public static IList<ResolvableType>  NoResolvableTypes = new List<ResolvableType>().AsReadOnly();
+        public static IList<ResolvableType> NoResolvableTypes = new List<ResolvableType>().AsReadOnly();
+
+        public static IEnumerable<T> Concat<T>(this IEnumerable<T> collection, T item)
+        {
+            return collection.Concat(new[] {item});
+        }
     }
 }
