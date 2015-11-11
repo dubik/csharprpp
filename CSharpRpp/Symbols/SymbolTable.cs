@@ -27,6 +27,12 @@ namespace CSharpRpp.Symbols
             _classType = classType;
 
             AddGenericParametersToScope(_classType);
+            AddNestedToScope(_classType);
+        }
+
+        private void AddNestedToScope(RType classType)
+        {
+            classType.Nested?.ForEach(AddType);
         }
 
         public SymbolTable(SymbolTable parent, RppMethodInfo methodInfo)

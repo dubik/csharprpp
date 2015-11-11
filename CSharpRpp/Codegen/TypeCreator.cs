@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -12,13 +11,36 @@ namespace CSharpRpp.Codegen
     /// </summary>
     public class Type2Creator : RppNodeVisitor
     {
+        private readonly Stack<RType> outterTypes = new Stack<RType>();
+
         public override void VisitEnter(RppClass node)
         {
-            RType classType = new RType(node.GetNativeName(), GetTypeAttributes(node), null, null);
+            string typeName = node.GetNativeName();
+            RTypeAttributes typeAttributes = GetTypeAttributes(node);
+
+            RType classType;
+
+            if (outterTypes.Any())
+            {
+                RType outterType = outterTypes.Peek();
+                classType = outterType.DefineNestedType(typeName, typeAttributes, null);
+            }
+            else
+            {
+                classType = new RType(typeName, typeAttributes, null, null);
+            }
+
             node.Type = classType;
+
+            outterTypes.Push(classType);
 
             string[] typeParamsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
             classType.DefineGenericParameters(typeParamsNames);
+        }
+
+        public override void VisitExit(RppClass node)
+        {
+            outterTypes.Pop();
         }
 
         private static RTypeAttributes GetTypeAttributes(RppClass node)

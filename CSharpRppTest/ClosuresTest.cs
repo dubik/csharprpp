@@ -83,7 +83,7 @@ object Bar
 
         [TestMethod]
         [TestCategory("Closures"), TestCategory("Generics")]
-        public void ABitSimpler()
+        public void GenericMethod()
         {
             const string code = @"
 object Bar
@@ -95,6 +95,21 @@ object Bar
 }
 ";
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
+        }
+
+        [TestMethod]
+        public void ReturnTypeForClosure()
+        {
+            const string code = @"
+class Bar[A, B]
+{
+    def func(i: A, k: B) : B = {
+        val f: (A, B) => B = (x: A, y: B) => x
+        f[A, B](i, k)
+    }
+}
+";
+            //var barTy = Utils.ParseAndCreateType(code, "Bar$");
         }
     }
 }

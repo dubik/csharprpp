@@ -44,13 +44,14 @@ abstract class Function2[T1, T2, TResult]
     def apply(arg1: T1, arg2: T2) : TResult
 }
 
-object Bar
+class Foo
 {
-    def func[A](k : A) : A =  {
-         val l: (Int) => Int = (x: Int) => x
-         val f: (A) => A = (x : A) => x
-         f[A](k)
+    class Internal
+    {
+        def func() : Int = 13
     }
+
+    def create : Internal = new Internal()
 }
 ";
 

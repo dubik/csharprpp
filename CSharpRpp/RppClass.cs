@@ -44,11 +44,6 @@ namespace CSharpRpp
         }
 
         [NotNull]
-        public IEnumerable<RppFunc> Functions => _funcs.AsEnumerable();
-
-        public RppFunc Constructor { get; }
-
-        [NotNull]
         public IEnumerable<RppField> Fields => _fields.AsEnumerable();
 
         [NotNull]
@@ -61,21 +56,12 @@ namespace CSharpRpp
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
         private IList<RppFunc> _constructors;
+        private IList<RppClass> _nested;
 
         public IEnumerable<RppFunc> Constructors => _constructors.AsEnumerable();
 
         public RppField InstanceField { get; }
         public RType Type { get; set; }
-
-        public RppClass(ClassKind kind, [NotNull] string name) : base(name)
-        {
-            Kind = kind;
-            _funcs = Collections.NoFuncs;
-            Constructor = CreatePrimaryConstructor(Collections.NoExprs);
-            _typeParams = Collections.NoVariantTypeParams;
-            Modifiers = Collections.NoModifiers;
-            _constructors = Collections.NoFuncs;
-        }
 
         public RppBaseConstructorCall BaseConstructorCall { get; }
 
@@ -97,8 +83,8 @@ namespace CSharpRpp
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
 
-            Constructor = CreatePrimaryConstructor(_constrExprs);
-            _constructors.Add(Constructor);
+            var primaryConstructor = CreatePrimaryConstructor(_constrExprs);
+            _constructors.Add(primaryConstructor);
 
             if (kind == ClassKind.Object)
             {
@@ -106,6 +92,8 @@ namespace CSharpRpp
                 InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new ResolvableType(new RTypeName(objectName)));
                 _fields.Add(InstanceField);
             }
+
+            _nested = rppNodes.OfType<RppClass>().ToList();
         }
 
         private void DefineFunc(RppFunc func)
@@ -117,9 +105,10 @@ namespace CSharpRpp
         public override void Accept(IRppNodeVisitor visitor)
         {
             visitor.VisitEnter(this);
-            _fields.ForEach(field => field.Accept(visitor));
-            _constructors.ForEach(constructor => constructor.Accept(visitor));
-            _funcs.ForEach(func => func.Accept(visitor));
+            _fields.ForEach(f => f.Accept(visitor));
+            _constructors.ForEach(c => c.Accept(visitor));
+            _funcs.ForEach(f => f.Accept(visitor));
+            _nested.ForEach(n => n.Accept(visitor));
             visitor.VisitExit(this);
         }
 
@@ -129,14 +118,17 @@ namespace CSharpRpp
         {
             Debug.Assert(scope != null, "scope != null");
 
-            Scope = new SymbolTable(scope, Type);
+            NodeUtils.PreAnalyze(scope, _nested);
 
+            Scope = new SymbolTable(scope, Type);
             BaseConstructorCall.ResolveBaseClass(Scope);
         }
 
         public override IRppNode Analyze(SymbolTable scope)
         {
             Debug.Assert(Scope != null, "Scope != null");
+
+            NodeUtils.Analyze(scope, _nested);
 
             SymbolTable constructorScope = new SymbolTable(Scope, Type);
 

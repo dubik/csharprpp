@@ -289,11 +289,14 @@ namespace CSharpRpp.TypeSystem
 
         public int GenericParameterPosition { get; set; }
 
+        public IReadOnlyList<RType> Nested => _nested;
+
         private readonly List<RppMethodInfo> _constructors = new List<RppMethodInfo>();
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
         private RppGenericParameter[] _genericParameters = new RppGenericParameter[0];
         private readonly List<RType> _genericArguments = new List<RType>();
+        private readonly List<RType> _nested = new List<RType>();
 
         public RType([NotNull] string name, [NotNull] Type type)
         {
@@ -335,6 +338,13 @@ namespace CSharpRpp.TypeSystem
             Attributes = attributes;
             BaseType = parent;
             DeclaringType = declaringType;
+        }
+
+        public RType DefineNestedType(string name, RTypeAttributes attributes, RType parent)
+        {
+            RType nested = new RType(name, attributes, parent, this);
+            _nested.Add(nested);
+            return nested;
         }
 
         public RppMethodInfo DefineMethod([NotNull] string name, RMethodAttributes attributes)
@@ -469,8 +479,15 @@ namespace CSharpRpp.TypeSystem
         {
             if (_typeBuilder == null)
             {
-                TypeAttributes attrs = RTypeUtils.GetTypeAttributes(Attributes);
-                _typeBuilder = module.DefineType(Name, attrs);
+                if (DeclaringType == null)
+                {
+                    TypeAttributes attrs = RTypeUtils.GetTypeAttributes(Attributes);
+                    _typeBuilder = module.DefineType(Name, attrs);
+                }
+                else
+                {
+                    _typeBuilder = ((TypeBuilder) DeclaringType.NativeType).DefineNestedType(Name, TypeAttributes.NestedPublic);
+                }
 
                 if (IsGenericType)
                 {

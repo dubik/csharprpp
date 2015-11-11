@@ -35,19 +35,6 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
-        public void OneFunObject()
-        {
-            const string code = @"object Main {
-    def main(args: Array[String]) : Unit = {
-    }
-}";
-            RppProgram program = Parse(code);
-            Assert.IsNotNull(program);
-            Assert.AreEqual(1, program.Classes.First().Functions.Count());
-            Assert.AreEqual("main", program.Classes.First().Functions.First().Name);
-        }
-
-        [TestMethod]
         public void ParseEmptyClass()
         {
             RppClass rppClass = ParseClass("class String");

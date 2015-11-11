@@ -461,6 +461,11 @@ namespace CSharpRpp
                 return ParseFunDef(modifiers);
             }
 
+            if (Require(RppLexer.KW_Class) || Require(RppLexer.KW_Object))
+            {
+                return ParseClassDef(modifiers);
+            }
+
             return null;
         }
 
