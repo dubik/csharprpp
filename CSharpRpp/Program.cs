@@ -26,9 +26,6 @@ object Runtime
     def printFormat(format: String, args: Any*) : Unit = { }
 }
 
-";
-            // TODO fix this runtime thingy
-            const string code = @"
 abstract class Function0[TResult]
 {
     def apply : TResult
@@ -43,7 +40,9 @@ abstract class Function2[T1, T2, TResult]
 {
     def apply(arg1: T1, arg2: T2) : TResult
 }
-
+";
+            // TODO fix this runtime thingy
+            const string code = @"
 class First[A, B] {
   class Second[C, D] {
     def func[E]() : E = null
@@ -51,13 +50,14 @@ class First[A, B] {
 }
 ";
 
-            RppProgram runtime = Parse(runtimeCode);
+            RppProgram program = new RppProgram();
+            Parse(runtimeCode, program);
             SymbolTable runtimeScope = new SymbolTable();
-            WireRuntime(runtime.Classes, runtimeScope);
-            RppProgram program = Parse(code);
+            WireRuntime(program.Classes, runtimeScope);
+            Parse(code, program);
             program.Name = "Sample";
-            SymbolTable scope = new SymbolTable(runtimeScope);
-            RppTypeSystem.PopulateBuiltinTypes(scope);
+            
+            RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
 
             CodeGenerator generator = new CodeGenerator(program);
             try
@@ -65,7 +65,7 @@ class First[A, B] {
                 Type2Creator typeCreator = new Type2Creator();
                 program.Accept(typeCreator);
 
-                program.PreAnalyze(scope);
+                program.PreAnalyze(runtimeScope);
 
                 InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
                 program.Accept(configurator);
@@ -73,7 +73,7 @@ class First[A, B] {
                 CreateRType createRType = new CreateRType();
                 program.Accept(createRType);
 
-                program.Analyze(scope);
+                program.Analyze(runtimeScope);
 
                 SemanticAnalyzer semantic = new SemanticAnalyzer();
                 program.Accept(semantic);
@@ -161,12 +161,12 @@ class First[A, B] {
             return Assembly.GetAssembly(typeof (Runtime));
         }
 
-        private static RppProgram Parse(string code)
+        private static void Parse(string code, RppProgram program)
         {
             try
             {
                 RppParser parser = CreateParser(code);
-                return parser.CompilationUnit();
+                parser.CompilationUnit(program);
             }
             catch (UnexpectedTokenException e)
             {
@@ -177,8 +177,6 @@ class First[A, B] {
                 Console.WriteLine("{0}^ Found '{1}', but expected '{2}'", Ident(e.Actual.CharPositionInLine), e.Actual.Text, e.Expected);
                 Environment.Exit(-1);
             }
-
-            return null;
         }
 
         private static RppParser CreateParser(string code)

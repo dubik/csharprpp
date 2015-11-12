@@ -103,7 +103,8 @@ abstract class Function2[T1, T2, TResult]
 
 ";
             RppParser parser = CreateParser(runtime + code);
-            RppProgram compilationUnit = parser.CompilationUnit();
+            RppProgram compilationUnit = new RppProgram();
+            parser.CompilationUnit(compilationUnit);
             compilationUnit.Name = "TestedAssembly";
             return compilationUnit;
         }

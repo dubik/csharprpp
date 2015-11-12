@@ -138,10 +138,8 @@ namespace CSharpRpp
             }
         }
 
-        public RppProgram CompilationUnit()
+        public RppProgram CompilationUnit(RppProgram program)
         {
-            RppProgram program = new RppProgram();
-
             if (Require(RppLexer.KW_Package))
             {
                 QualifiedId id = ParseQualifiedId();

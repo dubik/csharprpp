@@ -12,7 +12,9 @@ namespace CSharpRppTest
         internal static RppProgram Parse(string code)
         {
             RppParser parser = CreateParser(code);
-            return parser.CompilationUnit();
+            RppProgram program = new RppProgram();
+            parser.CompilationUnit(program);
+            return program;
         }
 
         internal static RppParser CreateParser(string code)
