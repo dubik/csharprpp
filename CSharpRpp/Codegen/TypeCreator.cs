@@ -11,7 +11,7 @@ namespace CSharpRpp.Codegen
     /// </summary>
     public class Type2Creator : RppNodeVisitor
     {
-        private readonly Stack<RType> outterTypes = new Stack<RType>();
+        private readonly Stack<RType> _outterTypes = new Stack<RType>();
 
         public override void VisitEnter(RppClass node)
         {
@@ -20,9 +20,9 @@ namespace CSharpRpp.Codegen
 
             RType classType;
 
-            if (outterTypes.Any())
+            if (_outterTypes.Any())
             {
-                RType outterType = outterTypes.Peek();
+                RType outterType = _outterTypes.Peek();
                 classType = outterType.DefineNestedType(typeName, typeAttributes, null);
             }
             else
@@ -32,15 +32,28 @@ namespace CSharpRpp.Codegen
 
             node.Type = classType;
 
-            outterTypes.Push(classType);
+            _outterTypes.Push(classType);
 
-            string[] typeParamsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
+            string[] typeParamsNames = CombineGenericParameters(node.TypeParams.Select(tp => tp.Name));
             classType.DefineGenericParameters(typeParamsNames);
+        }
+
+        /// <summary>
+        /// Going up in the hierarchy and combine all generic parameters.
+        /// </summary>
+        /// <param name="classGenericParameters"></param>
+        /// <returns>combined array</returns>
+        private string[] CombineGenericParameters(IEnumerable<string> classGenericParameters)
+        {
+            IEnumerable<string> allGenerics = _outterTypes.Aggregate((IEnumerable<string>) new List<string>(),
+                (list, type) => list.Concat(type.GenericParameters.Select(gp => gp.Name)));
+            string[] typeParamsNames = allGenerics.Concat(classGenericParameters).ToArray();
+            return typeParamsNames;
         }
 
         public override void VisitExit(RppClass node)
         {
-            outterTypes.Pop();
+            _outterTypes.Pop();
         }
 
         private static RTypeAttributes GetTypeAttributes(RppClass node)

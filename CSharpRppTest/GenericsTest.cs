@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -69,7 +70,7 @@ class Foo extends Bar[Int]
             Type fooTy = Utils.ParseAndCreateType(code, "Foo");
             Assert.IsNotNull(fooTy);
             Assert.IsFalse(fooTy.IsGenericType);
-            Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
+            Assert.AreEqual(typeof (int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
 
 
@@ -172,6 +173,23 @@ object Bar {
             Type barTy = Utils.ParseAndCreateType(code, "Bar$");
             var res = Utils.InvokeStatic(barTy, "main");
             Assert.IsNotNull(res);
+        }
+
+        [TestMethod]
+        public void GenericInNestedClasses()
+        {
+            const string code = @"
+class First[A, B] {
+  class Second[C, D] {
+  }
+}
+";
+            Type firstTy = Utils.ParseAndCreateType(code, "First");
+            Assert.IsNotNull(firstTy);
+            Assert.AreEqual(2, firstTy.GetGenericArguments().Length);
+            CollectionAssert.AreEqual(new[] {"A", "B"}, firstTy.GetGenericArguments().Select(t => t.Name).ToList());
+            Type secondTy = firstTy.GetNestedType("Second");
+            CollectionAssert.AreEqual(new[] {"A", "B", "C", "D"}, secondTy.GetGenericArguments().Select(t => t.Name).ToList());
         }
     }
 }

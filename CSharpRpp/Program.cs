@@ -44,14 +44,10 @@ abstract class Function2[T1, T2, TResult]
     def apply(arg1: T1, arg2: T2) : TResult
 }
 
-class Foo
-{
-    class Internal
-    {
-        def func() : Int = 13
-    }
-
-    def create : Internal = new Internal()
+class First[A, B] {
+  class Second[C, D] {
+    def func[E]() : E = null
+  }
 }
 ";
 
