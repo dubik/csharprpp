@@ -41,13 +41,24 @@ abstract class Function2[T1, T2, TResult]
     def apply(arg1: T1, arg2: T2) : TResult
 }
 ";
-            // TODO fix this runtime thingy
             const string code = @"
-class First[A, B] {
-  class Second[C, D] {
-    def func[E]() : E = null
-  }
+object Main
+{
+    def func() : Unit = {
+        val k = Main
+    }
 }
+
+class Foo
+
+object Bar extends Foo
+{
+    def bar() : Foo = {
+        val k : Foo = Bar
+        k
+    }
+}
+
 ";
 
             RppProgram program = new RppProgram();

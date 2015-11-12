@@ -409,6 +409,17 @@ namespace CSharpRpp.Codegen
             else if (node.IsParam)
             {
                 ((RppParam) node.Ref).Accept(this);
+            } else if (node.IsObject)
+            {
+                if (_typeBuilder == node.Type.Value.NativeType)
+                {
+                    _body.Emit(OpCodes.Ldarg_0); // we are in one of the methods of object, so first parameter is it's instance
+                }
+                else
+                {
+                    FieldInfo cilField = node.Type.Value.Fields.First(f => f.Name == "_instance").Native;
+                    _body.Emit(OpCodes.Ldsfld, cilField);
+                }
             }
         }
 

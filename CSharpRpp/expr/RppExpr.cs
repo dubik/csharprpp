@@ -901,6 +901,7 @@ namespace CSharpRpp
         public bool IsVar => Ref is RppVar;
         public bool IsField => Field != null;
         public bool IsParam => Ref is RppParam;
+        public bool IsObject => Type.Value.IsObject;
         public IRppNamedNode Ref { get; private set; }
 
         public RppFieldInfo Field { get; private set; }
