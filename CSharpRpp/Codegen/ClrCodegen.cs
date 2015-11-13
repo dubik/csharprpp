@@ -313,18 +313,17 @@ namespace CSharpRpp.Codegen
                 }
                 else
                 {
-                    if (!_inSelector && !rppMethodInfo.IsStatic)
+                    if (!_inSelector)
                     {
-                        _body.Emit(OpCodes.Ldarg_0); // load 'this'
-                    }
-
-                    if (rppMethodInfo.IsStatic)
-                    {
-                        Debug.Assert(rppMethodInfo.Native.DeclaringType != null, "rppMethodInfo.Native.DeclaringType != null");
-                        // TODO Fix this, this is weird also if we are inside object, we shouldn't probably load instance through the field because we have it in the parameter
-                        var instanceField = rppMethodInfo.DeclaringType.Fields.First(f => f.Name == "_instance");
-                        Debug.Assert(instanceField != null, "instanceField != null");
-                        _body.Emit(OpCodes.Ldsfld, instanceField.Native);
+                        if (rppMethodInfo.IsStatic)
+                        {
+                            var instanceField = rppMethodInfo.DeclaringType.Fields.First(f => f.Name == "_instance");
+                            _body.Emit(OpCodes.Ldsfld, instanceField.Native);
+                        }
+                        else
+                        {
+                            _body.Emit(OpCodes.Ldarg_0); // load 'this'
+                        }
                     }
 
                     // Create own code generator for arguments because they can have RppSelectors which may interfer with already existing RppSelector

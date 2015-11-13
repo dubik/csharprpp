@@ -42,20 +42,15 @@ abstract class Function2[T1, T2, TResult]
 }
 ";
             const string code = @"
-object Main
+object Foo
 {
-    def func() : Unit = {
-        val k = Main
-    }
+    def length() : Int = 10
 }
 
-class Foo
-
-object Bar extends Foo
+object Bar
 {
-    def bar() : Foo = {
-        val k : Foo = Bar
-        k
+    def invoke() : Int = {
+        Foo.length()
     }
 }
 
