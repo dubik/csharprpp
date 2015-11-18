@@ -24,21 +24,6 @@ object Runtime
     def println(line: String) : Unit = { }
     def printFormat(format: String, args: Any*) : Unit = { }
 }
-
-abstract class Function0[TResult]
-{
-    def apply : TResult
-}
-
-abstract class Function1[T1, TResult]
-{
-    def apply(arg1: T1) : TResult
-}
-
-abstract class Function2[T1, T2, TResult]
-{
-    def apply(arg1: T1, arg2: T2) : TResult
-}
 ";
             const string code = @"
 abstract class Option[A]
@@ -75,7 +60,7 @@ object Main
             RppProgram program = new RppProgram();
             Parse(runtimeCode, program);
             SymbolTable runtimeScope = new SymbolTable();
-            WireRuntime(program.Classes, runtimeScope);
+            WireRuntime(runtimeScope);
             Parse(code, program);
             program.Name = "Sample";
 
@@ -122,40 +107,24 @@ object Main
             generator.Save();
         }
 
-        private static void WireRuntime(IEnumerable<RppClass> classes, Symbols.SymbolTable scope)
+        private static void WireRuntime(SymbolTable scope)
         {
-            /*
             Assembly runtimeAssembly = GetRuntimeAssembly();
             Type[] types = runtimeAssembly.GetTypes();
-            var typesMap = types.ToDictionary(t => t.Name);
-            foreach (RppClass clazz in classes)
+
+            foreach (Type type in types)
             {
-                Type matchingType;
-                if (typesMap.TryGetValue(clazz.Name, out matchingType))
+                string name = type.Name;
+                if (type.Name.Contains("`"))
                 {
-                    IRppClass runtimeClass = new RppNativeClass(matchingType);
-//                    scope.Add(runtimeClass);
-                    if (runtimeClass.Name == "Runtime")
-                    {
-                        AddFunctionsToScope(runtimeClass.Functions, scope);
-                    }
+                    name = name.Substring(0, name.IndexOf('`'));
                 }
-                else
-                {
-                    throw new Exception($"Can't find {clazz.Name} class from runtime assembly");
-                }
+
+                RType rType = RppTypeSystem.CreateType(name, type);
+                scope.AddType(rType);
             }
-            */
+
             scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
-
-            //Enumerable.Range(0, 5).Select(CreateFunctionInterfaceType).ForEach(scope.AddType);
-
-            //scope.AddType(new RType("Function0", typeof (Function0<>)));
-            //scope.AddType(new RType("Function1", typeof (Function1<,>)));
-            //scope.AddType(new RType("Function2", typeof (Function2<,,>)));
-            //scope.AddType(new RType("Function3", typeof (Function3<,,,>)));
-            //scope.AddType(new RType("Function4", typeof (Function4<,,,,>)));
-            //scope.AddType(new RType("Function5", typeof (Function5<,,,,,>)));
         }
 
         private static RType CreateFunctionInterfaceType(int paramsCount)
