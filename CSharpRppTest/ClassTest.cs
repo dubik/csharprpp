@@ -453,7 +453,8 @@ abstract class Option[A]
 {
     def isEmpty : Boolean
     def get: A
-    def map[B](f: (A) => B): Option[B] = if(isEmpty()) new None() else new Some[B](f(get()))
+    def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some[B](f(get()))
+    def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
 }
 
 class Some[A](val x: A) extends Option[A]
@@ -462,7 +463,7 @@ class Some[A](val x: A) extends Option[A]
     override def get : A = x
 }
 
-class None extends Option[Nothing]
+object None extends Option[Nothing]
 {
     override def isEmpty : Boolean = true
     override def get : Nothing = throw new Exception(""Nothing to get"")

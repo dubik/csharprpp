@@ -42,15 +42,32 @@ abstract class Function2[T1, T2, TResult]
 }
 ";
             const string code = @"
-object Foo
+abstract class Option[A]
 {
-    def length() : Int = 10
+    def isEmpty : Boolean
+    def get: A
+    def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some[B](f(get()))
+    def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
 }
 
-object Bar
+class Some[A](val x: A) extends Option[A]
 {
-    def invoke() : Int = {
-        Foo.length()
+    override def isEmpty : Boolean = false
+    override def get : A = x
+}
+
+object None extends Option[Nothing]
+{
+    override def isEmpty : Boolean = true
+    override def get : Nothing = throw new Exception(""Nothing to get"")
+}
+
+object Main
+{
+    def main : Int = {
+        val k : Some[Int] = new Some[Int](123)
+        val p = k.x
+        p
     }
 }
 
