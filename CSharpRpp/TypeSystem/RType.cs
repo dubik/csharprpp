@@ -268,7 +268,17 @@ namespace CSharpRpp.TypeSystem
 
         public virtual IReadOnlyList<RppFieldInfo> Fields => _fields;
 
-        public virtual IReadOnlyList<RppMethodInfo> Methods => _methods;
+        public virtual IReadOnlyList<RppMethodInfo> Methods
+        {
+            get
+            {
+                if (_methods.Count == 0 && _type != null)
+                {
+                    InitNativeMethods();
+                }
+                return _methods;
+            }
+        }
 
         public virtual IReadOnlyList<RppMethodInfo> Constructors
         {
@@ -304,28 +314,6 @@ namespace CSharpRpp.TypeSystem
             _type = type;
         }
 
-        private void InitNativeConstructors()
-        {
-            Debug.Assert(_type != null, "_type != null");
-            var constructors = _type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Select(Convert);
-            _constructors.AddRange(constructors);
-        }
-
-        public static RppMethodInfo Convert(ConstructorInfo constructor)
-        {
-            Type declaringType = constructor.DeclaringType;
-            Debug.Assert(declaringType != null, "declaringType != null");
-
-            var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
-            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", new RType(declaringType.Name, declaringType), rMethodAttributes,
-                RppTypeSystem.UnitTy, parameters)
-            {
-                Native = constructor
-            };
-            return rppConstructor;
-        }
-
         public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.None)
         {
             Name = name;
@@ -338,6 +326,50 @@ namespace CSharpRpp.TypeSystem
             Attributes = attributes;
             BaseType = parent;
             DeclaringType = declaringType;
+        }
+ 
+        private void InitNativeConstructors()
+        {
+            Debug.Assert(_type != null, "_type != null");
+            var constructors = _type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Select(Convert);
+            _constructors.AddRange(constructors);
+        }
+
+        private void InitNativeMethods()
+        {
+            Debug.Assert(_type != null, "_type != null");
+            var methods = _type.GetMethods(BindingFlags.Public | BindingFlags.Instance).Select(Convert);
+            _methods.AddRange(methods);
+        }
+
+        private static RppMethodInfo Convert(MethodInfo method)
+        {
+            Type declaringType = method.DeclaringType;
+            Debug.Assert(declaringType != null, "declaringType != null");
+
+            var rMethodAttributes = RTypeUtils.GetRMethodAttributes(method.Attributes);
+            var parameters = method.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, new RType(declaringType.Name, declaringType), rMethodAttributes,
+                RppTypeSystem.UnitTy, parameters)
+            {
+                Native = method
+            };
+            return rppConstructor;
+        }
+
+        private static RppMethodInfo Convert(ConstructorInfo constructor)
+        {
+            Type declaringType = constructor.DeclaringType;
+            Debug.Assert(declaringType != null, "declaringType != null");
+
+            var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
+            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", new RType(declaringType.Name, declaringType), rMethodAttributes,
+                RppTypeSystem.UnitTy, parameters)
+            {
+                Native = constructor
+            };
+            return rppConstructor;
         }
 
         public RType DefineNestedType(string name, RTypeAttributes attributes, RType parent)

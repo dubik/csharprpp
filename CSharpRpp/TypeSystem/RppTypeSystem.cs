@@ -1,28 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
+using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
-    public class RppTypeSystem
+    public sealed class RppTypeSystem
     {
-        public static RType UnitTy = CreatePrimitive("Unit", typeof (void));
-        public static RType CharTy = CreatePrimitive("Char", typeof (char));
-        public static RType BooleanTy = CreatePrimitive("Boolean", typeof (bool));
-        public static RType ShortTy = CreatePrimitive("Short", typeof (short));
-        public static RType IntTy = CreatePrimitive("Int", typeof (int));
-        public static RType ByteTy = CreatePrimitive("Byte", typeof (byte));
-        public static RType LongTy = CreatePrimitive("Long", typeof (long));
-        public static RType FloatTy = CreatePrimitive("Float", typeof (float));
-        public static RType DoubleTy = CreatePrimitive("Double", typeof (double));
+        public static RppTypeSystem Instance = new RppTypeSystem();
+
+        public static RType UnitTy = CreateType("Unit", typeof (void));
+        public static RType CharTy = CreateType("Char", typeof (char));
+        public static RType BooleanTy = CreateType("Boolean", typeof (bool));
+        public static RType ShortTy = CreateType("Short", typeof (short));
+        public static RType IntTy = CreateType("Int", typeof (int));
+        public static RType ByteTy = CreateType("Byte", typeof (byte));
+        public static RType LongTy = CreateType("Long", typeof (long));
+        public static RType FloatTy = CreateType("Float", typeof (float));
+        public static RType DoubleTy = CreateType("Double", typeof (double));
         public static RType NullTy = ImportClass("Null", typeof (object));
         public static RType AnyTy = ImportClass("Any", typeof (object));
         public static RType StringTy = ImportClass("String", typeof (string));
         public static RType NothingTy = ImportClass("Nothing", typeof (object));
 
-        private static RType CreatePrimitive(string name, Type systemType)
+        private readonly Dictionary<string, RType> _allTypes = new Dictionary<string, RType>();
+
+        public static RType CreateType(string name)
         {
-            return new RType(name, systemType);
+            return Instance.GetOrCreate(name, () => new RType(name));
+        }
+
+        public static RType CreateType(string name, Type systemType)
+        {
+            return Instance.GetOrCreate(name, () => new RType(name, systemType));
+        }
+
+        public static RType CreateType(string name, RTypeAttributes attributes, RType parent, RType declaringType)
+        {
+            return Instance.GetOrCreate(name, () => new RType(name, attributes, parent, declaringType));
+        }
+
+        private RType GetOrCreate(string name, Func<RType> typeFactory)
+        {
+            RType type;
+            if (_allTypes.TryGetValue(name, out type))
+            {
+                return type;
+            }
+
+            type = typeFactory();
+            _allTypes.Add(name, type);
+
+            return type;
         }
 
         private static readonly Dictionary<string, RType> PrimitiveTypesMap = new Dictionary<string, RType>
@@ -37,17 +66,7 @@ namespace CSharpRpp.TypeSystem
             {"Double", DoubleTy}
         };
 
-        public static bool IsPrimitive(string name)
-        {
-            return PrimitiveTypesMap.ContainsKey(name);
-        }
-
-        public static RType GetPrimitive(string name)
-        {
-            return PrimitiveTypesMap[name];
-        }
-
-        public static void PopulateBuiltinTypes([NotNull] Symbols.SymbolTable scope)
+        public static void PopulateBuiltinTypes([NotNull] SymbolTable scope)
         {
             scope.AddType(UnitTy);
             scope.AddType(CharTy);
