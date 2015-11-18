@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RppRuntime;
 
 namespace CSharpRppTest
 {

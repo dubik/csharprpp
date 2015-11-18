@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using CSharpRpp.Symbols;
 using JetBrains.Annotations;
-using RppRuntime;
 
 namespace CSharpRpp
 {

@@ -9,7 +9,6 @@ using CSharpRpp.Codegen;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
-using RppRuntime;
 
 [assembly: CLSCompliant(true)]
 

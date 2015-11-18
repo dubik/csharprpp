@@ -100,6 +100,7 @@ object Bar
         [TestMethod]
         public void ReturnTypeForClosure()
         {
+            /*
             const string code = @"
 class Bar[A, B]
 {
@@ -109,6 +110,7 @@ class Bar[A, B]
     }
 }
 ";
+*/
             //var barTy = Utils.ParseAndCreateType(code, "Bar$");
         }
     }

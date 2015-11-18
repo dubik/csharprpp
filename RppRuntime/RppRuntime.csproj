@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Closures.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Runtime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
