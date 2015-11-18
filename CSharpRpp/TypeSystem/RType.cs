@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using JetBrains.Annotations;
+using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRpp.TypeSystem
 {
@@ -327,7 +328,7 @@ namespace CSharpRpp.TypeSystem
             BaseType = parent;
             DeclaringType = declaringType;
         }
- 
+
         private void InitNativeConstructors()
         {
             Debug.Assert(_type != null, "_type != null");
@@ -348,9 +349,9 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(declaringType != null, "declaringType != null");
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(method.Attributes);
-            var parameters = method.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, new RType(declaringType.Name, declaringType), rMethodAttributes,
-                RppTypeSystem.UnitTy, parameters)
+            var parameters = method.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, CreateType(declaringType.Name, declaringType), rMethodAttributes,
+                UnitTy, parameters)
             {
                 Native = method
             };
@@ -363,9 +364,9 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(declaringType != null, "declaringType != null");
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
-            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(new RType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", new RType(declaringType.Name, declaringType), rMethodAttributes,
-                RppTypeSystem.UnitTy, parameters)
+            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", CreateType(declaringType.Name, declaringType), rMethodAttributes,
+                UnitTy, parameters)
             {
                 Native = constructor
             };
@@ -424,18 +425,19 @@ namespace CSharpRpp.TypeSystem
 
         public RppMethodInfo DefineConstructor(RMethodAttributes attributes, RppParameterInfo[] parameterTypes)
         {
-            RppMethodInfo constructor = new RppMethodInfo("ctor", this, attributes, RppTypeSystem.UnitTy, parameterTypes);
+            RppMethodInfo constructor = new RppMethodInfo("ctor", this, attributes, UnitTy, parameterTypes);
             _constructors.Add(constructor);
             return constructor;
         }
 
         public RType MakeArrayType()
         {
+            // TODO perhaps we should have generic type for array and make specialized version of it
             RType newType = new RType("Array", Attributes, null, DeclaringType) {IsArray = true};
-            newType.DefineMethod("length", RMethodAttributes.Public, RppTypeSystem.IntTy, new RppParameterInfo[0]);
-            newType.DefineMethod("apply", RMethodAttributes.Public, this, new[] {new RppParameterInfo("index", RppTypeSystem.IntTy)}, new RppGenericParameter[0]);
+            newType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
+            newType.DefineMethod("apply", RMethodAttributes.Public, this, new[] {new RppParameterInfo("index", IntTy)}, new RppGenericParameter[0]);
             newType.DefineMethod("update", RMethodAttributes.Public, this,
-                new[] {new RppParameterInfo("index", RppTypeSystem.IntTy), new RppParameterInfo("value", this)}, new RppGenericParameter[0]);
+                new[] {new RppParameterInfo("index", IntTy), new RppParameterInfo("value", this)}, new RppGenericParameter[0]);
             return newType;
         }
 

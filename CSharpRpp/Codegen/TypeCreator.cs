@@ -27,7 +27,7 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                classType = new RType(typeName, typeAttributes, null, null);
+                classType = RppTypeSystem.CreateType(typeName, typeAttributes, null, null);
             }
 
             node.Type = classType;

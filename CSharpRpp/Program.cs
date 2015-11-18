@@ -79,7 +79,7 @@ object Main
             WireRuntime(program.Classes, runtimeScope);
             Parse(code, program);
             program.Name = "Sample";
-            
+
             RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
 
             CodeGenerator generator = new CodeGenerator(program);
@@ -147,7 +147,7 @@ object Main
                 }
             }
             */
-            scope.AddType(new RType("Exception", typeof (Exception)));
+            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
 
             //Enumerable.Range(0, 5).Select(CreateFunctionInterfaceType).ForEach(scope.AddType);
 
@@ -161,7 +161,7 @@ object Main
 
         private static RType CreateFunctionInterfaceType(int paramsCount)
         {
-            RType functionType = new RType($"Function{paramsCount}", RTypeAttributes.Interface | RTypeAttributes.Public);
+            RType functionType = RppTypeSystem.CreateType($"Function{paramsCount}", RTypeAttributes.Interface | RTypeAttributes.Public, null, null);
             List<string> generics = new List<string>(new[] {"TResult"});
             var paramsList = Enumerable.Range(0, paramsCount).Select(r => $"T{r + 1}");
             generics.AddRange(paramsList);

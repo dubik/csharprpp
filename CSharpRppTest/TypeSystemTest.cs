@@ -33,6 +33,7 @@ object Main
             var program = Utils.Parse(code);
 
             SymbolTable scope = new SymbolTable();
+            RppTypeSystem.PopulateBuiltinTypes(scope);
 
             Type2Creator typeCreator = new Type2Creator();
             program.Accept(typeCreator);

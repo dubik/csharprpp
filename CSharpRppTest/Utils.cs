@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    internal class Utils
+    class Utils
     {
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
@@ -80,7 +80,7 @@ namespace CSharpRppTest
 
         private static void WireRuntime(SymbolTable scope)
         {
-            scope.AddType(new RType("Exception", typeof (Exception)));
+            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
         }
 
         public static RppProgram Parse(string code)

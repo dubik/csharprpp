@@ -7,7 +7,7 @@ namespace CSharpRpp.TypeSystem
 {
     public sealed class RppTypeSystem
     {
-        public static RppTypeSystem Instance = new RppTypeSystem();
+        public static readonly RppTypeSystem Instance = new RppTypeSystem();
 
         public static RType UnitTy = CreateType("Unit", typeof (void));
         public static RType CharTy = CreateType("Char", typeof (char));
@@ -54,20 +54,9 @@ namespace CSharpRpp.TypeSystem
             return type;
         }
 
-        private static readonly Dictionary<string, RType> PrimitiveTypesMap = new Dictionary<string, RType>
-        {
-            {"Unit", UnitTy},
-            {"Char", CharTy},
-            {"Boolean", BooleanTy},
-            {"Short", ShortTy},
-            {"Int", IntTy},
-            {"Long", LongTy},
-            {"Float", FloatTy},
-            {"Double", DoubleTy}
-        };
-
         public static void PopulateBuiltinTypes([NotNull] SymbolTable scope)
         {
+            Instance._allTypes.Clear();
             scope.AddType(UnitTy);
             scope.AddType(CharTy);
             scope.AddType(BooleanTy);
@@ -83,13 +72,13 @@ namespace CSharpRpp.TypeSystem
 
         public static RType ImportClass(Type systemType)
         {
-            RType type = new RType(systemType.Name, systemType);
+            RType type = CreateType(systemType.Name, systemType);
             return type;
         }
 
         public static RType ImportClass(string name, Type systemType)
         {
-            RType type = new RType(name, systemType);
+            RType type = CreateType(name, systemType);
             return type;
         }
 
