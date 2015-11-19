@@ -24,7 +24,15 @@ namespace CSharpRpp.TypeSystem
                     }
                     else
                     {
-                        _nativeMethod = TypeBuilder.GetMethod(DeclaringType.NativeType, (MethodInfo) GenericMethodDefinition.Native);
+                        if (DeclaringType.NativeType is TypeBuilder)
+                        {
+                            _nativeMethod = TypeBuilder.GetMethod(DeclaringType.NativeType, (MethodInfo) GenericMethodDefinition.Native);
+                        }
+                        else
+                        {
+                            MethodInfo method = DeclaringType.NativeType.GetMethod(Name, BindingFlags.Public | BindingFlags.Instance);
+                            _nativeMethod = method;
+                        }
                     }
                 }
 

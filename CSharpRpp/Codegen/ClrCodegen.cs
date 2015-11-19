@@ -580,8 +580,8 @@ namespace CSharpRpp.Codegen
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
             }
 
-            closureClass.SetParent(parentType);
-
+            //closureClass.SetParent(parentType);
+            closureClass.AddInterfaceImplementation(parentType);
             MethodBuilder applyMethod = closureClass.DefineMethod("apply",
                 MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
                 CallingConventions.Standard);

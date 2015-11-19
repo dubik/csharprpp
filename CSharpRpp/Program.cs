@@ -26,37 +26,12 @@ object Runtime
 }
 ";
             const string code = @"
-abstract class Option[A]
+class Foo extends Function2[Int, Int, Int]
 {
-    def isEmpty : Boolean
-    def get: A
-    def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some[B](f(get()))
-    def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
-}
-
-class Some[A](val x: A) extends Option[A]
-{
-    override def isEmpty : Boolean = false
-    override def get : A = x
-}
-
-object None extends Option[Nothing]
-{
-    override def isEmpty : Boolean = true
-    override def get : Nothing = throw new Exception(""Nothing to get"")
-}
-
-object Main
-{
-    def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
-        val p = k.x
-        p
-    }
+    def apply(x: Int, y: Int) : Int = x + y
 }
 
 ";
-
             RppProgram program = new RppProgram();
             Parse(runtimeCode, program);
             SymbolTable runtimeScope = new SymbolTable();

@@ -224,7 +224,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsArray { get; private set; }
 
-        public bool IsGenericType => _genericParameters.Any();
+        public bool IsGenericType => GenericParameters.Any();
 
         public bool IsPrimitive => !IsClass;
 
@@ -296,7 +296,18 @@ namespace CSharpRpp.TypeSystem
 
         public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
 
-        public IReadOnlyCollection<RppGenericParameter> GenericParameters => _genericParameters;
+        public IReadOnlyCollection<RppGenericParameter> GenericParameters
+        {
+            get
+            {
+                if (_genericParameters.Length == 0 && _type != null)
+                {
+                    InitGenericParameters();
+                }
+
+                return _genericParameters;
+            }
+        }
 
         public int GenericParameterPosition { get; set; }
 
@@ -306,13 +317,17 @@ namespace CSharpRpp.TypeSystem
         private readonly List<RppFieldInfo> _fields = new List<RppFieldInfo>();
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
         private RppGenericParameter[] _genericParameters = new RppGenericParameter[0];
-        private readonly List<RType> _genericArguments = new List<RType>();
         private readonly List<RType> _nested = new List<RType>();
 
         public RType([NotNull] string name, [NotNull] Type type)
         {
             Name = name;
             _type = type;
+            IsGenericParameter = type.IsGenericParameter;
+            if (type.IsGenericParameter)
+            {
+                GenericParameterPosition = type.GenericParameterPosition;
+            }
         }
 
         public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.None)
@@ -327,6 +342,15 @@ namespace CSharpRpp.TypeSystem
             Attributes = attributes;
             BaseType = parent;
             DeclaringType = declaringType;
+        }
+
+        private void InitGenericParameters()
+        {
+            Debug.Assert(_type != null, "_type != null");
+            _genericParameters =
+                _type.GetGenericArguments()
+                    .Select(gp => new RppGenericParameter(gp.Name) {Position = gp.GenericParameterPosition, Type = new RType(gp.Name, gp)})
+                    .ToArray();
         }
 
         private void InitNativeConstructors()
@@ -348,13 +372,21 @@ namespace CSharpRpp.TypeSystem
             Type declaringType = method.DeclaringType;
             Debug.Assert(declaringType != null, "declaringType != null");
 
+            RType returnType = new RType(method.ReturnType.Name, method.ReturnType);
+
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(method.Attributes);
             var parameters = method.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
             RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, CreateType(declaringType.Name, declaringType), rMethodAttributes,
-                UnitTy, parameters)
+                returnType, parameters)
             {
                 Native = method
             };
+
+            if (method.ContainsGenericParameters)
+            {
+                var genericArguments = method.GetGenericArguments();
+            }
+
             return rppConstructor;
         }
 

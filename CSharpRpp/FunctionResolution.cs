@@ -65,13 +65,13 @@ namespace CSharpRpp
                 return res;
             }
 
-            res = resolution.SearchInClosures(name, argsList, scope);
+            res = SearchInClosures(name, argsList, scope);
             if (res != null)
             {
                 return res;
             }
 
-            res = resolution.SearchInCompanionObjects(name, argsList, scope);
+            res = SearchInCompanionObjects(name, argsList, scope);
             return res;
         }
 
@@ -93,7 +93,7 @@ namespace CSharpRpp
             return new ResolveResults(candidates[0]);
         }
 
-        private ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, SymbolTable scope)
+        private static ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             Symbol symbol = scope.Lookup(name);
             if (symbol is LocalVarSymbol) // () applied to expression, so it could be closure
@@ -120,7 +120,7 @@ namespace CSharpRpp
             return null;
         }
 
-        private ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
+        private static ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
             TypeSymbol obj = scope.LookupObject(name);
             var applyFunctions = obj.Type.Methods.Where(func => func.Name == "apply").ToList();
