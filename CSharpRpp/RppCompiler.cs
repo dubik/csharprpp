@@ -11,9 +11,15 @@ using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
 {
-    public class RppCompiler
+    public sealed class RppCompiler
     {
-        public void CompileAndSave(string code)
+        public static void CompileAndSave(string code)
+        {
+            var generator = Compile(code);
+            generator.Save();
+        }
+
+        public static CodeGenerator Compile(string code)
         {
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
@@ -60,7 +66,7 @@ namespace CSharpRpp
             }
 
             generator.Generate();
-            generator.Save();
+            return generator;
         }
 
         private static void WireRuntime(SymbolTable scope)
@@ -138,7 +144,7 @@ namespace CSharpRpp
 
         private static Assembly GetRuntimeAssembly()
         {
-            return Assembly.GetAssembly(typeof(Runtime));
+            return Assembly.GetAssembly(typeof (Runtime));
         }
     }
 }

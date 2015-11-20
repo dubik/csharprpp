@@ -13,8 +13,7 @@ class Foo[A] extends Function2[Int, A, Int]
 
 ";
 
-            RppCompiler compiler = new RppCompiler();
-            compiler.CompileAndSave(code);
+            RppCompiler.CompileAndSave(code);
         }
     }
 }

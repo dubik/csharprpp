@@ -1,32 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using CSharpRpp.Symbols;
-using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    public class CodegenContext
-    {
-        public AssemblyName AssemblyName;
-        public AssemblyBuilder AssemblyBuilder { get; private set; }
-        public ModuleBuilder ModuleBuilder { get; private set; }
-
-        public void CreateAssembly(string name)
-        {
-            AssemblyName = new AssemblyName(name);
-            AssemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(AssemblyName, AssemblyBuilderAccess.Save);
-        }
-
-        public void CreateModuleBuilder()
-        {
-            ModuleBuilder = AssemblyBuilder.DefineDynamicModule(AssemblyName.Name, AssemblyName.Name + ".exe");
-        }
-    }
-
     [DebuggerDisplay("Name = {Name}, Classes = {_classes.Count}")]
     public class RppProgram : RppNode
     {
@@ -35,7 +13,6 @@ namespace CSharpRpp
         public IEnumerable<RppClass> Classes => _classes.AsEnumerable();
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppClass> _classes = new List<RppClass>();
-        private readonly CodegenContext _context = new CodegenContext();
 
         public void Add(RppClass clazz)
         {
@@ -44,11 +21,6 @@ namespace CSharpRpp
 
         public void PreAnalyze(SymbolTable scope)
         {
-            _context.CreateAssembly(Name);
-            _context.CreateModuleBuilder();
-
-            BootstrapRuntime(scope);
-
             _classes.ForEach(c => scope.AddType(c.Type));
 
             NodeUtils.PreAnalyze(scope, _classes);
@@ -58,14 +30,6 @@ namespace CSharpRpp
         {
             visitor.Visit(this);
             _classes.ForEach(clazz => clazz.Accept(visitor));
-        }
-
-        private void BootstrapRuntime([NotNull] SymbolTable scope)
-        {
-            foreach (MethodInfo methodInfo in typeof (Runtime).GetMethods(BindingFlags.Static))
-            {
-                methodInfo.GetBaseDefinition();
-            }
         }
 
         public override IRppNode Analyze(Symbols.SymbolTable scope)
