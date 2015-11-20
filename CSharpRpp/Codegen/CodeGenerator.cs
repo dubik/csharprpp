@@ -11,43 +11,25 @@ namespace CSharpRpp.Codegen
     public sealed class CodeGenerator
     {
         public Assembly Assembly => _assemblyBuilder;
-        public ModuleBuilder Module => _moduleBuilder;
+        public ModuleBuilder Module { get; private set; }
 
         private readonly RppProgram _program;
-        private readonly Dictionary<RppClass, TypeBuilder> _typeBuilders;
         private readonly Dictionary<RppFunc, MethodBuilder> _funcBuilders;
 
         private AssemblyName _assemblyName;
         private AssemblyBuilder _assemblyBuilder;
-        private ModuleBuilder _moduleBuilder;
 
         public CodeGenerator(RppProgram program)
         {
             _program = program;
 
-            _typeBuilders = new Dictionary<RppClass, TypeBuilder>();
             _funcBuilders = new Dictionary<RppFunc, MethodBuilder>();
 
             CreateModule();
         }
 
-        public void PreGenerate()
-        {
-            //TypeCreator creatorCreator = new TypeCreator(_moduleBuilder, _typeBuilders);
-            //_program.Accept(creatorCreator);
-        }
-
         public void Generate()
         {
-            // Setup parent classes
-            //InheritanceConfigurator configurator = new InheritanceConfigurator();
-            //_program.Accept(configurator);
-
-            // GenerateMethodStubs();
-
-            //ConstructorGenerator.GenerateFields(_typeBuilders);
-            //ConstructorGenerator.GenerateConstructors(_typeBuilders);
-
             GenerateMethodBodies();
         }
 
@@ -61,7 +43,7 @@ namespace CSharpRpp.Codegen
         {
             _assemblyName = new AssemblyName(_program.Name);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(_program.Name, _program.Name + ".dll");
+            Module = _assemblyBuilder.DefineDynamicModule(_program.Name, _program.Name + ".dll");
         }
 
         public void Save()
@@ -105,7 +87,7 @@ namespace CSharpRpp.Codegen
             Debug.Assert(declaringType != null, "declaringType != null");
             FieldInfo instanceField = declaringType.GetField("_instance");
 
-            TypeBuilder wrappedMainType = _moduleBuilder.DefineType("<>RppApp");
+            TypeBuilder wrappedMainType = Module.DefineType("<>RppApp");
             MethodBuilder wrappedMain = wrappedMainType.DefineMethod("Main", MethodAttributes.Static | MethodAttributes.Public, typeof (int),
                 new[] {typeof (string[])});
             wrappedMain.DefineParameter(1, ParameterAttributes.None, "args");
