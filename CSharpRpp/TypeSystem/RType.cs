@@ -574,7 +574,15 @@ namespace CSharpRpp.TypeSystem
 
             if (BaseType != null)
             {
-                _typeBuilder.SetParent(BaseType.NativeType);
+                Type baseClassType = BaseType.NativeType;
+                if (baseClassType.IsClass)
+                {
+                    _typeBuilder.SetParent(baseClassType);
+                }
+                else if(baseClassType.IsInterface) // This happens for runtime interfaces like Function*
+                {
+                    _typeBuilder.AddInterfaceImplementation(baseClassType);
+                }
             }
 
             foreach (RppMethodInfo rppMethod in Methods)
