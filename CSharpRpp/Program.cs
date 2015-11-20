@@ -26,9 +26,23 @@ object Runtime
 }
 ";
             const string code = @"
-class Foo extends Function2[Int, Int, Int]
+abstract class Func[R, T]
 {
-    def apply(x: Int, y: Int) : Int = x + y
+    def apply(arg : T) : R
+}
+
+class MyClosure extends Func[Int, Float]
+{
+    override def apply(f: Float) : Int = {
+        10
+    }
+}
+
+object Bar {
+    def main : Int = {
+        val f : Func[Int, Float] = new MyClosure()
+        f.apply(12.3)
+    }
 }
 
 ";

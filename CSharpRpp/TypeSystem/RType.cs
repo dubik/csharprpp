@@ -323,6 +323,8 @@ namespace CSharpRpp.TypeSystem
         {
             Name = name;
             _type = type;
+            Attributes = RTypeUtils.GetRTypeAttributes(type.Attributes, type.IsValueType);
+
             IsGenericParameter = type.IsGenericParameter;
             if (type.IsGenericParameter)
             {
@@ -381,11 +383,6 @@ namespace CSharpRpp.TypeSystem
             {
                 Native = method
             };
-
-            if (method.ContainsGenericParameters)
-            {
-                var genericArguments = method.GetGenericArguments();
-            }
 
             return rppConstructor;
         }
@@ -579,7 +576,7 @@ namespace CSharpRpp.TypeSystem
                 {
                     _typeBuilder.SetParent(baseClassType);
                 }
-                else if(baseClassType.IsInterface) // This happens for runtime interfaces like Function*
+                else if (baseClassType.IsInterface) // This happens for runtime interfaces like Function*
                 {
                     _typeBuilder.AddInterfaceImplementation(baseClassType);
                 }

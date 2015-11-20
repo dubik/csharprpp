@@ -86,6 +86,37 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
+        public static RTypeAttributes GetRTypeAttributes(TypeAttributes attrs, bool isValueType)
+        {
+            RTypeAttributes rAttrs = 0;
+            TypeAttributes visibility = attrs & TypeAttributes.VisibilityMask;
+            if (visibility == TypeAttributes.NotPublic)
+            {
+                rAttrs |= RTypeAttributes.Private;
+            }
+            else if (visibility == TypeAttributes.Public)
+            {
+                rAttrs |= RTypeAttributes.Public;
+            }
+
+            TypeAttributes classSemantics = attrs & TypeAttributes.ClassSemanticsMask;
+            if (classSemantics == TypeAttributes.Class && !isValueType)
+            {
+                rAttrs |= RTypeAttributes.Class;
+            }
+            else if (classSemantics == TypeAttributes.Interface)
+            {
+                rAttrs |= RTypeAttributes.Interface;
+            }
+
+            if ((attrs & TypeAttributes.Sealed) != 0)
+            {
+                rAttrs |= RTypeAttributes.Sealed;
+            }
+
+            return rAttrs;
+        }
+
         public static TypeAttributes GetTypeAttributes(RTypeAttributes modifiers)
         {
             TypeAttributes attrs = TypeAttributes.Class;
