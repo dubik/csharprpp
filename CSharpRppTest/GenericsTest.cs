@@ -191,5 +191,22 @@ class First[A, B] {
             Type secondTy = firstTy.GetNestedType("Second");
             CollectionAssert.AreEqual(new[] {"A", "B", "C", "D"}, secondTy.GetGenericArguments().Select(t => t.Name).ToList());
         }
+
+        [TestMethod]
+        public void ExtendingRuntimeInterface()
+        {
+            const string code = @"
+class Foo extends Function2[Int, Int, Int]
+{
+    def apply(x: Int, y: Int) : Int = x + y
+}
+";
+            Type fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            object func = Activator.CreateInstance(fooTy);
+            Function2<int, int, int> f = (Function2<int, int, int>) func;
+            int res = f.apply(17, 21);
+            Assert.AreEqual(38, res);
+        }
     }
 }

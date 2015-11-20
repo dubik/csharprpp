@@ -108,6 +108,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RppCompiler.cs" />
     <Compile Include="RppVariantTypeParam.cs" />
     <Compile Include="Symbols\Symbol.cs" />
     <Compile Include="Symbols\SymbolTable.cs" />

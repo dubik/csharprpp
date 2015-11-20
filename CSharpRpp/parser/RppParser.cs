@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Antlr.Runtime;
 using CSharpRpp.TypeSystem;
@@ -615,7 +614,8 @@ namespace CSharpRpp
 
             bool variadic = Require(RppLexer.OP_Star);
 
-            funcParam = new RppParam(name, new ResolvableType(type), variadic);
+            var a = new RppParam(name, new ResolvableType(type), variadic);
+            funcParam = a;
             return true;
         }
 

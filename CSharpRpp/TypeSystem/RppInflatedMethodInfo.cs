@@ -18,13 +18,22 @@ namespace CSharpRpp.TypeSystem
                 if (_nativeMethod == null)
                 {
                     // Reflection.Emit wants to differentiate between methods and constructors
+                    Type declaringNativeType = DeclaringType.NativeType;
                     if (GenericMethodDefinition.Native is ConstructorInfo)
                     {
-                        _nativeMethod = TypeBuilder.GetConstructor(DeclaringType.NativeType, (ConstructorInfo) GenericMethodDefinition.Native);
+                        _nativeMethod = TypeBuilder.GetConstructor(declaringNativeType, (ConstructorInfo) GenericMethodDefinition.Native);
                     }
                     else
                     {
-                        _nativeMethod = TypeBuilder.GetMethod(DeclaringType.NativeType, (MethodInfo) GenericMethodDefinition.Native);
+                        try
+                        {
+                            _nativeMethod = TypeBuilder.GetMethod(declaringNativeType, (MethodInfo) GenericMethodDefinition.Native);
+                        }
+                        catch
+                        {
+                            MethodInfo method = declaringNativeType.GetMethod(Name, BindingFlags.Public | BindingFlags.Instance);
+                            _nativeMethod = method;
+                        }
                     }
                 }
 

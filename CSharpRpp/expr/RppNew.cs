@@ -38,7 +38,9 @@ namespace CSharpRpp
             List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
             var constructors = Type.Value.Constructors;
 
-            List<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, constructors).ToList();
+            var genericArguments = Type.Value.GenericArguments.ToList();
+            DefaultTypesComparator comparator = new DefaultTypesComparator(genericArguments.ToArray());
+            List<RppMethodInfo> candidates = OverloadQuery.Find(Args, new RType[0], constructors, comparator).ToList();
             if (candidates.Count != 1)
             {
                 throw new Exception("Can't figure out which overload to use");
