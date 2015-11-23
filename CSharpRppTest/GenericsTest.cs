@@ -227,5 +227,25 @@ object Main
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(132, res);
         }
+
+        [TestMethod]
+        public void CallApplyGenericFunction()
+        {
+            const string code = @"
+object Foo
+{
+    def apply[A](x: A) : A = x
+}
+
+object Main
+{
+    def main() : Int = Foo[Int](132)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(132, res);
+        }
+
     }
 }

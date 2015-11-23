@@ -44,13 +44,13 @@ object Main
             const string code = @"
 object Foo
 {
-    def func[A](x: A) : A = x
+    def apply[A](x: A) : A = x
 }
 
 object Main
 {
     def main() : Int = {
-        Foo.func[Int](132)
+        Foo[Int](132)
     }
 }
 ";
