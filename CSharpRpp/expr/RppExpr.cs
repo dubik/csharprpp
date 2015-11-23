@@ -907,34 +907,33 @@ namespace CSharpRpp
         // TODO Replace RppId with something like RppFieldAcces, RppParamAccess and so on those Ref and Field looks very bad
         public override IRppNode Analyze(SymbolTable scope)
         {
+            TypeSymbol objectType = scope.LookupObject(Name);
             // Lookup <name> or <name>$
-            Symbol symbol = scope.Lookup(Name);
-            if (symbol != null)
+            if (objectType != null)
             {
-                if (symbol.IsLocal)
-                {
-                    Type = new ResolvableType(symbol.Type);
-                    Ref = ((LocalVarSymbol) symbol).Var;
-                }
+                Type = new ResolvableType(objectType.Type);
             }
             else
             {
-                RppFieldInfo fieldSymbol = scope.LookupField(Name);
-                if (fieldSymbol != null)
+                Symbol symbol = scope.Lookup(Name);
+                if (symbol != null)
                 {
-                    Field = fieldSymbol;
-                    Type = new ResolvableType(fieldSymbol.Type);
+                    if (symbol.IsLocal)
+                    {
+                        Type = new ResolvableType(symbol.Type);
+                        Ref = ((LocalVarSymbol) symbol).Var;
+                    }
                 }
                 else
                 {
-                    TypeSymbol objectType = scope.LookupObject(Name);
-                    if (objectType != null)
+                    RppFieldInfo fieldSymbol = scope.LookupField(Name);
+                    if (fieldSymbol != null)
                     {
-                        Type = new ResolvableType(objectType.Type);
+                        Field = fieldSymbol;
+                        Type = new ResolvableType(fieldSymbol.Type);
                     }
                 }
             }
-
             return this;
         }
 

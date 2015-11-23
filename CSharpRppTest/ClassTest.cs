@@ -514,5 +514,31 @@ object Main
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
             Assert.IsTrue(fooTy.IsSealed);
         }
+
+        [TestMethod]
+        public void TestClassAndObjectWithTheSameName()
+        {
+            const string code = @"
+class Foo
+
+object Foo
+{
+    def calc: Int = 13
+}
+
+object Main
+{
+    def callObject: Int = Foo.calc()
+    def callClass : Foo = new Foo
+}
+
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "callObject");
+            Assert.AreEqual(13, res);
+            var fooInst = Utils.InvokeStatic(mainTy, "callClass");
+            Assert.IsNotNull(fooInst);
+            Assert.AreEqual("Foo", fooInst.GetType().Name);
+        }
     }
 }

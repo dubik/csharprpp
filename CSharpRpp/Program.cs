@@ -4,7 +4,6 @@
     {
         private static void Main()
         {
-            /*
             const string code = @"
 abstract class List[A] {
     def head : A
@@ -34,27 +33,25 @@ object Cons
 
 object Main
 {
-    def main : Unit = {
-        val k = Cons.doSome[Int](13)
+    def main() : Int = {
+        Cons.doSome[Int](13)
     }
 }
-
 ";
-*/
-            const string code = @"
+            const string code1 = @"class Foo
+
 object Foo
 {
-    def apply[A](x: A) : A = x
+    def calc: Int = 13
 }
 
 object Main
 {
-    def main() : Int = {
-        Foo[Int](132)
-    }
-}
-";
-            RppCompiler.CompileAndSave(code);
+    def callObject: Int = Foo.calc()
+    def callClass : Foo = new Foo
+}";
+
+            RppCompiler.CompileAndSave(code1);
         }
     }
 }
