@@ -208,5 +208,24 @@ class Foo extends Function2[Int, Int, Int]
             int res = f.apply(17, 21);
             Assert.AreEqual(38, res);
         }
+
+        [TestMethod]
+        public void CallObjectsGenericFunction()
+        {
+            const string code = @"
+object Foo
+{
+    def func[A](x: A) : A = x
+}
+
+object Main
+{
+    def main() : Int = Foo.func[Int](132)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(132, res);
+        }
     }
 }

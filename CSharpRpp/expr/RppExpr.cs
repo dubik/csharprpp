@@ -809,7 +809,6 @@ namespace CSharpRpp
     public class RppSelector : RppNode, IRppExpr
     {
         public ResolvableType Type => Path.Type;
-        public Type RuntimeType { get; private set; }
 
         public IRppExpr Target { get; }
         public RppMember Path { get; private set; }
@@ -832,25 +831,10 @@ namespace CSharpRpp
 
             Debug.Assert(targetType != null, "targetType != null");
 
-            SymbolTable classScope = new SymbolTable(null, targetType);
+            SymbolTable classScope = new SymbolTable(scope, targetType);
 
-            // targetType.Class.Functions.ForEach(classScope.Add);
-            // targetType.Class.Fields.ForEach(classScope.Add);
-
-            /*
-            if (Target.Type is RppGenericObjectType)
-            {
-                RppGenericObjectType targetGenericType = (RppGenericObjectType) Target.Type;
-                foreach (var pair in targetGenericType.Class.TypeParams.Zip(targetGenericType.GenericArguments, Tuple.Create))
-                {
-                    classScope.Add(pair.Item1.Name, RppNativeType.Create(pair.Item2));
-                }
-            }
-            */
-            //Path.TargetType = targetType;
             Path.TargetType2 = targetType;
             Path = (RppMember) Path.Analyze(classScope);
-            //Type = Path.Type.Runtime.IsGenericParameter ? classScope.LookupGenericType(Path.Type.Runtime.Name) : Path.Type;
             return this;
         }
 
@@ -951,36 +935,8 @@ namespace CSharpRpp
                 }
             }
 
-
-            // Reference to object, e.g. String.isNull(..)
-            /*
-                if (node is RppClass)
-                {
-                    RppClass clazz = (RppClass) node;
-                    if (clazz.Kind != ClassKind.Object)
-                    {
-                        throw new Exception("Only objects are supported");
-                    }
-
-                    member = new ClassAsMemberAdapter(clazz);
-                }
-                else if (node is RppMember) // localVar, field
-                {
-                    member = node as RppMember;
-                }
-                */
-
-            // If generic like 'A', then find real type
-            /*
-            if (Ref.Type.IsGenericParameter())
-            {
-                Type = scope.LookupGenericType(Ref.Type.Runtime.Name);
-                return this;
-            }*/
-
             return this;
         }
-
 
         public override string ToString()
         {
