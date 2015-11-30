@@ -5,11 +5,9 @@ using CSharpRpp.Symbols;
 
 namespace CSharpRpp
 {
-    [DebuggerDisplay("Name = {Name}, Classes = {_classes.Count}")]
+    [DebuggerDisplay("Classes = {_classes.Count}")]
     public class RppProgram : RppNode
     {
-        public string Name { get; set; }
-
         public IEnumerable<RppClass> Classes => _classes.AsEnumerable();
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)] private IList<RppClass> _classes = new List<RppClass>();

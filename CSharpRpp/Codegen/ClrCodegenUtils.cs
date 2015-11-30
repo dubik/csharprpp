@@ -6,7 +6,7 @@ using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Codegen
 {
-    class ClrCodegenUtils
+    internal class ClrCodegenUtils
     {
         private static readonly Dictionary<short, OpCode> loadLocal = new Dictionary<short, OpCode>()
         {

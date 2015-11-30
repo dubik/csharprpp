@@ -13,23 +13,22 @@ namespace CSharpRpp
 {
     public sealed class RppCompiler
     {
-        public static void CompileAndSave(string code)
+        public static void CompileAndSave(IEnumerable<string> fileNames, string outFileName)
         {
-            var generator = Compile(code);
+            var generator = Compile(program => Parse(fileNames, program), outFileName);
             generator.Save();
         }
 
-        public static CodeGenerator Compile(string code)
+        public static CodeGenerator Compile(Action<RppProgram> parseFactory, string fileName = "<buffer>")
         {
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
             WireRuntime(runtimeScope);
-            Parse(code, program);
-            program.Name = "Sample";
+            parseFactory(program);
 
             RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
 
-            CodeGenerator generator = new CodeGenerator(program);
+            CodeGenerator generator = new CodeGenerator(program, fileName);
             try
             {
                 Type2Creator typeCreator = new Type2Creator();
@@ -55,6 +54,7 @@ namespace CSharpRpp
             }
             catch (TypeMismatchException e)
             {
+                const string code = "Get code from token";
                 var lines = GetLines(code);
                 var line = lines[e.Token.Line - 1];
                 Console.WriteLine("<buffer>:{0} error: type mismatch", e.Token.Line);
@@ -87,6 +87,11 @@ namespace CSharpRpp
             }
 
             scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
+        }
+
+        private static void Parse(IEnumerable<string> fileNames, RppProgram program)
+        {
+            fileNames.ForEach(fileName => Parse(File.ReadAllText(fileName), program));
         }
 
         private static void Parse(string code, RppProgram program)

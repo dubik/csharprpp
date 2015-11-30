@@ -10,6 +10,7 @@ namespace CSharpRpp.Codegen
 {
     public sealed class CodeGenerator
     {
+        public string AssemblyName { get; set; }
         public Assembly Assembly => _assemblyBuilder;
         public ModuleBuilder Module { get; private set; }
 
@@ -19,8 +20,9 @@ namespace CSharpRpp.Codegen
         private AssemblyName _assemblyName;
         private AssemblyBuilder _assemblyBuilder;
 
-        public CodeGenerator(RppProgram program)
+        public CodeGenerator(RppProgram program, string assemblyName)
         {
+            AssemblyName = assemblyName;
             _program = program;
 
             _funcBuilders = new Dictionary<RppFunc, MethodBuilder>();
@@ -41,9 +43,9 @@ namespace CSharpRpp.Codegen
 
         private void CreateModule()
         {
-            _assemblyName = new AssemblyName(_program.Name);
+            _assemblyName = new AssemblyName(AssemblyName);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            Module = _assemblyBuilder.DefineDynamicModule(_program.Name, _program.Name + ".dll");
+            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll");
         }
 
         public void Save()

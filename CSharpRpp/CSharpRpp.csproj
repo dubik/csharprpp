@@ -60,6 +60,10 @@
     <Reference Include="Antlr3.StringTemplate">
       <HintPath>..\packages\StringTemplate3.3.5.0.3-alpha002\lib\net35-client\Antlr3.StringTemplate.dll</HintPath>
     </Reference>
+    <Reference Include="CommandLine, Version=2.0.275.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.0.275-beta\lib\net45\CommandLine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Experimental.Collections">
       <HintPath>..\packages\Microsoft.Experimental.Collections.1.0.3-alpha\lib\portable-net45+win8+wp8\Microsoft.Experimental.Collections.dll</HintPath>
     </Reference>
@@ -109,6 +113,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="RppCompiler.cs" />
+    <Compile Include="RppOptions.cs" />
     <Compile Include="RppVariantTypeParam.cs" />
     <Compile Include="Symbols\Symbol.cs" />
     <Compile Include="Symbols\SymbolTable.cs" />

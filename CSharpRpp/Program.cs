@@ -1,8 +1,28 @@
-﻿namespace CSharpRpp
+﻿using CommandLine;
+
+namespace CSharpRpp
 {
     public class Program
     {
-        private static void Main()
+        public static int Main(string[] args)
+        {
+            var result = CommandLine.Parser.Default.ParseArguments<RppOptions>(args);
+            return result.MapResult(RunAndReturnExitCode, _ => 1);
+        }
+
+        private static int RunAndReturnExitCode(RppOptions options)
+        {
+            RppCompiler.CompileAndSave(options.InputFiles, GetOutputFileName(options));
+            return 0;
+        }
+
+        private static string GetOutputFileName(RppOptions options)
+        {
+            return !string.IsNullOrEmpty(options.Out) ? options.Out : "out.exe";
+        }
+
+        /*
+        private static void Main(string[] args)
         {
             const string code = @"
 abstract class List[A] {
@@ -53,5 +73,6 @@ object Main
 
             RppCompiler.CompileAndSave(code1);
         }
+        */
     }
 }

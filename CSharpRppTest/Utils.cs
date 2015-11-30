@@ -51,7 +51,7 @@ namespace CSharpRppTest
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
             WireRuntime(scope);
-            CodeGenerator generator = new CodeGenerator(program);
+            CodeGenerator generator = new CodeGenerator(program, "TestAssembly");
 
             Type2Creator typeCreator = new Type2Creator();
             program.Accept(typeCreator);
@@ -108,7 +108,6 @@ namespace CSharpRppTest
             RppParser parser = CreateParser(code);
             RppProgram compilationUnit = new RppProgram();
             parser.CompilationUnit(compilationUnit);
-            compilationUnit.Name = "TestedAssembly";
             return compilationUnit;
         }
 
