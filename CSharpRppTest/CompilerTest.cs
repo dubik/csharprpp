@@ -6,7 +6,7 @@ namespace CSharpRppTest
     [TestClass]
     public class CompilerTest
     {
-        [TestMethod]
+        [TestCategory("ILVerifier"), TestMethod]
         public void SpawnVerifier()
         {
             ProcessStartInfo info = new ProcessStartInfo
