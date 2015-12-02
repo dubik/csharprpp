@@ -7,7 +7,7 @@ namespace CSharpRppTest
     public class CompilerTest
     {
         [TestMethod]
-        public void SpawnCompiler()
+        public void SpawnVerifier()
         {
             ProcessStartInfo info = new ProcessStartInfo
             {
@@ -24,7 +24,7 @@ namespace CSharpRppTest
 
             ProcessStartInfo peverifyInfo = new ProcessStartInfo
             {
-                FileName = "peverify.exe",
+                FileName = @"tools\peverify.exe",
                 CreateNoWindow = false,
                 WindowStyle = ProcessWindowStyle.Hidden
             };
