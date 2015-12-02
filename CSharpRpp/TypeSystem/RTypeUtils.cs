@@ -161,7 +161,10 @@ namespace CSharpRpp.TypeSystem
 
             if (!rAttributes.HasFlag(RMethodAttributes.Override))
             {
-                attrs |= MethodAttributes.NewSlot;
+                if(!constructor)
+                {
+                    attrs |= MethodAttributes.NewSlot;
+                }
             }
 
             if (rAttributes.HasFlag(RMethodAttributes.Abstract))
