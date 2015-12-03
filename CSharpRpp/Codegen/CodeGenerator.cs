@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -22,7 +23,7 @@ namespace CSharpRpp.Codegen
 
         public CodeGenerator(RppProgram program, string assemblyName)
         {
-            AssemblyName = assemblyName;
+            AssemblyName = Path.GetFileNameWithoutExtension(assemblyName);
             _program = program;
 
             _funcBuilders = new Dictionary<RppFunc, MethodBuilder>();
@@ -45,7 +46,7 @@ namespace CSharpRpp.Codegen
         {
             _assemblyName = new AssemblyName(AssemblyName);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name);
+            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll");
         }
 
         public void Save(string fileName)

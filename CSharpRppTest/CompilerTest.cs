@@ -34,7 +34,7 @@ namespace CSharpRppTest
 
         private static void PeverifyTest(string testcase)
         {
-            int compilerExitCode = SpawnCompiler(new[] {@"tests\" + testcase, "--out", @"out"});
+            int compilerExitCode = SpawnCompiler(new[] {@"tests\" + testcase, "--library","--out", "out.dll"});
             Assert.AreEqual(0, compilerExitCode);
             string output;
             int peverifyExitCode = SpawnPreverifier(new[] {@"out.dll"}, out output);
