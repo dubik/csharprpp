@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
 {
-    class Utils
+    internal class Utils
     {
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
@@ -51,7 +51,7 @@ namespace CSharpRppTest
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
             WireRuntime(scope);
-            CodeGenerator generator = new CodeGenerator(program, "TestAssembly");
+            CodeGenerator generator = new CodeGenerator(program, "TestAssembly.dll");
 
             Type2Creator typeCreator = new Type2Creator();
             program.Accept(typeCreator);

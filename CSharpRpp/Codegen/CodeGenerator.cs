@@ -45,22 +45,24 @@ namespace CSharpRpp.Codegen
         {
             _assemblyName = new AssemblyName(AssemblyName);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll");
+            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name);
         }
 
-        public void Save()
+        public void Save(string fileName)
         {
             var mainFunc = FindMain();
             if (mainFunc != null)
             {
                 MethodInfo wrappedMain = WrapMain(mainFunc);
                 _assemblyBuilder.SetEntryPoint(wrappedMain, PEFileKinds.ConsoleApplication);
-                _assemblyBuilder.Save(_assemblyName.Name + ".exe");
             }
-            else
-            {
-                _assemblyBuilder.Save(_assemblyName.Name + ".dll");
-            }
+
+            _assemblyBuilder.Save(fileName);
+        }
+
+        public bool HasMain()
+        {
+            return _funcBuilders.Values.Any(f => f.Name == "main");
         }
 
         private MethodInfo FindMain()

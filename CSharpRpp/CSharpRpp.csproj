@@ -112,6 +112,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Reporting\Diagnostic.cs" />
+    <Compile Include="Reporting\ErrorMessage.cs" />
     <Compile Include="RppCompiler.cs" />
     <Compile Include="RppOptions.cs" />
     <Compile Include="RppVariantTypeParam.cs" />

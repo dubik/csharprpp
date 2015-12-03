@@ -4,13 +4,16 @@ using CommandLine.Text;
 
 namespace CSharpRpp
 {
-    internal class RppOptions
+    public class RppOptions
     {
         [Value(0, HelpText = "list of input files", Required = true)]
         public IEnumerable<string> InputFiles { get; set; }
 
         [Option(HelpText = "Specify output file name")]
         public string Out { get; set; }
+
+        [Option(HelpText = "Specify if class library should be created (by default executable)")]
+        public bool Library { get; set; }
 
         [Usage]
         public static IEnumerable<Example> Examples
