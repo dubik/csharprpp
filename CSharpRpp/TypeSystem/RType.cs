@@ -222,6 +222,8 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsSealed => Attributes.HasFlag(RTypeAttributes.Sealed);
 
+        public bool IsInterface => Attributes.HasFlag(RTypeAttributes.Interface);
+
         public bool IsArray { get; private set; }
 
         public bool IsGenericType => GenericParameters.Any();
@@ -318,6 +320,8 @@ namespace CSharpRpp.TypeSystem
         private readonly List<RppMethodInfo> _methods = new List<RppMethodInfo>();
         private RppGenericParameter[] _genericParameters = new RppGenericParameter[0];
         private readonly List<RType> _nested = new List<RType>();
+
+        [CanBeNull] private List<RType> _implementedInterfaces;
 
         public RType([NotNull] string name, [NotNull] Type type)
         {
@@ -638,6 +642,46 @@ namespace CSharpRpp.TypeSystem
         public bool IsNumeric()
         {
             return Name == "Int" || Name == "Float" || Name == "Double" || Name == "Char" || Name == "Short" || Name == "Byte";
+        }
+
+        public bool IsSame(RType other)
+        {
+            return Name.Equals(other.Name);
+        }
+
+        public void AddInterfaceImplementation(RType interfaceType)
+        {
+            if (!interfaceType.IsInterface)
+            {
+                throw new ArgumentException("interface type is expected", nameof(interfaceType));
+            }
+
+            if (_implementedInterfaces == null)
+            {
+                _implementedInterfaces = new List<RType>();
+            }
+
+            _implementedInterfaces.Add(interfaceType);
+        }
+
+        public bool IsInstanceOf(RType other)
+        {
+            if (IsSame(other))
+            {
+                return true;
+            }
+
+            if (other.IsInterface && _implementedInterfaces != null)
+            {
+                return _implementedInterfaces.Any(i => i.IsInstanceOf(other));
+            }
+
+            if (BaseType != null)
+            {
+                return BaseType.IsInstanceOf(other);
+            }
+
+            return false;
         }
     }
 }
