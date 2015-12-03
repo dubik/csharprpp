@@ -49,46 +49,6 @@ namespace CLRCodeGen
         Res Apply(T p);
     }
 
-    class MyFoo<A, C, P>
-    {
-        class MyBar<Z>
-        {
-            private C myField;
-
-            public void func<B>(B someB)
-            {
-                var f = new Func<object, C>(b =>
-                                            {
-                                                Console.WriteLine(someB);
-                                                return myField;
-                                            });
-            }
-        }
-
-        public static void Create()
-        {
-            MyBar<int> b = new MyBar<int>();
-        }
-    }
-
-    internal class MyFooMain
-    {
-        public static void main()
-        {
-            MyFoo<int, float, float> a = new MyFoo<int, float, float>();
-        }
-    }
-
-
-    /*
-    class Foo[A]
-    {
-        def func(k: A) : Unit = {
-            var f: (A) => Int = (x: A) => 10
-        }
-    }
-    */
-
     public class MyMain<A>
     {
         private class Closure : Function<A, int>

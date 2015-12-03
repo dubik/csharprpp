@@ -123,7 +123,6 @@ namespace VisitorThingy
              */
 
             //HindleyMilner.DoMain();
-            Generics.MainA();
         }
 
         public static void Println(string format, params object[] args)
