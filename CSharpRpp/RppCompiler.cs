@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
+using CSharpRpp.Reporting;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -13,10 +15,37 @@ namespace CSharpRpp
 {
     public sealed class RppCompiler
     {
-        public static void CompileAndSave(IEnumerable<string> fileNames, string outFileName)
+        public static void CompileAndSave(RppOptions options, Diagnostic diagnostic)
         {
-            var generator = Compile(program => Parse(fileNames, program), outFileName);
-            generator.Save();
+            string outFileName = GetOutputFileName(options);
+
+            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), outFileName);
+
+            ValidateEntryPoint(generator, options, diagnostic);
+            if (!diagnostic.Errors.Any())
+            {
+                generator.Save(outFileName);
+            }
+        }
+
+        private static void ValidateEntryPoint(CodeGenerator generator, RppOptions options, Diagnostic diagnostic)
+        {
+            if (options.Library == false && !generator.HasMain())
+            {
+                diagnostic.Error(101, "Program doesn't contain a valid entry point");
+            }
+        }
+
+        private static string GetOutputFileName(RppOptions options)
+        {
+            return !string.IsNullOrEmpty(options.Out) ? options.Out : GenerateOutputFileName(options);
+        }
+
+        private static string GenerateOutputFileName(RppOptions options)
+        {
+            string ext = options.Library ? ".dll" : ".exe";
+            string firstFile = options.InputFiles.First();
+            return Path.GetFileNameWithoutExtension(firstFile) + ext;
         }
 
         public static CodeGenerator Compile(Action<RppProgram> parseFactory, string fileName = "<buffer>")

@@ -1,4 +1,6 @@
-﻿using CommandLine;
+﻿using System.Linq;
+using CommandLine;
+using CSharpRpp.Reporting;
 
 namespace CSharpRpp
 {
@@ -12,14 +14,19 @@ namespace CSharpRpp
 
         private static int RunAndReturnExitCode(RppOptions options)
         {
-            RppCompiler.CompileAndSave(options.InputFiles, GetOutputFileName(options));
+            Diagnostic diagnostic = new Diagnostic();
+            RppCompiler.CompileAndSave(options, diagnostic);
+
+            diagnostic.Report();
+
+            if (diagnostic.Errors.Any())
+            {
+                return 1;
+            }
+
             return 0;
         }
 
-        private static string GetOutputFileName(RppOptions options)
-        {
-            return !string.IsNullOrEmpty(options.Out) ? options.Out : "out.exe";
-        }
 
         /*
         private static void Main(string[] args)
