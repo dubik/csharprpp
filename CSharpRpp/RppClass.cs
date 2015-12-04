@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -124,19 +125,19 @@ namespace CSharpRpp
             BaseConstructorCall.ResolveBaseClass(Scope);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             Debug.Assert(Scope != null, "Scope != null");
 
-            NodeUtils.Analyze(scope, _nested);
+            NodeUtils.Analyze(scope, _nested, diagnostic);
 
             SymbolTable constructorScope = new SymbolTable(Scope, Type);
 
-            _classParams = NodeUtils.Analyze(Scope, _classParams);
-            _fields = NodeUtils.Analyze(Scope, _fields);
+            _classParams = NodeUtils.Analyze(Scope, _classParams, diagnostic);
+            _fields = NodeUtils.Analyze(Scope, _fields, diagnostic);
 
-            _constructors = NodeUtils.Analyze(constructorScope, _constructors);
-            _funcs = NodeUtils.Analyze(Scope, _funcs);
+            _constructors = NodeUtils.Analyze(constructorScope, _constructors, diagnostic);
+            _funcs = NodeUtils.Analyze(Scope, _funcs, diagnostic);
 
             return this;
         }

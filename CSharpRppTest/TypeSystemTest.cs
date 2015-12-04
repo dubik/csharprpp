@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using CSharpRpp.Codegen;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -40,7 +41,7 @@ object Main
             program.PreAnalyze(scope);
             InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
             program.Accept(configurator);
-            var creator = new CreateRType();
+            var creator = new CreateRType(new Diagnostic());
             program.Accept(creator);
             var classes = program.Classes.Where(c => !c.Name.Contains("Function")).ToArray(); // Remove Functions* from runtime
             var fooType = classes[0].Type;

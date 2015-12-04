@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Parser;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -52,9 +53,9 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            base.Analyze(scope);
+            base.Analyze(scope, diagnostic);
 
             // 10 || left
             // isOk && notRunning
@@ -92,9 +93,9 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            base.Analyze(scope);
+            base.Analyze(scope, diagnostic);
 
             return this;
         }
@@ -108,9 +109,9 @@ namespace CSharpRpp
         {
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            base.Analyze(scope);
+            base.Analyze(scope, diagnostic);
 
             Type = new ResolvableType(TypeInference.ResolveCommonType(Left.Type.Value, Right.Type.Value));
 
@@ -168,11 +169,11 @@ namespace CSharpRpp
             Right = right;
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Left = Left.Analyze(scope) as IRppExpr;
+            Left = Left.Analyze(scope, diagnostic) as IRppExpr;
             Debug.Assert(Left != null);
-            Right = Right.Analyze(scope) as IRppExpr;
+            Right = Right.Analyze(scope, diagnostic) as IRppExpr;
             Debug.Assert(Right != null);
 
             return this;
@@ -433,10 +434,10 @@ namespace CSharpRpp
         }
 
         // TODO This needs to be rewritten.
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             // Skip closures because they may have missing types
-            ArgList = NodeUtils.AnalyzeWithPredicate(scope, ArgList, node => !(node is RppClosure));
+            ArgList = NodeUtils.AnalyzeWithPredicate(scope, ArgList, node => !(node is RppClosure), diagnostic);
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
@@ -446,7 +447,7 @@ namespace CSharpRpp
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
             IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
             //var args = ArgList;
-            NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure);
+            NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure, diagnostic);
             if (resolveResults.Function.IsVariadic)
             {
                 args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
@@ -489,7 +490,7 @@ namespace CSharpRpp
             variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
             RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
-            variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope);
+            variadicArgsArray = (RppArray) variadicArgsArray.Analyze(scope, null);
 
             newArgList.Add(variadicArgsArray);
             return newArgList;
@@ -616,9 +617,9 @@ namespace CSharpRpp
             BaseClassType2.Resolve(scope);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            NodeUtils.Analyze(scope, ArgList);
+            NodeUtils.Analyze(scope, ArgList, diagnostic);
 
             /*
             BaseClassTypeArgs = BaseClassTypeArgs.Select(type => type.Resolve(scope)).ToList();
@@ -705,7 +706,7 @@ namespace CSharpRpp
             Size = Initializers.Count();
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             Type = new ResolvableType(_elementType.MakeArrayType());
 
@@ -740,9 +741,9 @@ namespace CSharpRpp
             visitor.VisitExit(this);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            _exprs = NodeUtils.Analyze(scope, _exprs);
+            _exprs = NodeUtils.Analyze(scope, _exprs, diagnostic);
 
             InitializeType();
 
@@ -824,9 +825,9 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Target.Analyze(scope);
+            Target.Analyze(scope, diagnostic);
             RType targetType = Target.Type.Value;
 
             Debug.Assert(targetType != null, "targetType != null");
@@ -834,7 +835,7 @@ namespace CSharpRpp
             SymbolTable classScope = new SymbolTable(scope, targetType);
 
             Path.TargetType2 = targetType;
-            Path = (RppMember) Path.Analyze(classScope);
+            Path = (RppMember) Path.Analyze(classScope, diagnostic);
             return this;
         }
 
@@ -905,7 +906,7 @@ namespace CSharpRpp
         }
 
         // TODO Replace RppId with something like RppFieldAcces, RppParamAccess and so on those Ref and Field looks very bad
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             TypeSymbol objectType = scope.LookupObject(Name);
             // Lookup <name> or <name>$

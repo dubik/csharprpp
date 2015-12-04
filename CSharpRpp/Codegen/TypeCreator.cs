@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using CSharpRpp.Reporting;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -87,7 +88,13 @@ namespace CSharpRpp.Codegen
     /// </summary>
     public class ResolveParamTypes : RppNodeVisitor
     {
+        private readonly Diagnostic _diagnostic;
         private RppClass _currentClass;
+
+        public ResolveParamTypes(Diagnostic diagnostic)
+        {
+            _diagnostic = diagnostic;
+        }
 
         public override void VisitEnter(RppClass node)
         {
@@ -96,7 +103,7 @@ namespace CSharpRpp.Codegen
 
         public override void VisitEnter(RppFunc node)
         {
-            node.ResolveTypes(_currentClass.Scope);
+            node.ResolveTypes(_currentClass.Scope, _diagnostic);
         }
 
         public override void Visit(RppField node)
@@ -107,8 +114,14 @@ namespace CSharpRpp.Codegen
 
     public class CreateRType : RppNodeVisitor
     {
+        private readonly Diagnostic _diagnostic;
         private RType _currentType;
         private RppClass _currentClass;
+
+        public CreateRType(Diagnostic diagnostic)
+        {
+            _diagnostic = diagnostic;
+        }
 
         public override void VisitEnter(RppClass node)
         {
@@ -134,7 +147,7 @@ namespace CSharpRpp.Codegen
                 method.DefineGenericParameters(genericArgumentsNames);
             }
 
-            node.ResolveTypes(_currentClass.Scope);
+            node.ResolveTypes(_currentClass.Scope, _diagnostic);
 
             RppParameterInfo[] parameters = node.Params.Select(p => new RppParameterInfo(p.Name, p.Type.Value, p.IsVariadic)).ToArray();
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'

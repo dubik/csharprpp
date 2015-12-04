@@ -19,7 +19,7 @@ namespace CSharpRpp
         {
             string outFileName = GetOutputFileName(options);
 
-            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), outFileName);
+            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, outFileName);
 
             ValidateEntryPoint(generator, options, diagnostic);
             if (!diagnostic.Errors.Any())
@@ -48,7 +48,7 @@ namespace CSharpRpp
             return Path.GetFileNameWithoutExtension(firstFile) + ext;
         }
 
-        public static CodeGenerator Compile(Action<RppProgram> parseFactory, string fileName = "<buffer>")
+        public static CodeGenerator Compile(Action<RppProgram> parseFactory, Diagnostic diagnostic, string fileName = "<buffer>")
         {
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
@@ -68,12 +68,12 @@ namespace CSharpRpp
                 InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
                 program.Accept(configurator);
 
-                CreateRType createRType = new CreateRType();
+                CreateRType createRType = new CreateRType(diagnostic);
                 program.Accept(createRType);
 
-                program.Analyze(runtimeScope);
+                program.Analyze(runtimeScope, null);
 
-                SemanticAnalyzer semantic = new SemanticAnalyzer();
+                SemanticAnalyzer semantic = new SemanticAnalyzer(diagnostic);
                 program.Accept(semantic);
 
                 InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
@@ -123,7 +123,7 @@ namespace CSharpRpp
             fileNames.ForEach(fileName => Parse(File.ReadAllText(fileName), program));
         }
 
-        private static void Parse(string code, RppProgram program)
+        public static void Parse(string code, RppProgram program)
         {
             try
             {

@@ -1,4 +1,6 @@
-﻿using CSharpRpp.TypeSystem;
+﻿using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Expr
@@ -23,11 +25,11 @@ namespace CSharpRpp.Expr
             ElseExpr = elseExpr;
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Condition = (IRppExpr) Condition.Analyze(scope);
-            ThenExpr = (IRppExpr) ThenExpr.Analyze(scope);
-            ElseExpr = (IRppExpr) ElseExpr.Analyze(scope);
+            Condition = (IRppExpr) Condition.Analyze(scope, diagnostic);
+            ThenExpr = (IRppExpr) ThenExpr.Analyze(scope, diagnostic);
+            ElseExpr = (IRppExpr) ElseExpr.Analyze(scope, diagnostic);
 
             Type = ThenExpr.Type;
 

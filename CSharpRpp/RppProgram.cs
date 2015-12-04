@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 
 namespace CSharpRpp
@@ -30,9 +31,9 @@ namespace CSharpRpp
             _classes.ForEach(clazz => clazz.Accept(visitor));
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            _classes = NodeUtils.Analyze(scope, _classes);
+            _classes = NodeUtils.Analyze(scope, _classes, diagnostic);
             return this;
         }
     }

@@ -1,4 +1,6 @@
 ﻿using System;
+using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp
@@ -16,10 +18,10 @@ namespace CSharpRpp
             Body = body;
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Condition = (IRppExpr) Condition.Analyze(scope);
-            Body = Body.Analyze(scope);
+            Condition = (IRppExpr) Condition.Analyze(scope, diagnostic);
+            Body = Body.Analyze(scope, diagnostic);
 
             if (!Equals(Condition.Type, ResolvableType.BooleanTy))
             {

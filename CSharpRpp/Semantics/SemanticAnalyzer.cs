@@ -1,9 +1,17 @@
 ﻿using CSharpRpp.Exceptions;
+using CSharpRpp.Reporting;
 
 namespace CSharpRpp.Semantics
 {
     public class SemanticAnalyzer : RppNodeVisitor
     {
+        private readonly Diagnostic _diagnostic;
+
+        public SemanticAnalyzer(Diagnostic diagnostic)
+        {
+            _diagnostic = diagnostic;
+        }
+
         public override void VisitEnter(RppClass node)
         {
             CheckForNonDefinedAbstractMethods(node);

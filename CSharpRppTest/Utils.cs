@@ -5,6 +5,7 @@ using System.Reflection;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.Codegen;
+using CSharpRpp.Reporting;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -16,22 +17,32 @@ namespace CSharpRppTest
     {
         public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames)
         {
+            return ParseAndCreateTypes(code, typesNames, new Diagnostic());
+        }
+
+        public static IEnumerable<Type> ParseAndCreateTypes(string code, IEnumerable<string> typesNames, Diagnostic diagnostic)
+        {
             RppProgram program = Parse(code);
-            var assembly = CodeGen(program);
+            var assembly = CodeGen(program, diagnostic);
             return typesNames.Select(assembly.GetType);
         }
 
         public static Type ParseAndCreateType(string code, string typeName)
         {
+            return ParseAndCreateType(code, typeName, new Diagnostic());
+        }
+
+        public static Type ParseAndCreateType(string code, string typeName, Diagnostic diagnostic)
+        {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, typeName);
+            var fooTy = CodeGenAndGetType(program, typeName, diagnostic);
             return fooTy;
         }
 
-        public static Type CodeGenAndGetType(RppProgram program, string typeName)
+        public static Type CodeGenAndGetType(RppProgram program, string typeName, Diagnostic diagnostic)
         {
-            var assembly = CodeGen(program);
+            var assembly = CodeGen(program, diagnostic);
             Type arrayTy = assembly.GetType(typeName);
             Assert.IsNotNull(arrayTy);
             return arrayTy;
@@ -39,12 +50,17 @@ namespace CSharpRppTest
 
         public static RppProgram ParseAndAnalyze(string code)
         {
+            return ParseAndAnalyze(code, new Diagnostic());
+        }
+
+        public static RppProgram ParseAndAnalyze(string code, Diagnostic diagnostic)
+        {
             RppProgram program = Parse(code);
-            CodeGen(program);
+            CodeGen(program, diagnostic);
             return program;
         }
 
-        public static Assembly CodeGen(RppProgram program)
+        public static Assembly CodeGen(RppProgram program, Diagnostic diagnostic)
         {
             SymbolTable scope = new SymbolTable(null);
 
@@ -61,12 +77,12 @@ namespace CSharpRppTest
             InheritanceConfigurator2 configurator = new InheritanceConfigurator2();
             program.Accept(configurator);
 
-            CreateRType createRType = new CreateRType();
+            CreateRType createRType = new CreateRType(diagnostic);
             program.Accept(createRType);
 
-            program.Analyze(scope);
+            program.Analyze(scope, null);
 
-            SemanticAnalyzer semantic = new SemanticAnalyzer();
+            SemanticAnalyzer semantic = new SemanticAnalyzer(diagnostic);
             program.Accept(semantic);
 
             InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);

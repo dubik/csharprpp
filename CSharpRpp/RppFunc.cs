@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -127,15 +128,16 @@ namespace CSharpRpp
         /// Resolves parameters and return types
         /// </summary>
         /// <param name="scope">class scope</param>
-        public void ResolveTypes([NotNull] SymbolTable scope)
+        /// <param name="diagnostic"></param>
+        public void ResolveTypes([NotNull] SymbolTable scope, Diagnostic diagnostic)
         {
             // This will make generic parameters available as well
             SymbolTable tempScope = new SymbolTable(scope, MethodInfo);
-            NodeUtils.Analyze(tempScope, Params);
+            NodeUtils.Analyze(tempScope, Params, diagnostic);
             ReturnType2.Resolve(tempScope);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             _scope = new SymbolTable(scope, MethodInfo);
             Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type.Value, p));
@@ -147,7 +149,7 @@ namespace CSharpRpp
                 //_scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
             }
 
-            Expr = NodeUtils.AnalyzeNode(_scope, Expr);
+            Expr = NodeUtils.AnalyzeNode(_scope, Expr, diagnostic);
 
             return this;
         }
@@ -273,7 +275,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             Type.Resolve(scope);
             if (IsVariadic)

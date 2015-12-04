@@ -3,14 +3,15 @@ using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Symbols;
 using System;
+using CSharpRpp.Reporting;
 
 namespace CSharpRpp
 {
     internal class NodeUtils
     {
-        public static T AnalyzeNode<T>(SymbolTable scope, T node) where T : class, IRppNode
+        public static T AnalyzeNode<T>(SymbolTable scope, T node, Diagnostic diagnostic) where T : class, IRppNode
         {
-            T analyzedNode = node.Analyze(scope) as T;
+            T analyzedNode = node.Analyze(scope, diagnostic) as T;
             Debug.Assert(analyzedNode != null);
             return analyzedNode;
         }
@@ -23,23 +24,24 @@ namespace CSharpRpp
             }
         }
 
-        public static IList<T> Analyze<T>(SymbolTable parentScope, IEnumerable<T> nodes) where T : class, IRppNode
+        public static IList<T> Analyze<T>(SymbolTable parentScope, IEnumerable<T> nodes, Diagnostic diagnostic) where T : class, IRppNode
         {
             return nodes.Select(node =>
             {
-                T analyzedNode = node.Analyze(parentScope) as T;
+                T analyzedNode = node.Analyze(parentScope, diagnostic) as T;
                 Debug.Assert(analyzedNode != null);
                 return analyzedNode;
             }).ToList();
         }
 
-        public static IList<T> AnalyzeWithPredicate<T>(SymbolTable parentScope, IEnumerable<T> nodes, Func<T, bool> pred) where T : class, IRppNode
+        public static IList<T> AnalyzeWithPredicate<T>(SymbolTable parentScope, IEnumerable<T> nodes, Func<T, bool> pred, Diagnostic diagnostic)
+            where T : class, IRppNode
         {
             return nodes.Select(node =>
             {
                 if (pred(node))
                 {
-                    T analyzedNode = node.Analyze(parentScope) as T;
+                    T analyzedNode = node.Analyze(parentScope, diagnostic) as T;
                     Debug.Assert(analyzedNode != null);
                     return analyzedNode;
                 }

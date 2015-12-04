@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.Parser;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -29,9 +30,9 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            _arguments = NodeUtils.Analyze(scope, _arguments);
+            _arguments = NodeUtils.Analyze(scope, _arguments, diagnostic);
 
             Type.Resolve(scope);
 

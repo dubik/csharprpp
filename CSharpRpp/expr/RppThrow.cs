@@ -1,4 +1,6 @@
-﻿using CSharpRpp.TypeSystem;
+﻿using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Expr
 {
@@ -14,9 +16,9 @@ namespace CSharpRpp.Expr
             Type = ResolvableType.UnitTy;
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Expr = Expr.Analyze(scope) as IRppExpr;
+            Expr = Expr.Analyze(scope, diagnostic) as IRppExpr;
             return this;
         }
 

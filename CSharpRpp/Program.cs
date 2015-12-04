@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using CommandLine;
+using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
 
 namespace CSharpRpp
@@ -28,8 +29,7 @@ namespace CSharpRpp
         }
 
 
-        /*
-        private static void Main(string[] args)
+        public static void CompileBuffer()
         {
             const string code = @"
 abstract class List[A] {
@@ -65,21 +65,16 @@ object Main
     }
 }
 ";
-            const string code1 = @"class Foo
-
-object Foo
-{
-    def calc: Int = 13
-}
-
+            const string code1 = @"
 object Main
 {
-    def callObject: Int = Foo.calc()
-    def callClass : Foo = new Foo
+    def main() : Unit = {
+        val k: Int
+    }
 }";
-
-            RppCompiler.CompileAndSave(code1);
+            Diagnostic diagnostic = new Diagnostic();
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            codeGen.Save("Sample.dll");
         }
-        */
     }
 }

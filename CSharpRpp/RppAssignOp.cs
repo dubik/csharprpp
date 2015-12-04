@@ -1,3 +1,5 @@
+using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -15,9 +17,9 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            base.Analyze(scope);
+            base.Analyze(scope, diagnostic);
 
             if (!Equals(Left.Type, Right.Type))
             {

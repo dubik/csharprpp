@@ -1,4 +1,5 @@
 ﻿using Antlr.Runtime;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -10,7 +11,7 @@ namespace CSharpRpp
         IToken Token { get; }
 
         [NotNull]
-        IRppNode Analyze([NotNull] SymbolTable scope);
+        IRppNode Analyze([NotNull] SymbolTable scope, Diagnostic diagnostic);
 
         void Accept([NotNull] IRppNodeVisitor visitor);
     }
@@ -28,7 +29,7 @@ namespace CSharpRpp
     {
         public IToken Token { get; set; }
 
-        public virtual IRppNode Analyze(SymbolTable scope)
+        public virtual IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             return this;
         }

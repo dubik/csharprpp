@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
@@ -20,13 +21,13 @@ namespace CSharpRpp
             Type = ResolvableType.UndefinedTy;
         }
 
-        public override IRppNode Analyze(SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             SymbolTable closureScope = new SymbolTable(scope);
-            NodeUtils.Analyze(closureScope, Bindings);
+            NodeUtils.Analyze(closureScope, Bindings, diagnostic);
 
             Bindings.ForEach(b => closureScope.AddLocalVar(b.Name, b.Type.Value, b));
-            Expr = NodeUtils.AnalyzeNode(closureScope, Expr);
+            Expr = NodeUtils.AnalyzeNode(closureScope, Expr, diagnostic);
 
             ReturnType = Expr.Type;
 

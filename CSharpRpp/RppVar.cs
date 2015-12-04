@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Reflection.Emit;
 using CSharpRpp.Expr;
+using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -9,7 +11,7 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public override sealed ResolvableType Type { get; protected set; }
+        public sealed override ResolvableType Type { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
 
@@ -32,7 +34,7 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        public override IRppNode Analyze(Symbols.SymbolTable scope)
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             // We have 2 cases when type is omited, so we need to get it from initializing expression
             // and when type is specified so we need to resolve it and if there is a closure, propagate that
@@ -42,7 +44,7 @@ namespace CSharpRpp
                 Type.Resolve(scope);
 
                 InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
-                InitExpr = (IRppExpr)InitExpr.Analyze(scope);
+                InitExpr = (IRppExpr)InitExpr.Analyze(scope, diagnostic);
             }
             else
             {
@@ -51,7 +53,7 @@ namespace CSharpRpp
                     throw new Exception("Type is not specified but also initializing expression is missing, I give up");
                 }
 
-                InitExpr = (IRppExpr)InitExpr.Analyze(scope);
+                InitExpr = (IRppExpr)InitExpr.Analyze(scope, diagnostic);
                 Type = InitExpr.Type;
             }
 
