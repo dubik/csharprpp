@@ -90,7 +90,9 @@ namespace CSharpRpp
             if (kind == ClassKind.Object)
             {
                 string objectName = SymbolTable.GetObjectName(Name);
-                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, new ResolvableType(new RTypeName(objectName)));
+                ResolvableType instanceFieldType = new ResolvableType(new RTypeName(objectName));
+                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, instanceFieldType,
+                    new RppNew(instanceFieldType, Collections.NoExprs));
                 _fields.Add(InstanceField);
             }
 

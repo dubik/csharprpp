@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
-    internal class ClrCodegen : RppNodeVisitor
+    class ClrCodegen : RppNodeVisitor
     {
         private ILGenerator _body;
 
@@ -66,19 +66,18 @@ namespace CSharpRpp.Codegen
 
             if (node.IsObject())
             {
-                FieldInfo instanceField = node.InstanceField.FieldInfo.Native;
-                CreateStaticConstructor(_typeBuilder, instanceField, node);
+                CreateStaticConstructor(_typeBuilder, node.InstanceField, node);
             }
         }
 
-        private static void CreateStaticConstructor(TypeBuilder typeBuilder, FieldInfo instanceField, RppClass obj)
+        private void CreateStaticConstructor(TypeBuilder typeBuilder, RppField instanceField, RppClass obj)
         {
+            FieldInfo instanceFieldInfo = instanceField.FieldInfo.Native;
             ConstructorBuilder staticConstructor = typeBuilder.DefineTypeInitializer();
-            ILGenerator body = staticConstructor.GetILGenerator();
-            ConstructorInfo constructor = obj.Type.Constructors[0].Native as ConstructorInfo;
-            body.Emit(OpCodes.Newobj, constructor);
-            body.Emit(OpCodes.Stsfld, instanceField);
-            body.Emit(OpCodes.Ret);
+            _body = staticConstructor.GetILGenerator();
+            instanceField.InitExpr.Accept(this);
+            _body.Emit(OpCodes.Stsfld, instanceFieldInfo);
+            _body.Emit(OpCodes.Ret);
         }
 
         public override void VisitExit(RppClass node)
@@ -408,7 +407,8 @@ namespace CSharpRpp.Codegen
             else if (node.IsParam)
             {
                 ((RppParam) node.Ref).Accept(this);
-            } else if (node.IsObject)
+            }
+            else if (node.IsObject)
             {
                 if (_typeBuilder == node.Type.Value.NativeType)
                 {
@@ -565,14 +565,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
-                {
-                    if (t.IsGenericParameter)
-                    {
-                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                        return closureGenericArgument;
-                    }
-                    return t;
-                }).ToArray();
+                                                              {
+                                                                  if (t.IsGenericParameter)
+                                                                  {
+                                                                      Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                                                                      return closureGenericArgument;
+                                                                  }
+                                                                  return t;
+                                                              }).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
                 parentType = genericTypeDef.MakeGenericType(targetSignature);
