@@ -28,8 +28,7 @@ namespace CSharpRpp
             return 0;
         }
 
-
-        public static void CompileBuffer()
+        public static int Main1(string[] args)
         {
             const string code = @"
 abstract class List[A] {
@@ -69,12 +68,12 @@ object Main
 object Main
 {
     def main() : Unit = {
-        val k: Int
     }
 }";
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             codeGen.Save("Sample.dll");
+            return 0;
         }
     }
 }

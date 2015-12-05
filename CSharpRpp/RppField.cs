@@ -24,14 +24,14 @@ namespace CSharpRpp
             : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
         {
             _modifiers = modifiers;
-            AddToScope = false;
+            IsLocalSemantic = false;
         }
 
         public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type, IRppExpr initExpr)
             : base(mutabilityFlag, name, type, initExpr)
         {
             _modifiers = modifiers;
-            AddToScope = false;
+            IsLocalSemantic = false;
         }
 
         public new FieldBuilder Builder { get; set; }

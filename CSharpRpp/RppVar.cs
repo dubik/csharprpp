@@ -11,7 +11,7 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public sealed override ResolvableType Type { get; protected set; }
+        public override sealed ResolvableType Type { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
 
@@ -20,7 +20,7 @@ namespace CSharpRpp
 
         public LocalBuilder Builder { get; set; }
 
-        protected bool AddToScope = true;
+        protected bool IsLocalSemantic = true;
 
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {
@@ -36,6 +36,12 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
+            if (InitExpr is RppEmptyExpr && IsLocalSemantic)
+            {
+                diagnostic.Error(102, "local variable must be initialized");
+                return this;
+            }
+
             // We have 2 cases when type is omited, so we need to get it from initializing expression
             // and when type is specified so we need to resolve it and if there is a closure, propagate that
             // to init expression
@@ -44,21 +50,16 @@ namespace CSharpRpp
                 Type.Resolve(scope);
 
                 InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
-                InitExpr = (IRppExpr)InitExpr.Analyze(scope, diagnostic);
+                InitExpr = (IRppExpr) InitExpr.Analyze(scope, diagnostic);
             }
             else
             {
-                if (InitExpr is RppEmptyExpr)
-                {
-                    throw new Exception("Type is not specified but also initializing expression is missing, I give up");
-                }
-
-                InitExpr = (IRppExpr)InitExpr.Analyze(scope, diagnostic);
+                InitExpr = (IRppExpr) InitExpr.Analyze(scope, diagnostic);
                 Type = InitExpr.Type;
             }
 
 
-            if (AddToScope)
+            if (IsLocalSemantic)
             {
                 scope.AddLocalVar(Name, Type.Value, this);
             }

@@ -80,10 +80,25 @@ namespace CSharpRppTest
             CreateRType createRType = new CreateRType(diagnostic);
             program.Accept(createRType);
 
-            program.Analyze(scope, null);
+            if (diagnostic.Errors.Any())
+            {
+                return null;
+            }
+
+            program.Analyze(scope, diagnostic);
+
+            if (diagnostic.Errors.Any())
+            {
+                return null;
+            }
 
             SemanticAnalyzer semantic = new SemanticAnalyzer(diagnostic);
             program.Accept(semantic);
+
+            if (diagnostic.Errors.Any())
+            {
+                return null;
+            }
 
             InitializeNativeTypes initializeNativeTypes = new InitializeNativeTypes(generator.Module);
             program.Accept(initializeNativeTypes);
