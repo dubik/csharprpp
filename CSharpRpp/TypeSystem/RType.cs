@@ -107,21 +107,41 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
+    public enum RppGenericParameterCovariance
+    {
+        Default,
+
+        /// <summary>
+        /// Covariant type, e.g. '+'
+        /// </summary>
+        Covariant,
+
+        /// <summary>
+        /// Contravariant type, e.g. '-'
+        /// </summary>
+        Contravariant // '-'
+    }
+
     public class RppGenericParameter
     {
         public string Name { get; }
         public RType Type { get; set; }
         public int Position { get; set; }
         public GenericTypeParameterBuilder Native { get; private set; }
+        public RppGenericParameterCovariance Covariance { get; set; }
 
         public RppGenericParameter(string name)
         {
             Name = name;
+            Covariance = RppGenericParameterCovariance.Default;
         }
 
         public override string ToString()
         {
-            return $"{Name}";
+            string covarianceStr = Covariance == RppGenericParameterCovariance.Covariant
+                ? "+"
+                : Covariance == RppGenericParameterCovariance.Contravariant ? "-" : "";
+            return $"{covarianceStr}{Name}";
         }
 
         public void SetGenericTypeParameterBuilder(GenericTypeParameterBuilder builder)
@@ -226,7 +246,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsArray { get; private set; }
 
-        public bool IsGenericType => GenericParameters.Any();
+        public bool IsGenericType => GenericParameters.Any() || GenericArguments.Any();
 
         public bool IsPrimitive => !IsClass;
 
@@ -682,6 +702,48 @@ namespace CSharpRpp.TypeSystem
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// <code>true</code> if specified type can be 'assigned' to the current one.
+        /// <code>'x:this' = 'y:right'</code>
+        /// </summary>
+        /// <param name="right">some type</param>
+        /// <returns><code>true</code>if type can be assigned</returns>
+        public bool IsAssignable(RType right)
+        {
+            if (!IsSubclassOf(right))
+            {
+                return false;
+            }
+
+            if (IsGenericType)
+            {
+                RppGenericParameter[] genericParametrs = DefinitionType.GenericParameters.ToArray();
+                int index = 0;
+                return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
+                                                                    {
+                                                                        RppGenericParameter genericParam = genericParametrs[index++];
+                                                                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                                                                    }).Contains(false);
+            }
+
+            return true;
+        }
+
+        private bool Compare(RppGenericParameterCovariance covariance, RType leftGeneric, RType rightGeneric)
+        {
+            switch (covariance)
+            {
+                case RppGenericParameterCovariance.Default:
+                    return leftGeneric.IsSame(rightGeneric);
+                case RppGenericParameterCovariance.Covariant:
+                    return rightGeneric.IsSubclassOf(leftGeneric);
+                case RppGenericParameterCovariance.Contravariant:
+                    return leftGeneric.IsSubclassOf(rightGeneric);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

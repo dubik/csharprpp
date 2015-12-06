@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -246,5 +248,83 @@ object Main
             Assert.AreEqual(132, res);
         }
 
+
+        /**
+            class List[A]
+            class Fruit
+            class Apple extends Fruit
+        */
+
+        [TestMethod]
+        [TestCategory("Covariance")]
+        public void DefaultTypesEquality()
+        {
+            RType listOfFruitsTy;
+            RType listOfApplesTy;
+            CreateTypes(RppGenericParameterCovariance.Default, out listOfFruitsTy, out listOfApplesTy);
+
+            // List[Fruit] = List[Apple]
+            Assert.IsFalse(listOfFruitsTy.IsAssignable(listOfApplesTy));
+
+            // List[Apple] = List[Fruit]
+            Assert.IsFalse(listOfApplesTy.IsAssignable(listOfFruitsTy));
+        }
+
+        [TestMethod]
+        [TestCategory("Covariance")]
+        public void CovariantTypesEquality()
+        {
+            RType listOfFruitsTy;
+            RType listOfApplesTy;
+            CreateTypes(RppGenericParameterCovariance.Covariant, out listOfFruitsTy, out listOfApplesTy);
+
+            // List[Fruit] = List[Apple]
+            Assert.IsTrue(listOfFruitsTy.IsAssignable(listOfApplesTy));
+
+            // List[Apple] = List[Fruit]
+            Assert.IsFalse(listOfApplesTy.IsAssignable(listOfFruitsTy));
+        }
+
+
+        [TestMethod]
+        [TestCategory("Covariance")]
+        public void ContravariantTypesEquality()
+        {
+            RType listOfFruitsTy;
+            RType listOfApplesTy;
+            CreateTypes(RppGenericParameterCovariance.Contravariant, out listOfFruitsTy, out listOfApplesTy);
+
+            // List[Fruit] = List[Apple]
+            Assert.IsFalse(listOfFruitsTy.IsAssignable(listOfApplesTy));
+
+            // List[Apple] = List[Fruit]
+            Assert.IsTrue(listOfApplesTy.IsAssignable(listOfFruitsTy));
+        }
+
+        /// <summary>
+        /// Creates 2 types, List[Fruit] and List[Apple], where:
+        /// <code>
+        /// class List[A]
+        /// class Fruit
+        /// class Apple extends Fruit
+        /// </code>
+        /// </summary>
+        /// <param name="covariance">covariance type for type argument <code>'A'</code></param>
+        /// <param name="listOfFruits"></param>
+        /// <param name="listOfApples"></param>
+        private static void CreateTypes(RppGenericParameterCovariance covariance, out RType listOfFruits, out RType listOfApples)
+        {
+            RType listTy = new RType("List", RTypeAttributes.Interface);
+            RppGenericParameter[] genericParameters = listTy.DefineGenericParameters(new[] {"A"});
+            genericParameters[0].Covariance = covariance;
+            RType fruitTy = new RType("Fruit");
+
+            RType listOfFruitsTy = listTy.MakeGenericType(new[] {fruitTy});
+
+            RType appleTy = new RType("Apple", RTypeAttributes.Class, fruitTy, null);
+            listOfApples = listTy.MakeGenericType(new[] {appleTy});
+
+            listOfFruits = listOfFruitsTy;
+        }
     }
 }
