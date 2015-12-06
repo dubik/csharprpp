@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Reporting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,7 +8,6 @@ namespace CSharpRppTest
     [TestClass]
     public class DiagnosticTest
     {
-
         [TestMethod]
         public void NonInitializedLocalVar()
         {
@@ -23,6 +23,21 @@ object Main
             Utils.ParseAndAnalyze(code, diagnostic);
             Assert.AreEqual(1, diagnostic.Errors.Count());
             Assert.AreEqual(102, diagnostic.Errors.First().Code);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (TypeNotFoundException))]
+        public void TypeNotFound()
+        {
+            const string code = @"
+object Main
+{
+    def main: Foo = {
+    }
+}
+";
+            Diagnostic diagnostic = new Diagnostic();
+            Utils.ParseAndAnalyze(code, diagnostic);
         }
     }
 }
