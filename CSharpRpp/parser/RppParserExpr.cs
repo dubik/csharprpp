@@ -220,8 +220,7 @@ namespace CSharpRpp
         private RppNew ParseNewExpr()
         {
             Expect(RppLexer.Id);
-            string name = _lastToken.Text;
-            RTypeName typeName = new RTypeName(name);
+            RTypeName typeName = new RTypeName(_lastToken);
             if (Peek(RppLexer.OP_LBracket))
             {
                 IList<RTypeName> genericArguments = ParseTypeParamClause();

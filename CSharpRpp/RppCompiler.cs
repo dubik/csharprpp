@@ -6,10 +6,12 @@ using System.Reflection;
 using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Reporting;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -20,11 +22,13 @@ namespace CSharpRpp
             string outFileName = GetOutputFileName(options);
 
             CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, outFileName);
-
-            ValidateEntryPoint(generator, options, diagnostic);
-            if (!diagnostic.Errors.Any())
+            if (generator != null)
             {
-                generator.Save(outFileName);
+                ValidateEntryPoint(generator, options, diagnostic);
+                if (!diagnostic.Errors.Any())
+                {
+                    generator.Save(outFileName);
+                }
             }
         }
 
@@ -48,6 +52,7 @@ namespace CSharpRpp
             return Path.GetFileNameWithoutExtension(firstFile) + ext;
         }
 
+        [CanBeNull]
         public static CodeGenerator Compile(Action<RppProgram> parseFactory, Diagnostic diagnostic, string fileName = "<buffer>")
         {
             RppProgram program = new RppProgram();
@@ -92,6 +97,11 @@ namespace CSharpRpp
                 Console.WriteLine(line);
                 Console.WriteLine("{0}^", Ident(e.Token.CharPositionInLine));
                 Environment.Exit(-1);
+            }
+            catch (TypeNotFoundException e)
+            {
+                diagnostic.Error(103, e.GenerateMessage());
+                return null;
             }
 
             generator.Generate();

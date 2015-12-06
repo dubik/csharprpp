@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Antlr.Runtime;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 
@@ -12,13 +14,22 @@ namespace CSharpRpp.TypeSystem
         public static RTypeName UnitN = new RTypeName("Unit");
         public static RTypeName IntN = new RTypeName("Int");
 
+        [NotNull]
         public string Name { get; }
+
+        [CanBeNull]
+        public IToken Token { get; set; }
 
         private readonly IList<RTypeName> _params = new List<RTypeName>();
 
-        public RTypeName(string name)
+        public RTypeName([NotNull] string name)
         {
             Name = name;
+        }
+
+        public RTypeName([NotNull] IToken token) : this(token.Text)
+        {
+            Token = token;
         }
 
         public void AddGenericArgument(RTypeName genericArgument)
@@ -28,7 +39,14 @@ namespace CSharpRpp.TypeSystem
 
         public RType Resolve([NotNull] SymbolTable scope)
         {
-            RType type = scope.LookupType(Name).Type;
+            TypeSymbol typeSymbol = scope.LookupType(Name);
+
+            if (typeSymbol == null)
+            {
+                throw new TypeNotFoundException(Token);
+            }
+
+            RType type = typeSymbol.Type;
 
             if (_params.Any())
             {

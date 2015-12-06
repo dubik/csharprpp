@@ -380,7 +380,7 @@ namespace CSharpRpp
             {
                 if (Require(RppLexer.Id))
                 {
-                    baseClassType = new RTypeName(_lastToken.Text);
+                    baseClassType = new RTypeName(_lastToken);
                 }
                 else
                 {
@@ -663,10 +663,10 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.Id))
             {
-                string typeName = _lastToken.Text;
+                IToken typeNameToken = _lastToken;
                 if (Require(RppLexer.OP_LBracket))
                 {
-                    RTypeName genericType = new RTypeName(typeName);
+                    RTypeName genericType = new RTypeName(typeNameToken);
                     type = genericType;
 
                     RTypeName subType;
@@ -702,7 +702,7 @@ namespace CSharpRpp
                     return true;
                 }
 
-                type = new RTypeName(typeName);
+                type = new RTypeName(typeNameToken);
                 return true;
             }
 

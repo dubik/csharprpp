@@ -6,7 +6,7 @@ namespace CSharpRpp
 {
     public class Program
     {
-        public static int Main1(string[] args)
+        public static int Main(string[] args)
         {
             var result = CommandLine.Parser.Default.ParseArguments<RppOptions>(args);
             return result.MapResult(RunAndReturnExitCode, _ => 1);

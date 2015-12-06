@@ -4,9 +4,9 @@ using CSharpRpp.Reporting;
 
 namespace BufferCompiler
 {
-    class Program
+    public class Program
     {
-        private static void Main()
+        public static void Main()
         {
             /*
             const string code = @"
@@ -53,7 +53,14 @@ object Main
 }";
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
-            codeGen.Save("Sample.dll");
+            if (codeGen == null)
+            {
+                diagnostic.Report();
+            }
+            else
+            {
+                codeGen.Save("Sample.dll");
+            }
         }
     }
 }

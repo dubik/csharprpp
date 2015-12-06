@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
 
 namespace CSharpRpp.Symbols
 {
@@ -68,7 +69,8 @@ namespace CSharpRpp.Symbols
             return Parent?.Lookup(name);
         }
 
-        public TypeSymbol LookupType(string name)
+        [CanBeNull]
+        public TypeSymbol LookupType([NotNull] string name)
         {
             Symbol symbol = Lookup(name);
             return symbol as TypeSymbol;

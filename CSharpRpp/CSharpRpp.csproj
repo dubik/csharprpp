@@ -97,6 +97,8 @@
     <Compile Include="Collections.cs" />
     <Compile Include="DefaultTypesComparator.cs" />
     <Compile Include="EnumerableExtensions.cs" />
+    <Compile Include="Exceptions\TokenUtils.cs" />
+    <Compile Include="Exceptions\TypeNotFoundException.cs" />
     <Compile Include="Exceptions\SemanticException.cs" />
     <Compile Include="Expr\RppIf.cs" />
     <Compile Include="Expr\ImplicitCast.cs" />

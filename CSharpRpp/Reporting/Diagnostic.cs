@@ -10,13 +10,14 @@ namespace CSharpRpp.Reporting
 
         private readonly List<ErrorMessage> _errors = new List<ErrorMessage>();
 
-        public Diagnostic()
-        {
-        }
-
         public void Error(int code, string message)
         {
             _errors.Add(new ErrorMessage(code, message));
+        }
+
+        public void Error(int code, string firstline, string secondline)
+        {
+            _errors.Add(new ErrorMessage(code, firstline, secondline));
         }
 
         public void Report()
