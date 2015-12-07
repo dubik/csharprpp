@@ -148,13 +148,16 @@ namespace CSharpRpp.Codegen
             genericParameters.EachPair(typeParams, (genericParam, typeParam) =>
             {
                 genericParam.Constraint = typeParam.ConstraintType;
-                if (typeParam.ConstraintType.IsClass)
+                if (typeParam.ConstraintType != null)
                 {
-                    genericParam.Type.BaseType = typeParam.ConstraintType;
-                }
-                else
-                {
-                    throw new Exception("Interfaces and value types are not supported yet");
+                    if (typeParam.ConstraintType.IsClass)
+                    {
+                        genericParam.Type.BaseType = typeParam.ConstraintType;
+                    }
+                    else
+                    {
+                        throw new Exception("Interfaces and value types are not supported yet");
+                    }
                 }
             });
         }
