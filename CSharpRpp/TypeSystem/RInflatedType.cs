@@ -29,7 +29,14 @@ namespace CSharpRpp.TypeSystem
                 if (_type == null)
                 {
                     Type[] types = _genericArguments.Select(a => a.NativeType).ToArray();
-                    _type = DefinitionType.NativeType.MakeGenericType(types);
+                    if (Name == "Array")
+                    {
+                        _type = types[0].MakeArrayType();
+                    }
+                    else
+                    {
+                        _type = DefinitionType.NativeType.MakeGenericType(types);
+                    }
                 }
 
                 return _type;
@@ -39,6 +46,7 @@ namespace CSharpRpp.TypeSystem
         public RInflatedType([NotNull] RType type, RType[] genericArguments) : base(type.Name, type.Attributes, type.BaseType, type.DeclaringType)
         {
             DefinitionType = type;
+            IsArray = type.IsArray;
 
             if (!type.IsGenericType)
             {

@@ -109,7 +109,7 @@ namespace CSharpRpp.TypeSystem
 
     public enum RppGenericParameterCovariance
     {
-        Default,
+        Invariant,
 
         /// <summary>
         /// Covariant type, e.g. '+'
@@ -133,7 +133,7 @@ namespace CSharpRpp.TypeSystem
         public RppGenericParameter(string name)
         {
             Name = name;
-            Covariance = RppGenericParameterCovariance.Default;
+            Covariance = RppGenericParameterCovariance.Invariant;
         }
 
         public override string ToString()
@@ -244,7 +244,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsInterface => Attributes.HasFlag(RTypeAttributes.Interface);
 
-        public bool IsArray { get; private set; }
+        public bool IsArray { get; set; }
 
         public bool IsGenericType => GenericParameters.Any() || GenericArguments.Any();
 
@@ -443,7 +443,7 @@ namespace CSharpRpp.TypeSystem
             [CanBeNull] RType returnType,
             [NotNull] RppParameterInfo[] parameterTypes)
         {
-            return DefineMethod(name, attributes, returnType, parameterTypes, null);
+            return DefineMethod(name, attributes, returnType, parameterTypes, new RppGenericParameter[0]);
         }
 
         public RppMethodInfo DefineMethod([NotNull] string name,
@@ -486,6 +486,8 @@ namespace CSharpRpp.TypeSystem
         public RType MakeArrayType()
         {
             // TODO perhaps we should have generic type for array and make specialized version of it
+            // TODO make this is not needed anymore because we have RInflatedType and can do what TODO above says
+            // we also do that for cases when Array[String] is parsed (because we resolve type name)
             RType newType = new RType("Array", Attributes, null, DeclaringType) {IsArray = true};
             newType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
             newType.DefineMethod("apply", RMethodAttributes.Public, this, new[] {new RppParameterInfo("index", IntTy)}, new RppGenericParameter[0]);
@@ -722,10 +724,10 @@ namespace CSharpRpp.TypeSystem
                 RppGenericParameter[] genericParametrs = DefinitionType.GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                                                                    {
-                                                                        RppGenericParameter genericParam = genericParametrs[index++];
-                                                                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                                                                    }).Contains(false);
+                {
+                    RppGenericParameter genericParam = genericParametrs[index++];
+                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                }).Contains(false);
             }
 
             return true;
@@ -735,7 +737,7 @@ namespace CSharpRpp.TypeSystem
         {
             switch (covariance)
             {
-                case RppGenericParameterCovariance.Default:
+                case RppGenericParameterCovariance.Invariant:
                     return leftGeneric.IsSame(rightGeneric);
                 case RppGenericParameterCovariance.Covariant:
                     return rightGeneric.IsSubclassOf(leftGeneric);

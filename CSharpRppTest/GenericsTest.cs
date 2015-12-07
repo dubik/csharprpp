@@ -261,7 +261,7 @@ object Main
         {
             RType listOfFruitsTy;
             RType listOfApplesTy;
-            CreateTypes(RppGenericParameterCovariance.Default, out listOfFruitsTy, out listOfApplesTy);
+            CreateTypes(RppGenericParameterCovariance.Invariant, out listOfFruitsTy, out listOfApplesTy);
 
             // List[Fruit] = List[Apple]
             Assert.IsFalse(listOfFruitsTy.IsAssignable(listOfApplesTy));

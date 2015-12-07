@@ -693,7 +693,7 @@ namespace CSharpRpp
     {
         public ResolvableType Type { get; private set; }
 
-        public IEnumerable<IRppExpr> Initializers { get; private set; }
+        public IEnumerable<IRppExpr> Initializers { get; }
 
         public int Size { get; private set; }
 

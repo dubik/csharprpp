@@ -68,6 +68,7 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(ImportClass(typeof (string)));
             scope.AddType(AnyTy);
             scope.AddType(NothingTy);
+            scope.AddType(CreateArrayType());
         }
 
         public static RType ImportClass(Type systemType)
@@ -80,6 +81,18 @@ namespace CSharpRpp.TypeSystem
         {
             RType type = CreateType(name, systemType);
             return type;
+        }
+
+        private static RType CreateArrayType()
+        {
+            RType arrayType = new RType("Array") {IsArray = true};
+            RppGenericParameter genericParameter = arrayType.DefineGenericParameters(new[] {"A"})[0];
+            arrayType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
+            arrayType.DefineMethod("apply", RMethodAttributes.Public, genericParameter.Type, new[] {new RppParameterInfo("index", IntTy)},
+                new RppGenericParameter[0]);
+            arrayType.DefineMethod("update", RMethodAttributes.Public, genericParameter.Type,
+                new[] {new RppParameterInfo("index", IntTy), new RppParameterInfo("value", genericParameter.Type)}, new RppGenericParameter[0]);
+            return arrayType;
         }
 
         [NotNull]
