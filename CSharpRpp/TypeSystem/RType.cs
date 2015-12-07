@@ -748,7 +748,7 @@ namespace CSharpRpp.TypeSystem
             return true;
         }
 
-        private bool Compare(RppGenericParameterCovariance covariance, RType leftGeneric, RType rightGeneric)
+        private static bool Compare(RppGenericParameterCovariance covariance, RType leftGeneric, RType rightGeneric)
         {
             switch (covariance)
             {

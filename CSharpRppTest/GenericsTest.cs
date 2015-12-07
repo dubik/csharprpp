@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.TypeSystem;
@@ -328,6 +329,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void TestGenericsConstraint()
         {
             const string code = @"
@@ -338,6 +340,56 @@ class Bag[A <: Item]
             Assert.IsTrue(bagTy.ContainsGenericParameters);
             Type[] typeParameters = bagTy.GetGenericArguments();
             Assert.AreEqual("Item", typeParameters[0].BaseType?.Name);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void ConstraintedMembersShouldBeAvailableToGenericParameter()
+        {
+            const string code = @"
+class Item {
+    def read(): String = ""Hello""
+}
+
+class Bag[A <: Item] {
+    def doSome(f: A): String = {
+        f.read()
+    }
+}
+
+object Main {
+    def main: String = {
+        val k = new Bag[Item]()
+        val item = new Item()
+        k.doSome(item)
+    }
+}
+";
+            Type bagTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(bagTy, "main", null);
+            Assert.AreEqual("Hello", res);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void ConstraintedMembersShouldBeAvailableToMethodGenericParameter()
+        {
+            const string code = @"
+class Item {
+    def read(): String = ""Hello""
+}
+object Main {
+    def main[A <: Item](item: A) : String = item.read()
+
+    def execute: String = {
+        val item = new Item()
+        main[Item](item)
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "execute", null);
+            Assert.AreEqual("Hello", res);
         }
     }
 }

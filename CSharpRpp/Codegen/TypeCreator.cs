@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using CSharpRpp.Reporting;
@@ -138,8 +139,24 @@ namespace CSharpRpp.Codegen
             if (_currentType.IsGenericType)
             {
                 _currentClass.ResolveGenericTypeConstraints(_currentClass.Scope, _diagnostic);
-                _currentType.GenericParameters.EachPair(node.TypeParams, (genericParam, typeParam) => { genericParam.Constraint = typeParam.ConstraintType; });
+                ProcessGenerics(node.TypeParams, _currentType.GenericParameters);
             }
+        }
+
+        private static void ProcessGenerics(IEnumerable<RppVariantTypeParam> typeParams, IEnumerable<RppGenericParameter> genericParameters)
+        {
+            genericParameters.EachPair(typeParams, (genericParam, typeParam) =>
+            {
+                genericParam.Constraint = typeParam.ConstraintType;
+                if (typeParam.ConstraintType.IsClass)
+                {
+                    genericParam.Type.BaseType = typeParam.ConstraintType;
+                }
+                else
+                {
+                    throw new Exception("Interfaces and value types are not supported yet");
+                }
+            });
         }
 
         public override void VisitExit(RppFunc node)
@@ -157,7 +174,10 @@ namespace CSharpRpp.Codegen
             if (node.TypeParams.Any())
             {
                 string[] genericArgumentsNames = node.TypeParams.Select(tp => tp.Name).ToArray();
-                method.DefineGenericParameters(genericArgumentsNames);
+                var genericParameters = method.DefineGenericParameters(genericArgumentsNames);
+
+                node.ResolveGenericTypeConstraints(_currentClass.Scope, _diagnostic);
+                ProcessGenerics(node.TypeParams, genericParameters);
             }
 
             node.ResolveTypes(_currentClass.Scope, _diagnostic);

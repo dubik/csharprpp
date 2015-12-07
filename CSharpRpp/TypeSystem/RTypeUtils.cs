@@ -161,7 +161,7 @@ namespace CSharpRpp.TypeSystem
 
             if (!rAttributes.HasFlag(RMethodAttributes.Override))
             {
-                if(!constructor)
+                if (!constructor)
                 {
                     attrs |= MethodAttributes.NewSlot;
                 }
@@ -213,13 +213,35 @@ namespace CSharpRpp.TypeSystem
 
             if (rppMethod.HasGenericParameters())
             {
+                string[] genericParameterNames = rppMethod.GenericParameters.Select(p => p.Name).ToArray();
+                GenericTypeParameterBuilder[] nativeGenericParameter = method.DefineGenericParameters(genericParameterNames);
+                var _genericParameters = rppMethod.GenericParameters;
+                _genericParameters.ForEachWithIndex(
+                    (index, genericParameter) =>
+                    {
+                        genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]);
+                        if (genericParameter.Constraint != null)
+                        {
+                            if (genericParameter.Constraint.IsClass)
+                            {
+                                nativeGenericParameter[index].SetBaseTypeConstraint(genericParameter.Constraint.NativeType);
+                            }
+                            else
+                            {
+                                nativeGenericParameter[index].SetInterfaceConstraints(genericParameter.Constraint.NativeType);
+                            }
+                        }
+                    });
+
                 // TODO missing constraints for generics
+                /*
                 string[] genericParametersNames = rppMethod.GenericParameters.Select(gp => gp.Name).ToArray();
                 GenericTypeParameterBuilder[] builders = method.DefineGenericParameters(genericParametersNames);
                 for (int i = 0; i < rppMethod.GenericParameters.Length; i++)
                 {
                     rppMethod.GenericParameters[i].SetGenericTypeParameterBuilder(builders[i]);
                 }
+                */
             }
 
             DefineReturnType(method, rppMethod.ReturnType);

@@ -137,17 +137,15 @@ namespace CSharpRpp
             ReturnType2.Resolve(tempScope);
         }
 
+        public void ResolveGenericTypeConstraints(SymbolTable scope, Diagnostic diagnostic)
+        {
+            NodeUtils.Analyze(scope, TypeParams, diagnostic);
+        }
+
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             _scope = new SymbolTable(scope, MethodInfo);
             Params.ForEach(p => _scope.AddLocalVar(p.Name, p.Type.Value, p));
-            // TODO this is probably not needed , because next line adds generic params to the scope
-            //TypeParams.ForEach(_scope.Add);
-
-            foreach (var typeParam in TypeParams)
-            {
-                //_scope.Add(typeParam.Name, RppNativeType.Create(typeParam.Runtime));
-            }
 
             Expr = NodeUtils.AnalyzeNode(_scope, Expr, diagnostic);
 
