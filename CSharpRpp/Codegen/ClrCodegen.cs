@@ -97,7 +97,7 @@ namespace CSharpRpp.Codegen
                 }
 
                 string msg = $"Method '{groups[0]}' in class '{groups[1]}' does not have an implementation";
-                throw new SemanticException(msg);
+                throw new SemanticException(105, msg);
             }
 
             Console.WriteLine("Generated class");

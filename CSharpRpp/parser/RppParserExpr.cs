@@ -428,13 +428,14 @@ namespace CSharpRpp
             if (expr is RppId)
             {
                 RppId id = expr as RppId;
-                return new RppFuncCall(id.Name, args, typeArgs);
+                return new RppFuncCall(id.Name, args, typeArgs) {Token = id.Token};
             }
 
             if (expr is RppSelector)
             {
                 RppSelector selector = expr as RppSelector;
-                return new RppSelector(selector.Target, new RppFuncCall(selector.Path.Name, args, typeArgs));
+                RppFuncCall funcCall = new RppFuncCall(selector.Path.Name, args, typeArgs) {Token = selector.Path.Token};
+                return new RppSelector(selector.Target, funcCall);
             }
 
             return expr;

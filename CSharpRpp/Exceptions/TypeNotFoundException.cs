@@ -2,26 +2,25 @@
 
 namespace CSharpRpp.Exceptions
 {
-    public class TypeNotFoundException : SemanticException
+    public class SemanticExceptionFactory
     {
-        public IToken Token { get; set; }
-
-        public TypeNotFoundException(IToken token)
+        public static SemanticException TypeNotFound(IToken token)
         {
-            Token = token;
+            return new SemanticException(103, FormatErrorAndPointAtToken(token, $"not found: type {token.Text}"));
         }
 
-        public string GenerateMessage()
+        public static SemanticException MemberNotFound(IToken token, string targetTypeName)
         {
-            if (Token != null)
-            {
-                string firstLine = $"Error({Token.Line}, {Token.CharPositionInLine}) not found: type {Token.Text}";
-                string secondLine = TokenUtils.GetTokenLine(Token);
-                string pointerLine = $"{TokenUtils.Ident(Token.CharPositionInLine)}^";
-                return $"{firstLine}\n{secondLine}\n{pointerLine}";
-            }
+            string str = FormatErrorAndPointAtToken(token, $"value {token.Text} is not a member of {targetTypeName}");
+            return new SemanticException(104, str);
+        }
 
-            return "type not found";
+        private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
+        {
+            string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
+            string secondLine = TokenUtils.GetTokenLine(token);
+            string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
+            return $"{firstLine}\n{secondLine}\n{pointerLine}";
         }
     }
 }

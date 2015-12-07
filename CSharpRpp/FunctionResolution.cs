@@ -4,6 +4,7 @@ using System.Linq;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -120,9 +121,15 @@ namespace CSharpRpp
             return null;
         }
 
+        [CanBeNull]
         private static ResolveResults SearchInCompanionObjects(string name, IEnumerable<IRppExpr> args, Symbols.SymbolTable scope)
         {
             TypeSymbol obj = scope.LookupObject(name);
+            if (obj == null)
+            {
+                return null;
+            }
+
             var applyFunctions = obj.Type.Methods.Where(func => func.Name == "apply").ToList();
             if (applyFunctions.Count == 0)
             {

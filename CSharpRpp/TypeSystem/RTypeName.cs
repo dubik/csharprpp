@@ -43,7 +43,7 @@ namespace CSharpRpp.TypeSystem
 
             if (typeSymbol == null)
             {
-                throw new TypeNotFoundException(Token);
+                throw SemanticExceptionFactory.TypeNotFound(Token);
             }
 
             RType type = typeSymbol.Type;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Antlr.Runtime;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
@@ -368,7 +370,7 @@ namespace CSharpRpp
 
     public class RppFuncCall : RppMember
     {
-        public override sealed ResolvableType Type { get; protected set; }
+        public sealed override ResolvableType Type { get; protected set; }
 
         public IEnumerable<IRppExpr> Args => ArgList.AsEnumerable();
 
@@ -445,6 +447,11 @@ namespace CSharpRpp
 
             // Search for a function which matches signature and possible gaps in types (for closures)
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
+            if (resolveResults == null)
+            {
+                throw SemanticExceptionFactory.MemberNotFound(Token, TargetType2.Name);
+            }
+
             IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
             //var args = ArgList;
             NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure, diagnostic);
@@ -499,22 +506,6 @@ namespace CSharpRpp
         private static RType GetElementType(RType arrayType)
         {
             return arrayType.SubType();
-            /*
-            RppArrayType type = arrayType as RppArrayType;
-            if (type != null)
-            {
-                return type.SubType;
-            }
-
-            if (arrayType is RppNativeType)
-            {
-                Type nativeArrayType = arrayType.Runtime;
-                return RppNativeType.Create(nativeArrayType.GetElementType());
-            }
-
-            Debug.Assert(false, "arrayType is not arraytype ");
-            return null;
-            */
         }
 
         private static IRppExpr BoxIfValueType(IRppExpr arg, RType targetType)
@@ -576,7 +567,7 @@ namespace CSharpRpp
     {
         public RppMethodInfo BaseConstructor { get; private set; }
 
-        public ResolvableType BaseClassType2 { get; private set; }
+        public ResolvableType BaseClassType2 { get; }
 
         public static RppBaseConstructorCall Object = new RppBaseConstructorCall(AnyTy, Collections.NoExprs);
 
@@ -593,27 +584,6 @@ namespace CSharpRpp
 
         public void ResolveBaseClass(SymbolTable scope)
         {
-            /*
-            switch (BaseClassName)
-            {
-                case "Object":
-                    BaseClassType2 = new RType("Object", typeof (object));
-                    BaseClass = new RppNativeClass(typeof (object));
-                    break;
-                case "Exception":
-                    BaseClassType2 = new RType("Exception", typeof (Exception));
-                    BaseClass = new RppNativeClass(typeof (Exception));
-                    break;
-                default:
-                    BaseClassType2 = scope.LookupType(BaseClassName).Type;
-                    if (BaseClassType2 == null)
-                    {
-                        throw new Exception($"Can't find {BaseClassName} class");
-                    }
-                    break;
-            }
-            */
-
             BaseClassType2.Resolve(scope);
         }
 
@@ -621,26 +591,6 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList, diagnostic);
 
-            /*
-            BaseClassTypeArgs = BaseClassTypeArgs.Select(type => type.Resolve(scope)).ToList();
-
-            var types = BaseClassTypeArgs.Select(type => type.Runtime).ToArray();
-
-            IEnumerable<RppType> args = Args.Select(a => a.Type).ToList();
-            if (BaseClass.RuntimeType.IsGenericType)
-            {
-                BaseClassType = new RppGenericObjectType(BaseClass, types, BaseClass.RuntimeType.MakeGenericType(types));
-            }
-            else
-            {
-                BaseClassType = new RppObjectType(BaseClass);
-            }
-
-            BaseConstructor = FindMatchingConstructor(args);
-
-            // parent constructor is a special case, so don't resolve function
-            Type = RppNativeType.Create(typeof (void));
-            */
             SymbolTable sc = new SymbolTable(null, BaseClassType2.Value);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type = UnitTy;
@@ -890,6 +840,7 @@ namespace CSharpRpp
         public IRppNamedNode Ref { get; private set; }
 
         public RppFieldInfo Field { get; private set; }
+
 
         public RppId([NotNull] string name) : base(name)
         {

@@ -98,11 +98,12 @@ namespace CSharpRpp
                 Console.WriteLine("{0}^", Ident(e.Token.CharPositionInLine));
                 Environment.Exit(-1);
             }
-            catch (TypeNotFoundException e)
+            catch (SemanticException e)
             {
-                diagnostic.Error(103, e.GenerateMessage());
+                diagnostic.Error(e.Code, e.Message);
                 return null;
             }
+
 
             generator.Generate();
             return generator;

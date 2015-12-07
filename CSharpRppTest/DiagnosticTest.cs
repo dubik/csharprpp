@@ -26,7 +26,7 @@ object Main
         }
 
         [TestMethod]
-        [ExpectedException(typeof (TypeNotFoundException))]
+        [ExpectedException(typeof (SemanticException))]
         public void TypeNotFound()
         {
             const string code = @"
@@ -36,8 +36,24 @@ object Main
     }
 }
 ";
-            Diagnostic diagnostic = new Diagnostic();
-            Utils.ParseAndAnalyze(code, diagnostic);
+            Utils.ParseAndAnalyze(code, new Diagnostic());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SemanticException))]
+        public void ValueIsNotAMember()
+        {
+            const string code = @"
+class Item {
+}
+
+object Main {
+    def main(item: Item): Unit = {
+        item.calculate()
+    }
+}
+";
+            Utils.ParseAndAnalyze(code, new Diagnostic());
         }
     }
 }
