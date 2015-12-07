@@ -99,6 +99,7 @@ namespace CSharpRpp.Codegen
         public override void VisitEnter(RppClass node)
         {
             _currentClass = node;
+            node.ResolveGenericTypeConstraints(_currentClass.Scope, _diagnostic);
         }
 
         public override void VisitEnter(RppFunc node)
@@ -127,6 +128,18 @@ namespace CSharpRpp.Codegen
         {
             _currentClass = node;
             _currentType = node.Type;
+
+            ProcessTypeConstraints(node);
+        }
+
+        // class Bag[A : Item] -> resolves 'Item' and sets constraint to generic parameter
+        private void ProcessTypeConstraints(RppClass node)
+        {
+            if (_currentType.IsGenericType)
+            {
+                _currentClass.ResolveGenericTypeConstraints(_currentClass.Scope, _diagnostic);
+                _currentType.GenericParameters.EachPair(node.TypeParams, (genericParam, typeParam) => { genericParam.Constraint = typeParam.ConstraintType; });
+            }
         }
 
         public override void VisitExit(RppFunc node)

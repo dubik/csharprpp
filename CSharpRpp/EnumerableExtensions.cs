@@ -20,5 +20,23 @@ namespace CSharpRpp
                 index++;
             }
         }
+
+        public static void EachPair<TFirst, TSecond>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, Action<TFirst, TSecond> resultSelector)
+        {
+            first.EachPairWithIndex(second, (index, firstItem, secondItem) => resultSelector(firstItem, secondItem));
+        }
+
+        public static void EachPairWithIndex<TFirst, TSecond>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second,
+            Action<int, TFirst, TSecond> resultSelector)
+        {
+            int index = 0;
+            var firstIter = first.GetEnumerator();
+            var secondIter = second.GetEnumerator();
+            while (firstIter.MoveNext() && secondIter.MoveNext())
+            {
+                resultSelector(index, firstIter.Current, secondIter.Current);
+                index++;
+            }
+        }
     }
 }

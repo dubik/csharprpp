@@ -341,15 +341,19 @@ namespace CSharpRpp
 
         private bool ParseVariantTypeParam(out RppVariantTypeParam typeParam)
         {
-            TypeVariant variant = TypeVariant.Contravariant; // -T
+            TypeVariant variant = TypeVariant.Invariant; // "A"
             bool requireId = false;
             if (Require(RppLexer.OP_Ops))
             {
-                if (_lastToken.Text == "+")
+                if (_lastToken.Text == "+") // "+A"
                 {
                     variant = TypeVariant.Covariant;
                 }
-                else if (_lastToken.Text != "-")
+                else if (_lastToken.Text == "-") // "-A"
+                {
+                    variant = TypeVariant.Contravariant;
+                }
+                else
                 {
                     throw new Exception("Expected '+' or '-' but got " + _lastToken.Text);
                 }
@@ -359,7 +363,15 @@ namespace CSharpRpp
 
             if (Require(RppLexer.Id))
             {
-                typeParam = new RppVariantTypeParam(_lastToken.Text, variant);
+                string typeParamName = _lastToken.Text;
+                RTypeName constraint = null;
+                if (Require(RppLexer.OP_Colon))
+                {
+                    Expect(RppLexer.Id);
+                    constraint = new RTypeName(_lastToken);
+                }
+
+                typeParam = new RppVariantTypeParam(typeParamName, variant, constraint);
                 return true;
             }
 

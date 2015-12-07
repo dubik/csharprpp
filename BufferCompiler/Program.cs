@@ -45,12 +45,9 @@ object Main
 ";
 */
             const string code1 = @"
-object Main
-{
-    def main(argv: Array[String]) : Int = {
-        13
-    }
-}";
+class Item
+class Bag[A : Item]
+";
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)

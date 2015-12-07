@@ -129,6 +129,7 @@ namespace CSharpRpp.TypeSystem
         public int Position { get; set; }
         public GenericTypeParameterBuilder Native { get; private set; }
         public RppGenericParameterCovariance Covariance { get; set; }
+        public RType Constraint { get; set; }
 
         public RppGenericParameter(string name)
         {
@@ -583,7 +584,21 @@ namespace CSharpRpp.TypeSystem
                     string[] genericParameterNames = _genericParameters.Select(p => p.Name).ToArray();
                     GenericTypeParameterBuilder[] nativeGenericParameter = _typeBuilder.DefineGenericParameters(genericParameterNames);
                     _genericParameters.ForEachWithIndex(
-                        (index, genericParameter) => genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]));
+                        (index, genericParameter) =>
+                        {
+                            genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]);
+                            if (genericParameter.Constraint != null)
+                            {
+                                if (genericParameter.Constraint.IsClass)
+                                {
+                                    nativeGenericParameter[index].SetBaseTypeConstraint(genericParameter.Constraint.NativeType);
+                                }
+                                else
+                                {
+                                    nativeGenericParameter[index].SetInterfaceConstraints(genericParameter.Constraint.NativeType);
+                                }
+                            }
+                        });
                 }
             }
         }

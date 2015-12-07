@@ -144,6 +144,11 @@ namespace CSharpRpp
             return this;
         }
 
+        public void ResolveGenericTypeConstraints(SymbolTable scope, Diagnostic diagnostic)
+        {
+            NodeUtils.Analyze(scope, TypeParams, diagnostic);
+        }
+
         [NotNull]
         private RppFunc CreatePrimaryConstructor(IEnumerable<IRppExpr> exprs)
         {

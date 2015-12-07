@@ -2,6 +2,14 @@
 
 namespace CLRCodeGen.Monads
 {
+    public class Item
+    {
+    }
+
+    public class Bag<TA> where TA : Item
+    {
+    }
+
     internal abstract class Option<TItem>
     {
         public abstract bool IsEmpty();

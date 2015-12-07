@@ -326,5 +326,18 @@ object Main
 
             listOfFruits = listOfFruitsTy;
         }
+
+        [TestMethod]
+        public void TestGenericsConstraint()
+        {
+            const string code = @"
+class Item
+class Bag[A : Item]
+";
+            Type bagTy = Utils.ParseAndCreateType(code, "Bag");
+            Assert.IsTrue(bagTy.ContainsGenericParameters);
+            Type[] typeParameters = bagTy.GetGenericArguments();
+            Assert.AreEqual("Item", typeParameters[0].BaseType?.Name);
+        }
     }
 }
