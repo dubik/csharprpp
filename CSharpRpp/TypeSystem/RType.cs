@@ -72,7 +72,7 @@ namespace CSharpRpp.TypeSystem
         private bool Equals(RppFieldInfo other)
         {
             return string.Equals(Name, other.Name) && Attributes == other.Attributes && Type.Equals(other.Type)
-                   && ((bool) DeclaringType?.Equals(other.DeclaringType));
+                   && DeclaringType.Equals(other.DeclaringType);
         }
 
         public override bool Equals(object obj)
@@ -93,7 +93,7 @@ namespace CSharpRpp.TypeSystem
         {
             unchecked
             {
-                return (Name.GetHashCode() * 397) ^ (int) Attributes ^ (DeclaringType?.GetHashCode() ?? 0);
+                return (Name.GetHashCode() * 397) ^ (int) Attributes ^ DeclaringType.GetHashCode();
             }
         }
 
@@ -160,7 +160,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsVariadic { get; }
 
-        public RppParameterInfo(RType type) : this("", type, false)
+        public RppParameterInfo(RType type) : this("", type)
         {
         }
 
@@ -545,7 +545,7 @@ namespace CSharpRpp.TypeSystem
 
         public override int GetHashCode()
         {
-            return (int) Name?.GetHashCode();
+            return Name.GetHashCode();
         }
 
         #endregion
@@ -581,24 +581,8 @@ namespace CSharpRpp.TypeSystem
 
                 if (IsGenericType)
                 {
-                    string[] genericParameterNames = _genericParameters.Select(p => p.Name).ToArray();
-                    GenericTypeParameterBuilder[] nativeGenericParameter = _typeBuilder.DefineGenericParameters(genericParameterNames);
-                    _genericParameters.ForEachWithIndex(
-                        (index, genericParameter) =>
-                        {
-                            genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]);
-                            if (genericParameter.Constraint != null)
-                            {
-                                if (genericParameter.Constraint.IsClass)
-                                {
-                                    nativeGenericParameter[index].SetBaseTypeConstraint(genericParameter.Constraint.NativeType);
-                                }
-                                else
-                                {
-                                    nativeGenericParameter[index].SetInterfaceConstraints(genericParameter.Constraint.NativeType);
-                                }
-                            }
-                        });
+                    RTypeUtils.CreateNativeGenericParameters(_genericParameters,
+                        genericParameterNames => _typeBuilder.DefineGenericParameters(genericParameterNames));
                 }
             }
         }
@@ -739,10 +723,10 @@ namespace CSharpRpp.TypeSystem
                 RppGenericParameter[] genericParametrs = DefinitionType.GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                {
-                    RppGenericParameter genericParam = genericParametrs[index++];
-                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                }).Contains(false);
+                                                                     {
+                                                                         RppGenericParameter genericParam = genericParametrs[index++];
+                                                                         return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                                                                     }).Contains(false);
             }
 
             return true;

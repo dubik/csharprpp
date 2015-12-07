@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
-    internal static class RTypeExtensions
+    static class RTypeExtensions
     {
         /// <summary>
         /// Returns sub type of array type
@@ -37,7 +37,7 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    internal class RTypeUtils
+    class RTypeUtils
     {
         public static void DefineParams(ConstructorBuilder constructorBuilder, IEnumerable<RppParameterInfo> constructorParams)
         {
@@ -213,41 +213,45 @@ namespace CSharpRpp.TypeSystem
 
             if (rppMethod.HasGenericParameters())
             {
-                string[] genericParameterNames = rppMethod.GenericParameters.Select(p => p.Name).ToArray();
-                GenericTypeParameterBuilder[] nativeGenericParameter = method.DefineGenericParameters(genericParameterNames);
-                var _genericParameters = rppMethod.GenericParameters;
-                _genericParameters.ForEachWithIndex(
-                    (index, genericParameter) =>
-                    {
-                        genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter[index]);
-                        if (genericParameter.Constraint != null)
-                        {
-                            if (genericParameter.Constraint.IsClass)
-                            {
-                                nativeGenericParameter[index].SetBaseTypeConstraint(genericParameter.Constraint.NativeType);
-                            }
-                            else
-                            {
-                                nativeGenericParameter[index].SetInterfaceConstraints(genericParameter.Constraint.NativeType);
-                            }
-                        }
-                    });
-
-                // TODO missing constraints for generics
-                /*
-                string[] genericParametersNames = rppMethod.GenericParameters.Select(gp => gp.Name).ToArray();
-                GenericTypeParameterBuilder[] builders = method.DefineGenericParameters(genericParametersNames);
-                for (int i = 0; i < rppMethod.GenericParameters.Length; i++)
-                {
-                    rppMethod.GenericParameters[i].SetGenericTypeParameterBuilder(builders[i]);
-                }
-                */
+                var genericParameters = rppMethod.GenericParameters;
+                CreateNativeGenericParameters(genericParameters, genericParameterNames => method.DefineGenericParameters(genericParameterNames));
             }
 
             DefineReturnType(method, rppMethod.ReturnType);
             DefineParameters(method, rppMethod.Parameters);
 
             rppMethod.Native = method;
+        }
+
+        public static void CreateNativeGenericParameters([NotNull] IEnumerable<RppGenericParameter> genericParameters,
+            [NotNull] Func<string[], GenericTypeParameterBuilder[]> defineGenericParameterFunc)
+        {
+            var rppGenericParameters = genericParameters as RppGenericParameter[] ?? genericParameters.ToArray();
+            string[] genericParameterNames = rppGenericParameters.Select(p => p.Name).ToArray();
+            GenericTypeParameterBuilder[] nativeGenericParameters = defineGenericParameterFunc(genericParameterNames);
+            UpdateGenericParameters(rppGenericParameters, nativeGenericParameters);
+        }
+
+        public static void UpdateGenericParameters(IEnumerable<RppGenericParameter> genericParameters,
+            IEnumerable<GenericTypeParameterBuilder> nativeGenericParameters)
+        {
+            genericParameters.EachPair(nativeGenericParameters, UpdateGenericParameter);
+        }
+
+        private static void UpdateGenericParameter(RppGenericParameter genericParameter, GenericTypeParameterBuilder nativeGenericParameter)
+        {
+            genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter);
+            if (genericParameter.Constraint != null)
+            {
+                if (genericParameter.Constraint.IsClass)
+                {
+                    nativeGenericParameter.SetBaseTypeConstraint(genericParameter.Constraint.NativeType);
+                }
+                else
+                {
+                    nativeGenericParameter.SetInterfaceConstraints(genericParameter.Constraint.NativeType);
+                }
+            }
         }
 
         public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType)
