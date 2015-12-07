@@ -55,6 +55,7 @@ OP_Follow : '=>';
 OP_Eq : '=';
 OP_Dot : '.';
 OP_Star : '*';
+OP_Upper : '<:';
 
 OP_Ops : '+' | '-' | '/' | OP_Star | '%' | '<' | '>' | '||';
 

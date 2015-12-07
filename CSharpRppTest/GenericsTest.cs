@@ -332,7 +332,7 @@ object Main
         {
             const string code = @"
 class Item
-class Bag[A : Item]
+class Bag[A <: Item]
 ";
             Type bagTy = Utils.ParseAndCreateType(code, "Bag");
             Assert.IsTrue(bagTy.ContainsGenericParameters);

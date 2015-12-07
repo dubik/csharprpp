@@ -4,10 +4,16 @@ namespace CLRCodeGen.Monads
 {
     public class Item
     {
+        public string Calculate() => "Hello";
     }
 
-    public class Bag<TA> where TA : Item
+    public class Bag<TA> where TA : Item, new()
     {
+        public string Create()
+        {
+            TA item = new TA();
+            return item.Calculate();
+        }
     }
 
     internal abstract class Option<TItem>

@@ -365,7 +365,7 @@ namespace CSharpRpp
             {
                 string typeParamName = _lastToken.Text;
                 RTypeName constraint = null;
-                if (Require(RppLexer.OP_Colon))
+                if (Require(RppLexer.OP_Upper))
                 {
                     Expect(RppLexer.Id);
                     constraint = new RTypeName(_lastToken);
