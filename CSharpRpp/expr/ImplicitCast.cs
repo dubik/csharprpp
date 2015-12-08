@@ -84,27 +84,17 @@ namespace CSharpRpp.Expr
 
         public static bool CanCast(RType source, RType dest)
         {
-            /*
-            if (source is RppPrimitiveType && dest is RppPrimitiveType)
-            {
-                RppPrimitiveType sourceType = (RppPrimitiveType) source;
-                RppPrimitiveType destType = (RppPrimitiveType) dest;
-                return _implicitConversions.Contains(Zip(sourceType, destType));
-            }
-
-            // TODO fix this somehow, its quite weird to have RppType and RppNativeType handling
-            if (source is RppNativeType && dest is RppNativeType)
-            {
-                return source.Runtime.IsValueType && dest.Runtime == typeof (object);
-            }
-            */
-
             if (source.IsPrimitive && Equals(dest, RppTypeSystem.AnyTy))
             {
                 return true;
             }
 
             if ((dest.IsClass || dest.IsGenericParameter) && Equals(source, RppTypeSystem.NullTy))
+            {
+                return true;
+            }
+
+            if (source.IsAssignable(dest))
             {
                 return true;
             }

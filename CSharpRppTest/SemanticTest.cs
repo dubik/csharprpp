@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CSharpRpp;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -68,7 +69,7 @@ object Bar
         }
 
         [TestMethod]
-        [ExpectedException(typeof(TypeMismatchException))]
+        [ExpectedException(typeof(SemanticException))]
         public void TypeDonotMatch()
         {
             const string code = @"

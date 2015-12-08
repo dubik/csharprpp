@@ -111,7 +111,7 @@ namespace CSharpRppTest
 
         private static RppInteger Int(int value)
         {
-            return new RppInteger(value.ToString(CultureInfo.InvariantCulture));
+            return new RppInteger(value);
         }
 
         private static BinOp Add(IRppExpr left, IRppExpr right)

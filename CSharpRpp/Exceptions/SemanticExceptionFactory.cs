@@ -15,6 +15,13 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(104, str);
         }
 
+        public static SemanticException TypeMismatch(IToken token, string requiredType, string foundType)
+        {
+            string message = $"type mismatch;\n found: {foundType}\n required: {requiredType}";
+            string str = FormatErrorAndPointAtToken(token, message);
+            return new SemanticException(105, str);
+        }
+
         private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
         {
             string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
@@ -22,5 +29,6 @@ namespace CSharpRpp.Exceptions
             string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
             return $"{firstLine}\n{secondLine}\n{pointerLine}";
         }
+
     }
 }

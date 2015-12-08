@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
@@ -11,7 +12,7 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
-        public override sealed ResolvableType Type { get; protected set; }
+        public sealed override ResolvableType Type { get; protected set; }
 
         public MutabilityFlag MutabilityFlag { get; private set; }
 
@@ -66,7 +67,14 @@ namespace CSharpRpp
 
             if (!(InitExpr is RppEmptyExpr))
             {
-                InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type.Value);
+                if (ImplicitCast.CanCast(InitExpr.Type.Value, Type.Value))
+                {
+                    InitExpr = ImplicitCast.CastIfNeeded(InitExpr, Type.Value);
+                }
+                else
+                {
+                    throw SemanticExceptionFactory.TypeMismatch(Token, Type.Value.Name, InitExpr.Type.Value.Name);
+                }
             }
 
             return this;

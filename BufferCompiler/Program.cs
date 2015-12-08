@@ -45,9 +45,26 @@ object Main
 ";
 */
             const string code1 = @"
-class Item
-class Bag[A : Item]
+class Human
+{
+    def getId : Int = 10
+}
+
+class Person extends Human
+{
+    override def getId : Int = 13
+}
+
+object Main
+{
+    def main : Int = {
+        val k : Human = new Person
+        k = 32
+        k.getId()
+    }
+}
 ";
+
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)

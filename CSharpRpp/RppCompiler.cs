@@ -86,24 +86,11 @@ namespace CSharpRpp
                 CreateNativeTypes createNativeTypes = new CreateNativeTypes();
                 program.Accept(createNativeTypes);
             }
-            catch (TypeMismatchException e)
-            {
-                const string code = "Get code from token";
-                var lines = GetLines(code);
-                var line = lines[e.Token.Line - 1];
-                Console.WriteLine("<buffer>:{0} error: type mismatch", e.Token.Line);
-                Console.WriteLine(" found   : {0}", e.Found);
-                Console.WriteLine(" required: {0}", e.Required);
-                Console.WriteLine(line);
-                Console.WriteLine("{0}^", Ident(e.Token.CharPositionInLine));
-                Environment.Exit(-1);
-            }
             catch (SemanticException e)
             {
                 diagnostic.Error(e.Code, e.Message);
                 return null;
             }
-
 
             generator.Generate();
             return generator;

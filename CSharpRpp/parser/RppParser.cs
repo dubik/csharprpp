@@ -635,7 +635,7 @@ namespace CSharpRpp
         public RppVar ParsePatDef(MutabilityFlag mutabilityFlag)
         {
             Expect(RppLexer.Id);
-            string varId = _lastToken.Text;
+            IToken varIdToken = _lastToken;
 
             RTypeName type = RTypeName.Undefined;
             if (Require(RppLexer.OP_Colon))
@@ -652,9 +652,8 @@ namespace CSharpRpp
                 expr = ParseExpr();
             }
 
-            return new RppVar(mutabilityFlag, varId, new ResolvableType(type), expr);
+            return new RppVar(mutabilityFlag, varIdToken.Text, new ResolvableType(type), expr) {Token = varIdToken};
         }
-
 
         public bool ParseModifier()
         {

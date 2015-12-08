@@ -225,7 +225,7 @@ namespace CSharpRpp
         {
         }
 
-        public RppInteger(string valueStr) : base(valueStr)
+        public RppInteger(IToken valueToken) : base(valueToken)
         {
         }
 
@@ -246,10 +246,11 @@ namespace CSharpRpp
 
         public ResolvableType Type { get; private set; }
 
-        protected RppLiteralBase(string valueStr)
+        protected RppLiteralBase(IToken valueToken)
         {
+            Token = valueToken;
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
-            Initialize(Parse(valueStr));
+            Initialize(Parse(valueToken.Text));
         }
 
         private void Initialize(T value)
@@ -303,7 +304,7 @@ namespace CSharpRpp
     [DebuggerDisplay("Float: {Value}")]
     public sealed class RppFloat : RppLiteralBase<float>
     {
-        public RppFloat(string valueStr) : base(valueStr)
+        public RppFloat(IToken valueToken) : base(valueToken)
         {
         }
 
@@ -325,7 +326,11 @@ namespace CSharpRpp
     [DebuggerDisplay("String: {Value}")]
     public sealed class RppString : RppLiteralBase<string>
     {
-        public RppString([NotNull] string valueStr) : base(valueStr)
+        public RppString([NotNull] string value) : base(value)
+        {
+        }
+
+        public RppString([NotNull] IToken valueToken) : base(valueToken)
         {
         }
 
@@ -353,7 +358,7 @@ namespace CSharpRpp
 
     public sealed class RppBooleanLiteral : RppLiteralBase<bool>
     {
-        public RppBooleanLiteral([NotNull] string valueStr) : base(valueStr)
+        public RppBooleanLiteral([NotNull] IToken valueToken) : base(valueToken)
         {
         }
 

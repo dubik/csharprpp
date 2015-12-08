@@ -275,19 +275,19 @@ namespace CSharpRpp
             IRppExpr expr;
             if (Require(RppLexer.IntegerLiteral))
             {
-                expr = new RppInteger(_lastToken.Text);
+                expr = new RppInteger(_lastToken);
             }
             else if (Require(RppLexer.FloatingPointLiteral))
             {
-                expr = new RppFloat(_lastToken.Text);
+                expr = new RppFloat(_lastToken);
             }
             else if (Require(RppLexer.StringLiteral))
             {
-                expr = new RppString(_lastToken.Text);
+                expr = new RppString(_lastToken);
             }
             else if (Require(RppLexer.InterpolatedStringLiteral))
             {
-                expr = new RppString(_lastToken.Text);
+                expr = new RppString(_lastToken);
             }
             else if (Require(RppLexer.KW_Null))
             {
@@ -295,7 +295,7 @@ namespace CSharpRpp
             }
             else if (Require(RppLexer.BooleanLiteral))
             {
-                expr = new RppBooleanLiteral(_lastToken.Text);
+                expr = new RppBooleanLiteral(_lastToken);
             }
             else
             {

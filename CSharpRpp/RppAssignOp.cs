@@ -1,3 +1,5 @@
+using System;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -23,9 +25,9 @@ namespace CSharpRpp
 
             if (!Equals(Left.Type, Right.Type))
             {
-                if (!Right.Type.Value.IsSubclassOf(Left.Type.Value))
+                if (!Left.Type.Value.IsAssignable(Right.Type.Value))
                 {
-                    throw new TypeMismatchException(Right.Token, Right.Type.Value.ToString(), Left.Type.Value.ToString());
+                    throw SemanticExceptionFactory.TypeMismatch(Right.Token, Left.Type.Value.Name, Right.Type.Value.Name);
                 }
             }
 

@@ -98,7 +98,7 @@
     <Compile Include="DefaultTypesComparator.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Exceptions\TokenUtils.cs" />
-    <Compile Include="Exceptions\TypeNotFoundException.cs" />
+    <Compile Include="Exceptions\SemanticExceptionFactory.cs" />
     <Compile Include="Exceptions\SemanticException.cs" />
     <Compile Include="Expr\RppIf.cs" />
     <Compile Include="Expr\ImplicitCast.cs" />
@@ -144,7 +144,6 @@
     <Compile Include="RppProgram.cs" />
     <Compile Include="RppVar.cs" />
     <Compile Include="RppWhile.cs" />
-    <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Semantics\SemanticAnalyzer.cs" />
     <Compile Include="TypeSystem\RInflatedType.cs" />
     <Compile Include="TypeSystem\RppInflatedFieldInfo.cs" />
