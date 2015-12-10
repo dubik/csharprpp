@@ -66,4 +66,28 @@ namespace CLRCodeGen.Monads
             return false;
         }
     }
+
+    class Main1
+    {
+        /*
+        public A Calculate<A>(A x)
+        {
+            return x;
+        }
+        */
+
+        public A Calculate<A>(Func<A, A> x, A y)
+        {
+            return x(y);
+        }
+    }
+
+    class Main2
+    {
+        public static void Main3()
+        {
+            Main1 f = new Main1();
+            f.Calculate(x => x, 13);
+        }
+    }
 }
