@@ -98,6 +98,25 @@ object Bar
         }
 
         [TestMethod]
+        [TestCategory("Closures"), TestCategory("Generics")]
+        public void ParseOneParamClosureWithoutParents()
+        {
+            const string code = @"
+object Main
+{
+    def calc(func: (Int) => Int, v : Int) : Int = func(v)
+    def main : Int = {
+        calc(x => x + 1, 13)
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(14, res);
+        }
+
+
+        [TestMethod]
         public void ReturnTypeForClosure()
         {
             /*

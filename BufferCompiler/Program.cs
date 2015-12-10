@@ -45,22 +45,11 @@ object Main
 ";
 */
             const string code1 = @"
-class Human
-{
-    def getId : Int = 10
-}
-
-class Person extends Human
-{
-    override def getId : Int = 13
-}
-
 object Main
 {
+    def calc(func: (Int) => Int, v : Int) : Int = func(v)
     def main : Int = {
-        val k : Human = new Person
-        k = 32
-        k.getId()
+        calc(x => x + 1, 13)
     }
 }
 ";

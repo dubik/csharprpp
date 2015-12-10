@@ -549,12 +549,24 @@ namespace CSharpRpp
         {
             bindings = null;
 
+            var list = new List<IRppParam>();
+
             if (!Require(RppLexer.OP_LParen))
             {
-                return false;
+                RppParam funcParam;
+                if (ParseBinding(out funcParam))
+                {
+                    list.Add(funcParam);
+                }
+                else
+                {
+                    return false;
+                }
+
+                bindings = list;
+                return true;
             }
 
-            var list = new List<IRppParam>();
             while (true)
             {
                 RppParam funcParam;
