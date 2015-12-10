@@ -43,16 +43,24 @@ object Main
     }
 }
 ";
+
+            const string code1 = @"
+class Box[A](val v: A) {
+  def map[B](f: A => B): B = f(v)
+}
+
+class Package(val v: Int)
+
+";
 */
             const string code1 = @"
-object Main
+object Foo
 {
-    def calc(func: (Int) => Int, v : Int) : Int = func(v)
-    def main : Int = {
-        calc(x => x + 1, 13)
+    def main() : (Int => Int) = {
+        val func : (Int => Int) = (x) => x + 10
+        func
     }
-}
-";
+}";
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");

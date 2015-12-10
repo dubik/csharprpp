@@ -104,7 +104,7 @@ object Bar
             const string code = @"
 object Main
 {
-    def calc(func: (Int) => Int, v : Int) : Int = func(v)
+    def calc(func: Int => Int, v : Int) : Int = func(v)
     def main : Int = {
         calc(x => x + 1, 13)
     }

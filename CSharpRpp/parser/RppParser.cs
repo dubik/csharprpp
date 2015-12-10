@@ -725,10 +725,25 @@ namespace CSharpRpp
                     return true;
                 }
 
+                // A => B
+                if (Require(RppLexer.OP_Follow))
+                {
+                    RTypeName returnType;
+                    if (!ParseType(out returnType))
+                    {
+                        throw new Exception("Expected type but got " + _lastToken.Text);
+                    }
+
+                    type = CreateClosureTypeName(new List<RTypeName> {new RTypeName(typeNameToken)}, returnType);
+                    return true;
+                }
+
                 type = new RTypeName(typeNameToken);
                 return true;
             }
 
+            // (A, B) => C
+            // (A => B)
             if (Require(RppLexer.OP_LParen))
             {
                 bool closingParenRequired = true;
@@ -763,7 +778,18 @@ namespace CSharpRpp
                     }
                 }
 
-                Expect(RppLexer.OP_Follow);
+                if (!Require(RppLexer.OP_Follow))
+                {
+                    // (A => A)
+                    if (paramTypes.Count == 1)
+                    {
+                        type = paramTypes[0];
+                        return true;
+                    }
+
+                    // (A, B, C)
+                    throw new NotImplementedException("Tuples are not implemented");
+                }
 
                 if (!ParseType(out returnType))
                 {
@@ -775,15 +801,20 @@ namespace CSharpRpp
                     Expect(RppLexer.OP_RParen);
                 }
 
-                RTypeName closureType = new RTypeName("Function" + paramTypes.Count);
-                paramTypes.ForEach(closureType.AddGenericArgument);
-                closureType.AddGenericArgument(returnType);
-                type = closureType;
+                type = CreateClosureTypeName(paramTypes, returnType);
                 return true;
             }
 
             type = null;
             return false;
+        }
+
+        private static RTypeName CreateClosureTypeName(ICollection<RTypeName> paramTypes, RTypeName returnType)
+        {
+            RTypeName closureType = new RTypeName("Function" + paramTypes.Count);
+            paramTypes.ForEach(closureType.AddGenericArgument);
+            closureType.AddGenericArgument(returnType);
+            return closureType;
         }
 
         private RppClass ParseObjectDef(HashSet<ObjectModifier> modifiers)
