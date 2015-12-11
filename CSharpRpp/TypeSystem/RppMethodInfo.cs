@@ -14,7 +14,7 @@ namespace CSharpRpp.TypeSystem
         [CanBeNull]
         public virtual RType ReturnType { get; set; }
 
-        [CanBeNull]
+        [NotNull]
         public virtual RppParameterInfo[] Parameters { get; set; }
 
         public RppTypeParameterInfo[] TypeParameters { get; set; }
@@ -26,7 +26,7 @@ namespace CSharpRpp.TypeSystem
 
         public virtual MethodBase Native { get; set; }
 
-        public bool IsVariadic => Parameters != null && Parameters.Any() && Parameters.Last().IsVariadic;
+        public bool IsVariadic => Parameters.Any() && Parameters.Last().IsVariadic;
 
         public bool IsStatic => DeclaringType.Name.EndsWith("$");
 
@@ -70,7 +70,7 @@ namespace CSharpRpp.TypeSystem
 
         public override string ToString()
         {
-            var res = new List<string> {ToString(Attributes), Name + ParamsToString(), ":", ReturnType?.ToString()};
+            var res = new List<string> {ToString(Attributes), Name + GenericParametersToString() + ParamsToString(), ":", ReturnType?.ToString()};
             return string.Join(" ", res);
         }
 
@@ -84,7 +84,6 @@ namespace CSharpRpp.TypeSystem
             Tuple.Create(RMethodAttributes.Override, "override"),
             Tuple.Create(RMethodAttributes.Static, "static")
         };
-
 
         private static string ToString(RMethodAttributes attrs)
         {
@@ -102,6 +101,16 @@ namespace CSharpRpp.TypeSystem
             return string.Join(" ", res);
         }
 
+        private string GenericParametersToString()
+        {
+            if (_genericParameters != null)
+            {
+                return "[" + string.Join(", ", GenericParameters.Select(gp => gp.Name)) + "]";
+            }
+
+            return string.Empty;
+        }
+
         private string ParamsToString()
         {
             if (Parameters != null)
@@ -109,7 +118,7 @@ namespace CSharpRpp.TypeSystem
                 return "(" + string.Join(", ", Parameters.Select(p => p.Name + ": " + p.Type.ToString())) + ")";
             }
 
-            return "";
+            return string.Empty;
         }
 
         #endregion

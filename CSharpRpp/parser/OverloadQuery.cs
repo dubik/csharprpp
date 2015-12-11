@@ -53,6 +53,8 @@ namespace CSharpRpp.Parser
             [NotNull] IEnumerable<RppMethodInfo> overloads,
             ITypesComparator<T> comparator)
         {
+            int typeArgsCount = typeArgs.Count();
+
             var argTypesArray = argTypes.ToArray();
 
             var candidates = new List<RppMethodInfo>();
@@ -63,7 +65,14 @@ namespace CSharpRpp.Parser
 
                 int candidateTypeParamCount = candidate.GenericParameters?.Length ?? 0;
 
-                if (candidateTypeParamCount == typeArgs.Count()
+                // If no type args specified, then we shouldn't check if they match candidate generic parameters count
+                bool passTypeArgsCount = true;
+                if (typeArgsCount != 0)
+                {
+                    passTypeArgsCount = candidateTypeParamCount == typeArgsCount;
+                }
+
+                if (passTypeArgsCount
                     && SignatureMatched(argTypesArray, candidateParams, comparator, out castRequired))
                 {
                     if (!castRequired)
@@ -116,8 +125,6 @@ namespace CSharpRpp.Parser
 
                 if (param.IsVariadic)
                 {
-                    //throw new NotImplementedException("Variadic is not implemented yet");
-                    // paramType = ((RppArrayType) paramType).SubType;
                     paramType = param.Type.SubType();
                 }
                 else

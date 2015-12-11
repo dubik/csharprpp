@@ -22,6 +22,7 @@ namespace CSharpRpp.TypeSystem
         public static RType AnyTy = ImportClass("Any", typeof (object));
         public static RType StringTy = ImportClass("String", typeof (string));
         public static RType NothingTy = ImportClass("Nothing", typeof (object));
+        public static RType Undefined = new RType("Undefined");
 
         private readonly Dictionary<string, RType> _allTypes = new Dictionary<string, RType>();
 

@@ -3,6 +3,14 @@ using System.Collections.Generic;
 
 namespace CSharpRpp
 {
+    public static class ListExtensions
+    {
+        public static List<T> List<T>(params T[] args)
+        {
+            return new List<T>(args);
+        }
+    }
+
     public static class EnumerableExtensions
     {
         public static void ForEach<T>(this IEnumerable<T> collection, Action<T> action)

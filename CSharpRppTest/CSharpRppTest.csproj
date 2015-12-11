@@ -64,6 +64,7 @@
     <Compile Include="FuncTest.cs" />
     <Compile Include="GenericsTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />
+    <Compile Include="InferenceContext.cs" />
     <Compile Include="MethodDispatchTest.cs" />
     <Compile Include="NestedTest.cs" />
     <Compile Include="ParserExprTest.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectorTest.cs" />
     <Compile Include="SemanticTest.cs" />
+    <Compile Include="TypeInferenceTest.cs" />
     <Compile Include="TypeSystemTest.cs" />
     <Compile Include="TypeTest.cs" />
     <Compile Include="Utils.cs" />

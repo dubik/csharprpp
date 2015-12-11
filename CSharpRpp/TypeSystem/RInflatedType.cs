@@ -86,5 +86,10 @@ namespace CSharpRpp.TypeSystem
             string genericArgumentsStr = string.Join(", ", _genericArguments.Select(a => a.ToString()));
             return $"{Name}[{genericArgumentsStr}]";
         }
+
+        public override RType MakeGenericType(RType[] genericArguments)
+        {
+            return DefinitionType.MakeGenericType(genericArguments);
+        }
     }
 }

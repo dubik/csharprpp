@@ -143,5 +143,58 @@ namespace CSharpRpp.TypeSystem
 
             return expr;
         }
+
+        public static IEnumerable<RType> InferTypes(IEnumerable<RType> callList, IEnumerable<RType> targetList)
+        {
+            Dictionary<int, RType> dict = new Dictionary<int, RType>();
+            var targetTypes = targetList as IList<RType> ?? targetList.ToList();
+            var stage1 = callList.Zip(targetTypes, (callTy, targetTy) => Infer(callTy, targetTy, dict)).ToList();
+            var stage2 = stage1.Zip(targetTypes, (callTy, targetTy) => Infer(callTy, targetTy, dict)).ToList();
+            return stage2;
+        }
+
+        private static RType Infer(RType source, RType target, IDictionary<int, RType> dict)
+        {
+            RType finalType;
+            if (target.IsGenericParameter && dict.TryGetValue(target.GenericParameterPosition, out finalType))
+            {
+                return finalType;
+            }
+
+            if (IsUndefined(source))
+            {
+                return target;
+            }
+
+            if (target.IsGenericParameter && !dict.ContainsKey(target.GenericParameterPosition) && target.Name != source.Name)
+            {
+                dict.Add(target.GenericParameterPosition, source);
+                return source;
+            }
+
+            if (source.IsGenericType)
+            {
+                var newGenericArguments =
+                    source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict)).ToArray();
+
+                // Add generic arguments to dictionary in case they were resolved to some real type
+                for (int i = 0; i < newGenericArguments.Length; i++)
+                {
+                    if (!newGenericArguments[i].IsGenericParameter && !dict.ContainsKey(i))
+                    {
+                        dict.Add(i, newGenericArguments[i]);
+                    }
+                }
+
+                return source.DefinitionType.MakeGenericType(newGenericArguments);
+            }
+
+            return source;
+        }
+
+        private static bool IsUndefined(RType type)
+        {
+            return type.Name.StartsWith("Undefined");
+        }
     }
 }

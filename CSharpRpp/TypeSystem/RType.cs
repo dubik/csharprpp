@@ -497,7 +497,7 @@ namespace CSharpRpp.TypeSystem
             return newType;
         }
 
-        public RType MakeGenericType(RType[] genericArguments)
+        public virtual RType MakeGenericType(RType[] genericArguments)
         {
             RInflatedType inflatedType = new RInflatedType(this, genericArguments);
             return inflatedType;

@@ -21,14 +21,14 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            if (TargetType2 == null)
+            if (TargetType == null)
             {
                 throw new Exception("TargetType should be specified before anaylyze is called");
             }
 
             //IEnumerable<RppType> typeArgs = T.BaseConstructorCall.BaseClassTypeArgs;
 
-            RType classType = TargetType2;
+            RType classType = TargetType;
             
             // TODO It's kinda weird to have resolution here and not in the scope, because similar
             // lookup is done for methods
@@ -45,7 +45,7 @@ namespace CSharpRpp
 
             if (Field == null)
             {
-                throw new Exception($"Can't find field {Name} for type {TargetType2}");
+                throw new Exception($"Can't find field {Name} for type {TargetType}");
             }
 
             Debug.Assert(classType != null, "obj != null");

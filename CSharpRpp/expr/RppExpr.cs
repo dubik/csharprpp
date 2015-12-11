@@ -18,7 +18,7 @@ namespace CSharpRpp
     {
         public abstract ResolvableType Type { get; protected set; }
 
-        public RType TargetType2 { get; set; }
+        public RType TargetType { get; set; }
 
         protected RppMember(string name) : base(name)
         {
@@ -454,28 +454,18 @@ namespace CSharpRpp
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
             if (resolveResults == null)
             {
-                throw SemanticExceptionFactory.MemberNotFound(Token, TargetType2.Name);
+                throw SemanticExceptionFactory.MemberNotFound(Token, TargetType.Name);
             }
 
-            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Function.Parameters);
+            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Method.Parameters);
             //var args = ArgList;
             NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure, diagnostic);
-            if (resolveResults.Function.IsVariadic)
+            if (resolveResults.Method.IsVariadic)
             {
-                args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Function);
+                args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Method);
             }
 
-            return resolveResults.RewriteFunctionCall(TargetType2, Name, args, genericArguments);
-        }
-
-        private static IEnumerable<RppClosure> ArgListOfClosures(IEnumerable<IRppExpr> args)
-        {
-            return args.OfType<RppClosure>();
-        }
-
-        private static IEnumerable<IRppExpr> ArgListWithoutClosures(IEnumerable<IRppExpr> args)
-        {
-            return args.Where(arg => !(arg is RppClosure));
+            return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);
         }
 
         /// <summary>
@@ -602,7 +592,7 @@ namespace CSharpRpp
             return this;
         }
 
-        private RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, SymbolTable scope)
+        private static RppMethodInfo FindMatchingConstructor(IEnumerable<IRppExpr> args, SymbolTable scope)
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction("this");
             IEnumerable<RType> typeArgs = Collections.NoRTypes;
@@ -619,24 +609,6 @@ namespace CSharpRpp
 
             return candidates[0];
         }
-
-        /*
-        private static bool CanCast(RppType source, RppType target)
-        {
-            return OverloadQuery.DefaultCanCast(source, target);
-        }
-
-        private bool TypesComparator(RppType source, RppType target)
-        {
-            if (target.Runtime.IsGenericParameter)
-            {
-                RppType specializedTarget = BaseClassTypeArgs.ElementAt(target.Runtime.GenericParameterPosition);
-                return OverloadQuery.DefaultTypesComparator(source, specializedTarget);
-            }
-
-            return OverloadQuery.DefaultTypesComparator(source, target);
-        }
-        */
 
         public override string ToString()
         {
@@ -664,11 +636,6 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             Type = new ResolvableType(_elementType.MakeArrayType());
-
-            //var resolvedType = Type.Resolve(scope);
-            //Debug.Assert(resolvedType != null);
-            //Type = resolvedType;
-
             return this;
         }
 
@@ -789,7 +756,7 @@ namespace CSharpRpp
 
             SymbolTable classScope = new SymbolTable(scope, targetType);
 
-            Path.TargetType2 = targetType;
+            Path.TargetType = targetType;
             Path = (RppMember) Path.Analyze(classScope, diagnostic);
             return this;
         }

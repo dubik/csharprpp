@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
@@ -8,24 +9,53 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
-    class FunctionResolution
+    internal class FunctionResolution
     {
         public class ResolveResults
         {
-            public RppMethodInfo Function { get; }
+            public RppMethodInfo Method { get; }
+            public IEnumerable<RType> TypeArguments { get; }
 
             public ResolveResults(RppMethodInfo resolvedFunc)
             {
-                Function = resolvedFunc;
+                Method = resolvedFunc;
+            }
+
+            public ResolveResults(RppMethodInfo resolvedFunc, IEnumerable<RType> typeArguments)
+            {
+                Method = resolvedFunc;
+                TypeArguments = typeArguments;
             }
 
             public virtual IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> typeArgs)
             {
-                var resolvableTypeArgs = typeArgs.Select(t => new ResolvableType(t)).ToList();
-                return new RppFuncCall(functionName, resolvedArgList, Function, new ResolvableType(Function.ReturnType), resolvableTypeArgs)
+                List<ResolvableType> resolvableTypeArgs = ConvertToResolvableType(GetTypeArguments(typeArgs)).ToList();
+
+                RType returnType = GetReturnType(typeArgs);
+
+                return new RppFuncCall(functionName, resolvedArgList, Method, new ResolvableType(returnType), resolvableTypeArgs)
                 {
-                    TargetType2 = targetType
+                    TargetType = targetType
                 };
+            }
+
+            private RType GetReturnType(IEnumerable<RType> typeArgs)
+            {
+                RType methodReturnType = Method.ReturnType;
+                Debug.Assert(methodReturnType != null, "methodReturnType != null");
+                RType returnType = methodReturnType.IsGenericType ? methodReturnType.MakeGenericType(GetTypeArguments(typeArgs).ToArray()) : methodReturnType;
+                return returnType;
+            }
+
+            private IEnumerable<RType> GetTypeArguments(IEnumerable<RType> typeArgs)
+            {
+                IEnumerable<RType> typeArguments = typeArgs as IList<RType> ?? typeArgs.ToList();
+                return !typeArguments.Any() && TypeArguments != null ? TypeArguments : typeArguments;
+            }
+
+            private static IEnumerable<ResolvableType> ConvertToResolvableType(IEnumerable<RType> types)
+            {
+                return types.Select(t => new ResolvableType(t));
             }
         }
 
@@ -43,7 +73,7 @@ namespace CSharpRpp
             public override IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> unused)
             {
                 return new RppSelector(new RppId(_expr.Name, _expr),
-                    new RppFuncCall(Function.Name, resolvedArgList, Function, new ResolvableType(Function.ReturnType), Collections.NoResolvableTypes));
+                    new RppFuncCall(Method.Name, resolvedArgList, Method, new ResolvableType(Method.ReturnType), Collections.NoResolvableTypes));
             }
         }
 
@@ -80,7 +110,9 @@ namespace CSharpRpp
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
 
-            var candidates = OverloadQuery.Find(args, _typeArgs, overloads, new DefaultTypesComparator(_typeArgs)).ToList();
+            DefaultTypesComparator typesComparator = new DefaultTypesComparator(_typeArgs);
+            IEnumerable<IRppExpr> argList = args as IList<IRppExpr> ?? args.ToList();
+            List<RppMethodInfo> candidates = OverloadQuery.Find(argList, _typeArgs, overloads, typesComparator).ToList();
             if (candidates.Count > 1)
             {
                 throw new Exception("Can't figure out which overload to use");
@@ -91,7 +123,48 @@ namespace CSharpRpp
                 return null;
             }
 
-            return new ResolveResults(candidates[0]);
+            RppMethodInfo candidate = candidates[0];
+
+            IEnumerable<RType> inferredTypeArguments = null;
+            if (candidate.GenericParameters != null)
+            {
+                inferredTypeArguments = InferTypes(candidate, argList).ToList();
+            }
+
+            return new ResolveResults(candidate, inferredTypeArguments);
+        }
+
+        private IEnumerable<RType> InferTypes(RppMethodInfo candidate, IEnumerable<IRppExpr> args)
+        {
+            var argTypes = args.Select(a => a.Type.Value).ToList();
+
+            Tuple<int, Tuple<string, float>> k = Tuple.Create(13, Tuple.Create("Hello", 2.4f));
+
+            List<RType> targetTypes =
+                candidate.GenericParameters.Select(gp => gp.Type)
+                    .Concat(candidate.Parameters.Select(p => p.Type))
+                    .Concat(candidate.ReturnType).ToList();
+
+            List<RType> sourceTypes = GetGenericArgumentsOrUndefinedTypes(_typeArgs, candidate.GenericParameters.Length)
+                .Concat(argTypes).Concat(RppTypeSystem.Undefined).ToList();
+
+            IEnumerable<RType> inferredTypes = TypeInference.InferTypes(sourceTypes, targetTypes).ToList();
+            if (inferredTypes.Any(t => RppTypeSystem.Undefined.Equals(t)))
+            {
+                return null;
+            }
+
+            return inferredTypes.Take(candidate.GenericParameters.Length);
+        }
+
+        private static IEnumerable<RType> GetGenericArgumentsOrUndefinedTypes(IReadOnlyCollection<RType> typeArgs, int argCount)
+        {
+            if (typeArgs == null || typeArgs.Count == 0)
+            {
+                return Enumerable.Range(0, argCount).Select(ta => RppTypeSystem.Undefined);
+            }
+
+            return typeArgs;
         }
 
         private static ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, SymbolTable scope)

@@ -36,10 +36,13 @@ namespace CSharpRpp
 
             if (target.IsGenericParameter)
             {
+                // Skip the check, generic arguments will be inferred
+                if (_genericArguments.Length == 0)
+                {
+                    return true;
+                }
+
                 targetType = _genericArguments[target.GenericParameterPosition];
-                // TODO should be consistent with RppNew
-                //var genericParameterName = targetType.Runtime.Name;
-                //targetType = _scope.LookupGenericType(genericParameterName);
             }
 
             if (source is RppClosure)
@@ -47,13 +50,6 @@ namespace CSharpRpp
                 RppClosure closure = (RppClosure) source;
                 if (closure.Type == null)
                 {
-                    /*
-                    Debug.Assert(targetType.Runtime != null, "Only runtime is supported at this moment");
-                    Type[] genericTypes = targetType.Runtime.GetGenericArguments();
-                    RppType[] paramTypes = closure.Bindings.Select(b => b.Type).ToArray();
-                    // Differentiate only by the number of arguments
-                    return genericTypes.Length == (paramTypes.Length + 1); // '1' is a return type
-                    */
                     throw new NotImplementedException("Not done");
                 }
             }
