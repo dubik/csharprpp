@@ -129,7 +129,7 @@ namespace CSharpRpp.Codegen
 
         private static void GenerateRet([NotNull] RppFunc func, [NotNull] ILGenerator generator)
         {
-            RType funcReturnType = func.ReturnType2.Value;
+            RType funcReturnType = func.ReturnType.Value;
             RType expressionType = func.Expr.Type.Value;
 
             if (funcReturnType.Equals(RppTypeSystem.UnitTy) && !expressionType.Equals(RppTypeSystem.UnitTy))

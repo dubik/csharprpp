@@ -69,7 +69,7 @@ object Bar
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [ExpectedException(typeof (SemanticException))]
         public void TypeDonotMatch()
         {
             const string code = @"
@@ -83,6 +83,19 @@ object Main
         var bar: Bar = new Bar()
         foo = bar
     }
+}
+";
+            Utils.ParseAndAnalyze(code);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof (SemanticException))]
+        public void MethodReturnTypeShouldMatchLastExpressionType()
+        {
+            const string code = @"
+object Main
+{
+    def main: Int = ""Hello""
 }
 ";
             Utils.ParseAndAnalyze(code);

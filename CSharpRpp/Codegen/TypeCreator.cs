@@ -189,7 +189,7 @@ namespace CSharpRpp.Codegen
             node.Params.ForEachWithIndex((index, p) => p.Index = index + 1); // Assign index to each parameter, 1 is for 'this'
 
             method.Parameters = parameters;
-            method.ReturnType = node.ReturnType2.Value;
+            method.ReturnType = node.ReturnType.Value;
         }
 
         public override void Visit(RppField node)
@@ -268,7 +268,7 @@ namespace CSharpRpp.Codegen
         {
             if (!node.IsConstructor)
             {
-                method.ReturnType = node.ReturnType2.Value;
+                method.ReturnType = node.ReturnType.Value;
             }
         }
     }

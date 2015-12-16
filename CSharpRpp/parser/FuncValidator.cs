@@ -43,7 +43,7 @@ namespace CSharpRpp.Parser
 
         private static void CheckReturnValue(RppFunc function, RppFunc foundFunc)
         {
-            if (!foundFunc.ReturnType2.Equals(function.ReturnType2))
+            if (!foundFunc.ReturnType.Equals(function.ReturnType))
             {
                 throw new Exception("Return type should match for the functions with the same name");
             }

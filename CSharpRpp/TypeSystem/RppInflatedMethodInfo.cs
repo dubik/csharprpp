@@ -77,8 +77,12 @@ namespace CSharpRpp.TypeSystem
 
         private RType SubstitutedType(RType type)
         {
-            RType substitutedType = _genericArguments[type.GenericParameterPosition];
-            return substitutedType;
+            if (type.IsGenericParameter)
+            {
+                return _genericArguments[type.GenericParameterPosition];
+            }
+            
+            return type;
         }
     }
 }

@@ -39,11 +39,15 @@ namespace CSharpRpp
                 };
             }
 
+            // TODO This should be replaced with inflated method, we are actually doing something like that
             private RType GetReturnType(IEnumerable<RType> typeArgs)
             {
                 RType methodReturnType = Method.ReturnType;
                 Debug.Assert(methodReturnType != null, "methodReturnType != null");
-                RType returnType = methodReturnType.IsGenericType ? methodReturnType.MakeGenericType(GetTypeArguments(typeArgs).ToArray()) : methodReturnType;
+                RType[] genericArguments = GetTypeArguments(typeArgs).ToArray();
+                RType returnType = (methodReturnType.IsGenericType || methodReturnType.IsGenericParameter) && genericArguments.Length != 0
+                    ? methodReturnType.MakeGenericType(genericArguments)
+                    : methodReturnType;
                 return returnType;
             }
 

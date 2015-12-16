@@ -29,6 +29,5 @@ namespace CSharpRpp.Exceptions
             string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
             return $"{firstLine}\n{secondLine}\n{pointerLine}";
         }
-
     }
 }

@@ -78,8 +78,7 @@ object Tuple {
 
 object Main {
     def main: Tuple1[Int] = {
-        val t = Tuple.create(13)
-        t
+        13
     }
 }
 ";

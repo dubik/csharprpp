@@ -15,6 +15,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Exceptions;
+using CSharpRpp.Expr;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -77,7 +79,7 @@ namespace CSharpRpp
 
         public IList<RppVariantTypeParam> TypeParams { get; set; }
 
-        public ResolvableType ReturnType2 { get; private set; }
+        public ResolvableType ReturnType { get; private set; }
 
         public RppFunc([NotNull] string name) : base(name)
         {
@@ -111,7 +113,7 @@ namespace CSharpRpp
             [NotNull] IRppExpr expr)
         {
             Params = funcParams.ToArray();
-            ReturnType2 = returnType;
+            ReturnType = returnType;
             Expr = expr;
             IsVariadic = Params.Any(param => param.IsVariadic);
             TypeParams = Collections.NoVariantTypeParams;
@@ -134,7 +136,7 @@ namespace CSharpRpp
             // This will make generic parameters available as well
             SymbolTable tempScope = new SymbolTable(scope, MethodInfo);
             NodeUtils.Analyze(tempScope, Params, diagnostic);
-            ReturnType2.Resolve(tempScope);
+            ReturnType.Resolve(tempScope);
         }
 
         public void ResolveGenericTypeConstraints(SymbolTable scope, Diagnostic diagnostic)
@@ -149,6 +151,19 @@ namespace CSharpRpp
 
             Expr = NodeUtils.AnalyzeNode(_scope, Expr, diagnostic);
 
+            if (ImplicitCast.CanCast(Expr.Type.Value, ReturnType.Value))
+            {
+                Expr = ImplicitCast.CastIfNeeded(Expr, ReturnType.Value);
+            }
+            else
+            {
+                // void methods just discard that last value
+                if (!ReturnType.Value.Equals(RppTypeSystem.UnitTy) && !IsAbstract)
+                {
+                    throw SemanticExceptionFactory.TypeMismatch(ReturnType.Name.Token, ReturnType.Value.ToString(), Expr.Type.Value.ToString());
+                }
+            }
+
             return this;
         }
 
@@ -156,7 +171,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppFunc other)
         {
-            return Equals(Name, other.Name) && Equals(ReturnType2, other.ReturnType2) && Equals(Params, other.Params) &&
+            return Equals(Name, other.Name) && Equals(ReturnType, other.ReturnType) && Equals(Params, other.Params) &&
                    IsStatic.Equals(other.IsStatic) &&
                    IsPublic.Equals(other.IsPublic) && IsAbstract.Equals(other.IsAbstract);
         }
@@ -182,7 +197,7 @@ namespace CSharpRpp
         {
             unchecked
             {
-                var hashCode = ReturnType2.GetHashCode();
+                var hashCode = ReturnType.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Params?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ IsStatic.GetHashCode();
                 hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
@@ -197,7 +212,7 @@ namespace CSharpRpp
 
         public override string ToString()
         {
-            return $"{ModifiersToString()} def {Name}({ParamsToString()}) : {ReturnType2}";
+            return $"{ModifiersToString()} def {Name}({ParamsToString()}) : {ReturnType}";
         }
 
         public string ModifiersToString()

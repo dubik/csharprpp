@@ -13,7 +13,7 @@ namespace CSharpRpp.Expr
         public RppThrow(IRppExpr expr)
         {
             Expr = expr;
-            Type = ResolvableType.UnitTy;
+            Type = ResolvableType.NothingTy;
         }
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)

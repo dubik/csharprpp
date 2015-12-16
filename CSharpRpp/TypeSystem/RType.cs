@@ -499,6 +499,11 @@ namespace CSharpRpp.TypeSystem
 
         public virtual RType MakeGenericType(RType[] genericArguments)
         {
+            if (IsGenericParameter)
+            {
+                return genericArguments[GenericParameterPosition];
+            }
+
             RInflatedType inflatedType = new RInflatedType(this, genericArguments);
             return inflatedType;
         }
@@ -718,15 +723,20 @@ namespace CSharpRpp.TypeSystem
                 return false;
             }
 
+            if (BaseType != null && BaseType.IsAssignable(right))
+            {
+                return true;
+            }
+
             if (IsGenericType)
             {
                 RppGenericParameter[] genericParametrs = DefinitionType.GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                                                                     {
-                                                                         RppGenericParameter genericParam = genericParametrs[index++];
-                                                                         return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                                                                     }).Contains(false);
+                {
+                    RppGenericParameter genericParam = genericParametrs[index++];
+                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                }).Contains(false);
             }
 
             return true;
