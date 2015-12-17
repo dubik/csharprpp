@@ -11,7 +11,7 @@ namespace CSharpRpp
 {
     public class RppNew : RppNode, IRppExpr
     {
-        public ResolvableType Type { get; }
+        public ResolvableType Type { get; set; }
 
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 
@@ -36,10 +36,32 @@ namespace CSharpRpp
 
             Type.Resolve(scope);
 
-            List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
-            var constructors = Type.Value.Constructors;
+            RType classType = Type.Value;
 
-            var genericArguments = Type.Value.GenericArguments.ToList();
+            var constructor = FindConstructor(classType);
+
+            IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;
+            if (genericParameters.Count > 0)
+            {
+                List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
+                var inferredTypeArguments = InferGenericArguments(genericParameters, argTypes, constructor.Parameters.Select(p => p.Type));
+                RType inferredType = Type.Value.MakeGenericType(inferredTypeArguments);
+                Type = new ResolvableType(inferredType);
+                Constructor = inferredType.Constructors.First(c => c.GenericMethodDefinition == constructor);
+            }
+            else
+            {
+                Constructor = constructor;
+            }
+
+            return this;
+        }
+
+        private RppMethodInfo FindConstructor(RType classType)
+        {
+            var constructors = classType.Constructors;
+
+            var genericArguments = classType.GenericArguments.ToList();
             DefaultTypesComparator comparator = new DefaultTypesComparator(genericArguments.ToArray());
             List<RppMethodInfo> candidates = OverloadQuery.Find(Args, new RType[0], constructors, comparator).ToList();
             if (candidates.Count != 1)
@@ -47,8 +69,18 @@ namespace CSharpRpp
                 throw new Exception("Can't figure out which overload to use");
             }
 
-            Constructor = candidates[0];
-            return this;
+            RppMethodInfo constructor = candidates[0];
+            return constructor;
+        }
+
+        private static RType[] InferGenericArguments(IReadOnlyCollection<RppGenericParameter> genericParameters,
+            IEnumerable<RType> argTypes, IEnumerable<RType> constructorParameters)
+        {
+            IEnumerable<RType> sourceTypes = genericParameters.Select(gp => RppTypeSystem.Undefined).Concat(argTypes);
+            IEnumerable<RType> targetTypes = genericParameters.Select(gp => gp.Type).Concat(constructorParameters);
+            IEnumerable<RType> inferredTypes = TypeInference.InferTypes(sourceTypes, targetTypes).ToList();
+            RType[] inferredTypeArguments = inferredTypes.Take(genericParameters.Count).ToArray();
+            return inferredTypeArguments;
         }
     }
 }

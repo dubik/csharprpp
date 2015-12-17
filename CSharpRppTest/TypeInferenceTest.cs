@@ -84,6 +84,21 @@ object Main {
             Assert.AreEqual(24.34f, item1.GetFieldValue("item2"));
         }
 
+        [TestMethod]
+        public void InfereTypesWhenObjectIsInstantiated()
+        {
+            const string code = @"
+class Option[A](val item: A)
+
+object Main {
+    def main: Option[Int] = new Option(132)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+        }
+
         #region Utils
 
         private static void TestTypeInference(string methodCode, IEnumerable<RType> callTypes, IEnumerable<RType> expectedInferredTypes)

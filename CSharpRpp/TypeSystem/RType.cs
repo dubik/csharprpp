@@ -730,7 +730,9 @@ namespace CSharpRpp.TypeSystem
 
             if (IsGenericType)
             {
-                RppGenericParameter[] genericParametrs = DefinitionType.GenericParameters.ToArray();
+                // TODO This is quite suspicious, it takes generic parameters from type or definition type, but what if type added 
+                // additional generic parameters?
+                RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
                 {

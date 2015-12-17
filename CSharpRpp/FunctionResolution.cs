@@ -142,8 +142,6 @@ namespace CSharpRpp
         {
             var argTypes = args.Select(a => a.Type.Value).ToList();
 
-            Tuple<int, Tuple<string, float>> k = Tuple.Create(13, Tuple.Create("Hello", 2.4f));
-
             List<RType> targetTypes =
                 candidate.GenericParameters.Select(gp => gp.Type)
                     .Concat(candidate.Parameters.Select(p => p.Type))

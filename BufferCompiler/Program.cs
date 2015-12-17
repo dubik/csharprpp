@@ -44,45 +44,43 @@ object Main
 }
 ";
 */
-
             /*
+                        const string code1 = @"
+            abstract class Option[A]
+            {
+                def isEmpty : Boolean
+                def get: A
+                def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some(f(get()))
+                def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
+            }
+
+            class Some[A](val x: A) extends Option[A]
+            {
+                override def isEmpty : Boolean = false
+                override def get : A = x
+            }
+
+            object None extends Option[Nothing]
+            {
+                override def isEmpty : Boolean = true
+                override def get : Nothing = throw new Exception(""Nothing to get"")
+            }
+
+            object Main
+            {
+                def main : Unit = {
+                    val k = new Some(123)
+                }
+            }
+            ";
+            */
             const string code1 = @"
-class Item
-
-class Box[A](val v: A) {
-  def map[B](f: A => B): B = f(v)
-}
-
-class Package(val v: Item)
-
-object Main
-{
-    def main() : Int = {
-        val item = new Item
-        val box = new Box[Item](item)
-        box.map[Package](x => new Package(x.v))
-        13
-    }
-}
-
-";
-*/
-            const string code1 = @"
-class Tuple1[A](val item1: A)
-class Tuple2[A,B](val item1: A, val item2: B)
-
-object Tuple {
-  def create[T1](arg1: T1) : Tuple1[T1] = new Tuple1[T1](arg1)
-  def create[T1, T2](arg1: T1, arg2: T2) : Tuple2[T1, T2] = new Tuple2[T1, T2](arg1, arg2)
-}
+class Option[A](val item: A)
 
 object Main {
-    def main: Tuple1[Int] = {
-        13
-    }
+    def main: Option[Int] = new Option(132)
 }
 ";
-
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)
