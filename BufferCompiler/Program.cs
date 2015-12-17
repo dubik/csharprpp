@@ -44,8 +44,7 @@ object Main
 }
 ";
 */
-            /*
-                        const string code1 = @"
+            const string code1 = @"
             abstract class Option[A]
             {
                 def isEmpty : Boolean
@@ -70,17 +69,11 @@ object Main
             {
                 def main : Unit = {
                     val k = new Some(123)
+                    k.map(x => x * 2)
                 }
             }
             ";
-            */
-            const string code1 = @"
-class Option[A](val item: A)
 
-object Main {
-    def main: Option[Int] = new Option(132)
-}
-";
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)

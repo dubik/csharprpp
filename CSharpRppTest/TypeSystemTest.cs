@@ -86,6 +86,27 @@ object Main
             Assert.IsTrue(t.IsAbstract);
         }
 
+        [TestMethod]
+        public void InflateSimpleGeneric()
+        {
+            /*
+            class Foo[A,B]{
+                def get(x: A): B
+            }
+            */
+            RType fooTy = new RType("Foo");
+            RppGenericParameter[] gp = fooTy.DefineGenericParameters(new[] {"A", "B"});
+            fooTy.DefineMethod("get", RMethodAttributes.Public, gp[0].Type, new[] {new RppParameterInfo(gp[0].Type), new RppParameterInfo(gp[1].Type)});
+
+            // Foo[Int, Float]
+            RType specializedFooTy = fooTy.MakeGenericType(new[] {RppTypeSystem.IntTy, RppTypeSystem.FloatTy});
+            // get(x: Int) : Float
+            RppMethodInfo getMethod = specializedFooTy.Methods[0];
+            Assert.AreEqual(RppTypeSystem.IntTy, getMethod.ReturnType);
+            Assert.AreEqual(RppTypeSystem.IntTy, getMethod.Parameters[0].Type);
+            Assert.AreEqual(RppTypeSystem.FloatTy, getMethod.Parameters[1].Type);
+        }
+
         [TestInitialize]
         public void SetUp()
         {
