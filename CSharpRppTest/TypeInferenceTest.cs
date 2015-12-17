@@ -68,8 +68,8 @@ object Tuple {
 }
 
 object Main {
-    def main: Tuple1[Int] = {
-        val t = Tuple.create(13)
+    def main: Tuple1[Tuple2[Int, Float]] = {
+        val t = Tuple.create(Tuple.create(13, 24.34))
         t
     }
 }
@@ -77,6 +77,11 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
+            Assert.AreEqual("Tuple1", res.GetType().Name);
+            object item1 = res.GetFieldValue("item1");
+            Assert.IsNotNull(item1);
+            Assert.AreEqual(13, item1.GetFieldValue("item1"));
+            Assert.AreEqual(24.34f, item1.GetFieldValue("item2"));
         }
 
         #region Utils

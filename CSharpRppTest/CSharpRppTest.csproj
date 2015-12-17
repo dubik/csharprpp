@@ -67,6 +67,7 @@
     <Compile Include="InferenceContext.cs" />
     <Compile Include="MethodDispatchTest.cs" />
     <Compile Include="NestedTest.cs" />
+    <Compile Include="ObjectExtension.cs" />
     <Compile Include="ParserExprTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="RppProgramExtensions.cs" />
