@@ -43,8 +43,10 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public RInflatedType([NotNull] RType type, RType[] genericArguments) : base(type.Name, type.Attributes, type.BaseType, type.DeclaringType)
+        public RInflatedType([NotNull] RType type, RType[] genericArguments) : base(type.Name, type.Attributes, null, type.DeclaringType)
         {
+            BaseType = InflateBaseType(type.BaseType, genericArguments);
+
             DefinitionType = type;
             IsArray = type.IsArray;
 
@@ -59,6 +61,22 @@ namespace CSharpRpp.TypeSystem
             }
 
             _genericArguments = genericArguments;
+        }
+
+        [CanBeNull]
+        private RType InflateBaseType([CanBeNull] RType baseType, [NotNull] IEnumerable<RType> genericArguments)
+        {
+            if (baseType == null)
+            {
+                return null;
+            }
+
+            if (baseType.GenericParameters.Count == 0)
+            {
+                return baseType;
+            }
+
+            return baseType.MakeGenericType(genericArguments.Take(baseType.GenericParameters.Count).ToArray());
         }
 
         private RppFieldInfo[] InflateFields(IEnumerable<RppFieldInfo> fields)

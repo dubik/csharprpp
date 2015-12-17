@@ -1,4 +1,5 @@
-﻿using CSharpRpp;
+﻿using System;
+using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
 
@@ -8,6 +9,7 @@ namespace BufferCompiler
     {
         public static void Main()
         {
+            var k =Tuple.Create(13, 23);
             /*
             const string code = @"
 abstract class List[A] {

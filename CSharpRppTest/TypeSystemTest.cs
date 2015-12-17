@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -7,6 +8,7 @@ using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
@@ -34,7 +36,7 @@ object Main
             var program = Utils.Parse(code);
 
             SymbolTable scope = new SymbolTable();
-            RppTypeSystem.PopulateBuiltinTypes(scope);
+            PopulateBuiltinTypes(scope);
 
             Type2Creator typeCreator = new Type2Creator();
             program.Accept(typeCreator);
@@ -91,7 +93,7 @@ object Main
         {
             /*
             class Foo[A,B]{
-                def get(x: A): B
+                def get(x: A, y: B): B
             }
             */
             RType fooTy = new RType("Foo");
@@ -99,12 +101,49 @@ object Main
             fooTy.DefineMethod("get", RMethodAttributes.Public, gp[0].Type, new[] {new RppParameterInfo(gp[0].Type), new RppParameterInfo(gp[1].Type)});
 
             // Foo[Int, Float]
-            RType specializedFooTy = fooTy.MakeGenericType(new[] {RppTypeSystem.IntTy, RppTypeSystem.FloatTy});
+            RType specializedFooTy = fooTy.MakeGenericType(new[] {IntTy, FloatTy});
             // get(x: Int) : Float
             RppMethodInfo getMethod = specializedFooTy.Methods[0];
-            Assert.AreEqual(RppTypeSystem.IntTy, getMethod.ReturnType);
-            Assert.AreEqual(RppTypeSystem.IntTy, getMethod.Parameters[0].Type);
-            Assert.AreEqual(RppTypeSystem.FloatTy, getMethod.Parameters[1].Type);
+            Assert.AreEqual(IntTy, getMethod.ReturnType);
+            Assert.AreEqual(IntTy, getMethod.Parameters[0].Type);
+            Assert.AreEqual(FloatTy, getMethod.Parameters[1].Type);
+        }
+
+        [TestMethod]
+        public void InflateClassWithGenericBaseType()
+        {
+            /*
+                class Foo[A, B] {
+                    def get(x: A) : B
+                }
+                class Bar[A, B, C] extends Foo[A, B]
+                {
+                    def map(x: A, y: B) : C
+                }
+            */
+            RType fooTy = new RType("Foo");
+            {
+                RppGenericParameter[] gp = fooTy.DefineGenericParameters(new[] {"A", "B"});
+                fooTy.DefineMethod("get", RMethodAttributes.Public, gp[1].Type, new[] {new RppParameterInfo(gp[0].Type)});
+            }
+
+            RType barTy = new RType("Bar", RTypeAttributes.Class, fooTy, null);
+            RppGenericParameter[] barGp = barTy.DefineGenericParameters(new[] {"A", "B", "C"});
+            barTy.DefineMethod("map", RMethodAttributes.Public, barGp[2].Type, new[]
+            {
+                new RppParameterInfo(barGp[0].Type),
+                new RppParameterInfo(barGp[1].Type)
+            });
+
+            RType specilizedBarTy = barTy.MakeGenericType(new[] {IntTy, FloatTy, StringTy});
+            Assert.IsNotNull(specilizedBarTy.BaseType);
+            IReadOnlyCollection<RType> barGenericArguments = specilizedBarTy.GenericArguments;
+            CollectionAssert.AreEqual(new[] {IntTy, FloatTy, StringTy}, barGenericArguments.ToList());
+            var fooGenericArguments = specilizedBarTy.BaseType.GenericArguments;
+            CollectionAssert.AreEqual(new[] {IntTy, FloatTy}, fooGenericArguments.ToList());
+            RppMethodInfo getMethod = specilizedBarTy.BaseType.Methods[0];
+            Assert.AreEqual(FloatTy, getMethod.ReturnType);
+            Assert.AreEqual(IntTy, getMethod.Parameters[0].Type);
         }
 
         [TestInitialize]
