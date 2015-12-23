@@ -115,6 +115,26 @@ object Main
             Assert.AreEqual(14, res);
         }
 
+        [TestMethod]
+        public void FiguringOutTypesOfSimpleClosureTypeInAGenericClass()
+        {
+            const string code = @"
+class Foo[A](val k: A) {
+  def map(f: A => A): Foo[A] = new Foo(f(k))
+}
+
+object Main {
+  def main: Foo[Int] = {
+    val foo = new Foo(12)
+    foo.map(x => x * 2)
+  }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+            Assert.AreEqual(24, res.GetFieldValue("k"));
+        }
 
         [TestMethod]
         public void ReturnTypeForClosure()

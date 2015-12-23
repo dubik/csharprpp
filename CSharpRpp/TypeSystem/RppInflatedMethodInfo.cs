@@ -66,7 +66,7 @@ namespace CSharpRpp.TypeSystem
 
         private RppParameterInfo InflateParameter(RppParameterInfo parameter)
         {
-            if (parameter.Type.IsGenericParameter)
+            if (parameter.Type.IsGenericParameter || parameter.Type.IsGenericType)
             {
                 var substitutedType = SubstitutedType(parameter.Type);
                 return parameter.CloneWithNewType(substitutedType);
@@ -81,7 +81,14 @@ namespace CSharpRpp.TypeSystem
             {
                 return _genericArguments[type.GenericParameterPosition];
             }
-            
+
+            if (type.IsGenericType)
+            {
+                var mappedGenericArguments = type.GenericArguments.Select(ga => _genericArguments[ga.GenericParameterPosition]).ToArray();
+                var substitutedType = type.MakeGenericType(mappedGenericArguments);
+                return substitutedType;
+            }
+
             return type;
         }
     }

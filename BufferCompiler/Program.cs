@@ -1,5 +1,4 @@
-﻿using System;
-using CSharpRpp;
+﻿using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
 
@@ -9,7 +8,6 @@ namespace BufferCompiler
     {
         public static void Main()
         {
-            var k =Tuple.Create(13, 23);
             /*
             const string code = @"
 abstract class List[A] {
@@ -47,34 +45,19 @@ object Main
 ";
 */
             const string code1 = @"
-            abstract class Option[A]
-            {
-                def isEmpty : Boolean
-                def get: A
-                def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some(f(get()))
-                def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
-            }
+            class Foo[A](val k: A) {
+  def map(f: A => A): Foo[A] = new Foo(f(k))
+}
 
-            class Some[A](val x: A) extends Option[A]
-            {
-                override def isEmpty : Boolean = false
-                override def get : A = x
-            }
+object Main {
+  def main: Foo[Int] = {
+    val foo = new Foo(12)
+    val ret = foo.map(x => x * 2)
+    ret
+  }
+}
 
-            object None extends Option[Nothing]
-            {
-                override def isEmpty : Boolean = true
-                override def get : Nothing = throw new Exception(""Nothing to get"")
-            }
-
-            object Main
-            {
-                def main : Unit = {
-                    val k = new Some(123)
-                    k.map(x => x * 2)
-                }
-            }
-            ";
+";
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");

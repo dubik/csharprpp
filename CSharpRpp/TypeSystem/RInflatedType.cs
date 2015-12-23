@@ -64,7 +64,7 @@ namespace CSharpRpp.TypeSystem
         }
 
         [CanBeNull]
-        private RType InflateBaseType([CanBeNull] RType baseType, [NotNull] IEnumerable<RType> genericArguments)
+        private static RType InflateBaseType([CanBeNull] RType baseType, [NotNull] IEnumerable<RType> genericArguments)
         {
             if (baseType == null)
             {
