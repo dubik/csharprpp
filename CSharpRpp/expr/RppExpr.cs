@@ -133,7 +133,7 @@ namespace CSharpRpp
         public ResolvableType Type { get; protected set; }
 
         [NotNull]
-        public string Op { get; private set; }
+        public string Op { get; }
 
         public IRppExpr Left { get; private set; }
         public IRppExpr Right { get; private set; }

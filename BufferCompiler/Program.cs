@@ -43,7 +43,7 @@ class QCons[A](val _head: A, val _tail: QList[A]) extends QList[A] {
 
 object QList {
   def apply[A](args: A*): QList[A] = {
-    if (args.isEmpty) {
+    if (args.length() == 0) {
       QNil
     } else {
       var k = args.length - 1
@@ -58,10 +58,15 @@ object QList {
 }
 ";
             const string code1 = @"
-class Foo {
-    def myself() : Foo = new Foo
-    def calculate() : Int = 13
-    def subCalc() : Int = myself().calculate()
+object Foo {
+    def main : Int = {
+        val k = 13
+        if(k == 10) {
+            3
+        } else {
+            5
+        }
+    }
 }
 ";
 

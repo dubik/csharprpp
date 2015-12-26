@@ -113,6 +113,7 @@ namespace CSharpRpp
                 op = token.Text;
                 switch (token.Text)
                 {
+                    case "==":
                     case "||":
                         precedence = 2;
                         break;

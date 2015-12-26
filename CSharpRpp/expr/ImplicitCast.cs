@@ -45,6 +45,11 @@ namespace CSharpRpp.Expr
                 return sourceExpr;
             }
 
+            if (sourceType == RppTypeSystem.NothingTy)
+            {
+                return sourceExpr;
+            }
+
             throw new Exception("Can't cast expression to a specific type");
         }
 
@@ -95,6 +100,11 @@ namespace CSharpRpp.Expr
             }
 
             if (source.IsAssignable(dest))
+            {
+                return true;
+            }
+
+            if (Equals(source, RppTypeSystem.NothingTy))
             {
                 return true;
             }

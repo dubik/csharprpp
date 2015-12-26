@@ -11,7 +11,7 @@ namespace CSharpRpp
     {
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
-            Type = ResolvableType.UnitTy;
+             Type = ResolvableType.UnitTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

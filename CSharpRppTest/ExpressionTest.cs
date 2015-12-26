@@ -97,5 +97,24 @@ object Main
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNull(res);
         }
+
+        [TestMethod]
+        public void TestEqualOperator()
+        {
+            const string code = @"
+object Foo {
+    def main : Int = {
+        val k = 13
+        if(k == 10) {
+            3
+        } else {
+            5
+        }
+    }
+}";
+            Type mainTy = Utils.ParseAndCreateType(code, "Foo$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(5, res);
+        }
     }
 }
