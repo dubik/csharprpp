@@ -733,7 +733,7 @@ namespace CSharpRpp
     {
         public ResolvableType Type => Path.Type;
 
-        public IRppExpr Target { get; }
+        public IRppExpr Target { get; private set; }
         public RppMember Path { get; private set; }
 
         public RppSelector(IRppExpr target, RppMember path)
@@ -749,7 +749,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            Target.Analyze(scope, diagnostic);
+            Target = (IRppExpr) Target.Analyze(scope, diagnostic);
             RType targetType = Target.Type.Value;
 
             Debug.Assert(targetType != null, "targetType != null");

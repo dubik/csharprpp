@@ -8,55 +8,61 @@ namespace BufferCompiler
     {
         public static void Main()
         {
-            /*
             const string code = @"
-abstract class List[A] {
-    def head : A
-    def tail : List[A]
-    def isEmpty : Boolean
-}
+abstract class QList[+A] {
+  def head: A
 
-object Nil extends List[Nothing]
-{
-    override def head: Nothing = throw new Exception(""Empty list"")
-    override def tail: List[Nothing] = throw new Exception(""Empty list"")
-    override def isEmpty : Boolean = true
-}
+  def tail: QList[A]
 
-class Cons[A](val _head: A, val _tail: List[A]) extends List[A]
-{
-    override def head: A = _head
-    override def tail: List[A] = _tail
-    override def isEmpty : Boolean = true
-}
+  def isEmpty: Boolean
 
-object Cons
-{
-    def doSome[A](x: A) : A = x
-    def apply[A](head: A, tail: List[A]) : List[A] = new Cons[A](head, tail)
-}
-
-object Main
-{
-    def main() : Int = {
-        Cons.doSome[Int](13)
+  def map[U](f: A => U): QList[U] = {
+    if (isEmpty) {
+        QNil
+    } else {
+      new QCons(f(head()), tail().map(f))
     }
-}
-";
-*/
-            const string code1 = @"
-            class Foo[A](val k: A) {
-  def map(f: A => A): Foo[A] = new Foo(f(k))
-}
-
-object Main {
-  def main: Foo[Int] = {
-    val foo = new Foo(12)
-    val ret = foo.map(x => x * 2)
-    ret
   }
 }
 
+object QNil extends QList[Nothing] {
+  override def head: Nothing = throw new Exception(""Not implemented"")
+
+  override def tail: QList[Nothing] = throw new Exception(""Not implemented"")
+
+  override def isEmpty: Boolean = true
+}
+
+class QCons[A](val _head: A, val _tail: QList[A]) extends QList[A] {
+  override def head: A = _head
+
+  override def tail: QList[A] = _tail
+
+  override def isEmpty: Boolean = false
+}
+
+object QList {
+  def apply[A](args: A*): QList[A] = {
+    if (args.isEmpty) {
+      QNil
+    } else {
+      var k = args.length - 1
+      var list: QList[A] = QNil
+      while (k >= 0) {
+        list = new QCons(args(k), list)
+        k -= 1
+      }
+      list
+    }
+  }
+}
+";
+            const string code1 = @"
+class Foo {
+    def myself() : Foo = new Foo
+    def calculate() : Int = 13
+    def subCalc() : Int = myself().calculate()
+}
 ";
 
             Diagnostic diagnostic = new Diagnostic();

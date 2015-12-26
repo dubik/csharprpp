@@ -540,5 +540,22 @@ object Main
             Assert.IsNotNull(fooInst);
             Assert.AreEqual("Foo", fooInst.GetType().Name);
         }
+
+        [TestMethod]
+        public void ChainCalls()
+        {
+            const string code = @"
+class Foo {
+    def calculate() : Int = 13
+    def myself() : Foo = new Foo
+    def subCalc() : Int = myself().calculate()
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo");
+            Assert.IsNotNull(fooTy);
+            object foo = Activator.CreateInstance(fooTy);
+            object res = fooTy.GetMethod("subCalc").Invoke(foo, null);
+            Assert.AreEqual(13, res);
+        }
     }
 }
