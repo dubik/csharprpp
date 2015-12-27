@@ -357,9 +357,13 @@ namespace CSharpRpp.Codegen
             {
                 _body.Emit(OpCodes.Ldlen);
                 return;
-            } else if (function.DeclaringType.Name == "Array" && function.Name == "apply")
+            }
+
+            if (function.DeclaringType.Name == "Array" && function.Name == "apply")
             {
-                _body.Emit(OpCodes.Ldelem);
+                RType elementType = function.DeclaringType.GenericArguments.First();
+                OpCode ldOpCode = ClrCodegenUtils.ArrayLoadOpCodeByType(elementType.NativeType);
+                _body.Emit(ldOpCode);
                 return;
             }
 

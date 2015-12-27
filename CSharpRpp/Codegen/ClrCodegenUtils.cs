@@ -37,7 +37,7 @@ namespace CSharpRpp.Codegen
             {8, OpCodes.Ldc_I4_8}
         };
 
-        private static readonly Dictionary<Type, OpCode> stElemOpCode = new Dictionary<Type, OpCode>()
+        private static readonly Dictionary<Type, OpCode> stElemOpCode = new Dictionary<Type, OpCode>
         {
             {Types.Bool, OpCodes.Stelem_I1},
             {Types.Byte, OpCodes.Stelem_I1},
@@ -47,6 +47,18 @@ namespace CSharpRpp.Codegen
             {Types.Long, OpCodes.Stelem_I8},
             {Types.Float, OpCodes.Stelem_R4},
             {Types.Double, OpCodes.Stelem_R8},
+        };
+
+        private static readonly Dictionary<Type, OpCode> ldElemOpCode = new Dictionary<Type, OpCode>
+        {
+            {Types.Bool, OpCodes.Ldelem_I1},
+            {Types.Byte, OpCodes.Ldelem_I1},
+            {Types.Char, OpCodes.Ldelem_I2},
+            {Types.Short, OpCodes.Ldelem_I2},
+            {Types.Int, OpCodes.Ldelem_I4},
+            {Types.Long, OpCodes.Ldelem_I8},
+            {Types.Float, OpCodes.Ldelem_R4},
+            {Types.Double, OpCodes.Ldelem_R8},
         };
 
         public static void LoadInt(int val, ILGenerator body)
@@ -99,6 +111,17 @@ namespace CSharpRpp.Codegen
             }
 
             return OpCodes.Stelem_Ref;
+        }
+
+        public static OpCode ArrayLoadOpCodeByType(Type type)
+        {
+            OpCode opcode;
+            if (ldElemOpCode.TryGetValue(type, out opcode))
+            {
+                return opcode;
+            }
+
+            return OpCodes.Ldelem_Ref;
         }
     }
 }

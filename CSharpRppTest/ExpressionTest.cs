@@ -116,5 +116,44 @@ object Foo {
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(5, res);
         }
+
+        [TestMethod]
+        public void ReadIntFromArray()
+        {
+            const string code = @"
+object Main {
+    def read(args: Array[Int], index: Int) : Int = {
+        args(index)
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            int[] array = {1, 3, 5};
+            for (int i = 0; i < array.Length; i++)
+            {
+                object res = Utils.InvokeStatic(mainTy, "read", new object[] {array, i});
+                Assert.AreEqual(array[i], res);
+            }
+        }
+
+        [TestMethod]
+        public void ReadStringFromArray()
+        {
+            const string code = @"
+object Main {
+    def read(args: Array[String], index: Int) : String = {
+        args(index)
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            string[] array = { "Hello", "Terve", "Moi" };
+            for (int i = 0; i < array.Length; i++)
+            {
+                object res = Utils.InvokeStatic(mainTy, "read", new object[] { array, i });
+                Assert.AreEqual(array[i], res);
+            }
+        }
+
     }
 }

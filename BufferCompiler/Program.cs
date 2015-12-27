@@ -58,19 +58,18 @@ object QList {
 }
 ";
             const string code1 = @"
-object Foo {
-    def main : Int = {
-        val k = 13
-        if(k == 10) {
-            3
-        } else {
-            5
-        }
+object Main {
+    def read(args: Array[Int], index: Int) : Int = {
+        args(index)
+    }
+
+    def read(args: Array[String], index: Int) : String = {
+        args(index)
     }
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -81,9 +80,9 @@ object Foo {
             }
         }
 
-        public static void callme()
+        public static int read(int[] array, int index)
         {
-            
+            return array[index];
         }
     }
 }
