@@ -23,6 +23,7 @@ namespace CSharpRpp.TypeSystem
         public static RType StringTy = ImportClass("String", typeof (string));
         public static RType NothingTy = ImportClass("Nothing", typeof (object));
         public static RType Undefined = new RType("Undefined");
+        public static RType ArrayTy = CreateArrayType();
 
         private readonly Dictionary<string, RType> _allTypes = new Dictionary<string, RType>();
 
@@ -69,7 +70,7 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(ImportClass(typeof (string)));
             scope.AddType(AnyTy);
             scope.AddType(NothingTy);
-            scope.AddType(CreateArrayType());
+            scope.AddType(ArrayTy);
         }
 
         public static RType ImportClass(Type systemType)

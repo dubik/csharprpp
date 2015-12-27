@@ -195,5 +195,39 @@ object Main {
             CollectionAssert.AreEqual(new[] { "23", "24", "25" }, array);
         }
 
+
+        [TestMethod]
+        public void ReadGenericFromArray()
+        {
+            const string code = @"
+object Main {
+    def read[A](args: Array[A], index: Int) : A = {
+        args(index)
+    }
+
+    def readInt(args: Array[Int], index: Int) : Int =
+        read[Int](args, index)
+
+    def readString(args: Array[String], index: Int) : String =
+        read[String](args, index)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+
+            int[] intArray = { 1, 3, 5 };
+            for (int i = 0; i < intArray.Length; i++)
+            {
+                object res = Utils.InvokeStatic(mainTy, "readInt", new object[] { intArray, i });
+                Assert.AreEqual(intArray[i], res);
+            }
+
+            string[] stringArray = { "Hello", "Terve", "Moi" };
+            for (int i = 0; i < stringArray.Length; i++)
+            {
+                object res = Utils.InvokeStatic(mainTy, "readString", new object[] { stringArray, i });
+                Assert.AreEqual(stringArray[i], res);
+            }
+        }
+
     }
 }

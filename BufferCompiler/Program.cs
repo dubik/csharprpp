@@ -49,7 +49,8 @@ object QList {
       var k = args.length() - 1
       var list: QList[A] = QNil
       while (k >= 0) {
-        list = new QCons(args(k), list)
+        val it: A = args(k)
+        list = new QCons(it, list)
         k = k - 1
       }
       list
@@ -59,9 +60,15 @@ object QList {
 ";
             const string code1 = @"
 object Main {
-    def read(args: Array[Int], index: Int, value: Int) : Unit = {
-        args(index) = value
+    def read[A](args: Array[A], index: Int) : A = {
+        args(index)
     }
+
+    def readInt(args: Array[Int], index: Int) : Int =
+        read[Int](args, index)
+
+    def readString(args: Array[String], index: Int) : String =
+        read[String](args, index)
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
@@ -76,9 +83,19 @@ object Main {
             }
         }
 
-        public static void write(int[] array, int index, int value)
+        public static int readInt()
         {
-            array[index] = value;
+            return first(new[] {1, 2}, 0);
+        }
+
+        public static string readString()
+        {
+            return first(new[] {"Heö", "Moi"}, 1);
+        }
+
+        public static A first<A>(A[] array, int i)
+        {
+            return array[0];
         }
     }
 }

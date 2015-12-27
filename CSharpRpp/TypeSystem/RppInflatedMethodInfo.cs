@@ -31,8 +31,15 @@ namespace CSharpRpp.TypeSystem
                         }
                         catch
                         {
-                            MethodInfo method = declaringNativeType.GetMethod(Name, BindingFlags.Public | BindingFlags.Instance);
-                            _nativeMethod = method;
+                            try
+                            {
+                                MethodInfo method = declaringNativeType.GetMethod(Name, BindingFlags.Public | BindingFlags.Instance);
+                                _nativeMethod = method;
+                            }
+                            catch
+                            {
+                                _nativeMethod = null;
+                            }
                         }
                     }
                 }

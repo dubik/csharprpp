@@ -364,8 +364,15 @@ namespace CSharpRpp.Codegen
                     case "apply":
                     {
                         RType elementType = function.DeclaringType.GenericArguments.First();
-                        OpCode ldOpCode = ClrCodegenUtils.ArrayLoadOpCodeByType(elementType.NativeType);
-                        _body.Emit(ldOpCode);
+                        if (elementType.IsGenericParameter)
+                        {
+                            _body.Emit(OpCodes.Ldelem, elementType.NativeType);
+                        }
+                        else
+                        {
+                            OpCode ldOpCode = ClrCodegenUtils.ArrayLoadOpCodeByType(elementType.NativeType);
+                            _body.Emit(ldOpCode);
+                        }
                         break;
                     }
 

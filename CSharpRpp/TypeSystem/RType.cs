@@ -486,15 +486,7 @@ namespace CSharpRpp.TypeSystem
 
         public RType MakeArrayType()
         {
-            // TODO perhaps we should have generic type for array and make specialized version of it
-            // TODO make this is not needed anymore because we have RInflatedType and can do what TODO above says
-            // we also do that for cases when Array[String] is parsed (because we resolve type name)
-            RType newType = new RType("Array", Attributes, null, DeclaringType) {IsArray = true};
-            newType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
-            newType.DefineMethod("apply", RMethodAttributes.Public, this, new[] {new RppParameterInfo("index", IntTy)}, new RppGenericParameter[0]);
-            newType.DefineMethod("update", RMethodAttributes.Public, this,
-                new[] {new RppParameterInfo("index", IntTy), new RppParameterInfo("value", this)}, new RppGenericParameter[0]);
-            return newType;
+            return ArrayTy.MakeGenericType(new[] {this});
         }
 
         public virtual RType MakeGenericType(RType[] genericArguments)
