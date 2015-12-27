@@ -353,21 +353,34 @@ namespace CSharpRpp.Codegen
 
         private void CodegenForStub(RppMethodInfo function)
         {
-            if (function.DeclaringType.Name == "Array" && function.Name == "length")
+            if (function.DeclaringType.Name == "Array")
             {
-                _body.Emit(OpCodes.Ldlen);
-                return;
-            }
+                switch (function.Name)
+                {
+                    case "length":
+                        _body.Emit(OpCodes.Ldlen);
+                        break;
 
-            if (function.DeclaringType.Name == "Array" && function.Name == "apply")
-            {
-                RType elementType = function.DeclaringType.GenericArguments.First();
-                OpCode ldOpCode = ClrCodegenUtils.ArrayLoadOpCodeByType(elementType.NativeType);
-                _body.Emit(ldOpCode);
-                return;
-            }
+                    case "apply":
+                    {
+                        RType elementType = function.DeclaringType.GenericArguments.First();
+                        OpCode ldOpCode = ClrCodegenUtils.ArrayLoadOpCodeByType(elementType.NativeType);
+                        _body.Emit(ldOpCode);
+                        break;
+                    }
 
-            throw new NotImplementedException("Other funcs are not implemented");
+                    case "update":
+                    {
+                        RType elementType = function.DeclaringType.GenericArguments.First();
+                        OpCode ldOpCode = ClrCodegenUtils.ArrayStoreOpCodeByType(elementType.NativeType);
+                        _body.Emit(ldOpCode);
+                        break;
+                    }
+
+                    default:
+                        throw new NotImplementedException("Other funcs are not implemented");
+                }
+            }
         }
 
         public override void Visit(RppBaseConstructorCall node)
@@ -573,14 +586,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
-                                                              {
-                                                                  if (t.IsGenericParameter)
-                                                                  {
-                                                                      Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                                                                      return closureGenericArgument;
-                                                                  }
-                                                                  return t;
-                                                              }).ToArray();
+                    {
+                        if (t.IsGenericParameter)
+                        {
+                            Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                            return closureGenericArgument;
+                        }
+                        return t;
+                    }).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
                 parentType = genericTypeDef.MakeGenericType(targetSignature);

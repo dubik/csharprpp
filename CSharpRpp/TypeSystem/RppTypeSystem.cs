@@ -91,7 +91,7 @@ namespace CSharpRpp.TypeSystem
             arrayType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
             arrayType.DefineMethod("apply", RMethodAttributes.Public, genericParameter.Type, new[] {new RppParameterInfo("index", IntTy)},
                 new RppGenericParameter[0]);
-            arrayType.DefineMethod("update", RMethodAttributes.Public, genericParameter.Type,
+            arrayType.DefineMethod("update", RMethodAttributes.Public, UnitTy,
                 new[] {new RppParameterInfo("index", IntTy), new RppParameterInfo("value", genericParameter.Type)}, new RppGenericParameter[0]);
             return arrayType;
         }

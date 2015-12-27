@@ -59,12 +59,8 @@ object QList {
 ";
             const string code1 = @"
 object Main {
-    def read(args: Array[Int], index: Int) : Int = {
-        args(index)
-    }
-
-    def read(args: Array[String], index: Int) : String = {
-        args(index)
+    def read(args: Array[Int], index: Int, value: Int) : Unit = {
+        args(index) = value
     }
 }
 ";
@@ -80,9 +76,9 @@ object Main {
             }
         }
 
-        public static int read(int[] array, int index)
+        public static void write(int[] array, int index, int value)
         {
-            return array[index];
+            array[index] = value;
         }
     }
 }
