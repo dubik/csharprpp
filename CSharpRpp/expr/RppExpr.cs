@@ -79,7 +79,7 @@ namespace CSharpRpp
 
     public class RppRelationalBinOp : BinOp
     {
-        internal static readonly HashSet<string> Ops = new HashSet<string> {"<", ">", "==", "!="};
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"<", ">", "==", "!=", "<=", ">="};
 
         // 10 < id
         // 10 > id
@@ -98,6 +98,14 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             base.Analyze(scope, diagnostic);
+            // Convert less or equal to greater and greater or equal to less
+            switch (Op)
+            {
+                case "<=":
+                    return new RppRelationalBinOp(">", Right, Left);
+                case ">=":
+                    return new RppRelationalBinOp("<", Right, Left);
+            }
 
             return this;
         }

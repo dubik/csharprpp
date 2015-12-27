@@ -132,6 +132,8 @@ namespace CSharpRpp
                         break;
                     case "<":
                     case ">":
+                    case ">=":
+                    case "<=":
                         precedence = 6;
                         break;
                     case ":":
@@ -221,7 +223,8 @@ namespace CSharpRpp
         private RppNew ParseNewExpr()
         {
             Expect(RppLexer.Id);
-            RTypeName typeName = new RTypeName(_lastToken);
+            IToken typeNameToken = _lastToken;
+            RTypeName typeName = new RTypeName(typeNameToken);
             if (Peek(RppLexer.OP_LBracket))
             {
                 IList<RTypeName> genericArguments = ParseTypeParamClause();
@@ -229,7 +232,7 @@ namespace CSharpRpp
             }
 
             IList<IRppExpr> args = ParseArgsOpt();
-            return new RppNew(new ResolvableType(typeName), args);
+            return new RppNew(new ResolvableType(typeName), args) {Token = typeNameToken};
         }
 
         /*

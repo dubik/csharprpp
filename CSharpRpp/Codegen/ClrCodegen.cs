@@ -357,6 +357,10 @@ namespace CSharpRpp.Codegen
             {
                 _body.Emit(OpCodes.Ldlen);
                 return;
+            } else if (function.DeclaringType.Name == "Array" && function.Name == "apply")
+            {
+                _body.Emit(OpCodes.Ldelem);
+                return;
             }
 
             throw new NotImplementedException("Other funcs are not implemented");

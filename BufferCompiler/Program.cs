@@ -17,7 +17,7 @@ abstract class QList[+A] {
   def isEmpty: Boolean
 
   def map[U](f: A => U): QList[U] = {
-    if (isEmpty) {
+    if (isEmpty()) {
         QNil
     } else {
       new QCons(f(head()), tail().map(f))
@@ -46,11 +46,11 @@ object QList {
     if (args.length() == 0) {
       QNil
     } else {
-      var k = args.length - 1
+      var k = args.length() - 1
       var list: QList[A] = QNil
       while (k >= 0) {
         list = new QCons(args(k), list)
-        k -= 1
+        k = k - 1
       }
       list
     }
@@ -69,9 +69,8 @@ object Foo {
     }
 }
 ";
-
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -80,6 +79,11 @@ object Foo {
             {
                 codeGen.Save("Sample.dll");
             }
+        }
+
+        public static void callme()
+        {
+            
         }
     }
 }
