@@ -115,6 +115,7 @@ namespace CSharpRpp
                 {
                     case "==":
                     case "||":
+                    case "&&":
                         precedence = 2;
                         break;
                     case "|":

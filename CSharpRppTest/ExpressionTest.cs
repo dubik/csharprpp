@@ -186,13 +186,13 @@ object Main {
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            string[] array = { "hello", "moika", "terve" };
+            string[] array = {"hello", "moika", "terve"};
             for (int i = 0; i < array.Length; i++)
             {
-                Utils.InvokeStatic(mainTy, "write", new object[] { array, i, (i + 23).ToString()});
+                Utils.InvokeStatic(mainTy, "write", new object[] {array, i, (i + 23).ToString()});
             }
 
-            CollectionAssert.AreEqual(new[] { "23", "24", "25" }, array);
+            CollectionAssert.AreEqual(new[] {"23", "24", "25"}, array);
         }
 
 
@@ -214,20 +214,87 @@ object Main {
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
 
-            int[] intArray = { 1, 3, 5 };
+            int[] intArray = {1, 3, 5};
             for (int i = 0; i < intArray.Length; i++)
             {
-                object res = Utils.InvokeStatic(mainTy, "readInt", new object[] { intArray, i });
+                object res = Utils.InvokeStatic(mainTy, "readInt", new object[] {intArray, i});
                 Assert.AreEqual(intArray[i], res);
             }
 
-            string[] stringArray = { "Hello", "Terve", "Moi" };
+            string[] stringArray = {"Hello", "Terve", "Moi"};
             for (int i = 0; i < stringArray.Length; i++)
             {
-                object res = Utils.InvokeStatic(mainTy, "readString", new object[] { stringArray, i });
+                object res = Utils.InvokeStatic(mainTy, "readString", new object[] {stringArray, i});
                 Assert.AreEqual(stringArray[i], res);
             }
         }
 
+        [TestMethod]
+        public void LogicalAndConstrants()
+        {
+            const string code = @"
+object Main {
+    def allTrue : Boolean = true && true
+    def trueAndFalse : Boolean = true && false
+    def falseAndTrue : Boolean = false && true
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "allTrue"));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "trueAndFalse"));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "falseAndTrue"));
+        }
+
+        [TestMethod]
+        public void LogicalAndVariablesAndParameters()
+        {
+            const string code = @"
+object Main {
+    def and2(x: Boolean, y: Boolean) : Boolean = x && y
+    def and3(x: Boolean, y: Boolean, z: Boolean): Boolean = x && y && z;
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {true, true}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {true, false}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {false, true}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", new object[] {true, false, true}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", new object[] {false, false, true}));
+        }
+
+        [TestMethod]
+        public void TestMinAndMax()
+        {
+            const string code = @"
+object Main {
+    def max(x: Int, y: Int) : Int = if(x > y) x else y
+    def min(x: Int, y: Int) : Int = if(x < y) x else y
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", new object[] {13, 1}));
+            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", new object[] {13, -1}));
+            Assert.AreEqual(-1, Utils.InvokeStatic(mainTy, "min", new object[] {13, -1}));
+            Assert.AreEqual(1, Utils.InvokeStatic(mainTy, "min", new object[] {13, 1}));
+        }
+
+        [TestMethod]
+        public void ComplexLogicalExpressions()
+        {
+            const string code = @"
+object Main {
+    def logic1(x: Int, y: Int) : Boolean = x == 0 && y > 0 
+    def logic2(x: Int, y: Int) : Boolean = x < 0 || y > 0
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, 1}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, 0}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, -10}));
+
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {-10, 1}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {30, -10}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {0, 0}));
+        }
     }
 }

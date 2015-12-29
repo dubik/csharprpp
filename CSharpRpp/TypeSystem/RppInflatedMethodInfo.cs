@@ -113,10 +113,5 @@ namespace CSharpRpp.TypeSystem
 
             return _genericArguments[type.GenericParameterPosition];
         }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
     }
 }

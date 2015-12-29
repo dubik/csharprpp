@@ -48,6 +48,7 @@ namespace CSharpRpp
 
         public RppLogicalBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
         {
+            Type = BooleanTy;
         }
 
         public override void Accept(IRppNodeVisitor visitor)

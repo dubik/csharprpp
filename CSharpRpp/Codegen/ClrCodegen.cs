@@ -35,6 +35,8 @@ namespace CSharpRpp.Codegen
         private bool _logicalGen;
         private Label _trueLabel;
         private Label _exitLabel;
+        private bool _branch;
+        private bool _invert;
         private LocalBuilder _logicalTemp;
         private int _closureId;
 
@@ -55,6 +57,13 @@ namespace CSharpRpp.Codegen
         {
             _typeBuilder = builder;
             _body = body;
+        }
+
+        public ClrCodegen(ILGenerator body, Label exitLabel, bool invert) : this(body)
+        {
+            _exitLabel = exitLabel;
+            _branch = true;
+            _invert = invert;
         }
 
         public override void VisitEnter(RppClass node)
@@ -166,72 +175,96 @@ namespace CSharpRpp.Codegen
             {"!=", OpCodes.Ceq}
         };
 
+
         public override void Visit(RppLogicalBinOp node)
         {
-            bool firstPass = !_logicalGen;
-
-            if (!_logicalGen)
+            if (node.Op == "&&")
             {
-                _logicalGen = true;
-                _trueLabel = _body.DefineLabel();
-                _exitLabel = _body.DefineLabel();
-                _logicalTemp = _body.DeclareLocal(typeof (bool));
-            }
-
-            if (node.Op == "||")
-            {
-                node.Left.Accept(this);
-                if (!(node.Left is RppLogicalBinOp))
+                Label shortCircuitExit = _body.DefineLabel();
+                Label exitLabel = _body.DefineLabel();
+                ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, invert: false);
+                node.Left.Accept(codegen); // First condition can short circuit, since this is && we load 'false' (ldc_I4_0)
+                if (!(node.Left is RppRelationalBinOp)) // RppRelationBinOp uses optimized version, it calls Blt_S and Bgt and so on, rest should use Brfalse
                 {
-                    _body.Emit(OpCodes.Brtrue_S, _trueLabel);
+                    _body.Emit(OpCodes.Brfalse_S, _exitLabel);
                 }
+
                 node.Right.Accept(this);
-
-                if (firstPass)
-                {
-                    _body.Emit(OpCodes.Br_S, _exitLabel);
-                    _body.MarkLabel(_trueLabel);
-                    _body.Emit(OpCodes.Ldc_I4_1);
-                    _body.MarkLabel(_exitLabel);
-                    ClrCodegenUtils.StoreLocal(_logicalTemp, _body);
-                }
-                else
-                {
-                    _body.Emit(OpCodes.Brtrue_S, _trueLabel);
-                }
+                _body.Emit(OpCodes.Br_S, exitLabel); // We need to skip setting to false and use result of right condition evaluation
+                _body.MarkLabel(shortCircuitExit);
+                _body.Emit(OpCodes.Ldc_I4_0);
+                _body.MarkLabel(exitLabel);
             }
-
-            if (firstPass)
+            else if (node.Op == "||")
             {
-                ClrCodegenUtils.LoadLocal(_logicalTemp, _body);
-            }
+                Label shortCircuitExit = _body.DefineLabel();
+                Label exitLabel = _body.DefineLabel();
+                ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, invert: true);
+                node.Left.Accept(codegen);
+                if (!(node.Left is RppRelationalBinOp))
+                {
+                    _body.Emit(OpCodes.Brtrue_S, _exitLabel);
+                }
 
-            _logicalGen = false;
+                node.Right.Accept(this);
+                _body.Emit(OpCodes.Br_S, exitLabel);
+                _body.MarkLabel(shortCircuitExit);
+                _body.Emit(OpCodes.Ldc_I4_1);
+                _body.MarkLabel(exitLabel);
+            }
+            else
+            {
+                throw new Exception("Don't know how to handle " + node.Op);
+            }
+        }
+
+        public override void Visit(RppBooleanLiteral node)
+        {
+            var boolOpCode = node.Value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
+            _body.Emit(boolOpCode);
         }
 
         public override void Visit(RppRelationalBinOp node)
         {
-            LocalBuilder tempVar = _body.DeclareLocal(typeof (bool));
             node.Left.Accept(this);
             node.Right.Accept(this);
 
-            switch (node.Op)
+            if (_branch)
             {
-                case "<":
-                    _body.Emit(OpCodes.Clt);
-                    break;
-                case ">":
-                    _body.Emit(OpCodes.Cgt);
-                    break;
-                case "==":
-                    _body.Emit(OpCodes.Ceq);
-                    break;
+                OpCode cmpAndJumpOpCode;
+                switch (node.Op)
+                {
+                    case "<":
+                        cmpAndJumpOpCode = _invert ? OpCodes.Blt_S : OpCodes.Bge_S;
+                        break;
+                    case ">":
+                        cmpAndJumpOpCode = _invert ? OpCodes.Bgt_S : OpCodes.Ble_S;
+                        break;
+                    case "==":
+                        cmpAndJumpOpCode = _invert ? OpCodes.Beq_S : OpCodes.Bne_Un_S;
+                        break;
+                    default:
+                        throw new Exception("Don't know how to handle " + node.Op);
+                }
+
+                _body.Emit(cmpAndJumpOpCode, _exitLabel);
             }
-
-            ClrCodegenUtils.StoreLocal(tempVar, _body);
-            ClrCodegenUtils.LoadLocal(tempVar, _body);
+            else
+            {
+                switch (node.Op)
+                {
+                    case "<":
+                        _body.Emit(OpCodes.Clt);
+                        break;
+                    case ">":
+                        _body.Emit(OpCodes.Cgt);
+                        break;
+                    case "==":
+                        _body.Emit(OpCodes.Ceq);
+                        break;
+                }
+            }
         }
-
 
         public override void Visit(RppArithmBinOp node)
         {
@@ -641,11 +674,6 @@ namespace CSharpRpp.Codegen
             closureClass.CreateType();
         }
 
-        public override void Visit(RppBooleanLiteral node)
-        {
-            var boolOpCode = node.Value ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0;
-            _body.Emit(boolOpCode);
-        }
 
         public override void Visit(RppFieldSelector fieldSelector)
         {

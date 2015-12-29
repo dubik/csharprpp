@@ -1,4 +1,5 @@
-﻿using CSharpRpp;
+﻿using System;
+using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
 
@@ -24,8 +25,11 @@ abstract class QList[+A] {
   def isEmpty: Boolean
 
   def map[U](f: A => U): QList[U] = {
-    tail().map(f)
-    QNil
+    if (isEmpty()) {
+        QNil
+    } else {
+      new QCons(f(head()), tail().map(f))
+    }
   }
 }
 
@@ -75,5 +79,4 @@ object QList {
             }
         }
     }
-
 }
