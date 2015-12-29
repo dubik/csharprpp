@@ -16,6 +16,7 @@ namespace CSharpRpp
         {
             Condition = condition;
             Body = body;
+            Type = ResolvableType.UnitTy;
         }
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
