@@ -1,0 +1,17 @@
+﻿abstract class List[+A] {
+    def map[U](f: A => U): MyList[U]
+}
+
+class MyList[A](val tail: MyList[A]) extends List[A]{
+  override def map[U](f: A => U): MyList[U] = {
+    if(tail == null){
+        null
+     }else {
+        tail.map(f)
+    }
+  }
+}
+
+object Main {
+    def main: MyList[Any] = new MyList[Any](null)
+}

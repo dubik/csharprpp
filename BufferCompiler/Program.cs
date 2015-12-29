@@ -8,6 +8,13 @@ namespace BufferCompiler
     {
         public static void Main()
         {
+            /*
+                if (isEmpty()) {
+        QNil
+    } else {
+      new QCons(f(head()), tail().map(f))
+    }
+*/
             const string code = @"
 abstract class QList[+A] {
   def head: A
@@ -17,11 +24,8 @@ abstract class QList[+A] {
   def isEmpty: Boolean
 
   def map[U](f: A => U): QList[U] = {
-    if (isEmpty()) {
-        QNil
-    } else {
-      new QCons(f(head()), tail().map(f))
-    }
+    tail().map(f)
+    QNil
   }
 }
 
@@ -58,21 +62,9 @@ object QList {
   }
 }
 ";
-            const string code1 = @"
-object Main {
-    def read[A](args: Array[A], index: Int) : A = {
-        args(index)
-    }
 
-    def readInt(args: Array[Int], index: Int) : Int =
-        read[Int](args, index)
-
-    def readString(args: Array[String], index: Int) : String =
-        read[String](args, index)
-}
-";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -82,20 +74,6 @@ object Main {
                 codeGen.Save("Sample.dll");
             }
         }
-
-        public static int readInt()
-        {
-            return first(new[] {1, 2}, 0);
-        }
-
-        public static string readString()
-        {
-            return first(new[] {"Heö", "Moi"}, 1);
-        }
-
-        public static A first<A>(A[] array, int i)
-        {
-            return array[0];
-        }
     }
+
 }

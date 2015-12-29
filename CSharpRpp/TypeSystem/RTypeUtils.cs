@@ -254,23 +254,24 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType)
+        public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType, RppMethodInfo declaringMethod = null)
         {
             int genericArgumentPosition = 0;
             foreach (var genericParamName in genericParameterName)
             {
-                RppGenericParameter genericParameter = CreateGenericParameter(genericParamName, genericArgumentPosition++, declaringType);
+                RppGenericParameter genericParameter = CreateGenericParameter(genericParamName, genericArgumentPosition++, declaringType, declaringMethod);
                 yield return genericParameter;
             }
         }
 
-        private static RppGenericParameter CreateGenericParameter(string name, int genericArgumentPosition, RType declaringType)
+        private static RppGenericParameter CreateGenericParameter(string name, int genericArgumentPosition, RType declaringType, RppMethodInfo declaringMethod)
         {
             RppGenericParameter genericParameter = new RppGenericParameter(name);
             RType type = new RType(name, RTypeAttributes.None, null, declaringType)
             {
                 IsGenericParameter = true,
-                GenericParameterPosition = genericArgumentPosition
+                GenericParameterPosition = genericArgumentPosition,
+                GenericParameterDeclaringMethod = declaringMethod
             };
             genericParameter.Type = type;
             genericParameter.Position = genericArgumentPosition;

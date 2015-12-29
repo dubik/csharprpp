@@ -37,7 +37,7 @@ namespace CSharpRpp.TypeSystem
 
         private RppGenericParameter[] _genericParameters;
 
-        public RppGenericParameter[] GenericParameters => _genericParameters;
+        public virtual RppGenericParameter[] GenericParameters => _genericParameters;
 
         public RppMethodInfo([NotNull] string name, [NotNull] RType declaringType, RMethodAttributes attributes,
             [CanBeNull] RType returnType,
@@ -57,7 +57,7 @@ namespace CSharpRpp.TypeSystem
                 throw new Exception("there were generic paremeters defined already");
             }
 
-            _genericParameters = RTypeUtils.CreateGenericParameters(genericParameterName, DeclaringType).ToArray();
+            _genericParameters = RTypeUtils.CreateGenericParameters(genericParameterName, DeclaringType, this).ToArray();
             return _genericParameters;
         }
 

@@ -333,6 +333,9 @@ namespace CSharpRpp.TypeSystem
         }
 
         public int GenericParameterPosition { get; set; }
+        public RppMethodInfo GenericParameterDeclaringMethod { get; set; }
+
+        public bool IsMethodGenericParameter => GenericParameterDeclaringMethod != null;
 
         public IReadOnlyList<RType> Nested => _nested;
 
@@ -727,10 +730,10 @@ namespace CSharpRpp.TypeSystem
                 RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                {
-                    RppGenericParameter genericParam = genericParametrs[index++];
-                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                }).Contains(false);
+                    {
+                        RppGenericParameter genericParam = genericParametrs[index++];
+                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                    }).Contains(false);
             }
 
             return true;
@@ -750,7 +753,5 @@ namespace CSharpRpp.TypeSystem
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-
     }
 }

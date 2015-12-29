@@ -59,11 +59,15 @@ namespace CSharpRpp.TypeSystem
         private readonly RType[] _genericArguments;
         private MethodBase _nativeMethod;
 
+        private readonly RppGenericParameter[] _genericParameters;
+        public override RppGenericParameter[] GenericParameters => _genericParameters;
+
         public RppInflatedMethodInfo([NotNull] RppMethodInfo genericMethodDefinition, RType[] genericArguments, RType declaringType)
             : base(genericMethodDefinition.Name, declaringType, genericMethodDefinition.Attributes, null, new RppParameterInfo[0])
         {
             GenericMethodDefinition = genericMethodDefinition;
             _genericArguments = genericArguments;
+            _genericParameters = genericMethodDefinition.GenericParameters;
         }
 
         private RppParameterInfo[] InflateParameters()
@@ -86,7 +90,7 @@ namespace CSharpRpp.TypeSystem
         {
             if (type.IsGenericParameter)
             {
-                return _genericArguments[type.GenericParameterPosition];
+                return GetGenericArgument(type);
             }
 
             if (type.IsGenericType)
@@ -97,6 +101,22 @@ namespace CSharpRpp.TypeSystem
             }
 
             return type;
+        }
+
+        [NotNull]
+        private RType GetGenericArgument([NotNull] RType type)
+        {
+            if (type.IsMethodGenericParameter)
+            {
+                return _genericParameters[type.GenericParameterPosition].Type;
+            }
+
+            return _genericArguments[type.GenericParameterPosition];
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
         }
     }
 }

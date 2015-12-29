@@ -30,11 +30,19 @@ namespace CSharpRppTest
             PeverifyTest("testcase1.rpp");
         }
 
+        [TestCategory("ILVerifier"), TestMethod]
+        public void TestMixingGenericArgumentsOfMethodAndClass()
+        {
+            PeverifyTest("testcase2.rpp");
+        }
+
         #region Spawn
 
         private static void PeverifyTest(string testcase)
         {
-            int compilerExitCode = SpawnCompiler(new[] {@"tests\" + testcase, "--library","--out", "out.dll"});
+            string testcaseFullName = @"tests\" + testcase;
+            Assert.IsTrue(File.Exists(testcaseFullName), "Test case file can't be found (forgot to set 'Copy To Output Directory'?)");
+            int compilerExitCode = SpawnCompiler(new[] {testcaseFullName, "--library","--out", "out.dll"});
             Assert.AreEqual(0, compilerExitCode);
             string output;
             int peverifyExitCode = SpawnPreverifier(new[] {@"out.dll"}, out output);

@@ -89,14 +89,14 @@ namespace CSharpRpp.TypeSystem
             return new RppInflatedField(field, _genericArguments, this);
         }
 
-        private RppMethodInfo[] InflateMethods(IEnumerable<RppMethodInfo> constructors)
+        private RppMethodInfo[] InflateMethods(IEnumerable<RppMethodInfo> method)
         {
-            return constructors.Select(InflateMethod).ToArray();
+            return method.Select(InflateMethod).ToArray();
         }
 
-        private RppMethodInfo InflateMethod(RppMethodInfo constructor)
+        private RppMethodInfo InflateMethod(RppMethodInfo method)
         {
-            return new RppInflatedMethodInfo(constructor, _genericArguments, this);
+            return new RppInflatedMethodInfo(method, _genericArguments, this);
         }
 
         public override string ToString()
