@@ -32,16 +32,17 @@ namespace CSharpRpp.Codegen
 
         private static readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
-        private bool _logicalGen;
-        private Label _trueLabel;
-        private Label _exitLabel;
-        private bool _branch;
-        private bool _invert;
-        private LocalBuilder _logicalTemp;
+        private readonly Label _exitLabel;
+        public readonly bool Branching;
+        public bool Jumped { get; set; }
+        private readonly bool _invert;
+        public bool FirstLogicalBinOp { get; set; }
+
         private int _closureId;
 
         public ClrCodegen()
         {
+            FirstLogicalBinOp = true;
         }
 
         /// <summary>
@@ -49,20 +50,20 @@ namespace CSharpRpp.Codegen
         /// specific function.
         /// </summary>
         /// <param name="body"></param>
-        public ClrCodegen(ILGenerator body) : this(null, body)
+        public ClrCodegen(ILGenerator body) : this()
         {
+            _body = body;
         }
 
-        public ClrCodegen(TypeBuilder builder, ILGenerator body)
+        public ClrCodegen(TypeBuilder builder, ILGenerator body) : this(body)
         {
             _typeBuilder = builder;
-            _body = body;
         }
 
         public ClrCodegen(ILGenerator body, Label exitLabel, bool invert) : this(body)
         {
             _exitLabel = exitLabel;
-            _branch = true;
+            Branching = true;
             _invert = invert;
         }
 
@@ -178,43 +179,28 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppLogicalBinOp node)
         {
-            if (node.Op == "&&")
-            {
-                Label shortCircuitExit = _body.DefineLabel();
-                Label exitLabel = _body.DefineLabel();
-                ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, invert: false);
-                node.Left.Accept(codegen); // First condition can short circuit, since this is && we load 'false' (ldc_I4_0)
-                if (!(node.Left is RppRelationalBinOp)) // RppRelationBinOp uses optimized version, it calls Blt_S and Bgt and so on, rest should use Brfalse
-                {
-                    _body.Emit(OpCodes.Brfalse_S, _exitLabel);
-                }
+            bool branchingFlag = node.Op == "&&";
+            var shortCircuitExit = !Branching ? _body.DefineLabel() : _exitLabel; // Branching is false for the first '&&'
 
-                node.Right.Accept(this);
+            Label exitLabel = _body.DefineLabel();
+            ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, branchingFlag) {FirstLogicalBinOp = false};
+            node.Left.Accept(codegen); // First condition can short circuit, since this is && we load 'false' (ldc_I4_0)
+            if (!codegen.Jumped) // Check if we jumped on shortcircuite label, if not - jump 
+            {
+                // this may happen if boolean is in identifier or returned from function
+                _body.Emit(branchingFlag ? OpCodes.Brfalse_S : OpCodes.Brtrue_S, _exitLabel);
+            }
+
+            node.Right.Accept(this);
+            if (FirstLogicalBinOp) // We should define labels only for the first logical op, others will just use our label
+            {
                 _body.Emit(OpCodes.Br_S, exitLabel); // We need to skip setting to false and use result of right condition evaluation
-                _body.MarkLabel(shortCircuitExit);
-                _body.Emit(OpCodes.Ldc_I4_0);
-                _body.MarkLabel(exitLabel);
-            }
-            else if (node.Op == "||")
-            {
-                Label shortCircuitExit = _body.DefineLabel();
-                Label exitLabel = _body.DefineLabel();
-                ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, invert: true);
-                node.Left.Accept(codegen);
-                if (!(node.Left is RppRelationalBinOp))
+                if (!Branching)
                 {
-                    _body.Emit(OpCodes.Brtrue_S, _exitLabel);
+                    _body.MarkLabel(shortCircuitExit);
                 }
-
-                node.Right.Accept(this);
-                _body.Emit(OpCodes.Br_S, exitLabel);
-                _body.MarkLabel(shortCircuitExit);
-                _body.Emit(OpCodes.Ldc_I4_1);
+                _body.Emit(branchingFlag ? OpCodes.Ldc_I4_0 : OpCodes.Ldc_I4_1);
                 _body.MarkLabel(exitLabel);
-            }
-            else
-            {
-                throw new Exception("Don't know how to handle " + node.Op);
             }
         }
 
@@ -229,20 +215,27 @@ namespace CSharpRpp.Codegen
             node.Left.Accept(this);
             node.Right.Accept(this);
 
-            if (_branch)
+            if (Branching)
             {
                 OpCode cmpAndJumpOpCode;
                 switch (node.Op)
                 {
                     case "<":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Blt_S : OpCodes.Bge_S;
+                        cmpAndJumpOpCode = _invert ? OpCodes.Bge_S : OpCodes.Blt_S;
                         break;
                     case ">":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Bgt_S : OpCodes.Ble_S;
+                        cmpAndJumpOpCode = _invert ? OpCodes.Ble_S : OpCodes.Bgt_S;
                         break;
                     case "==":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Beq_S : OpCodes.Bne_Un_S;
+                        cmpAndJumpOpCode = _invert ? OpCodes.Bne_Un_S : OpCodes.Beq_S;
                         break;
+                    case ">=":
+                        cmpAndJumpOpCode = _invert ? OpCodes.Blt_S : OpCodes.Bge_S;
+                        break;
+                    case "<=":
+                        cmpAndJumpOpCode = _invert ? OpCodes.Bgt_S : OpCodes.Ble_S;
+                        break;
+
                     default:
                         throw new Exception("Don't know how to handle " + node.Op);
                 }
@@ -262,8 +255,16 @@ namespace CSharpRpp.Codegen
                     case "==":
                         _body.Emit(OpCodes.Ceq);
                         break;
+//                    case ">=":
+//                        break;
+//                    case "<=":
+//                        break;
+                    default:
+                        throw new Exception("Unknown op " + node.Op);
                 }
             }
+
+            Jumped = Branching;
         }
 
         public override void Visit(RppArithmBinOp node)
@@ -554,14 +555,15 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppWhile node)
         {
-            Label enterLoop = _body.DefineLabel();
-            Label exitLoop = _body.DefineLabel();
-            _body.MarkLabel(enterLoop);
-            node.Condition.Accept(this);
-            _body.Emit(OpCodes.Brfalse_S, exitLoop);
+            Label condition = _body.DefineLabel();
+            Label body = _body.DefineLabel();
+
+            _body.Emit(OpCodes.Br_S, condition);
+            _body.MarkLabel(body);
             node.Body.Accept(this);
-            _body.Emit(OpCodes.Br_S, enterLoop);
-            _body.MarkLabel(exitLoop);
+            _body.MarkLabel(condition);
+            ClrCodegen codegen = new ClrCodegen(_body, body, false) {FirstLogicalBinOp = false};
+            node.Condition.Accept(codegen);
         }
 
         public override void Visit(RppIf node)

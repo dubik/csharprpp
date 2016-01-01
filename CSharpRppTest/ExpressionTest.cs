@@ -296,5 +296,19 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {30, -10}));
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {0, 0}));
         }
+
+        [TestMethod]
+        public void MoreComplexLogicalExpressions()
+        {
+            const string code = @"
+object Main {
+    def condSimple(a: Int, b: Int, c: Int) : Boolean = a > b && b > c && c > 5
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {8, 7, 6}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {8, 7, 5}));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {0, 0, 0}));
+        }
     }
 }

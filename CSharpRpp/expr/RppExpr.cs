@@ -100,6 +100,7 @@ namespace CSharpRpp
         {
             base.Analyze(scope, diagnostic);
             // Convert less or equal to greater and greater or equal to less
+            /*
             switch (Op)
             {
                 case "<=":
@@ -107,7 +108,7 @@ namespace CSharpRpp
                 case ">=":
                     return new RppRelationalBinOp("<", Right, Left);
             }
-
+            */
             return this;
         }
     }

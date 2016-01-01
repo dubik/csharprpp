@@ -267,6 +267,29 @@ object Bar
         }
 
         [TestMethod]
+        public void ComplexWhile()
+        {
+            const string code = @"
+object Bar
+{
+    def invoke() : Int = {
+        val p : Int = 10
+        var ret : Int = 0
+        while(p >= 0 && ret < 5)
+        {
+            ret = ret + 1
+            p = p - 1
+        }
+        ret
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            object res = Utils.InvokeStatic(barTy, "invoke");
+            Assert.AreEqual(5, res);
+        }
+
+        [TestMethod]
         public void AutoBoxingForVarargs()
         {
             const string code = @"
