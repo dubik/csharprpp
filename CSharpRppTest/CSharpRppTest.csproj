@@ -101,6 +101,9 @@
     <None Include="tests\testcase2.rpp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="tests\testcase3.rpp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="tools\PEVerify.exe">

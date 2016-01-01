@@ -36,6 +36,12 @@ namespace CSharpRppTest
             PeverifyTest("testcase2.rpp");
         }
 
+        [TestCategory("ILVerifier"), TestMethod]
+        public void MethodWhichThrowExceptionShouldntUseReturn()
+        {
+            PeverifyTest("testcase3.rpp");
+        }
+
         #region Spawn
 
         private static void PeverifyTest(string testcase)

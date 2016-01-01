@@ -1,0 +1,4 @@
+﻿object Main
+{
+    def throwException : Int = throw new Exception("Not implemented")
+}

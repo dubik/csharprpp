@@ -9,13 +9,6 @@ namespace BufferCompiler
     {
         public static void Main()
         {
-            /*
-                if (isEmpty()) {
-        QNil
-    } else {
-      new QCons(f(head()), tail().map(f))
-    }
-*/
             const string code = @"
 abstract class QList[+A] {
   def head: A
@@ -58,7 +51,7 @@ object QList {
       var list: QList[A] = QNil
       while (k >= 0) {
         val it: A = args(k)
-        list = new QCons(it, list)
+        list = new QCons[A](it, list)
         k = k - 1
       }
       list
@@ -67,43 +60,8 @@ object QList {
 }
 ";
 
-            const string code1 = @"
-object Main {
-    def invoke() : Int = {
-        val p : Int = 10
-        var ret : Int = 0
-        while(p >= 0 && ret < 5)
-        {
-            ret = ret + 1
-            p = p - 1
-        }
-        ret
-    }
-
-    def allTrue : Boolean = true || true
-
-    def book(a: Int, b: Int, c: Int) : Int = if(a > b && b > c && c > 5) a else b
-    def bookSimple(a: Int, b: Int, c: Int) : Boolean = a > b && b > c && c > 5
-
-    def and2(x: Boolean, y: Boolean) : Boolean = x || y
-    def and3(x: Boolean, y: Boolean, z: Boolean): Boolean = x || y || z;
-}
-";
-            const string code2 = @"
-object Main {
-    def and2(x: Boolean, y: Boolean) : Boolean = x && y
-    def and3(x: Boolean, y: Boolean, z: Boolean): Boolean = x && y && z;
-}
-";
-
-            const string code3 = @"
-object Main {
-    def allTrue : Boolean = true && true
-    def condSimple(a: Int, b: Int, c: Int) : Boolean = a > b && b > c && c > 5
-}
-";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -113,51 +71,5 @@ object Main {
                 codeGen.Save("Sample.dll");
             }
         }
-    }
-
-    class Test
-    {
-        public static int Calc()
-        {
-            int k = 0;
-            int i = 10;
-            while (i >= 1)
-            {
-                k = k + 2;
-                i = i + 1;
-            }
-            return k;
-        }
-
-        public static int C()
-        {
-            int p = 10;
-            int ret = 0;
-            while (p <= 100)
-            {
-                ret = ret + 1;
-                p = p + 1;
-            }
-
-            return ret;
-        }
-
-        public static bool BookSimple(int a, int b, int c)
-        {
-            return a > b && b > c && c > 5;
-        }
-
-        public static int BookSimpleInt(int a, int b, int c)
-        {
-            if (a > b && b > c && c > 5)
-            {
-                return a;
-            }
-            else
-            {
-                return b;
-            }
-        }
-
     }
 }

@@ -4,7 +4,7 @@ using CSharpRpp.Expr;
 
 namespace CSharpRppTest
 {
-    class AstNodeMatcher<T> : IRppNodeVisitor where T : class, IRppNamedNode
+    internal class AstNodeMatcher<T> : IRppNodeVisitor where T : class, IRppNamedNode
     {
         public IList<T> Matches = new List<T>();
         private readonly string _name;

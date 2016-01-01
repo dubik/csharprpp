@@ -142,12 +142,15 @@ namespace CSharpRpp.Codegen
             RType funcReturnType = func.ReturnType.Value;
             RType expressionType = func.Expr.Type.Value;
 
-            if (funcReturnType.Equals(RppTypeSystem.UnitTy) && !expressionType.Equals(RppTypeSystem.UnitTy))
+            // nothing is throw, we shouldn't return in that case
+            if (!expressionType.Equals(RppTypeSystem.NothingTy))
             {
-                generator.Emit(OpCodes.Pop);
+                if (funcReturnType.Equals(RppTypeSystem.UnitTy) && !expressionType.Equals(RppTypeSystem.UnitTy))
+                {
+                    generator.Emit(OpCodes.Pop);
+                }
+                generator.Emit(OpCodes.Ret);
             }
-
-            generator.Emit(OpCodes.Ret);
         }
 
         public override void Visit(RppVar node)
