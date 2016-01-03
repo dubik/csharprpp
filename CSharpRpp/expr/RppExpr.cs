@@ -866,8 +866,13 @@ namespace CSharpRpp
                         Field = fieldSymbol;
                         Type = new ResolvableType(fieldSymbol.Type);
                     }
+                    else
+                    {
+                        throw SemanticExceptionFactory.ValueNotFound(Token);
+                    }
                 }
             }
+
             return this;
         }
 

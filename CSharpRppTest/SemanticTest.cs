@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CSharpRpp;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
@@ -100,5 +101,18 @@ object Main
 ";
             Utils.ParseAndAnalyze(code);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(SemanticException))]
+        public void ShouldReportErrorWhenSymbolIsNotFound()
+        {
+            const string code = @"
+object Main {
+    def main : Int = SomeClass
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+        }
+
     }
 }

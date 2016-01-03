@@ -22,6 +22,11 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(105, str);
         }
 
+        public static SemanticException ValueNotFound(IToken token)
+        {
+            return new SemanticException(106, FormatErrorAndPointAtToken(token, $"not found: value {token.Text}"));
+        }
+
         private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
         {
             string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
