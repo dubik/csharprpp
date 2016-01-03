@@ -857,6 +857,11 @@ namespace CSharpRpp
                         Type = new ResolvableType(symbol.Type);
                         Ref = ((LocalVarSymbol) symbol).Var;
                     }
+
+                    if (symbol.IsClass)
+                    {
+                        throw SemanticExceptionFactory.ValueNotFound(Token);
+                    }
                 }
                 else
                 {

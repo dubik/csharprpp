@@ -111,7 +111,23 @@ object Main {
     def main : Int = SomeClass
 }
 ";
-            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Utils.ParseAndCreateType(code, "Main$");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SemanticException))]
+        public void ShouldReportErrorWhenClassIsUsed()
+        {
+            const string code = @"
+class QNil
+
+object Main{
+    def main: Unit = {
+        var l = QNil
+    }
+}
+";
+            Utils.ParseAndCreateType(code, "Main$");
         }
 
     }

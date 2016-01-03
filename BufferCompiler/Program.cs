@@ -61,8 +61,12 @@ object QList {
 ";
 
             const string code1 = @"
-object Main {
-    def main : Int = SomeClass
+class QNil
+
+object Main{
+    def main: Unit = {
+        var l = QNil
+    }
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
