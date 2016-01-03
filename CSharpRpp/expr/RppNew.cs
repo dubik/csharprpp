@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
@@ -66,7 +67,7 @@ namespace CSharpRpp
             List<RppMethodInfo> candidates = OverloadQuery.Find(Args, new RType[0], constructors, comparator).ToList();
             if (candidates.Count != 1)
             {
-                throw new Exception("Can't figure out which overload to use");
+                throw SemanticExceptionFactory.CreateOverloadFailureException(Token, candidates, Args, constructors);
             }
 
             RppMethodInfo constructor = candidates[0];

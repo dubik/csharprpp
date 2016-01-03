@@ -45,10 +45,10 @@ class QCons[A](val _head: A, val _tail: QList[A]) extends QList[A] {
 object QList {
   def apply[A](args: A*): QList[A] = {
     if (args.length() == 0) {
-      new QNil
+      new QNil[A]()
     } else {
       var k = args.length() - 1
-      var list: QList[A] = QNil
+      var list: QList[A] = new QNil
       while (k >= 0) {
         val it: A = args(k)
         list = new QCons[A](it, list)
@@ -61,11 +61,11 @@ object QList {
 ";
 
             const string code1 = @"
-class QNil
+class Node[A](val item: A)
 
 object Main{
     def main: Unit = {
-        var l = QNil
+        var n: Node[Int] = new Node(12, 12)
     }
 }
 ";

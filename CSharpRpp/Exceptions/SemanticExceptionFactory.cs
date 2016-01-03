@@ -1,4 +1,7 @@
-﻿using Antlr.Runtime;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Antlr.Runtime;
+using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Exceptions
 {
@@ -27,12 +30,63 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(106, FormatErrorAndPointAtToken(token, $"not found: value {token.Text}"));
         }
 
+        public static SemanticException NotEnoughArguments(IToken token, RppMethodInfo targetMethod)
+        {
+            string methodString = MethodString(targetMethod);
+            return new SemanticException(107, FormatErrorAndPointAtToken(token, $"not enough arguments for method {methodString}"));
+        }
+
+        private static string MethodString(RppMethodInfo method)
+        {
+            if (method.Name == "ctor")
+            {
+                return method.ToString().Replace("ctor", "constructor").Replace("constrparam", "");
+            }
+
+            return method.ToString();
+        }
+
         private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
         {
             string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
             string secondLine = TokenUtils.GetTokenLine(token);
             string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
             return $"{firstLine}\n{secondLine}\n{pointerLine}";
+        }
+
+        public static SemanticException CreateOverloadFailureException(IToken token, IEnumerable<RppMethodInfo> matchingFunctions, IEnumerable<IRppExpr> args,
+            IEnumerable<RppMethodInfo> allFunctions)
+        {
+            if (matchingFunctions.Any())
+            {
+                // Not matching at all
+                if (allFunctions.Count() > 1) // many alternatives
+                {
+                }
+
+                // just one alternative
+            }
+            else
+            {
+                // Matching too many overloads
+                IEnumerable<RppMethodInfo> functions = allFunctions as IList<RppMethodInfo> ?? allFunctions.ToList();
+                if (functions.Count() > 1)
+                {
+                }
+                else
+                {
+                    RppMethodInfo closestMethod = functions.First();
+                    if (closestMethod.Parameters.Length > args.Count())
+                    {
+                        // Not enough arguments
+                        return NotEnoughArguments(token, closestMethod);
+                    }
+
+                    // Too many arguments
+                }
+            }
+
+            return new SemanticException(-1, "Not done");
         }
     }
 }

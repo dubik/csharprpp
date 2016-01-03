@@ -5,6 +5,7 @@ using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
@@ -27,7 +28,7 @@ object Bar
     }
 }
 ";
-            RppProgram program = Utils.ParseAndAnalyze(code);
+            RppProgram program = ParseAndAnalyze(code);
             RppId id = program.First<RppId>("k");
             RType objectType = id.Type.Value;
             Assert.IsNotNull(objectType, "Identifier should have been resolved to RType");
@@ -46,7 +47,7 @@ object Bar
 }
 ";
 
-            RppProgram program = Utils.ParseAndAnalyze(code);
+            RppProgram program = ParseAndAnalyze(code);
             Assert.IsNotNull(program);
         }
 
@@ -86,7 +87,7 @@ object Main
     }
 }
 ";
-            Utils.ParseAndAnalyze(code);
+            ParseAndAnalyze(code);
         }
 
         [TestMethod]
@@ -99,11 +100,11 @@ object Main
     def main: Int = ""Hello""
 }
 ";
-            Utils.ParseAndAnalyze(code);
+            ParseAndAnalyze(code);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [ExpectedException(typeof (SemanticException))]
         public void ShouldReportErrorWhenSymbolIsNotFound()
         {
             const string code = @"
@@ -111,11 +112,11 @@ object Main {
     def main : Int = SomeClass
 }
 ";
-            Utils.ParseAndCreateType(code, "Main$");
+            ParseAndCreateType(code, "Main$");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [ExpectedException(typeof (SemanticException))]
         public void ShouldReportErrorWhenClassIsUsed()
         {
             const string code = @"
@@ -127,8 +128,22 @@ object Main{
     }
 }
 ";
-            Utils.ParseAndCreateType(code, "Main$");
+            ParseAndCreateType(code, "Main$");
         }
 
+        [TestMethod]
+        public void NotEnoughArgumentsForNew()
+        {
+            const string code = @"
+class Node[A](val item: A)
+
+object Main{
+    def main: Unit = {
+        var n: Node[Int] = new Node
+    }
+}
+";
+            AssertRaisesException<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
+        }
     }
 }

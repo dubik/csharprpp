@@ -168,5 +168,30 @@ namespace CSharpRppTest
             var instanceField = type.GetField("_instance");
             return instanceField.GetValue(null);
         }
+
+        ///<summary>
+        /// Runs the action statement and asserts that it causes an exception with the expected type and message
+        ///</summary>
+        ///<typeparam name="TException"></typeparam>
+        ///<param name="action"></param>
+        ///<param name="expectedMessage"></param>
+        public static void AssertRaisesException<TException>(Action action, string expectedMessage) where TException : Exception
+        {
+            try
+            {
+                action();
+                Assert.Fail($"Call suceeded. Expected exception of type: {typeof (TException).Name} with message: {expectedMessage}");
+            }
+            catch (Exception ex)
+            {
+                if (ex is AssertFailedException)
+                    throw;
+
+                var exception = ex as TException;
+                Assert.IsNotNull(exception, $"Expected exception of type: {typeof (TException).Name}, actual type: {ex.GetType().Name}");
+                bool condition = exception.Message.Contains(expectedMessage);
+                Assert.IsTrue(condition, $"Should contain message: {expectedMessage}");
+            }
+        }
     }
 }
