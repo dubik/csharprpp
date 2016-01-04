@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CSharpRpp
 {
@@ -46,5 +47,9 @@ namespace CSharpRpp
                 index++;
             }
         }
+
+        public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
+
+        public static bool NonEmpty<T>(this IEnumerable<T> collection) => !collection.IsEmpty();
     }
 }

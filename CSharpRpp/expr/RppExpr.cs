@@ -461,7 +461,7 @@ namespace CSharpRpp
             List<RType> genericArguments = _typeArgs.Select(ta => ta.Value).ToList();
 
             // Search for a function which matches signature and possible gaps in types (for closures)
-            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Name, ArgList, genericArguments, scope);
+            FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Token, Name, ArgList, genericArguments, scope);
             if (resolveResults == null)
             {
                 throw SemanticExceptionFactory.MemberNotFound(Token, TargetType.Name);

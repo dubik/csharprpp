@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CSharpRpp;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
@@ -145,5 +144,21 @@ object Main{
 ";
             AssertRaisesException<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
         }
+
+        [TestMethod]
+        public void NotEnoughArgumentsForFunction()
+        {
+            const string code = @"
+object Main{
+    def func(k: Int) : Int = k
+
+    def main: Unit = {
+        func()
+    }
+}
+";
+            AssertRaisesException<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
+        }
+
     }
 }

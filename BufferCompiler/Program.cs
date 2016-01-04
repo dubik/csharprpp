@@ -61,16 +61,16 @@ object QList {
 ";
 
             const string code1 = @"
-class Node[A](val item: A)
-
 object Main{
+    def func(k: Int) : Int = k
+
     def main: Unit = {
-        var n: Node[Int] = new Node(12, 12)
+        func()
     }
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();

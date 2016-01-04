@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Antlr.Runtime;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -82,17 +84,18 @@ namespace CSharpRpp
         }
 
         private readonly RType[] _typeArgs;
+        private readonly IToken _token;
 
-        private FunctionResolution(IEnumerable<RType> typeArgs)
+        private FunctionResolution(IToken token, IEnumerable<RType> typeArgs)
         {
+            _token = token;
             _typeArgs = typeArgs.ToArray();
         }
 
-        public static ResolveResults ResolveFunction(string name, IEnumerable<IRppExpr> args, IEnumerable<RType> typeArgs,
-            SymbolTable scope)
+        public static ResolveResults ResolveFunction(IToken token, string name, IEnumerable<IRppExpr> args, IEnumerable<RType> typeArgs, SymbolTable scope)
         {
             IEnumerable<IRppExpr> argsList = args as IList<IRppExpr> ?? args.ToList();
-            FunctionResolution resolution = new FunctionResolution(typeArgs);
+            FunctionResolution resolution = new FunctionResolution(token, typeArgs);
 
             ResolveResults res = resolution.SearchInFunctions(name, argsList, scope);
             if (res != null)
@@ -114,17 +117,18 @@ namespace CSharpRpp
         {
             IReadOnlyCollection<RppMethodInfo> overloads = scope.LookupFunction(name);
 
+            if (overloads.IsEmpty())
+            {
+                return null;
+            }
+
             DefaultTypesComparator typesComparator = new DefaultTypesComparator(_typeArgs);
             IEnumerable<IRppExpr> argList = args as IList<IRppExpr> ?? args.ToList();
             List<RppMethodInfo> candidates = OverloadQuery.Find(argList, _typeArgs, overloads, typesComparator).ToList();
-            if (candidates.Count > 1)
-            {
-                throw new Exception("Can't figure out which overload to use");
-            }
 
-            if (candidates.Count == 0)
+            if (candidates.Count == 0 && overloads.Any())
             {
-                return null;
+                throw SemanticExceptionFactory.CreateOverloadFailureException(_token, candidates, argList, overloads);
             }
 
             RppMethodInfo candidate = candidates[0];
