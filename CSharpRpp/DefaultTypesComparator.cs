@@ -37,7 +37,7 @@ namespace CSharpRpp
             if (target.IsGenericParameter)
             {
                 // Skip the check, generic arguments will be inferred
-                if (_genericArguments.Length == 0)
+                if (_genericArguments == null || _genericArguments.Length == 0)
                 {
                     return true;
                 }

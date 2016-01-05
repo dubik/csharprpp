@@ -48,7 +48,7 @@ object QList {
       new QNil[A]()
     } else {
       var k = args.length() - 1
-      var list: QList[A] = new QNil
+      var list: QList[A] = new QNil[A]()
       while (k >= 0) {
         val it: A = args(k)
         list = new QCons[A](it, list)
@@ -61,16 +61,26 @@ object QList {
 ";
 
             const string code1 = @"
-object Main{
-    def func(k: Int) : Int = k
+class Node[A](val item: A)
 
-    def main: Unit = {
-        func()
-    }
+class List[A](k: A) extends Node[A](k) {
+}
+
+object Main {
+    def main: List[Int] = new List(13)
+}
+";
+
+            const string code2 = @"
+class Node[A](val item: A)
+
+object Main {
+    def main[A](p: A): Node[A] = new Node(p)
+    def mainInt: Node[Int] = main[Int](123)
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code2, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();

@@ -166,7 +166,7 @@ namespace CSharpRpp.TypeSystem
                 return target;
             }
 
-            if (target.IsGenericParameter && !dict.ContainsKey(target.GenericParameterPosition) && target.Name != source.Name)
+            if (target.IsGenericParameter && !dict.ContainsKey(target.GenericParameterPosition) && AreDifferent(source, target))
             {
                 dict.Add(target.GenericParameterPosition, source);
                 return source;
@@ -174,8 +174,7 @@ namespace CSharpRpp.TypeSystem
 
             if (source.IsGenericType)
             {
-                var newGenericArguments =
-                    source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict)).ToArray();
+                var newGenericArguments = source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict)).ToArray();
 
                 // Add generic arguments to dictionary in case they were resolved to some real type
                 for (int i = 0; i < newGenericArguments.Length; i++)
@@ -190,6 +189,18 @@ namespace CSharpRpp.TypeSystem
             }
 
             return source;
+        }
+
+        /// <summary>
+        /// Checks if 2 types are different by comparing names but also it checks if type was defined as method's generics
+        /// because generics can be defined for classes and methods, clr distinguishes them with "!!" and "!".
+        /// </summary>
+        /// <param name="source">first type</param>
+        /// <param name="target">second type</param>
+        /// <returns><code>true</code> if different</returns>
+        private static bool AreDifferent(RType source, RType target)
+        {
+            return target.Name != source.Name || target.IsMethodGenericParameter != source.IsMethodGenericParameter;
         }
 
         private static bool IsUndefined(RType type)

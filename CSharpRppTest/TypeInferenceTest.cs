@@ -99,6 +99,22 @@ object Main {
             Assert.IsNotNull(res);
         }
 
+        [TestMethod]
+        public void InfereTypesWhenClassIsInstantiatedFromGenericMethod()
+        {
+            const string code = @"
+class Node[A](val item: A)
+
+object Main {
+    def main[A](p: A): Node[A] = new Node(p)
+    def mainInt: Node[Int] = main[Int](123)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "mainInt");
+            Assert.IsNotNull(res);
+        }
+
         #region Utils
 
         private static void TestTypeInference(string methodCode, IEnumerable<RType> callTypes, IEnumerable<RType> expectedInferredTypes)

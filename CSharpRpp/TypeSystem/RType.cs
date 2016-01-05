@@ -554,13 +554,19 @@ namespace CSharpRpp.TypeSystem
 
         public override string ToString()
         {
+            string prefix = "";
+            if (IsGenericParameter)
+            {
+                prefix = IsMethodGenericParameter ? "!!" : "!";
+            }
+
             if (IsGenericType)
             {
                 string genericParameters = string.Join(", ", _genericParameters.Select(p => p.ToString()));
-                return $"{Name}[{genericParameters}]";
+                return $"{prefix}{Name}[{genericParameters}]";
             }
 
-            return $"{Name}";
+            return $"{prefix}{Name}";
         }
 
         #endregion
