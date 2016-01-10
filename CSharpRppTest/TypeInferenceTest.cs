@@ -78,10 +78,10 @@ object Main {
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
             Assert.AreEqual("Tuple1", res.GetType().Name);
-            object item1 = res.GetFieldValue("item1");
+            object item1 = res.GetPropertyValue("item1");
             Assert.IsNotNull(item1);
-            Assert.AreEqual(13, item1.GetFieldValue("item1"));
-            Assert.AreEqual(24.34f, item1.GetFieldValue("item2"));
+            Assert.AreEqual(13, item1.GetPropertyValue("item1"));
+            Assert.AreEqual(24.34f, item1.GetPropertyValue("item2"));
         }
 
         [TestMethod]

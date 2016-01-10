@@ -133,7 +133,7 @@ object Main {
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             var res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
-            Assert.AreEqual(24, res.GetFieldValue("k"));
+            Assert.AreEqual(24, res.GetPropertyValue("k"));
         }
 
         [TestMethod]

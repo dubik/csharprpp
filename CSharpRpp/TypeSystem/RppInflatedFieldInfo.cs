@@ -11,6 +11,9 @@ namespace CSharpRpp.TypeSystem
         private FieldInfo _native;
         public override FieldInfo Native => _native ?? (_native = TypeBuilder.GetField(DeclaringType.NativeType, GenericFieldDefinition.Native));
 
+        public override MethodInfo NativeGetter => TypeBuilder.GetMethod(DeclaringType.NativeType, GenericFieldDefinition.NativeGetter);
+        public override MethodInfo NativeSetter => TypeBuilder.GetMethod(DeclaringType.NativeType, GenericFieldDefinition.NativeGetter);
+
         public RppFieldInfo GenericFieldDefinition { get; }
 
         private readonly RType[] _genericArguments;

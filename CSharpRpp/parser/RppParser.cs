@@ -260,14 +260,14 @@ namespace CSharpRpp
         {
             classParam = null;
 
-            MutabilityFlag mutability = MutabilityFlag.MF_Unspecified;
+            MutabilityFlag mutability = MutabilityFlag.MfUnspecified;
             if (Require(RppLexer.KW_Var))
             {
-                mutability = MutabilityFlag.MF_Var;
+                mutability = MutabilityFlag.MfVar;
             }
             else if (Require(RppLexer.KW_Val))
             {
-                mutability = MutabilityFlag.MF_Val;
+                mutability = MutabilityFlag.MfVal;
             }
 
             if (!Require(RppLexer.Id))
@@ -457,12 +457,12 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_Val))
             {
-                return ParsePatDef(MutabilityFlag.MF_Val);
+                return ParsePatDef(MutabilityFlag.MfVal);
             }
 
             if (Require(RppLexer.KW_Var))
             {
-                return ParsePatDef(MutabilityFlag.MF_Var);
+                return ParsePatDef(MutabilityFlag.MfVar);
             }
 
             if (Require(RppLexer.KW_Def))

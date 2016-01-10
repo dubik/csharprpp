@@ -6,6 +6,7 @@ using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
+using static CSharpRpp.ListExtensions;
 
 namespace CSharpRpp
 {
@@ -36,9 +37,15 @@ namespace CSharpRpp
                     {
                         RppSelector updateArray = new RppSelector(selector.Target, new RppFuncCall("update",
                             new List<IRppExpr> {applyFuncCall.Args.First(), Right}));
-                        updateArray.Analyze(scope, diagnostic);
-                        return updateArray;
+                        return updateArray.Analyze(scope, diagnostic);
                     }
+                }
+                else if (selector.Path is RppFieldSelector) // Rewrite assignment to field as a call to setter of the field
+                {
+                    RppFieldSelector fieldSelector = (RppFieldSelector) selector.Path;
+                    RppSelector callPropertySetter = new RppSelector(selector.Target, new RppFuncCall(fieldSelector.Field.SetterName,
+                        List(Right)));
+                    return callPropertySetter.Analyze(scope, diagnostic);
                 }
             }
 

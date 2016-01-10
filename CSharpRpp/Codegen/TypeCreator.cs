@@ -171,6 +171,16 @@ namespace CSharpRpp.Codegen
                 rMethodAttributes |= RMethodAttributes.Abstract;
             }
 
+            if (node.IsPropertyAccessor)
+            {
+                rMethodAttributes |= RMethodAttributes.Final;
+            }
+
+            if (node.IsSynthesized)
+            {
+                rMethodAttributes |= RMethodAttributes.Synthesized;
+            }
+
             RppMethodInfo method = _currentType.DefineMethod(methodName, rMethodAttributes);
             node.MethodInfo = method;
 
@@ -235,11 +245,8 @@ namespace CSharpRpp.Codegen
 
     public class StubCreator : RppNodeVisitor
     {
-        private RppClass _class;
-
         public override void VisitEnter(RppClass node)
         {
-            _class = node;
         }
 
         public override void VisitExit(RppFunc node)
@@ -264,7 +271,7 @@ namespace CSharpRpp.Codegen
             return param.Type.Value;
         }
 
-        private void UpdateReturnType(RppFunc node, RppMethodInfo method)
+        private static void UpdateReturnType(RppFunc node, RppMethodInfo method)
         {
             if (!node.IsConstructor)
             {

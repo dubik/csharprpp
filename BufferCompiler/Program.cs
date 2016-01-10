@@ -72,11 +72,16 @@ object Main {
 ";
 
             const string code2 = @"
-class Node[A](val item: A)
+class Properties[A](var item: A) {
+
+}
 
 object Main {
-    def main[A](p: A): Node[A] = new Node(p)
-    def mainInt: Node[Int] = main[Int](123)
+  def main: Properties[Int] = {
+    val p = new Properties(13)
+    p.item = 27
+    p
+  }
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
@@ -90,5 +95,24 @@ object Main {
                 codeGen.Save("Sample.dll");
             }
         }
+    }
+}
+
+class Properties
+{
+    public int Count { get; set; }
+    public string Name { get; set; }
+
+    private int _length;
+
+    public int Length
+    {
+        get { return _length; }
+        set { _length = value; }
+    }
+
+    public int Combine()
+    {
+        return Count + Length;
     }
 }

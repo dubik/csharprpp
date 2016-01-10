@@ -130,14 +130,14 @@ namespace CSharpRpp.Symbols
         {
             if (_classType != null)
             {
-                var field = _classType.Fields.FirstOrDefault(f => f.Name == name);
+                var field = _classType.Fields.FirstOrDefault(f => f.MangledName == name || f.MangledName == RppFieldInfo.GetMangledName(name));
                 if (field != null)
                     return field;
 
                 RType baseClass = _classType.BaseType;
                 while (baseClass != null)
                 {
-                    field = _classType.Fields.FirstOrDefault(f => f.Name == name);
+                    field = _classType.Fields.FirstOrDefault(f => f.MangledName == name || f.MangledName == RppFieldInfo.GetMangledName(name));
                     if (field != null)
                         return field;
                     baseClass = baseClass.BaseType;

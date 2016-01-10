@@ -19,9 +19,9 @@ namespace CSharpRpp
     public class RppClass : RppNamedNode
     {
         private const string Constrparam = "constrparam";
-        private IList<RppFunc> _funcs;
-        private IList<RppField> _fields = Collections.NoFields;
-        private IList<RppField> _classParams = Collections.NoFields;
+        private List<RppFunc> _funcs;
+        private IList<RppField> _fields;
+        private IList<RppField> _classParams;
         private readonly List<IRppExpr> _constrExprs;
 
         public ClassKind Kind { get; }
@@ -57,7 +57,7 @@ namespace CSharpRpp
         public HashSet<ObjectModifier> Modifiers { get; private set; }
 
         private IList<RppFunc> _constructors;
-        private IList<RppClass> _nested;
+        private readonly IList<RppClass> _nested;
 
         public IEnumerable<RppFunc> Constructors => _constructors.AsEnumerable();
 
@@ -82,16 +82,18 @@ namespace CSharpRpp
 
             _constructors = rppNodes.OfType<RppFunc>().Where(f => f.IsConstructor).ToList();
 
-            _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MF_Unspecified).ToList();
+            _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MfUnspecified).ToList();
 
             var primaryConstructor = CreatePrimaryConstructor(_constrExprs);
             _constructors.Add(primaryConstructor);
+
+            CreateProperties();
 
             if (kind == ClassKind.Object)
             {
                 string objectName = SymbolTable.GetObjectName(Name);
                 ResolvableType instanceFieldType = new ResolvableType(new RTypeName(objectName));
-                InstanceField = new RppField(MutabilityFlag.MF_Val, "_instance", Collections.NoStrings, instanceFieldType,
+                InstanceField = new RppField(MutabilityFlag.MfVal, "_instance", Collections.NoStrings, instanceFieldType,
                     new RppNew(instanceFieldType, Collections.NoExprs));
                 _fields.Add(InstanceField);
             }
@@ -139,7 +141,7 @@ namespace CSharpRpp
             _fields = NodeUtils.Analyze(Scope, _fields, diagnostic);
 
             _constructors = NodeUtils.Analyze(constructorScope, _constructors, diagnostic);
-            _funcs = NodeUtils.Analyze(Scope, _funcs, diagnostic);
+            _funcs = (List<RppFunc>) NodeUtils.Analyze(Scope, _funcs, diagnostic); // TODO perhaps should be fixed
 
             return this;
         }
@@ -148,6 +150,34 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, TypeParams, diagnostic);
         }
+
+        private void CreateProperties()
+        {
+            _funcs.AddRange(_fields.SelectMany(CreatePropertyAccessors));
+        }
+
+        private static IEnumerable<RppFunc> CreatePropertyAccessors(RppField field)
+        {
+            IRppParam valueParam = new RppParam("value", field.Type);
+
+            RppFunc setter = new RppFunc(RppMethodInfo.GetSetterAccessorName(field.Name), new[] {valueParam}, ResolvableType.UnitTy,
+                new RppAssignOp(new RppId(field.MangledName), new RppId("value", valueParam)))
+            {
+                IsSynthesized = true,
+                IsPropertyAccessor = true
+            };
+
+            yield return setter;
+
+            RppFunc getter = new RppFunc(RppMethodInfo.GetGetterAccessorName(field.Name), Enumerable.Empty<IRppParam>(), field.Type, new RppId(field.MangledName, field))
+            {
+                IsSynthesized = true,
+                IsPropertyAccessor = true
+            };
+
+            yield return getter;
+        }
+
 
         [NotNull]
         private RppFunc CreatePrimaryConstructor(IEnumerable<IRppExpr> exprs)
@@ -158,7 +188,7 @@ namespace CSharpRpp
             foreach (var classParam in _fields)
             {
                 string argName = MakeConstructorArgName(classParam.Name);
-                RppAssignOp assign = new RppAssignOp(new RppId(classParam.Name), new RppId(argName));
+                RppAssignOp assign = new RppAssignOp(new RppId(classParam.MangledName), new RppId(argName));
                 assignExprs.Add(assign);
             }
 

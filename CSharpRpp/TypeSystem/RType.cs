@@ -32,7 +32,8 @@ namespace CSharpRpp.TypeSystem
         Private = 4,
         Public = 8,
         Static = 16,
-        Override = 32
+        Override = 32,
+        Synthesized = 64
     }
 
     [Flags]
@@ -50,7 +51,11 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public string Name { get; }
 
+        public string MangledName => GetMangledName(Name);
+
         public RFieldAttributes Attributes { get; }
+
+        public bool IsInstanceField => Name == "_instance";
 
         [NotNull]
         public RType DeclaringType { get; }
@@ -58,6 +63,16 @@ namespace CSharpRpp.TypeSystem
         public virtual RType Type { get; private set; }
 
         public virtual FieldInfo Native { get; set; }
+
+        public virtual PropertyInfo NativeProperty { get; set; }
+
+        public virtual MethodInfo NativeGetter => NativeProperty.GetMethod;
+
+        public virtual MethodInfo NativeSetter => NativeProperty.SetMethod;
+
+        public static string GetMangledName(string propertyName) => $"<{propertyName}>_BackingField";
+
+        public string SetterName => RppMethodInfo.GetSetterAccessorName(Name);
 
         public RppFieldInfo([NotNull] string name, [NotNull] RType fieldType, RFieldAttributes attributes, [NotNull] RType declaringType)
         {
@@ -623,10 +638,48 @@ namespace CSharpRpp.TypeSystem
                 RTypeUtils.DefineNativeTypeForConstructor(_typeBuilder, rppConstructor);
             }
 
-            foreach (RppFieldInfo rppField in Fields)
+            foreach (RppFieldInfo rppField in Fields.Where(f => !f.IsInstanceField))
             {
-                FieldAttributes attr = GetAttributes(rppField.Attributes);
-                rppField.Native = _typeBuilder.DefineField(rppField.Name, rppField.Type.NativeType, attr);
+                CreateProperty(rppField, Methods);
+            }
+
+            foreach (RppFieldInfo rppField in Fields.Where(f => f.IsInstanceField))
+            {
+                var attrs = GetAttributes(rppField.Attributes);
+                rppField.Native = _typeBuilder.DefineField(rppField.Name, rppField.Type.NativeType, attrs);
+            }
+        }
+
+        private void CreateProperty(RppFieldInfo field, IEnumerable<RppMethodInfo> methods)
+        {
+            Debug.Assert(_typeBuilder != null, "_typeBuilder != null");
+
+            PropertyBuilder propertyBuilder = _typeBuilder.DefineProperty(field.Name, PropertyAttributes.None, field.Type.NativeType, null);
+            propertyBuilder.SetCustomAttribute(RTypeUtils.CreateCompilerGeneratedAttribute());
+
+            // TODO we need to update visibility somehow
+            FieldBuilder fieldBuilder = _typeBuilder.DefineField(field.MangledName, field.Type.NativeType, FieldAttributes.Private);
+            fieldBuilder.SetCustomAttribute(RTypeUtils.CreateCompilerGeneratedAttribute());
+
+            SetAccessors(propertyBuilder, methods);
+
+            field.Native = fieldBuilder;
+            field.NativeProperty = propertyBuilder;
+        }
+
+        private static void SetAccessors(PropertyBuilder property, IEnumerable<RppMethodInfo> methods)
+        {
+            string propertyName = property.Name;
+            foreach (RppMethodInfo method in methods)
+            {
+                if (method.Name == RppMethodInfo.GetGetterAccessorName(propertyName))
+                {
+                    property.SetGetMethod((MethodBuilder) method.Native);
+                }
+                else if (method.Name == RppMethodInfo.GetSetterAccessorName(propertyName))
+                {
+                    property.SetSetMethod((MethodBuilder) method.Native);
+                }
             }
         }
 
@@ -736,10 +789,10 @@ namespace CSharpRpp.TypeSystem
                 RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                    {
-                        RppGenericParameter genericParam = genericParametrs[index++];
-                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                    }).Contains(false);
+                {
+                    RppGenericParameter genericParam = genericParametrs[index++];
+                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                }).Contains(false);
             }
 
             return true;

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
-    static class RTypeExtensions
+    internal static class RTypeExtensions
     {
         /// <summary>
         /// Returns sub type of array type
@@ -37,7 +39,7 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    class RTypeUtils
+    internal class RTypeUtils
     {
         public static void DefineParams(ConstructorBuilder constructorBuilder, IEnumerable<RppParameterInfo> constructorParams)
         {
@@ -151,8 +153,8 @@ namespace CSharpRpp.TypeSystem
                 attrs = MethodAttributes.Private;
             }
 
-            // always virtual, even for statics
-            if (!constructor)
+            // always virtual, even for statics but not for property accessors :)
+            if (!constructor && !rAttributes.HasFlag(RMethodAttributes.Final))
             {
                 attrs |= MethodAttributes.Virtual;
             }
@@ -161,7 +163,7 @@ namespace CSharpRpp.TypeSystem
 
             if (!rAttributes.HasFlag(RMethodAttributes.Override))
             {
-                if (!constructor)
+                if (!constructor && !rAttributes.HasFlag(RMethodAttributes.Final))
                 {
                     attrs |= MethodAttributes.NewSlot;
                 }
@@ -220,6 +222,11 @@ namespace CSharpRpp.TypeSystem
             DefineReturnType(method, rppMethod.ReturnType);
             DefineParameters(method, rppMethod.Parameters);
 
+            if (rppMethod.Attributes.HasFlag(RMethodAttributes.Synthesized))
+            {
+                method.SetCustomAttribute(CreateCompilerGeneratedAttribute());
+            }
+
             rppMethod.Native = method;
         }
 
@@ -254,7 +261,8 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType, RppMethodInfo declaringMethod = null)
+        public static IEnumerable<RppGenericParameter> CreateGenericParameters(IEnumerable<string> genericParameterName, RType declaringType,
+            RppMethodInfo declaringMethod = null)
         {
             int genericArgumentPosition = 0;
             foreach (var genericParamName in genericParameterName)
@@ -276,6 +284,13 @@ namespace CSharpRpp.TypeSystem
             genericParameter.Type = type;
             genericParameter.Position = genericArgumentPosition;
             return genericParameter;
+        }
+
+        public static CustomAttributeBuilder CreateCompilerGeneratedAttribute()
+        {
+            var compilerGeneratedAttributeCtor = typeof (CompilerGeneratedAttribute).GetConstructor(new Type[0]);
+            Debug.Assert(compilerGeneratedAttributeCtor != null, "compilerGeneratedAttributeCtor != null");
+            return new CustomAttributeBuilder(compilerGeneratedAttributeCtor, new object[0]);
         }
     }
 }

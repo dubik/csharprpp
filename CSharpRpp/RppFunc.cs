@@ -71,6 +71,8 @@ namespace CSharpRpp
         public bool IsConstructor => Name == "this";
 
         public bool IsSynthesized { get; set; }
+        public bool IsPropertyAccessor { get; set; }
+
         public bool IsStub { get; set; }
 
         public RppClass Class { get; set; }

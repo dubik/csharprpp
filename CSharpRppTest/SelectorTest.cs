@@ -18,7 +18,7 @@ namespace CSharpRppTest
         {
             RppNativeClass kClass = new RppNativeClass(typeof(Option));
             RppObjectType kClassType = new RppObjectType(kClass);
-            RppVar optionVar = new RppVar(MutabilityFlag.MF_Val, "myOption", kClassType, RppEmptyExpr.Instance);
+            RppVar optionVar = new RppVar(MutabilityFlag.MfVal, "myOption", kClassType, RppEmptyExpr.Instance);
             RppScope scope = new RppScope(null);
             optionVar.Analyze(scope);
             RppSelector fieldSelector = new RppSelector(new RppId("myOption"), new RppId("K"));

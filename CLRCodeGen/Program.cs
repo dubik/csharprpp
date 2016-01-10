@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using static System.Reflection.Emit.OpCodes;
 using FieldAttributes = System.Reflection.FieldAttributes;
 using MethodAttributes = System.Reflection.MethodAttributes;
 using TypeAttributes = System.Reflection.TypeAttributes;
@@ -94,7 +97,7 @@ namespace CLRCodeGen
             ILGenerator il = mainMethod.GetILGenerator();
             il.UsingNamespace("System");
             il.EmitWriteLine("Moikka");
-            il.Emit(OpCodes.Ret);
+            il.Emit(Ret);
 
             typeBuilder.CreateType();
 
@@ -131,16 +134,16 @@ namespace CLRCodeGen
 
             fooTypeBuilder.DefineField("_child", barTypeBuilder, FieldAttributes.Public);
 
-            var method = CreateMethod(fooTypeBuilder, barTypeBuilder);
-            var mainMethod = CreateMainMethod(fooTypeBuilder);
+            //var method = CreateMethod(fooTypeBuilder, barTypeBuilder);
+            //var mainMethod = CreateMainMethod(fooTypeBuilder);
 
             barTypeBuilder.CreateType();
             fooTypeBuilder.CreateType();
 
-            GenCode(mainMethod, barTypeBuilder);
+            //GenCode(mainMethod, barTypeBuilder);
 
-            assemblyBuilder.SetEntryPoint(mainMethod.GetBaseDefinition());
-            assemblyBuilder.Save(assemblyName.Name + ".exe", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+            //assemblyBuilder.SetEntryPoint(mainMethod.GetBaseDefinition());
+            assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
 
         private static void CreateMethodSlowely()
@@ -155,7 +158,7 @@ namespace CLRCodeGen
             methodBuilder.SetReturnType(typeof (int));
             methodBuilder.SetParameters(new[] {typeof (string)});
 
-            methodBuilder.GetILGenerator().Emit(OpCodes.Ret);
+            methodBuilder.GetILGenerator().Emit(Ret);
             fooTypeBuilder.CreateType();
             assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
         }
@@ -180,22 +183,22 @@ namespace CLRCodeGen
             sameMethod2.SetParameters(typeof (int));
             sameMethod2.SetReturnType(typeof (int));
 
-            sameMethod.GetILGenerator().Emit(OpCodes.Ret);
+            sameMethod.GetILGenerator().Emit(Ret);
 
             var gen2 = sameMethod2.GetILGenerator();
-            gen2.Emit(OpCodes.Ldc_I4_0);
-            gen2.Emit(OpCodes.Ret);
+            gen2.Emit(Ldc_I4_0);
+            gen2.Emit(Ret);
 
             var constr = clazz.DefineDefaultConstructor(MethodAttributes.Public);
             var intParamConstr = clazz.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] {genericTType});
-            intParamConstr.GetILGenerator().Emit(OpCodes.Ret);
+            intParamConstr.GetILGenerator().Emit(Ret);
 
             var specConstr = TypeBuilder.GetConstructor(retType, intParamConstr);
 
             var gen = method.GetILGenerator();
-            gen.Emit(OpCodes.Ldc_I4_3);
-            gen.Emit(OpCodes.Newobj, specConstr);
-            gen.Emit(OpCodes.Ret);
+            gen.Emit(Ldc_I4_3);
+            gen.Emit(Newobj, specConstr);
+            gen.Emit(Ret);
 
             clazz.CreateType();
 
@@ -230,8 +233,8 @@ namespace CLRCodeGen
             applyMethod.SetReturnType(t);
 
             ILGenerator body = applyMethod.GetILGenerator();
-            body.Emit(OpCodes.Ldnull);
-            body.Emit(OpCodes.Ret);
+            body.Emit(Ldnull);
+            body.Emit(Ret);
 
             closure.DefineDefaultConstructor(MethodAttributes.Public);
 
@@ -244,8 +247,8 @@ namespace CLRCodeGen
         private static void GenCode(MethodBuilder builder, Type objectToCreate)
         {
             ILGenerator il = builder.GetILGenerator();
-            il.Emit(OpCodes.Newobj, objectToCreate.GetConstructors()[0]);
-            il.Emit(OpCodes.Ret);
+            il.Emit(Newobj, objectToCreate.GetConstructors()[0]);
+            il.Emit(Ret);
         }
 
         private static MethodBuilder CreateMethod(TypeBuilder builder, Type objectToCreate)
@@ -258,10 +261,10 @@ namespace CLRCodeGen
         {
             MethodBuilder mainMethod = fooTypeBuilder.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard,
                 typeof (int),
-                new[] {typeof (String[])});
+                new[] {typeof (string[])});
             ILGenerator il = mainMethod.GetILGenerator();
             il.EmitWriteLine("Moikka");
-            il.Emit(OpCodes.Ret);
+            il.Emit(Ret);
             return mainMethod;
         }
 
@@ -273,11 +276,78 @@ namespace CLRCodeGen
             bool ass = typeofListOfInt.IsAssignableFrom(typeofListOfInts);
         }
 
-        private static void Main(String[] args)
+        private static void CreateProperty()
         {
-            CreateGenericClass();
-            CecilCodeGen.DoSomething();
-            CreateGenericClosures();
+            AssemblyName assemblyName = new AssemblyName("FooProperties");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Save);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".dll");
+
+            TypeBuilder fooTypeBuilder = moduleBuilder.DefineType("Foo", TypeAttributes.Public);
+            const string propertyName = "Length";
+            Type propertyType = typeof (int);
+            CreateProperty(fooTypeBuilder, propertyName, propertyType);
+
+            fooTypeBuilder.CreateType();
+            assemblyBuilder.Save(assemblyName.Name + ".dll", PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
+        }
+
+        private static void CreateProperty(TypeBuilder fooTypeBuilder, string propertyName, Type propertyType)
+        {
+            PropertyBuilder propertyBuilder = fooTypeBuilder.DefineProperty(propertyName, PropertyAttributes.None, propertyType, null);
+            propertyBuilder.SetCustomAttribute(CreateCompilerGeneratedAttribute());
+
+            FieldBuilder fieldBuilder = fooTypeBuilder.DefineField(GetBackingFieldName(propertyName), propertyType, FieldAttributes.Private);
+            fieldBuilder.SetCustomAttribute(CreateCompilerGeneratedAttribute());
+
+            MethodBuilder getPropertyMethodBuilder = CreateGetter(fooTypeBuilder, propertyName, propertyType, fieldBuilder);
+            MethodBuilder setPropertyMethodBuilder = CreateSetter(fooTypeBuilder, propertyName, propertyType, fieldBuilder);
+
+            propertyBuilder.SetGetMethod(getPropertyMethodBuilder);
+            propertyBuilder.SetSetMethod(setPropertyMethodBuilder);
+        }
+
+        private static MethodBuilder CreateSetter(TypeBuilder fooTypeBuilder, string propertyName, Type propertyType, FieldBuilder fieldBuilder)
+        {
+            MethodBuilder setPropertyMethodBuilder = fooTypeBuilder.DefineMethod(GetSetterAccessorName(propertyName),
+                MethodAttributes.SpecialName | MethodAttributes.Public | MethodAttributes.HideBySig,
+                typeof (void), new[] {propertyType});
+            ILGenerator setterBody = setPropertyMethodBuilder.GetILGenerator();
+            setterBody.Emit(Ldarg_0);
+            setterBody.Emit(Ldarg_1);
+            setterBody.Emit(Stfld, fieldBuilder);
+            setterBody.Emit(Ret);
+            setPropertyMethodBuilder.SetCustomAttribute(CreateCompilerGeneratedAttribute());
+            return setPropertyMethodBuilder;
+        }
+
+        private static MethodBuilder CreateGetter(TypeBuilder fooTypeBuilder, string propertyName, Type propertyType, FieldBuilder fieldBuilder)
+        {
+            MethodBuilder getPropertyMethodBuilder = fooTypeBuilder.DefineMethod(GetGetterAccessorName(propertyName),
+                MethodAttributes.SpecialName | MethodAttributes.Public | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
+            ILGenerator getterBody = getPropertyMethodBuilder.GetILGenerator();
+            getterBody.Emit(Ldarg_0);
+            getterBody.Emit(Ldfld, fieldBuilder);
+            getterBody.Emit(Ret);
+            getPropertyMethodBuilder.SetCustomAttribute(CreateCompilerGeneratedAttribute());
+            return getPropertyMethodBuilder;
+        }
+
+        private static CustomAttributeBuilder CreateCompilerGeneratedAttribute()
+        {
+            var compilerGeneratedAttributeCtor = typeof (CompilerGeneratedAttribute).GetConstructor(new Type[0]);
+            Debug.Assert(compilerGeneratedAttributeCtor != null, "compilerGeneratedAttributeCtor != null");
+            return new CustomAttributeBuilder(compilerGeneratedAttributeCtor, new object[0]);
+        }
+
+        private static string GetBackingFieldName(string propertyName) => $"<{propertyName}>_BackingField";
+
+        private static string GetSetterAccessorName(string propertyName) => $"set_{propertyName}";
+
+        private static string GetGetterAccessorName(string propertyName) => $"get_{propertyName}";
+
+        public static void Main()
+        {
+            CreateProperty();
         }
     }
 }

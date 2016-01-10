@@ -10,15 +10,17 @@ namespace CSharpRpp
 {
     public enum MutabilityFlag
     {
-        MF_Val,
-        MF_Var,
-        MF_Unspecified
+        MfVal,
+        MfVar,
+        MfUnspecified
     }
 
     [DebuggerDisplay("Field = {Name}: {Type}")]
     public class RppField : RppVar
     {
         private readonly IList<string> _modifiers;
+
+        public string MangledName => RppFieldInfo.GetMangledName(Name);
 
         public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type)
             : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)

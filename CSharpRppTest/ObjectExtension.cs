@@ -1,10 +1,19 @@
-﻿namespace CSharpRppTest
+﻿using System;
+using System.Reflection;
+
+namespace CSharpRppTest
 {
     internal static class ObjectExtension
     {
-        public static object GetFieldValue(this object o, string name)
+        public static object GetPropertyValue(this object o, string name)
         {
-            return o.GetType().GetField(name).GetValue(o);
+            PropertyInfo propertyInfo = o.GetType().GetProperty(name);
+            if (propertyInfo == null)
+            {
+                throw new Exception($"Property {name} is missing");
+            }
+
+            return propertyInfo.GetValue(o);
         }
     }
 }

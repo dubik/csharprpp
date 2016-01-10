@@ -31,7 +31,7 @@ class Foo(val k: Int)
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
             object foo = Activator.CreateInstance(fooTy, 10);
             Assert.IsNotNull(foo);
-            Assert.AreEqual(10, fooTy.GetField("k").GetValue(foo));
+            Assert.AreEqual(10, fooTy.GetProperty("k").GetValue(foo));
         }
 
         [TestMethod]
@@ -145,7 +145,7 @@ object Bar
             var barTy = Utils.ParseAndCreateType(code, "Bar$");
             object fooInstance = Utils.InvokeStatic(barTy, "create");
             Assert.IsNotNull(fooInstance);
-            object res = fooInstance.GetType().GetField("k").GetValue(fooInstance);
+            object res = fooInstance.GetPropertyValue("k");
             Assert.AreEqual(10, res);
         }
 

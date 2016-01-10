@@ -27,7 +27,7 @@ class Oor extends Bar
             var oorTy = types[2];
             Assert.IsNotNull(barTy);
             Assert.IsTrue(oorTy.IsSubclassOf(barTy));
-            Assert.IsNotNull(fooTy.GetField("id"));
+            Assert.IsNotNull(fooTy.GetProperty("id"));
         }
 
 
@@ -112,7 +112,7 @@ object Main
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             var res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
-            var fieldInfo = res.GetType().GetField("k");
+            var fieldInfo = res.GetType().GetProperty("k");
             var k = fieldInfo.GetValue(res);
             Assert.AreEqual(13, k);
         }
@@ -144,7 +144,7 @@ class Foo(val k : Int)
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
-            Assert.IsNotNull(fooTy.GetField("k"));
+            Assert.IsNotNull(fooTy.GetProperty("k"));
         }
 
         [TestMethod]
@@ -156,7 +156,7 @@ class Foo(k : Int)
 }
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo");
-            Assert.IsNull(fooTy.GetField("k"));
+            Assert.IsNull(fooTy.GetProperty("k"));
         }
 
         [TestMethod]
@@ -375,9 +375,7 @@ object Main
             var mainTy = Utils.ParseAndCreateType(code, "Main$");
             Assert.IsNotNull(mainTy);
             var fooInst = Utils.InvokeStatic(mainTy, "main");
-            FieldInfo lengthField = fooInst.GetType().GetField("length");
-            var length = lengthField.GetValue(fooInst);
-            Assert.AreEqual(13, length);
+            Assert.AreEqual(13, fooInst.GetPropertyValue("length"));
         }
 
         [TestMethod]
@@ -556,6 +554,50 @@ class Foo {
             object foo = Activator.CreateInstance(fooTy);
             object res = fooTy.GetMethod("subCalc").Invoke(foo, null);
             Assert.AreEqual(13, res);
+        }
+
+        [TestMethod]
+        public void WriteToProperty()
+        {
+            const string code = @"
+class Properties(var length: Int) {
+
+}
+
+object Main {
+  def main: Properties = {
+    val p = new Properties(13)
+    p.length = 27
+    p
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            object propertiesInst = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(27, propertiesInst.GetPropertyValue("length"));
+        }
+
+        [TestMethod]
+        public void WriteToGenericProperty()
+        {
+            const string code = @"
+class Properties[A](var item: A) {
+
+}
+
+object Main {
+  def main: Properties[Int] = {
+    val p = new Properties(13)
+    p.item = 27
+    p
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            object propertiesInst = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(27, propertiesInst.GetPropertyValue("item"));
         }
     }
 }

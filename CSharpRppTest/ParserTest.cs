@@ -105,9 +105,9 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestParseClassParam()
         {
-            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MF_Var, "foo", null, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("foo : Int", new RppField(MutabilityFlag.MF_Val, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MfVal, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MfVar, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("foo : Int", new RppField(MutabilityFlag.MfVal, "foo", null, new ResolvableType(new RTypeName("Int"))));
         }
 
         private static void TestClassParam(string code, RppField expected)
@@ -120,12 +120,12 @@ namespace CSharpRppTest
         [TestMethod]
         public void TestVarDef()
         {
-            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MF_Val, "k", new ResolvableType(new RTypeName("Int")), RppEmptyExpr.Instance));
+            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MfVal, "k", new ResolvableType(new RTypeName("Int")), RppEmptyExpr.Instance));
         }
 
         private static void TestVarDef(string code, RppVar expected)
         {
-            var var = CreateParser(code).ParsePatDef(MutabilityFlag.MF_Val);
+            var var = CreateParser(code).ParsePatDef(MutabilityFlag.MfVal);
             Assert.IsNotNull(var);
             Assert.AreEqual(expected, var);
         }

@@ -21,6 +21,7 @@ namespace CSharpRpp.Codegen
         private bool _inSelector;
 
         private TypeBuilder _typeBuilder;
+        private MethodBase _func;
 
         private static readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
         {
@@ -117,6 +118,7 @@ namespace CSharpRpp.Codegen
         {
             Console.WriteLine("Generating func: " + node.Name);
             _body = GetGenerator(node.MethodInfo.Native);
+            _func = node.MethodInfo.Native;
         }
 
         [NotNull]
@@ -456,14 +458,7 @@ namespace CSharpRpp.Codegen
         {
             if (node.IsField)
             {
-                if (!_inSelector)
-                {
-                    _body.Emit(OpCodes.Ldarg_0);
-                }
-
-                FieldInfo cilField = node.Field.Native;
-                Debug.Assert(cilField != null, "cilField != null");
-                _body.Emit(OpCodes.Ldfld, cilField);
+                LoadField(node.Field);
             }
             else if (node.IsVar)
             {
@@ -631,14 +626,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
+                {
+                    if (t.IsGenericParameter)
                     {
-                        if (t.IsGenericParameter)
-                        {
-                            Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                            return closureGenericArgument;
-                        }
-                        return t;
-                    }).ToArray();
+                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                        return closureGenericArgument;
+                    }
+                    return t;
+                }).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
                 parentType = genericTypeDef.MakeGenericType(targetSignature);
@@ -679,20 +674,32 @@ namespace CSharpRpp.Codegen
             closureClass.CreateType();
         }
 
-
         public override void Visit(RppFieldSelector fieldSelector)
+        {
+            LoadField(fieldSelector.Field);
+        }
+
+        private void LoadField(RppFieldInfo field)
         {
             if (!_inSelector)
             {
-                _body.Emit(OpCodes.Ldarg_0); // load 'this'
+                _body.Emit(OpCodes.Ldarg_0);
             }
 
-            Debug.Assert(fieldSelector.Field != null, "fieldSelector.Field != null");
+            if (IsInsideGetterOrSetter(field.Name))
+            {
+                _body.Emit(OpCodes.Ldfld, field.Native);
+            }
+            else
+            {
+                _body.Emit(OpCodes.Callvirt, field.NativeGetter);
+            }
+        }
 
-            FieldInfo field = fieldSelector.Field.Native;
-
-            Debug.Assert(field != null, "field != null");
-            _body.Emit(OpCodes.Ldfld, field);
+        private bool IsInsideGetterOrSetter(string propertyName)
+        {
+            return _func != null &&
+                   (RppMethodInfo.GetGetterAccessorName(propertyName) == _func.Name || RppMethodInfo.GetSetterAccessorName(propertyName) == _func.Name);
         }
     }
 }

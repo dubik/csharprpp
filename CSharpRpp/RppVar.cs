@@ -59,7 +59,6 @@ namespace CSharpRpp
                 Type = InitExpr.Type;
             }
 
-
             if (IsLocalSemantic)
             {
                 scope.AddLocalVar(Name, Type.Value, this);

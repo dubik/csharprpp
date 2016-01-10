@@ -823,7 +823,6 @@ namespace CSharpRpp
 
         public RppFieldInfo Field { get; private set; }
 
-
         public RppId([NotNull] string name) : base(name)
         {
         }
@@ -927,8 +926,6 @@ namespace CSharpRpp
         public RppBox([NotNull] IRppExpr expr)
         {
             Expression = expr;
-//            Debug.Assert(expr.Type.Runtime.IsValueType);
-//            Type = RppNativeType.Create(typeof (object));
             Type = new ResolvableType(RppTypeSystem.AnyTy);
         }
 

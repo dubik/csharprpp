@@ -66,6 +66,10 @@ namespace CSharpRpp.TypeSystem
             return GenericParameters != null && GenericParameters.Length > 0;
         }
 
+        public static string GetSetterAccessorName(string propertyName) => $"set_{propertyName}";
+
+        public static string GetGetterAccessorName(string propertyName) => $"get_{propertyName}";
+
         #region ToString
 
         public override string ToString()
