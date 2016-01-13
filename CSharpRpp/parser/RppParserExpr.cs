@@ -5,6 +5,8 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Expr;
 using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
+using static CSharpRpp.RppLexer;
 
 namespace CSharpRpp
 {
@@ -16,7 +18,7 @@ namespace CSharpRpp
             // separated things and when it notice => it creates a closure. Doing backtracking here is quite heavy task
             int rememberedPos = _stream.Mark();
             IEnumerable<IRppParam> bindings;
-            if (ParseBindings(out bindings) && Peek(RppLexer.OP_Follow))
+            if (ParseBindings(out bindings) && Peek(OP_Follow))
             {
                 _stream.Release(rememberedPos);
                 Consume(); // '=>'
@@ -30,22 +32,22 @@ namespace CSharpRpp
 
         private IRppExpr ParseExpr1()
         {
-            if (Peek(RppLexer.KW_If))
+            if (Peek(KW_If))
             {
                 return ParseIf();
             }
 
-            if (Peek(RppLexer.KW_While))
+            if (Peek(KW_While))
             {
                 return ParseWhile();
             }
 
-            if (Require(RppLexer.KW_Return))
+            if (Require(KW_Return))
             {
                 throw new Exception("Return not supported");
             }
 
-            if (Require(RppLexer.KW_Throw))
+            if (Require(KW_Throw))
             {
                 IToken throwToken = _lastToken;
                 return new RppThrow(ParseExpr()) {Token = throwToken};
@@ -56,14 +58,14 @@ namespace CSharpRpp
 
         private IRppExpr ParseIf()
         {
-            Expect(RppLexer.KW_If);
-            Expect(RppLexer.OP_LParen);
+            Expect(KW_If);
+            Expect(OP_LParen);
             IRppExpr condition = ParseExpr();
             if (condition == null)
             {
                 throw new Exception("Expected expression");
             }
-            Expect(RppLexer.OP_RParen);
+            Expect(OP_RParen);
             IRppExpr thenExpr = ParseExpr();
             if (thenExpr == null)
             {
@@ -71,7 +73,7 @@ namespace CSharpRpp
             }
 
             IRppExpr elseExpr = RppEmptyExpr.Instance;
-            if (Peek(RppLexer.KW_Else))
+            if (Peek(KW_Else))
             {
                 Consume();
                 elseExpr = ParseExpr();
@@ -86,14 +88,14 @@ namespace CSharpRpp
 
         private RppWhile ParseWhile()
         {
-            Expect(RppLexer.KW_While);
-            Expect(RppLexer.OP_LParen);
+            Expect(KW_While);
+            Expect(OP_LParen);
             IRppExpr condition = ParseExpr();
             if (condition == null)
             {
                 throw new Exception("Expected expression");
             }
-            Expect(RppLexer.OP_RParen);
+            Expect(OP_RParen);
             ParseSemi();
             IRppExpr body = ParseExpr();
             if (body == null)
@@ -107,7 +109,7 @@ namespace CSharpRpp
         private bool ParseOperator(out string op, out int precedence, out bool leftAssoc)
         {
             leftAssoc = false;
-            if (Require(RppLexer.OP_Ops) || Require(RppLexer.OP_Star) || Require(RppLexer.OP_Eq))
+            if (Require(OP_Ops) || Require(OP_Star) || Require(OP_Eq))
             {
                 var token = _lastToken;
                 op = token.Text;
@@ -165,6 +167,11 @@ namespace CSharpRpp
         private IRppExpr ParsePostfixExpr(int minPrecedence)
         {
             IRppExpr expr = ParsePrefixExpr();
+            if (Require(KW_Match))
+            {
+                return ParseMatch(expr);
+            }
+
             while (expr != null)
             {
                 int precedence;
@@ -189,13 +196,179 @@ namespace CSharpRpp
             return expr;
         }
 
+        private IRppExpr ParseMatch(IRppExpr expr)
+        {
+            Expect(OP_LBrace);
+            SkipNewLines();
+            IEnumerable<RppCaseClause> clauses = ParseCaseClauses();
+            SkipNewLines();
+            Expect(OP_RBrace);
+            return new RppMatch(expr, clauses);
+        }
+
+        [NotNull]
+        private IEnumerable<RppCaseClause> ParseCaseClauses()
+        {
+            List<RppCaseClause> items = new List<RppCaseClause>();
+            RppCaseClause item = ParseClause();
+            if (item == null)
+            {
+                throw new SyntaxException("Expected at least one 'case' clause", _lastToken);
+            }
+
+            while (item != null)
+            {
+                items.Add(item);
+                SkipNewLines();
+                if (!Peek(KW_Case))
+                {
+                    break;
+                }
+
+                item = ParseClause();
+            }
+
+            return items;
+        }
+
+        [NotNull]
+        private IEnumerable<T> OneOrMore<T>(Func<T> generator, string errorMessage, int? separator)
+        {
+            List<T> items = new List<T>();
+            T item = generator();
+            if (item == null)
+            {
+                throw new SyntaxException(errorMessage, _lastToken);
+            }
+
+            while (item != null)
+            {
+                items.Add(item);
+                if (separator.HasValue && Peek(separator.Value))
+                {
+                    Consume();
+                }
+
+                item = generator();
+            }
+
+            return items;
+        }
+
+        [CanBeNull]
+        private RppCaseClause ParseClause()
+        {
+            SkipNewLines();
+            Expect(KW_Case);
+            IEnumerable<RppMatchPattern> pattern = ParsePattern();
+            Expect(OP_Follow);
+            IRppExpr block = ParseExpr();
+            return new RppCaseClause(pattern.First(), block);
+        }
+
+        /*
+
+            Pattern ::= Pattern1 { ‘|’ Pattern1 }
+            Pattern1 ::= varid ‘:’ TypePat
+                    | ‘_’ ‘:’ TypePat
+                    | Pattern2
+            Pattern2 ::= varid [‘@’ Pattern3]
+                    | Pattern3
+            Pattern3 ::= SimplePattern
+                    | SimplePattern { id [nl] SimplePattern }
+            SimplePattern ::= ‘_’
+                    | varid
+                    | Literal
+                    | StableId
+                    | StableId ‘(’ [Patterns ‘)’
+                    | StableId ‘(’ [Patterns ‘,’] [varid ‘@’] ‘_’ ‘*’ ‘)’
+                    | ‘(’ [Patterns] ‘)’
+
+        */
+
+        private IEnumerable<RppMatchPattern> ParsePattern()
+        {
+            return OneOrMore(ParsePattern1, "Pattern expected", OP_Bar);
+        }
+
+        private RppMatchPattern ParsePattern1()
+        {
+            if (Require(Id))
+            {
+                IToken varid = _lastToken;
+                if (Require(OP_Colon)) // varid ':' TypePat
+                {
+                    RTypeName type;
+                    if (ParseType(out type, false))
+                    {
+                        return new RppTypedPattern(varid, type);
+                    }
+
+                    throw new SyntaxException("Expected type name but got", _lastToken);
+                }
+
+                if (Require(OP_At)) // varid '@' SimplePattern
+                {
+                    RppMatchPattern simplePattern = ParseSimplePattern();
+                    if (simplePattern == null)
+                    {
+                        throw new SyntaxException("Expected simple patter", _lastToken);
+                    }
+
+                    return new RppBinderPattern(varid, simplePattern);
+                }
+            }
+
+            return ParseSimplePattern();
+        }
+
+        /*
+            SimplePattern ::= ‘_’
+                        | varid
+                        | Literal
+                        | StableId
+                        | StableId ‘(’ [Patterns ‘)’
+                        | StableId ‘(’ [Patterns ‘,’] [varid ‘@’] ‘_’ ‘*’ ‘)’
+                        | ‘(’ [Patterns] ‘)’
+
+            case Expr("+", Expr(_,_), Num(0)) => 
+        */
+
+        [CanBeNull]
+        private RppMatchPattern ParseSimplePattern()
+        {
+            if (Require(OP_Underscore))
+            {
+                return new RppVariablePattern();
+            }
+
+            IRppExpr expr;
+            if (ParseLiteral(out expr))
+            {
+                return new RppLiteralPattern(expr);
+            }
+
+            if (ParsePath(out expr))
+            {
+                if (Require(OP_LParen))
+                {
+                    IEnumerable<RppMatchPattern> pattern = ParsePattern();
+                    Expect(OP_RParen);
+
+                    return new RppConstructorPattern(expr, pattern);
+                }
+            }
+
+            return null;
+        }
+
         private IRppExpr ParsePrefixExpr()
         {
             _stream.Mark();
-            if (Require(RppLexer.OP_LParen))
+            if (Require(OP_LParen))
             {
                 IRppExpr expr = ParsePostfixExpr(0);
-                if (expr != null && Require(RppLexer.OP_RParen))
+                if (expr != null && Require(OP_RParen))
                 {
                     _stream.Release(1);
                     return expr;
@@ -208,12 +381,12 @@ namespace CSharpRpp
 
         private IRppExpr ParseSimpleExpr()
         {
-            if (Require(RppLexer.KW_New))
+            if (Require(KW_New))
             {
                 return ParseNewExpr();
             }
 
-            if (Peek(RppLexer.OP_LBrace))
+            if (Peek(OP_LBrace))
             {
                 return ParseBlockExpr();
             }
@@ -223,10 +396,10 @@ namespace CSharpRpp
 
         private RppNew ParseNewExpr()
         {
-            Expect(RppLexer.Id);
+            Expect(Id);
             IToken typeNameToken = _lastToken;
             RTypeName typeName = new RTypeName(typeNameToken);
-            if (Peek(RppLexer.OP_LBracket))
+            if (Peek(OP_LBracket))
             {
                 IList<RTypeName> genericArguments = ParseTypeParamClause();
                 genericArguments.ForEach(typeName.AddGenericArgument);
@@ -237,9 +410,9 @@ namespace CSharpRpp
         }
 
         /*
-    Block ::= {BlockStat semi} [ResultExpr]
+        Block ::= {BlockStat semi} [ResultExpr]
 
-    BlockStat ::= ImportClass
+        BlockStat ::= ImportClass
                 | {Annotation} [‘implicit’ | ‘lazy’] Def
                 | {Annotation} {LocalModifier} TmplDef
                 | Expr1
@@ -248,7 +421,7 @@ namespace CSharpRpp
 
         public RppBlockExpr ParseBlockExpr()
         {
-            Expect(RppLexer.OP_LBrace);
+            Expect(OP_LBrace);
             IList<IRppNode> exprs = new List<IRppNode>();
             while (true)
             {
@@ -270,7 +443,7 @@ namespace CSharpRpp
                 SkipNewLines();
             }
 
-            Expect(RppLexer.OP_RBrace);
+            Expect(OP_RBrace);
 
             return new RppBlockExpr(exprs);
         }
@@ -278,29 +451,9 @@ namespace CSharpRpp
         private IRppExpr ParseSimpleExpr1()
         {
             IRppExpr expr;
-            if (Require(RppLexer.IntegerLiteral))
+            if (ParseLiteral(out expr))
             {
-                expr = new RppInteger(_lastToken);
-            }
-            else if (Require(RppLexer.FloatingPointLiteral))
-            {
-                expr = new RppFloat(_lastToken);
-            }
-            else if (Require(RppLexer.StringLiteral))
-            {
-                expr = new RppString(_lastToken);
-            }
-            else if (Require(RppLexer.InterpolatedStringLiteral))
-            {
-                expr = new RppString(_lastToken);
-            }
-            else if (Require(RppLexer.KW_Null))
-            {
-                expr = new RppNull();
-            }
-            else if (Require(RppLexer.BooleanLiteral))
-            {
-                expr = new RppBooleanLiteral(_lastToken);
+                return expr;
             }
             else
             {
@@ -308,6 +461,37 @@ namespace CSharpRpp
             }
 
             return ParseSimpleExprRest(expr);
+        }
+
+        private bool ParseLiteral(out IRppExpr literal)
+        {
+            literal = null;
+            if (Require(IntegerLiteral))
+            {
+                literal = new RppInteger(_lastToken);
+            }
+            else if (Require(FloatingPointLiteral))
+            {
+                literal = new RppFloat(_lastToken);
+            }
+            else if (Require(StringLiteral))
+            {
+                literal = new RppString(_lastToken);
+            }
+            else if (Require(InterpolatedStringLiteral))
+            {
+                literal = new RppString(_lastToken);
+            }
+            else if (Require(BooleanLiteral))
+            {
+                literal = new RppBooleanLiteral(_lastToken);
+            }
+            else if (Require(KW_Null))
+            {
+                literal = new RppNull();
+            }
+
+            return literal != null;
         }
 
         // Creating expressions which can process s"..."
@@ -366,12 +550,12 @@ namespace CSharpRpp
         {
             path = null;
 
-            if (Require(RppLexer.Id))
+            if (Require(Id))
             {
                 path = new RppId(_lastToken.Text) {Token = _lastToken};
-                while (Require(RppLexer.OP_Dot))
+                while (Require(OP_Dot))
                 {
-                    Expect(RppLexer.Id);
+                    Expect(Id);
                     path = new RppSelector(path, new RppFieldSelector(_lastToken.Text) {Token = _lastToken});
                 }
 
@@ -386,9 +570,9 @@ namespace CSharpRpp
         // class.Func[Int]()
         private IRppExpr ParseSimpleExprRest(IRppExpr expr)
         {
-            if (Require(RppLexer.OP_Dot))
+            if (Require(OP_Dot))
             {
-                if (Require(RppLexer.Id))
+                if (Require(Id))
                 {
                     return ParseSimpleExprRest(new RppSelector(expr, new RppFieldSelector(_lastToken.Text) {Token = _lastToken}));
                 }
@@ -396,10 +580,10 @@ namespace CSharpRpp
                 throw new Exception("After . identifier is expected " + _lastToken);
             }
 
-            if (Peek(RppLexer.OP_LBracket))
+            if (Peek(OP_LBracket))
             {
                 IList<RTypeName> typeArgs = ParseTypeParamClause();
-                if (!Peek(RppLexer.OP_LParen))
+                if (!Peek(OP_LParen))
                 {
                     throw new SyntaxException("Expecting function call after type arguments", _lastToken);
                 }
@@ -409,7 +593,7 @@ namespace CSharpRpp
                 return ParseSimpleExprRest(MakeCall(expr, args, genericArguments));
             }
 
-            if (Peek(RppLexer.OP_LParen))
+            if (Peek(OP_LParen))
             {
                 IList<IRppExpr> args = ParseArgs();
                 return ParseSimpleExprRest(MakeCall(expr, args, Collections.NoResolvableTypes));
@@ -420,7 +604,7 @@ namespace CSharpRpp
 
         private IList<IRppExpr> ParseArgsOpt()
         {
-            if (Peek(RppLexer.OP_LParen))
+            if (Peek(OP_LParen))
             {
                 return ParseArgs();
             }
@@ -448,21 +632,21 @@ namespace CSharpRpp
 
         private IList<IRppExpr> ParseArgs()
         {
-            Expect(RppLexer.OP_LParen);
+            Expect(OP_LParen);
             List<IRppExpr> exprs = new List<IRppExpr>();
 
             IRppExpr expr = ParseExpr();
             if (expr == null)
             {
-                Expect(RppLexer.OP_RParen);
+                Expect(OP_RParen);
                 return exprs;
             }
 
             exprs.Add(expr);
 
-            while (!Require(RppLexer.OP_RParen))
+            while (!Require(OP_RParen))
             {
-                Expect(RppLexer.OP_Comma);
+                Expect(OP_Comma);
 
                 expr = ParseExpr();
                 if (expr == null)

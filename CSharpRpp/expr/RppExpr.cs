@@ -25,6 +25,20 @@ namespace CSharpRpp
         }
     }
 
+    /// <summary>
+    /// Very similar to RppEmptyExpr, but not detected during semantic analysis, so
+    /// can be used in cases when no initializer is needed in custom AST manipulation
+    /// </summary>
+    public class RppDefaultExpr : RppNode, IRppExpr
+    {
+        public ResolvableType Type { get; }
+
+        public RppDefaultExpr(ResolvableType type)
+        {
+            Type = type;
+        }
+    }
+
     public class RppEmptyExpr : RppNode, IRppExpr
     {
         public static RppEmptyExpr Instance = new RppEmptyExpr();
@@ -34,6 +48,8 @@ namespace CSharpRpp
 
     public class RppNull : RppNode, IRppExpr
     {
+        public static RppNull Instance = new RppNull();
+
         public ResolvableType Type => NullTy;
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -275,6 +291,11 @@ namespace CSharpRpp
         }
 
         protected abstract T Parse(string valueStr);
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
 
         #region Equality
 

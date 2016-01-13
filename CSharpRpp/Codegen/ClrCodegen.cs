@@ -159,7 +159,7 @@ namespace CSharpRpp.Codegen
         {
             node.Builder = _body.DeclareLocal(node.Type.Value.NativeType);
 
-            if (!(node.InitExpr is RppEmptyExpr))
+            if (!(node.InitExpr is RppEmptyExpr) && !(node.InitExpr is RppDefaultExpr))
             {
                 node.InitExpr.Accept(this);
                 _body.Emit(OpCodes.Stloc, node.Builder);
@@ -259,6 +259,9 @@ namespace CSharpRpp.Codegen
                         break;
                     case "==":
                         _body.Emit(OpCodes.Ceq);
+                        break;
+                    case "!=":
+                        _body.Emit(OpCodes.Cgt_Un);
                         break;
 //                    case ">=":
 //                        break;
@@ -626,14 +629,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
-                {
-                    if (t.IsGenericParameter)
                     {
-                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                        return closureGenericArgument;
-                    }
-                    return t;
-                }).ToArray();
+                        if (t.IsGenericParameter)
+                        {
+                            Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                            return closureGenericArgument;
+                        }
+                        return t;
+                    }).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
                 parentType = genericTypeDef.MakeGenericType(targetSignature);
@@ -700,6 +703,12 @@ namespace CSharpRpp.Codegen
         {
             return _func != null &&
                    (RppMethodInfo.GetGetterAccessorName(propertyName) == _func.Name || RppMethodInfo.GetSetterAccessorName(propertyName) == _func.Name);
+        }
+
+        public override void Visit(RppAsInstanceOf node)
+        {
+            node.Value.Accept(this);
+            _body.Emit(OpCodes.Isinst, node.Type.Value.NativeType);
         }
     }
 }

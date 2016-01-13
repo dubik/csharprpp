@@ -70,6 +70,7 @@
     <Compile Include="ObjectExtension.cs" />
     <Compile Include="ParserExprTest.cs" />
     <Compile Include="ParserTest.cs" />
+    <Compile Include="PatternMatchingTest.cs" />
     <Compile Include="RppProgramExtensions.cs" />
     <Compile Include="ScopeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

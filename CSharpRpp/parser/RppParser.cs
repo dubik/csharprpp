@@ -682,7 +682,10 @@ namespace CSharpRpp
             return false;
         }
 
-        public bool ParseType(out RTypeName type)
+        // Consume follow is needed to handle pattern matching case:
+        // case x: Foo => x.length
+        // without consumeFollow false it will parse and closure type (Foo => x) which is incorrect
+        public bool ParseType(out RTypeName type, bool consumeFollow = true)
         {
             if (Require(RppLexer.Id))
             {
@@ -726,7 +729,7 @@ namespace CSharpRpp
                 }
 
                 // A => B
-                if (Require(RppLexer.OP_Follow))
+                if (consumeFollow && Require(RppLexer.OP_Follow))
                 {
                     RTypeName returnType;
                     if (!ParseType(out returnType))

@@ -93,7 +93,7 @@ namespace CLRCodeGen
 
             MethodBuilder mainMethod = typeBuilder.DefineMethod("Main", MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard,
                 typeof (int),
-                new[] {typeof (String[])});
+                new[] {typeof (string[])});
             ILGenerator il = mainMethod.GetILGenerator();
             il.UsingNamespace("System");
             il.EmitWriteLine("Moikka");

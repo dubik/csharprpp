@@ -37,6 +37,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppBooleanLiteral node);
         void Visit([NotNull] RppFieldSelector node);
         void Visit([NotNull] RppIf node);
+        void Visit([NotNull] RppAsInstanceOf node);
     }
 
     public class RppNodeVisitor : IRppNodeVisitor
@@ -114,6 +115,10 @@ namespace CSharpRpp
         }
 
         public virtual void Visit(RppIf node)
+        {
+        }
+
+        public virtual void Visit(RppAsInstanceOf node)
         {
         }
 

@@ -36,6 +36,11 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(107, FormatErrorAndPointAtToken(token, $"not enough arguments for method {methodString}"));
         }
 
+        public static SemanticException PatternMatchingCaseClausesHaveDifferentExpressionTypes(IToken token)
+        {
+            return new SemanticException(108, FormatErrorAndPointAtToken(token, $"cases can't have different return types"));
+        }
+
         private static string MethodString(RppMethodInfo method)
         {
             if (method.Name == "ctor")

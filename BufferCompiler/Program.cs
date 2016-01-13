@@ -61,31 +61,21 @@ object QList {
 ";
 
             const string code1 = @"
-class Node[A](val item: A)
-
-class List[A](k: A) extends Node[A](k) {
-}
+class Foo(val length: Int)
 
 object Main {
-    def main: List[Int] = new List(13)
+    def main : Int = {
+        val k = new Foo(3)
+        k match {
+            case x: Foo => x.length
+            case _ => 0
+        }
+    }
 }
 ";
 
-            const string code2 = @"
-class Properties[A](var item: A) {
-
-}
-
-object Main {
-  def main: Properties[Int] = {
-    val p = new Properties(13)
-    p.item = 27
-    p
-  }
-}
-";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code2, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -95,24 +85,22 @@ object Main {
                 codeGen.Save("Sample.dll");
             }
         }
-    }
-}
 
-class Properties
-{
-    public int Count { get; set; }
-    public string Name { get; set; }
+        public static void ste(object obj)
+        {
+            if (obj != null)
+            {
+                Console.WriteLine("Hello");
+            }
+        }
 
-    private int _length;
+        public static void ste1(object obj)
+        {
+            if (null == obj)
+            {
+                Console.WriteLine("Hello");
+            }
+        }
 
-    public int Length
-    {
-        get { return _length; }
-        set { _length = value; }
-    }
-
-    public int Combine()
-    {
-        return Count + Length;
     }
 }

@@ -60,7 +60,8 @@ namespace CSharpRpp
             {BooleanLiteral, "true or false"},
             {Id, "identifier"},
             {IntegerLiteral, "integer literal"},
-            {FloatingPointLiteral, "float literal"}
+            {FloatingPointLiteral, "float literal"},
+            {OP_Follow, "=>" }
         };
 
         public static string TokenToString(int token)

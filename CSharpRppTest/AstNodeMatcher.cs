@@ -159,5 +159,9 @@ namespace CSharpRppTest
         public void Visit(RppIf node)
         {
         }
+
+        public void Visit(RppAsInstanceOf node)
+        {
+        }
     }
 }

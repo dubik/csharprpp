@@ -79,6 +79,26 @@ namespace CSharpRpp
             return this;
         }
 
+        public override string ToString()
+        {
+            return $"{MutabilityFlagToString(MutabilityFlag)} {Name}: {Type}";
+        }
+
+        protected static string MutabilityFlagToString(MutabilityFlag mutability)
+        {
+            if (mutability == MutabilityFlag.MfVal)
+            {
+                return "val";
+            }
+
+            if (mutability == MutabilityFlag.MfVar)
+            {
+                return "var";
+            }
+
+            return "";
+        }
+
         #region Equality
 
         protected bool Equals(RppVar other)

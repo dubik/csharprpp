@@ -56,8 +56,12 @@ OP_Eq : '=';
 OP_Dot : '.';
 OP_Star : '*';
 OP_Upper : '<:';
+OP_At : '@';
+OP_Underscore : '_';
 
 OP_Ops : '+' | '-' | '/' | OP_Star | '%' | '<=' | '>=' | '<' | '>' | '||' | '&&' | '==';
+
+OP_Bar : '|';
 
 BooleanLiteral   :  'true' | 'false';
 Id : ('a' .. 'z' | 'A' .. 'Z')  ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9')*; 
