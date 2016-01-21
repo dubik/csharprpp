@@ -61,21 +61,15 @@ object QList {
 ";
 
             const string code1 = @"
-class Foo(val length: Int)
+class Tuple2[+T1, +T2](val _1: T1, val _2: T2)
 
 object Main {
-    def main : Int = {
-        val k = new Foo(3)
-        k match {
-            case x: Foo => x.length
-            case _ => 0
-        }
-    }
+    def main : Tuple2[Int, String] = new Tuple2[Int, String](13, ""Hello"")
 }
 ";
 
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -85,22 +79,5 @@ object Main {
                 codeGen.Save("Sample.dll");
             }
         }
-
-        public static void ste(object obj)
-        {
-            if (obj != null)
-            {
-                Console.WriteLine("Hello");
-            }
-        }
-
-        public static void ste1(object obj)
-        {
-            if (null == obj)
-            {
-                Console.WriteLine("Hello");
-            }
-        }
-
     }
 }

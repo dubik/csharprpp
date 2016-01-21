@@ -64,7 +64,7 @@ OP_Ops : '+' | '-' | '/' | OP_Star | '%' | '<=' | '>=' | '<' | '>' | '||' | '&&'
 OP_Bar : '|';
 
 BooleanLiteral   :  'true' | 'false';
-Id : ('a' .. 'z' | 'A' .. 'Z')  ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9')*; 
+Id : ('a' .. 'z' | 'A' .. 'Z' | '_')  ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9')*; 
 
 NewLine               :  '\r'? '\n';
 IntegerLiteral : (DecimalNumber) ('L' | 'l')?;
