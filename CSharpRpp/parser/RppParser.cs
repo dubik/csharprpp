@@ -8,7 +8,7 @@ namespace CSharpRpp
 {
     internal class QualifiedId
     {
-        private string _text;
+        [UsedImplicitly] private string _text;
 
         public QualifiedId(string text)
         {
@@ -141,6 +141,7 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_Package))
             {
+                // ReSharper disable once UnusedVariable
                 QualifiedId id = ParseQualifiedId();
                 ExpectSemi();
             }
@@ -791,7 +792,8 @@ namespace CSharpRpp
                     }
 
                     // (A, B, C)
-                    throw new NotImplementedException("Tuples are not implemented");
+                    type = CreateTupleTypeName(paramTypes);
+                    return true;
                 }
 
                 if (!ParseType(out returnType))
@@ -818,6 +820,13 @@ namespace CSharpRpp
             paramTypes.ForEach(closureType.AddGenericArgument);
             closureType.AddGenericArgument(returnType);
             return closureType;
+        }
+
+        private static RTypeName CreateTupleTypeName(ICollection<RTypeName> paramTypes)
+        {
+            RTypeName tupleType = new RTypeName("Tuple" + paramTypes.Count);
+            paramTypes.ForEach(tupleType.AddGenericArgument);
+            return tupleType;
         }
 
         private RppClass ParseObjectDef(HashSet<ObjectModifier> modifiers)
