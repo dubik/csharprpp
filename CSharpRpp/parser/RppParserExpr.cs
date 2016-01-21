@@ -364,18 +364,18 @@ namespace CSharpRpp
 
         private IRppExpr ParsePrefixExpr()
         {
-            _stream.Mark();
+            int position = _stream.Mark();
             if (Require(OP_LParen))
             {
                 IRppExpr expr = ParsePostfixExpr(0);
                 if (expr != null && Require(OP_RParen))
                 {
-                    _stream.Release(1);
+                    _stream.Release(position);
                     return expr;
                 }
             }
 
-            _stream.Rewind();
+            _stream.Rewind(position);
             return ParseSimpleExpr();
         }
 
@@ -454,6 +454,23 @@ namespace CSharpRpp
             if (ParseLiteral(out expr))
             {
                 return expr;
+            }
+
+            // Parse tuple (expr, expr, ...)
+            if (Peek(OP_LParen))
+            {
+                int position = _stream.Mark();
+                try
+                {
+                    IList<IRppExpr> exprs = ParseArgs();
+                    _stream.Release(position);
+                    // Create Tuple<Count>(args...)
+                    return new RppNew(new ResolvableType(new RTypeName(CreateTupleClassName(exprs.Count))), exprs);
+                }
+                catch
+                {
+                    _stream.Rewind(position);
+                }
             }
             else
             {

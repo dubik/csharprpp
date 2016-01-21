@@ -824,9 +824,14 @@ namespace CSharpRpp
 
         private static RTypeName CreateTupleTypeName(ICollection<RTypeName> paramTypes)
         {
-            RTypeName tupleType = new RTypeName("Tuple" + paramTypes.Count);
+            RTypeName tupleType = new RTypeName(CreateTupleClassName(paramTypes.Count));
             paramTypes.ForEach(tupleType.AddGenericArgument);
             return tupleType;
+        }
+
+        private static string CreateTupleClassName(int paramsCount)
+        {
+            return "Tuple" + paramsCount;
         }
 
         private RppClass ParseObjectDef(HashSet<ObjectModifier> modifiers)
