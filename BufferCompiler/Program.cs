@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.IO;
+using System.Reflection;
 using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
@@ -61,15 +62,14 @@ object QList {
 ";
 
             const string code1 = @"
-class Tuple2[+T1, +T2](val _1: T1, val _2: T2)
-
 object Main {
     def main : (Int, String) = (13, ""Hello"")
 }
 ";
 
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, "Sample.dll");
+
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();
@@ -78,6 +78,13 @@ object Main {
             {
                 codeGen.Save("Sample.dll");
             }
+        }
+
+        public static Assembly GetStdlibAssembly()
+        {
+            var location = Assembly.GetAssembly(typeof (Program)).Location;
+            string directory = Path.GetDirectoryName(location);
+            return Assembly.LoadFile(directory + @"\RppStdlib.dll");
         }
     }
 }

@@ -21,7 +21,7 @@ namespace CSharpRpp
         {
             string outFileName = GetOutputFileName(options);
 
-            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, outFileName);
+            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, null, outFileName);
             if (generator != null)
             {
                 ValidateEntryPoint(generator, options, diagnostic);
@@ -53,11 +53,17 @@ namespace CSharpRpp
         }
 
         [CanBeNull]
-        public static CodeGenerator Compile(Action<RppProgram> parseFactory, Diagnostic diagnostic, string fileName = "<buffer>")
+        public static CodeGenerator Compile(Action<RppProgram> parseFactory, Diagnostic diagnostic, [CanBeNull] Assembly stdlibAssembly,
+            string fileName = "<buffer>")
         {
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
             WireRuntime(runtimeScope);
+            if (stdlibAssembly != null)
+            {
+                WireAssembly(runtimeScope, stdlibAssembly);
+            }
+
             parseFactory(program);
 
             RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
@@ -99,6 +105,13 @@ namespace CSharpRpp
         private static void WireRuntime(SymbolTable scope)
         {
             Assembly runtimeAssembly = GetRuntimeAssembly();
+            WireAssembly(scope, runtimeAssembly);
+
+            scope.AddType(RppTypeSystem.CreateType("Exception", typeof(Exception)));
+        }
+
+        private static void WireAssembly(SymbolTable scope, Assembly runtimeAssembly)
+        {
             Type[] types = runtimeAssembly.GetTypes();
 
             foreach (Type type in types)
@@ -112,8 +125,6 @@ namespace CSharpRpp
                 RType rType = RppTypeSystem.CreateType(name, type);
                 scope.AddType(rType);
             }
-
-            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
         }
 
         private static void Parse(IEnumerable<string> fileNames, RppProgram program)

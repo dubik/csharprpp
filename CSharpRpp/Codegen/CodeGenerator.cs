@@ -49,7 +49,7 @@ namespace CSharpRpp.Codegen
             Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll");
         }
 
-        public void Save(string fileName)
+        public void Save(string fullPath)
         {
             var mainFunc = FindMain();
             if (mainFunc != null)
@@ -58,7 +58,34 @@ namespace CSharpRpp.Codegen
                 _assemblyBuilder.SetEntryPoint(wrappedMain, PEFileKinds.ConsoleApplication);
             }
 
-            _assemblyBuilder.Save(fileName);
+            SaveAssembly(fullPath, _assemblyBuilder);
+        }
+
+        private static void SaveAssembly(string fullPath, AssemblyBuilder assemblyBuilder)
+        {
+            // assemblyBuilder.Save doesn't want to save with full path, so saving to current directory and then
+            // moving file to final, weird
+            string fileName = Path.GetFileName(fullPath);
+
+            if (File.Exists(fileName))
+            {
+                File.Delete(fullPath);
+            }
+
+            assemblyBuilder.Save(fileName);
+
+            if (fileName != fullPath)
+            {
+                string targetDirectory = Path.GetDirectoryName(fullPath);
+                Debug.Assert(targetDirectory != null, "targetDirectory != null");
+                Directory.CreateDirectory(targetDirectory);
+                Debug.Assert(fileName != null, "fileName != null");
+
+                if (!File.Exists(fullPath))
+                {
+                    File.Move(fileName, fullPath);
+                }
+            }
         }
 
         public bool HasMain()
