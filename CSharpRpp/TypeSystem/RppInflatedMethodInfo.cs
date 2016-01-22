@@ -21,7 +21,22 @@ namespace CSharpRpp.TypeSystem
                     Type declaringNativeType = DeclaringType.NativeType;
                     if (GenericMethodDefinition.Native is ConstructorInfo)
                     {
-                        _nativeMethod = TypeBuilder.GetConstructor(declaringNativeType, (ConstructorInfo) GenericMethodDefinition.Native);
+                        try
+                        {
+                            _nativeMethod = TypeBuilder.GetConstructor(declaringNativeType, (ConstructorInfo) GenericMethodDefinition.Native);
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                Type[] parametersTypes = _parameters.Select(p => p.Type.NativeType).ToArray();
+                                _nativeMethod = declaringNativeType.GetConstructor(parametersTypes);
+                            }
+                            catch
+                            {
+                                _nativeMethod = null;
+                            }
+                        }
                     }
                     else
                     {
