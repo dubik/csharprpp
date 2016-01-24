@@ -50,6 +50,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="Stdlib.rpp" />
   </ItemGroup>
@@ -70,7 +73,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)CSharpRpp\bin\$(ConfigurationName)\CSharpRpp.exe --library --out $(TargetPath) $(ProjectDir)Stdlib.rpp</PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir)CSharpRpp\bin\$(ConfigurationName)\CSharpRpp.exe --library --nostdlib --out $(TargetPath) $(ProjectDir)Stdlib.rpp
+xcopy /I /Y $(TargetPath) $(ProjectDir)lib\</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

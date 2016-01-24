@@ -63,10 +63,8 @@ object QList {
 ";
 */
             const string code1 = @"
-case class Foo(k : Int)
-
 object Main {
-    def main : Foo = Foo(238)
+    def main : (Int, String) = (13, ""Hello"")
 }
 ";
 

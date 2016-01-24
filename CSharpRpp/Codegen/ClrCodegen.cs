@@ -483,6 +483,10 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldsfld, cilField);
                 }
             }
+            else
+            {
+                throw new NotImplementedException("don't know what to do here");
+            }
         }
 
         public override void Visit(RppParam node)
@@ -519,8 +523,14 @@ namespace CSharpRpp.Codegen
             node.Args.ForEach(arg => arg.Accept(this));
             RppMethodInfo constructor = node.Constructor;
 
-            ConstructorInfo constructorInfo = constructor.Native as ConstructorInfo;
-
+            var methodBase = constructor.Native;
+            Debug.Assert(methodBase != null);
+            ConstructorInfo constructorInfo = methodBase as ConstructorInfo;
+            if (constructorInfo == null)
+            {
+                Console.WriteLine(methodBase.GetType());
+            }
+            Debug.Assert(constructorInfo != null);
             _body.Emit(OpCodes.Newobj, constructorInfo);
         }
 

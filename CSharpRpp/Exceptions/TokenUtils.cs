@@ -5,7 +5,7 @@ using Antlr.Runtime;
 
 namespace CSharpRpp.Exceptions
 {
-    class TokenUtils
+    internal class TokenUtils
     {
         public static string GetTokenLine(IToken token)
         {

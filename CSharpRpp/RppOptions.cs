@@ -15,6 +15,9 @@ namespace CSharpRpp
         [Option(HelpText = "Specify if class library should be created (by default executable)")]
         public bool Library { get; set; }
 
+        [Option(HelpText = "Specify if no standard library should be used during compilation")]
+        public bool Nostdlib { get; set; }
+
         [Usage]
         public static IEnumerable<Example> Examples
         {

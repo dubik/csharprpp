@@ -10,16 +10,16 @@ namespace CSharpRppTest
         public void TestOptionMoand()
         {
             const string code = @"
-class Option[A]
-class Some[A](a: A) extends Option[A]
-class None[A] extends Option[A]
+class TOption[A]
+class TSome[A](a: A) extends TOption[A]
+class TNone[A] extends TOption[A]
 
 object Bar
 {
 }
 ";
 
-            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            Utils.ParseAndCreateType(code, "Bar$");
         }
     }
 }

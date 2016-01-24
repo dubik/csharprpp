@@ -114,19 +114,19 @@ namespace CSharpRppTest
             return new RppInteger(value);
         }
 
-        private static BinOp Add(IRppExpr left, IRppExpr right)
+        private static RppBinOp Add(IRppExpr left, IRppExpr right)
         {
-            return BinOp.Create("+", left, right);
+            return RppBinOp.Create("+", left, right);
         }
 
-        private static BinOp Sub(IRppExpr left, IRppExpr right)
+        private static RppBinOp Sub(IRppExpr left, IRppExpr right)
         {
-            return BinOp.Create("-", left, right);
+            return RppBinOp.Create("-", left, right);
         }
 
-        private static BinOp Mult(IRppExpr left, IRppExpr right)
+        private static RppBinOp Mult(IRppExpr left, IRppExpr right)
         {
-            return BinOp.Create("*", left, right);
+            return RppBinOp.Create("*", left, right);
         }
 
         private static RppId Id(string id)

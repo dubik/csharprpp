@@ -52,7 +52,7 @@ namespace CSharpRppTest
             AddIfMatch(node);
         }
 
-        public void Visit(BinOp node)
+        public void Visit(RppBinOp node)
         {
         }
 

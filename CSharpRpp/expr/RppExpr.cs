@@ -58,7 +58,7 @@ namespace CSharpRpp
         }
     }
 
-    public class RppLogicalBinOp : BinOp
+    public class RppLogicalBinOp : RppBinOp
     {
         internal static readonly HashSet<string> Ops = new HashSet<string> {"&&", "||"};
 
@@ -94,7 +94,7 @@ namespace CSharpRpp
         }
     }
 
-    public class RppRelationalBinOp : BinOp
+    public class RppRelationalBinOp : RppBinOp
     {
         internal static readonly HashSet<string> Ops = new HashSet<string> {"<", ">", "==", "!=", "<=", ">="};
 
@@ -129,7 +129,7 @@ namespace CSharpRpp
         }
     }
 
-    public class RppArithmBinOp : BinOp
+    public class RppArithmBinOp : RppBinOp
     {
         internal static readonly HashSet<string> Ops = new HashSet<string> {"+", "-", "/", "*", "%"};
 
@@ -154,7 +154,7 @@ namespace CSharpRpp
     }
 
     [DebuggerDisplay("Op = {Op}")]
-    public class BinOp : RppNode, IRppExpr
+    public class RppBinOp : RppNode, IRppExpr
     {
         public ResolvableType Type { get; protected set; }
 
@@ -164,7 +164,7 @@ namespace CSharpRpp
         public IRppExpr Left { get; private set; }
         public IRppExpr Right { get; private set; }
 
-        public static BinOp Create([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
+        public static RppBinOp Create([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
             if (RppArithmBinOp.Ops.Contains(op))
             {
@@ -190,7 +190,7 @@ namespace CSharpRpp
             return null;
         }
 
-        protected BinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
+        protected RppBinOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
             Op = op;
             Left = left;
@@ -213,7 +213,7 @@ namespace CSharpRpp
 
         #region Equality
 
-        protected bool Equals(BinOp other)
+        protected bool Equals(RppBinOp other)
         {
             return string.Equals(Op, other.Op) && Equals(Left, other.Left) && Equals(Right, other.Right);
         }
@@ -232,7 +232,7 @@ namespace CSharpRpp
             {
                 return false;
             }
-            return Equals((BinOp) obj);
+            return Equals((RppBinOp) obj);
         }
 
         public override int GetHashCode()
@@ -389,6 +389,10 @@ namespace CSharpRpp
 
     public sealed class RppBooleanLiteral : RppLiteralBase<bool>
     {
+        public RppBooleanLiteral(bool value) : base(value)
+        {
+        }
+
         public RppBooleanLiteral([NotNull] IToken valueToken) : base(valueToken)
         {
         }

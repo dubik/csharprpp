@@ -184,7 +184,7 @@ namespace CSharpRpp
                     _stream.Release(1);
                     int nextMinPrecedence = precedence + 1;
                     IRppExpr rhs = ParsePostfixExpr(nextMinPrecedence);
-                    expr = BinOp.Create(op, expr, rhs);
+                    expr = RppBinOp.Create(op, expr, rhs);
                 }
                 else
                 {

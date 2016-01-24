@@ -17,10 +17,15 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public string Name { get; }
 
-        [CanBeNull]
-        public IToken Token { get; set; }
+        [NotNull]
+        public IToken Token
+        {
+            get { return _token ?? new ClassicToken(0, Name); }
+            set { _token = value; }
+        }
 
         private readonly IList<RTypeName> _params = new List<RTypeName>();
+        private IToken _token;
 
         public RTypeName([NotNull] string name)
         {

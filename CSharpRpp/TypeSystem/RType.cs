@@ -305,7 +305,18 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public virtual IReadOnlyList<RppFieldInfo> Fields => _fields;
+        public virtual IReadOnlyList<RppFieldInfo> Fields
+        {
+            get
+            {
+                if (_fields.Count == 0 && _type != null)
+                {
+                    InitNativeFields();
+                }
+
+                return _fields;
+            }
+        }
 
         public virtual IReadOnlyList<RppMethodInfo> Methods
         {
@@ -368,10 +379,24 @@ namespace CSharpRpp.TypeSystem
             _type = type;
             Attributes = RTypeUtils.GetRTypeAttributes(type.Attributes, type.IsValueType);
 
+            if (type.Name.EndsWith("$"))
+            {
+                Attributes |= RTypeAttributes.Object;
+            }
+
             IsGenericParameter = type.IsGenericParameter;
             if (type.IsGenericParameter)
             {
                 GenericParameterPosition = type.GenericParameterPosition;
+            }
+
+            if (type.IsClass)
+            {
+                Type baseType = type.BaseType;
+                if (baseType != null && baseType != typeof (object))
+                {
+                    BaseType = new RType(baseType.Name, baseType);
+                }
             }
         }
 
@@ -410,6 +435,26 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(_type != null, "_type != null");
             var methods = _type.GetMethods(BindingFlags.Public | BindingFlags.Instance).Select(Convert);
             _methods.AddRange(methods);
+        }
+
+        private void InitNativeFields()
+        {
+            Debug.Assert(_type != null, "_type != null");
+            var fields = _type.GetFields().Select(f => Convert(f, this));
+            _fields.AddRange(fields);
+        }
+
+        private static RppFieldInfo Convert(FieldInfo field, RType declaringType)
+        {
+            RType fieldType = CreateType(field.FieldType.Name, field.FieldType);
+            bool priv = (field.Attributes & FieldAttributes.Private) != 0;
+            RFieldAttributes attr = priv ? RFieldAttributes.Private : RFieldAttributes.Public;
+            RppFieldInfo rppField = new RppFieldInfo(field.Name, fieldType, attr, declaringType)
+            {
+                Native = field
+            };
+
+            return rppField;
         }
 
         private static RppMethodInfo Convert(MethodInfo method)
@@ -789,10 +834,10 @@ namespace CSharpRpp.TypeSystem
                 RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
                 int index = 0;
                 return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                {
-                    RppGenericParameter genericParam = genericParametrs[index++];
-                    return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                }).Contains(false);
+                    {
+                        RppGenericParameter genericParam = genericParametrs[index++];
+                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
+                    }).Contains(false);
             }
 
             return true;

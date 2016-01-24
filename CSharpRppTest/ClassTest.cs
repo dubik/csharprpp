@@ -383,13 +383,13 @@ object Main
         public void GenericBaseConstructor()
         {
             const string code = @"
-class Option[A]
-class Some[A](val a: A) extends Option[A]
+class MyOption[A]
+class MySome[A](val a: A) extends MyOption[A]
 
 object Main
 {
     def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
+        val k : MySome[Int] = new MySome[Int](123)
         k.a
     }
 }
@@ -404,12 +404,12 @@ object Main
         public void AssignGenericFieldToAVar()
         {
             const string code = @"
-class Some[A](val a: A)
+class TSome[A](val a: A)
 
 object Main
 {
     def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
+        val k : TSome[Int] = new TSome[Int](123)
         val p = k.a
         p
     }
@@ -425,9 +425,9 @@ object Main
         public void SpecifyTypesForBaseClass()
         {
             const string code = @"
-class Option[A](val x : A)
+class TOption[A](val x : A)
 
-class SomeInt(x : Int) extends Option[Int](x)
+class SomeInt(x : Int) extends TOption[Int](x)
 
 object Main
 {
@@ -447,21 +447,21 @@ object Main
         public void OptionMonad()
         {
             const string code = @"
-abstract class Option[A]
+abstract class TOption[A]
 {
     def isEmpty : Boolean
     def get: A
-    def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some[B](f(get()))
-    def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
+    def map[B](f: (A) => B): TOption[B] = if(isEmpty()) TNone else new TSome[B](f(get()))
+    def flatMap[B](f: (A) => TOption[B]): TOption[B] = if(isEmpty()) TNone else f(get())
 }
 
-class Some[A](val x: A) extends Option[A]
+class TSome[A](val x: A) extends TOption[A]
 {
     override def isEmpty : Boolean = false
     override def get : A = x
 }
 
-object None extends Option[Nothing]
+object TNone extends TOption[Nothing]
 {
     override def isEmpty : Boolean = true
     override def get : Nothing = throw new Exception(""Nothing to get"")
@@ -470,7 +470,7 @@ object None extends Option[Nothing]
 object Main
 {
     def main : Int = {
-        val k : Some[Int] = new Some[Int](123)
+        val k : TSome[Int] = new TSome[Int](123)
         val p = k.x
         p
     }

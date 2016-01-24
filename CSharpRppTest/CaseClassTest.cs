@@ -23,7 +23,7 @@ object Main {
             Assert.AreEqual(238, res.GetPropertyValue("k"));
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public void TestUnapply()
         {
             const string code = @"

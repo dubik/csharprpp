@@ -59,17 +59,17 @@ object Main {
         public void InferenceOfFuncCallWhichHasAnotherFuncCallAsParameter()
         {
             const string code = @"
-class Tuple1[A](val item1: A)
-class Tuple2[A,B](val item1: A, val item2: B)
+class MTuple1[A](val item1: A)
+class MTuple2[A,B](val item1: A, val item2: B)
 
-object Tuple {
-  def create[T1](arg1: T1) : Tuple1[T1] = new Tuple1[T1](arg1)
-  def create[T1, T2](arg1: T1, arg2: T2) : Tuple2[T1, T2] = new Tuple2[T1, T2](arg1, arg2)
+object MTuple {
+  def create[T1](arg1: T1) : MTuple1[T1] = new MTuple1[T1](arg1)
+  def create[T1, T2](arg1: T1, arg2: T2) : MTuple2[T1, T2] = new MTuple2[T1, T2](arg1, arg2)
 }
 
 object Main {
-    def main: Tuple1[Tuple2[Int, Float]] = {
-        val t = Tuple.create(Tuple.create(13, 24.34))
+    def main: MTuple1[MTuple2[Int, Float]] = {
+        val t = MTuple.create(MTuple.create(13, 24.34))
         t
     }
 }
@@ -77,7 +77,7 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
-            Assert.AreEqual("Tuple1", res.GetType().Name);
+            Assert.AreEqual("MTuple1", res.GetType().Name);
             object item1 = res.GetPropertyValue("item1");
             Assert.IsNotNull(item1);
             Assert.AreEqual(13, item1.GetPropertyValue("item1"));
@@ -88,10 +88,10 @@ object Main {
         public void InfereTypesWhenObjectIsInstantiated()
         {
             const string code = @"
-class Option[A](val item: A)
+class TOption[A](val item: A)
 
 object Main {
-    def main: Option[Int] = new Option(132)
+    def main: TOption[Int] = new TOption(132)
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");

@@ -10,7 +10,7 @@ using static CSharpRpp.ListExtensions;
 
 namespace CSharpRpp
 {
-    public class RppAssignOp : BinOp
+    public class RppAssignOp : RppBinOp
     {
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {

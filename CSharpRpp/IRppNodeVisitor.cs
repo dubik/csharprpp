@@ -11,7 +11,7 @@ namespace CSharpRpp
         void VisitExit([NotNull] RppFunc node);
         void VisitEnter([NotNull] RppClass node);
         void VisitExit([NotNull] RppClass node);
-        void Visit([NotNull] BinOp node);
+        void Visit([NotNull] RppBinOp node);
         void Visit([NotNull] RppInteger node);
         void Visit([NotNull] RppString node);
         void Visit([NotNull] RppFuncCall node);
@@ -66,7 +66,7 @@ namespace CSharpRpp
         {
         }
 
-        public virtual void Visit(BinOp node)
+        public virtual void Visit(RppBinOp node)
         {
         }
 

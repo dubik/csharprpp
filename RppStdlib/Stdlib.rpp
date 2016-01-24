@@ -17,6 +17,11 @@ class Some[A](val x: A) extends Option[A]
     override def get : A = x
 }
 
+object Some
+{
+    def apply[A](x: A) : Some[A] = new Some(x)
+}
+
 object None extends Option[Nothing]
 {
     override def isEmpty : Boolean = true

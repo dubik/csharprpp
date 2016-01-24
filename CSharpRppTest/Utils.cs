@@ -36,8 +36,7 @@ namespace CSharpRppTest
         {
             RppProgram program = Parse(code);
             Assert.IsNotNull(program);
-            var fooTy = CodeGenAndGetType(program, typeName, diagnostic);
-            return fooTy;
+            return CodeGenAndGetType(program, typeName, diagnostic);
         }
 
         public static Type CodeGenAndGetType(RppProgram program, string typeName, Diagnostic diagnostic)
@@ -67,6 +66,13 @@ namespace CSharpRppTest
             RppTypeSystem.PopulateBuiltinTypes(scope);
 
             WireRuntime(scope);
+
+            Assembly stdlib = RppCompiler.FindStdlib();
+            if (stdlib != null)
+            {
+                WireAssembly(scope, stdlib);
+            }
+
             CodeGenerator generator = new CodeGenerator(program, "TestAssembly.dll");
 
             Type2Creator typeCreator = new Type2Creator();
@@ -112,7 +118,14 @@ namespace CSharpRppTest
         private static void WireRuntime(SymbolTable scope)
         {
             Assembly runtimeAssembly = GetRuntimeAssembly();
-            Type[] types = runtimeAssembly.GetTypes();
+            WireAssembly(scope, runtimeAssembly);
+
+            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
+        }
+
+        private static void WireAssembly(SymbolTable scope, Assembly assembly)
+        {
+            Type[] types = assembly.GetTypes();
 
             foreach (Type type in types)
             {
@@ -125,8 +138,6 @@ namespace CSharpRppTest
                 RType rType = RppTypeSystem.CreateType(name, type);
                 scope.AddType(rType);
             }
-
-            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
         }
 
         private static Assembly GetRuntimeAssembly()
@@ -185,7 +196,9 @@ namespace CSharpRppTest
             catch (Exception ex)
             {
                 if (ex is AssertFailedException)
+                {
                     throw;
+                }
 
                 var exception = ex as TException;
                 Assert.IsNotNull(exception, $"Expected exception of type: {typeof (TException).Name}, actual type: {ex.GetType().Name}");

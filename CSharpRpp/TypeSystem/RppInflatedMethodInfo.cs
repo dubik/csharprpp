@@ -27,19 +27,22 @@ namespace CSharpRpp.TypeSystem
                         }
                         catch
                         {
+                            Type[] parametersTypes = Parameters.Select(p => p.Type.NativeType).ToArray();
                             try
                             {
-                                Type[] parametersTypes = _parameters.Select(p => p.Type.NativeType).ToArray();
+                                parametersTypes.ForEach(Console.WriteLine);
                                 _nativeMethod = declaringNativeType.GetConstructor(parametersTypes);
                             }
                             catch
                             {
                                 _nativeMethod = null;
+                                throw;
                             }
                         }
                     }
                     else
                     {
+                        Console.WriteLine("method");
                         try
                         {
                             _nativeMethod = TypeBuilder.GetMethod(declaringNativeType, (MethodInfo) GenericMethodDefinition.Native);
@@ -87,7 +90,7 @@ namespace CSharpRpp.TypeSystem
 
         private RppParameterInfo[] InflateParameters()
         {
-            return GenericMethodDefinition?.Parameters?.Select(InflateParameter).ToArray();
+            return GenericMethodDefinition?.Parameters.Select(InflateParameter).ToArray();
         }
 
         private RppParameterInfo InflateParameter(RppParameterInfo parameter)

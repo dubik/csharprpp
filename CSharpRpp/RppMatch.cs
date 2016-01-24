@@ -177,7 +177,7 @@ namespace CSharpRpp
 
         public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
         {
-            return new RppIf(BinOp.Create("==", inVar, Literal), new RppAssignOp(outOut, thenExpr), elseExpr);
+            return new RppIf(RppBinOp.Create("==", inVar, Literal), new RppAssignOp(outOut, thenExpr), elseExpr);
         }
     }
 
@@ -251,7 +251,7 @@ namespace CSharpRpp
         {
             RppVar variable = new RppVar(MutabilityFlag.MfVal, Name, _resolvableType, new RppAsInstanceOf(inVar, _resolvableType)) {Token = Token};
             RppId variableRef = new RppId(Name, variable);
-            RppIf ifCond = new RppIf(BinOp.Create("!=", variableRef, RppNull.Instance), new RppAssignOp(outOut, thenExpr), elseExpr);
+            RppIf ifCond = new RppIf(RppBinOp.Create("!=", variableRef, RppNull.Instance), new RppAssignOp(outOut, thenExpr), elseExpr);
 
             return new RppBlockExpr(List<IRppNode>(variable, ifCond));
         }

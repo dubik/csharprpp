@@ -21,7 +21,13 @@ namespace CSharpRpp
         {
             string outFileName = GetOutputFileName(options);
 
-            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, null, outFileName);
+            Assembly stdlib = null;
+            if (!options.Nostdlib)
+            {
+                stdlib = FindStdlib();
+            }
+
+            CodeGenerator generator = Compile(program => Parse(options.InputFiles, program), diagnostic, stdlib, outFileName);
             if (generator != null)
             {
                 ValidateEntryPoint(generator, options, diagnostic);
@@ -52,6 +58,13 @@ namespace CSharpRpp
             return Path.GetFileNameWithoutExtension(firstFile) + ext;
         }
 
+        public static Assembly FindStdlib()
+        {
+            var location = Assembly.GetAssembly(typeof (RppCompiler)).Location;
+            string directory = Path.GetDirectoryName(location);
+            return Assembly.LoadFile(directory + @"\RppStdlib.dll");
+        }
+
         [CanBeNull]
         public static CodeGenerator Compile(Action<RppProgram> parseFactory, Diagnostic diagnostic, [CanBeNull] Assembly stdlibAssembly,
             string fileName = "<buffer>")
@@ -59,6 +72,7 @@ namespace CSharpRpp
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
             WireRuntime(runtimeScope);
+
             if (stdlibAssembly != null)
             {
                 WireAssembly(runtimeScope, stdlibAssembly);
@@ -107,12 +121,12 @@ namespace CSharpRpp
             Assembly runtimeAssembly = GetRuntimeAssembly();
             WireAssembly(scope, runtimeAssembly);
 
-            scope.AddType(RppTypeSystem.CreateType("Exception", typeof(Exception)));
+            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
         }
 
-        private static void WireAssembly(SymbolTable scope, Assembly runtimeAssembly)
+        private static void WireAssembly(SymbolTable scope, Assembly assembly)
         {
-            Type[] types = runtimeAssembly.GetTypes();
+            Type[] types = assembly.GetTypes();
 
             foreach (Type type in types)
             {
