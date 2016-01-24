@@ -6,6 +6,7 @@ using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
+using static CSharpRpp.ListExtensions;
 
 namespace CSharpRpp
 {
@@ -66,6 +67,8 @@ namespace CSharpRpp
 
         public RppBaseConstructorCall BaseConstructorCall { get; }
 
+        public bool IsCase => Modifiers != null && Modifiers.Contains(ObjectModifier.OmCase);
+
         public RppClass(ClassKind kind, HashSet<ObjectModifier> modifiers, [NotNull] string name, [NotNull] IList<RppField> classParams,
             [NotNull] IEnumerable<IRppNode> classBody, [NotNull] IList<RppVariantTypeParam> typeParams, RppBaseConstructorCall baseConstructorCall) : base(name)
         {
@@ -82,7 +85,7 @@ namespace CSharpRpp
 
             _constructors = rppNodes.OfType<RppFunc>().Where(f => f.IsConstructor).ToList();
 
-            _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MfUnspecified).ToList();
+            _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MfUnspecified || IsCase).ToList();
 
             var primaryConstructor = CreatePrimaryConstructor(_constrExprs);
             _constructors.Add(primaryConstructor);
@@ -129,6 +132,25 @@ namespace CSharpRpp
             BaseConstructorCall.ResolveBaseClass(Scope);
         }
 
+        public static RppClass CreateCompanion(string name, IEnumerable<ResolvableType> classParamTypes)
+        {
+            RppFunc factoryFunc = CreateApply(new RTypeName(name), classParamTypes);
+            var exprs = List(factoryFunc);
+            RppClass clazz = new RppClass(ClassKind.Object, new HashSet<ObjectModifier>(), name, Collections.NoFields, exprs,
+                Collections.NoVariantTypeParams,
+                RppBaseConstructorCall.Object);
+
+            return clazz;
+        }
+
+        private static RppFunc CreateApply(RTypeName classType, IEnumerable<ResolvableType> classParams)
+        {
+            int paramIndex = 0;
+            IEnumerable<IRppParam> funcParams = classParams.Select(t => new RppParam($"_{paramIndex++}", t)).ToList();
+            RppNew newExpr = new RppNew(new ResolvableType(classType), funcParams.Select(p => new RppId(p.Name, p)));
+            return new RppFunc("apply", funcParams, new ResolvableType(classType), newExpr);
+        }
+
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             Debug.Assert(Scope != null, "Scope != null");
@@ -169,7 +191,8 @@ namespace CSharpRpp
 
             yield return setter;
 
-            RppFunc getter = new RppFunc(RppMethodInfo.GetGetterAccessorName(field.Name), Enumerable.Empty<IRppParam>(), field.Type, new RppId(field.MangledName, field))
+            RppFunc getter = new RppFunc(RppMethodInfo.GetGetterAccessorName(field.Name), Enumerable.Empty<IRppParam>(), field.Type,
+                new RppId(field.MangledName, field))
             {
                 IsSynthesized = true,
                 IsPropertyAccessor = true

@@ -19,10 +19,10 @@ namespace CSharpRpp
 
         public RppMethodInfo Constructor { get; private set; }
 
-        public RppNew([NotNull] ResolvableType type, [NotNull] IList<IRppExpr> arguments)
+        public RppNew([NotNull] ResolvableType type, [NotNull] IEnumerable<IRppExpr> arguments)
         {
             Type = type;
-            _arguments = arguments;
+            _arguments = arguments.ToList();
         }
 
         public override void Accept(IRppNodeVisitor visitor)

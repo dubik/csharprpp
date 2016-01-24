@@ -485,6 +485,11 @@ namespace CSharpRpp
             FunctionResolution.ResolveResults resolveResults = FunctionResolution.ResolveFunction(Token, Name, ArgList, genericArguments, scope);
             if (resolveResults == null)
             {
+                if (TargetType == null)
+                {
+                    throw SemanticExceptionFactory.ValueNotFound(Token);
+                }
+
                 throw SemanticExceptionFactory.MemberNotFound(Token, TargetType.Name);
             }
 

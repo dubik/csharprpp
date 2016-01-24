@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AstNodeMatcher.cs" />
+    <Compile Include="CaseClassTest.cs" />
     <Compile Include="ClassTest.cs" />
     <Compile Include="ClosuresTest.cs" />
     <Compile Include="CodeGenTest.cs" />

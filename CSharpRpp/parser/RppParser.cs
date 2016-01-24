@@ -26,7 +26,8 @@ namespace CSharpRpp
         OmSealed,
         OmImplicit,
         OmLazy,
-        OmAbstract
+        OmAbstract,
+        OmCase
     }
 
     internal class UnexpectedTokenException : Exception
@@ -863,6 +864,7 @@ namespace CSharpRpp
             {RppLexer.KW_Private, ObjectModifier.OmPrivate},
             {RppLexer.KW_Protected, ObjectModifier.OmProtected},
             {RppLexer.KW_Sealed, ObjectModifier.OmSealed},
+            {RppLexer.KW_Case, ObjectModifier.OmCase}
         };
 
         private HashSet<ObjectModifier> ParseObjectModifier()

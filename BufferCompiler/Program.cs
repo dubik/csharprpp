@@ -10,6 +10,7 @@ namespace BufferCompiler
     {
         public static void Main()
         {
+            /*
             const string code = @"
 abstract class QList[+A] {
   def head: A
@@ -60,10 +61,12 @@ object QList {
   }
 }
 ";
-
+*/
             const string code1 = @"
+case class Foo(k : Int)
+
 object Main {
-    def main : (Int, String) = (13, ""Hello"")
+    def main : Foo = Foo(238)
 }
 ";
 
