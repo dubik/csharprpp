@@ -63,8 +63,13 @@ object QList {
 ";
 */
             const string code1 = @"
+case class Foo(k: Int, s: String)
+
 object Main {
-    def main : (Int, String) = (13, ""Hello"")
+    def main : Option[(Int, String)] = {
+        val foo = Foo(13, ""Hello"")
+        Foo.unapply(foo)
+    }
 }
 ";
 

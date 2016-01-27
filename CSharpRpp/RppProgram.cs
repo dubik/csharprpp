@@ -103,8 +103,10 @@ namespace CSharpRpp
                 IEnumerable<RppSelector> listOfFields = classParams.Select(p => FieldSelect("obj", p.Name));
 
                 string tupleTypeNameString = "Tuple" + classParams.Count();
+                RTypeName tupleType = CreateTupleType(classParams.Select(p => p.Type.Name.Name));
+
                 expr = If(NotNull(Id("obj")),
-                    Call("Some", List<IRppExpr>(New(tupleTypeNameString, listOfFields))),
+                    Call("Some", List<IRppExpr>(New(tupleTypeNameString, listOfFields)), List(new ResolvableType(tupleType))),
                     Id("None"));
             }
 
@@ -129,12 +131,19 @@ namespace CSharpRpp
             else
             {
                 RTypeName optionType = new RTypeName("Option");
-                string tupleTypeNameString = "Tuple" + names.Count();
-                RTypeName tuppleType = new RTypeName(tupleTypeNameString);
-                names.Select(n => new RTypeName(n)).ForEach(tuppleType.AddGenericArgument);
+                RTypeName tuppleType = CreateTupleType(names);
                 optionType.AddGenericArgument(tuppleType);
                 return new ResolvableType(optionType);
             }
+        }
+
+        private static RTypeName CreateTupleType(IEnumerable<string> names)
+        {
+            IEnumerable<string> typeNames = names as IList<string> ?? names.ToList();
+            string tupleTypeNameString = "Tuple" + typeNames.Count();
+            RTypeName tuppleType = new RTypeName(tupleTypeNameString);
+            typeNames.Select(n => new RTypeName(n)).ForEach(tuppleType.AddGenericArgument);
+            return tuppleType;
         }
     }
 
