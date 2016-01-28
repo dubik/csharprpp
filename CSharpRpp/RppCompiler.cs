@@ -66,6 +66,8 @@ namespace CSharpRpp
             Console.WriteLine($"Directory {directory}");
             string path = directory + @"\RppStdlib.dll";
             Console.WriteLine($"Stdlib path {path}");
+            Console.WriteLine($"Stdlib exists {File.Exists(path)}");
+            Console.WriteLine($"Current directory {Directory.GetCurrentDirectory()}");
             return Assembly.LoadFile(path);
         }
 
