@@ -61,14 +61,8 @@ namespace CSharpRpp
         public static Assembly FindStdlib()
         {
             var location = Assembly.GetAssembly(typeof (RppCompiler)).Location;
-            Console.WriteLine($"RppCompiler assembly location {location}");
             string directory = Path.GetDirectoryName(location);
-            Console.WriteLine($"Directory {directory}");
-            string path = directory + @"\RppStdlib.dll";
-            Console.WriteLine($"Stdlib path {path}");
-            Console.WriteLine($"Stdlib exists {File.Exists(path)}");
-            Console.WriteLine($"Current directory {Directory.GetCurrentDirectory()}");
-            return Assembly.LoadFile(path);
+            return Assembly.LoadFile(directory + @"\RppStdlib.dll");
         }
 
         [CanBeNull]

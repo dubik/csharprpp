@@ -70,9 +70,6 @@ namespace CSharpRppTest
             Assembly stdlib = RppCompiler.FindStdlib();
             if (stdlib != null)
             {
-                Console.WriteLine("Wireing up assembly");
-                Type[] types = stdlib.GetTypes();
-                Console.WriteLine(types);
                 WireAssembly(scope, stdlib);
             }
 

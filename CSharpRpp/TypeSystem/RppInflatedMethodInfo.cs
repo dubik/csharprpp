@@ -30,7 +30,6 @@ namespace CSharpRpp.TypeSystem
                             Type[] parametersTypes = Parameters.Select(p => p.Type.NativeType).ToArray();
                             try
                             {
-                                parametersTypes.ForEach(Console.WriteLine);
                                 _nativeMethod = declaringNativeType.GetConstructor(parametersTypes);
                             }
                             catch
@@ -42,7 +41,6 @@ namespace CSharpRpp.TypeSystem
                     }
                     else
                     {
-                        Console.WriteLine("method");
                         try
                         {
                             _nativeMethod = TypeBuilder.GetMethod(declaringNativeType, (MethodInfo) GenericMethodDefinition.Native);
