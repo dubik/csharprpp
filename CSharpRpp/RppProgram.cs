@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CSharpRpp.Expr;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 using static CSharpRpp.ListExtensions;
-using static CSharpRpp.RppAst;
+using static CSharpRpp.Utils.AstHelper;
 using ResolvableType = CSharpRpp.TypeSystem.ResolvableType;
 
 namespace CSharpRpp
@@ -145,80 +144,5 @@ namespace CSharpRpp
             typeNames.Select(n => new RTypeName(n)).ForEach(tuppleType.AddGenericArgument);
             return tuppleType;
         }
-    }
-
-    internal static class RppAst
-    {
-        public static RppParam Param(string name, string type)
-        {
-            return new RppParam(name, ResolvableType(type));
-        }
-
-        public static RppParam Param(string name, RTypeName typeName)
-        {
-            return new RppParam(name, new ResolvableType(typeName));
-        }
-
-        public static RppBinOp NotNull(IRppExpr expr)
-        {
-            return BinOp("!=", expr, Null);
-        }
-
-        public static RppId Id(string name)
-        {
-            return new RppId(name);
-        }
-
-        public static RppNew New(string typeNameString, IEnumerable<IRppExpr> args)
-        {
-            return New(ResolvableType(typeNameString), args);
-        }
-
-        public static RppNew New(ResolvableType type, IEnumerable<IRppExpr> args)
-        {
-            return new RppNew(type, args);
-        }
-
-        public static RppBinOp BinOp(string op, IRppExpr left, IRppExpr right)
-        {
-            return RppBinOp.Create(op, left, right);
-        }
-
-        public static RTypeName TypeName(string name)
-        {
-            return new RTypeName(name);
-        }
-
-        public static ResolvableType ResolvableType(string name)
-        {
-            return new ResolvableType(TypeName(name));
-        }
-
-        public static RppSelector FieldSelect(string target, string fieldName)
-        {
-            return Selector(Id(target), Id(fieldName));
-        }
-
-        public static RppSelector Selector(IRppExpr target, RppMember path)
-        {
-            return new RppSelector(target, path);
-        }
-
-        public static RppIf If(IRppExpr condition, IRppExpr thenExpr, IRppExpr elseExpr)
-        {
-            return new RppIf(condition, thenExpr, elseExpr);
-        }
-
-        public static RppFuncCall Call(string name, IList<IRppExpr> args)
-        {
-            return new RppFuncCall(name, args);
-        }
-
-        public static RppFuncCall Call(string name, IList<IRppExpr> args, IList<ResolvableType> typeList)
-        {
-            return new RppFuncCall(name, args, typeList);
-        }
-
-        public static RppNull Null = RppNull.Instance;
     }
 }

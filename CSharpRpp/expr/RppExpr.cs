@@ -9,6 +9,7 @@ using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
+using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.ResolvableType;
 
 namespace CSharpRpp
@@ -689,7 +690,13 @@ namespace CSharpRpp
     {
         public ResolvableType Type { get; private set; }
 
+        public bool Exitable { get; set; }
+
         private IList<IRppNode> _exprs;
+
+        public RppBlockExpr([NotNull] IRppNode node) : this(List(node))
+        {
+        }
 
         public RppBlockExpr([NotNull] IList<IRppNode> exprs)
         {
@@ -705,7 +712,8 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            _exprs = NodeUtils.Analyze(scope, _exprs, diagnostic);
+            SymbolTable localScope = new SymbolTable(scope);
+            _exprs = NodeUtils.Analyze(localScope, _exprs, diagnostic);
 
             InitializeType();
 

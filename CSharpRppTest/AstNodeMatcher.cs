@@ -163,5 +163,9 @@ namespace CSharpRppTest
         public void Visit(RppAsInstanceOf node)
         {
         }
+
+        public void Visit(RppBreak node)
+        {
+        }
     }
 }

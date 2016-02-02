@@ -442,6 +442,20 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(_type != null, "_type != null");
             var fields = _type.GetFields().Select(f => Convert(f, this));
             _fields.AddRange(fields);
+            var props = _type.GetProperties().Select(p => Convert(p, this));
+            _fields.AddRange(props);
+        }
+
+        private static RppFieldInfo Convert(PropertyInfo property, RType declaringType)
+        {
+            RType fieldType = CreateType(property.PropertyType.Name, property.PropertyType);
+            const RFieldAttributes attr = RFieldAttributes.Public;
+            RppFieldInfo rppField = new RppFieldInfo(property.Name, fieldType, attr, declaringType)
+            {
+                NativeProperty = property
+            };
+
+            return rppField;
         }
 
         private static RppFieldInfo Convert(FieldInfo field, RType declaringType)
@@ -703,7 +717,7 @@ namespace CSharpRpp.TypeSystem
             propertyBuilder.SetCustomAttribute(RTypeUtils.CreateCompilerGeneratedAttribute());
 
             // TODO we need to update visibility somehow
-            FieldBuilder fieldBuilder = _typeBuilder.DefineField(field.MangledName, field.Type.NativeType, FieldAttributes.Private);
+            FieldBuilder fieldBuilder = _typeBuilder.DefineField(field.MangledName, field.Type.NativeType, FieldAttributes.Public);
             fieldBuilder.SetCustomAttribute(RTypeUtils.CreateCompilerGeneratedAttribute());
 
             SetAccessors(propertyBuilder, methods);

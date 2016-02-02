@@ -102,5 +102,10 @@ namespace CSharpRpp.TypeSystem
         {
             return Equals(resolvableType, ResolvableType.UndefinedTy);
         }
+
+        public static ResolvableType AsResolvable(this RType type)
+        {
+            return new ResolvableType(type);
+        }
     }
 }

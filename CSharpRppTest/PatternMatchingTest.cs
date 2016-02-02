@@ -55,7 +55,7 @@ object Main {
     def main : Int = {
         val k = new Foo(3)
         k match {
-            case  x: Foo => x.length
+            case x: Foo => x.length
             case _ => 0
         }
     }
@@ -66,11 +66,11 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching"), Ignore]
+        [TestMethod, TestCategory("PatternMatching")]
         public void ConstructorPatternMatching()
         {
             const string code = @"
-class Foo(val length: Int, val value: Int)
+case class Foo(val length: Int, val value: Int)
 
 object Main {
     def main : Int = {

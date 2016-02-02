@@ -9,6 +9,7 @@ abstract class Option[A]
     def get: A
     def map[B](f: (A) => B): Option[B] = if(isEmpty()) None else new Some(f(get()))
     def flatMap[B](f: (A) => Option[B]): Option[B] = if(isEmpty()) None else f(get())
+    def isDefined: Boolean = isEmpty() == false
 }
 
 class Some[A](val x: A) extends Option[A]

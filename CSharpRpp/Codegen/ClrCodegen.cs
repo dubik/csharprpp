@@ -166,9 +166,24 @@ namespace CSharpRpp.Codegen
             }
         }
 
+        private readonly Stack<Label> _blockExprExitLabels = new Stack<Label>();
+
         public override void VisitEnter(RppBlockExpr node)
         {
             Console.WriteLine("Block expr");
+            if (node.Exitable)
+            {
+                Label exitLabel = _body.DefineLabel();
+                _blockExprExitLabels.Push(exitLabel);
+            }
+        }
+
+        public override void VisitExit(RppBlockExpr node)
+        {
+            if (node.Exitable)
+            {
+                _body.MarkLabel(_blockExprExitLabels.Pop());
+            }
         }
 
         private readonly Dictionary<string, OpCode> _logToIl = new Dictionary<string, OpCode>
@@ -719,6 +734,11 @@ namespace CSharpRpp.Codegen
         {
             node.Value.Accept(this);
             _body.Emit(OpCodes.Isinst, node.Type.Value.NativeType);
+        }
+
+        public override void Visit(RppBreak node)
+        {
+            _body.Emit(OpCodes.Br, _blockExprExitLabels.Peek());
         }
     }
 }

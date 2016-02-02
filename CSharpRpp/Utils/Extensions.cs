@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Utils
 {
-    static class Extensions
+    internal static class Extensions
     {
         public static int GetDeepHashCode<T>([CanBeNull] this IList<T> list)
         {

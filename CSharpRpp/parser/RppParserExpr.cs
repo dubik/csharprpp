@@ -295,13 +295,13 @@ namespace CSharpRpp
         {
             if (Require(Id))
             {
-                IToken varid = _lastToken;
+                IToken id = _lastToken;
                 if (Require(OP_Colon)) // varid ':' TypePat
                 {
                     RTypeName type;
                     if (ParseType(out type, false))
                     {
-                        return new RppTypedPattern(varid, type);
+                        return new RppTypedPattern(id, type);
                     }
 
                     throw new SyntaxException("Expected type name but got", _lastToken);
@@ -315,8 +315,33 @@ namespace CSharpRpp
                         throw new SyntaxException("Expected simple patter", _lastToken);
                     }
 
-                    return new RppBinderPattern(varid, simplePattern);
+                    return new RppBinderPattern(id, simplePattern);
                 }
+
+                if (Require(OP_LParen))
+                {
+                    List<RppMatchPattern> patterns = new List<RppMatchPattern>();
+                    while (true)
+                    {
+                        RppMatchPattern pattern = ParsePattern1();
+                        if (pattern == null)
+                        {
+                            break;
+                        }
+                        patterns.Add(pattern);
+                        if (Peek(OP_RParen))
+                        {
+                            break;
+                        }
+                        Require(OP_Comma);
+                    }
+
+                    Expect(OP_RParen);
+
+                    return new RppConstructorPattern(new ResolvableType(new RTypeName(id.Text)), patterns) {Token = id};
+                }
+
+                return new RppVariablePattern(id.Text) {Token = id};
             }
 
             return ParseSimplePattern();
@@ -346,17 +371,6 @@ namespace CSharpRpp
             if (ParseLiteral(out expr))
             {
                 return new RppLiteralPattern(expr);
-            }
-
-            if (ParsePath(out expr))
-            {
-                if (Require(OP_LParen))
-                {
-                    IEnumerable<RppMatchPattern> pattern = ParsePattern();
-                    Expect(OP_RParen);
-
-                    return new RppConstructorPattern(expr, pattern);
-                }
             }
 
             return null;

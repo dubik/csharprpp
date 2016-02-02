@@ -63,12 +63,13 @@ object QList {
 ";
 */
             const string code1 = @"
-case class Foo(k: Int, s: String)
-
 object Main {
-    def main : Option[(Int, String)] = {
-        val foo = Foo(13, ""Hello"")
-        Foo.unapply(foo)
+    def main : Int = {
+        val k = 13
+        k match {
+            case 13 => 24
+            case _ => 27
+        }
     }
 }
 ";
@@ -91,6 +92,26 @@ object Main {
             var location = Assembly.GetAssembly(typeof (Program)).Location;
             string directory = Path.GetDirectoryName(location);
             return Assembly.LoadFile(directory + @"\RppStdlib.dll");
+        }
+    }
+
+    public class MyFoo<T>
+    {
+        public T Length { get; set; }
+
+        public int Match(int arg)
+        {
+            int res = 0;
+            if (arg == 10)
+            {
+                res = arg * 2;
+            }
+            else if (arg == 13)
+            {
+                res = arg * 3;
+            }
+
+            return res;
         }
     }
 }

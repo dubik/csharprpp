@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.Exceptions;
@@ -8,9 +10,26 @@ using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 using static CSharpRpp.ListExtensions;
+using static CSharpRpp.Utils.AstHelper;
 
 namespace CSharpRpp
 {
+    public class RppMatchingContext
+    {
+        private int _localVarCounter;
+        private int _localOptionsCounter;
+
+        public string CreateLocal()
+        {
+            return $"localVar{_localVarCounter++}";
+        }
+
+        public string CreateLocalOption()
+        {
+            return $"localOption{_localOptionsCounter++}";
+        }
+    }
+
     public class RppMatch : RppNode, IRppExpr
     {
         public ResolvableType Type { get; set; }
@@ -23,39 +42,6 @@ namespace CSharpRpp
             Value = value;
             CaseClauses = caseClauses;
         }
-
-        /*
-        v match {
-            case 1 => 3
-            case 2 => 5
-            case _ => 0
-        }
-
-            val x = v;
-            var y;
-
-            if(x == 1) {
-                y = 3;
-            } if(x == 2) {
-                y = 5;
-            } else {
-                y = 0;
-            }
-
-            if(x == 1) {
-                y = 3;
-            } else {
-                if(x == 2) {
-                    y= 5;
-                } else {
-                    {
-                        y = 0;
-                    }
-                }
-            }
-
-            y;
-        */
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
@@ -71,11 +57,13 @@ namespace CSharpRpp
             RppId declInId = new RppId("<in>", declIn);
             RppId declOutId = new RppId("<out>", declOut);
 
-            var ifC = Create(declInId, declOutId, CaseClauses);
-            var exrp = new RppBlockExpr(List<IRppNode>(declIn, declOut, ifC, declOutId));
+            RppMatchingContext ctx = new RppMatchingContext();
+            var ifC = Create(declInId, declOutId, CaseClauses, ctx);
+            var expr = new RppBlockExpr(List<IRppNode>(declIn, ifC)) {Exitable = true};
 
             SymbolTable matchScope = new SymbolTable(scope);
-            return exrp.Analyze(matchScope, diagnostic);
+            RppBlockExpr matchBlock = new RppBlockExpr(List<IRppNode>(declOut, expr, declOutId));
+            return matchBlock.Analyze(matchScope, diagnostic);
         }
 
         private static void CheckCommonType(IEnumerable<RppCaseClause> caseClauses, IToken token)
@@ -87,19 +75,9 @@ namespace CSharpRpp
             }
         }
 
-        private static IRppExpr Create(RppId declInId, RppId declOutId, IEnumerable<RppCaseClause> caseClauses)
+        private static IRppExpr Create(RppMember declInId, RppMember declOutId, IEnumerable<RppCaseClause> caseClauses, RppMatchingContext ctx)
         {
-            IEnumerable<RppCaseClause> clauses = caseClauses as IList<RppCaseClause> ?? caseClauses.ToList();
-            if (clauses.IsEmpty())
-            {
-                return null;
-            }
-
-            RppCaseClause head = clauses.First();
-            IEnumerable<RppCaseClause> tail = clauses.Skip(1);
-
-            IRppExpr ifC = head.RewriteCaseClause(declInId, declOutId, Create(declInId, declOutId, tail));
-            return ifC;
+            return Block(caseClauses.Select(c => c.RewriteCaseClause(declInId, declOutId, ctx)).ToList<IRppNode>());
         }
     }
 
@@ -129,7 +107,8 @@ namespace CSharpRpp
             Pattern = (RppMatchPattern) Pattern.Analyze(scope, diagnostic);
 
             SymbolTable localScope = new SymbolTable(scope);
-            IEnumerable<IRppExpr> locals = Pattern.DeclareVariables();
+            RType inputType = GetInputType(localScope);
+            IEnumerable<IRppExpr> locals = Pattern.DeclareVariables(inputType);
             NodeUtils.Analyze(localScope, locals, diagnostic);
 
             Expr = (IRppExpr) Expr.Analyze(localScope, diagnostic);
@@ -141,9 +120,17 @@ namespace CSharpRpp
             return Pattern + " => " + Expr;
         }
 
-        public IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr create)
+        public IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, RppMatchingContext ctx)
         {
-            return Pattern.RewriteCaseClause(inVar, outOut, Expr, create);
+            return Pattern.RewriteCaseClause(inVar, outOut, Expr, ctx);
+        }
+
+        [NotNull]
+        protected static RType GetInputType([NotNull] SymbolTable scope)
+        {
+            LocalVarSymbol entry = (LocalVarSymbol) scope.Lookup("<in>");
+            Debug.Assert(entry != null, "input variable must exists");
+            return entry.Type;
         }
     }
 
@@ -153,12 +140,13 @@ namespace CSharpRpp
         /// Creates RppVar(s) with new variables (if any), needed for semantic analysis
         /// </summary>
         /// <returns></returns>
-        public virtual IEnumerable<IRppExpr> DeclareVariables()
+        [NotNull]
+        public virtual IEnumerable<IRppExpr> DeclareVariables([NotNull] RType inputType)
         {
             return Collections.NoExprs;
         }
 
-        public abstract IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr);
+        public abstract IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx);
     }
 
     public class RppLiteralPattern : RppMatchPattern
@@ -175,9 +163,9 @@ namespace CSharpRpp
             return Literal.ToString();
         }
 
-        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
+        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
-            return new RppIf(RppBinOp.Create("==", inVar, Literal), new RppAssignOp(outOut, thenExpr), elseExpr);
+            return If(BinOp("==", inVar, Literal), Block(Assign(outOut, thenExpr), Break));
         }
     }
 
@@ -200,26 +188,163 @@ namespace CSharpRpp
             return Name;
         }
 
-        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
+        public override IEnumerable<IRppExpr> DeclareVariables(RType inputType)
         {
             if (Name == "_")
             {
-                return new RppAssignOp(outOut, thenExpr);
+                return Collections.NoExprs;
             }
 
-            throw new System.NotImplementedException();
+            RppVar variable = Val(Name, inputType, new RppDefaultExpr(inputType.AsResolvable()));
+            variable.Token = Token;
+            return List(variable);
+        }
+
+        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
+        {
+            if (Name == "_")
+            {
+                return Block(Assign(outOut, thenExpr), Break);
+            }
+
+            throw new NotImplementedException();
         }
     }
 
     public class RppConstructorPattern : RppMatchPattern
     {
-        public RppConstructorPattern(IRppExpr expr, IEnumerable<RppMatchPattern> patterns)
+        private readonly ResolvableType _type;
+        private readonly IEnumerable<RppMatchPattern> _patterns;
+        private RppMethodInfo _unapplyMethod;
+        private RType[] _classParamTypes;
+
+        public RppConstructorPattern(ResolvableType typeName, IEnumerable<RppMatchPattern> patterns)
         {
+            _type = typeName;
+            _patterns = patterns;
         }
 
-        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
+        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
-            throw new System.NotImplementedException();
+            string localOptionVar = ctx.CreateLocalOption();
+            RppVar localOption = Val(localOptionVar, _unapplyMethod.ReturnType, CallMethod(_type.Value.Name, _unapplyMethod.Name, Id(inVar.Name)));
+
+            List<IRppNode> nodes = new List<IRppNode>();
+            RppMatchPattern[] patterns = _patterns.ToArray();
+            List<IRppExpr> conds = new List<IRppExpr>();
+            for (int i = 0; i < patterns.Length; i++)
+            {
+                RppMatchPattern pattern = patterns[i];
+                RppSelector classParamValue = new RppSelector(CallMethod(localOptionVar, "get"), Id($"_{i + 1}"));
+
+                if (pattern is RppLiteralPattern)
+                {
+                    RppLiteralPattern literalPattern = (RppLiteralPattern) pattern;
+                    RppBinOp cond = BinOp("==", literalPattern.Literal, classParamValue);
+                    conds.Add(cond);
+                }
+                else if (pattern is RppVariablePattern)
+                {
+                    var classParamType = _classParamTypes[i];
+                    RType patternType = classParamType;
+
+                    RppVar var = Val(pattern.Token.Text, patternType, classParamValue);
+                    var.Token = pattern.Token;
+                    nodes.Add(var);
+                }
+                else
+                {
+                    throw new NotImplementedException("not done yet");
+                }
+            }
+
+
+            RppAssignOp assign = Assign(outOut, thenExpr);
+
+            if (conds.Any())
+            {
+                IRppExpr cond = conds.Aggregate((left, right) => BinOp("&&", left, right));
+                RppIf specCond = If(cond, Block(assign, Break));
+                nodes.Add(specCond);
+            }
+            else
+            {
+                nodes.Add(assign);
+                nodes.Add(Break);
+            }
+
+
+            RppIf ifCond = If(CallMethod(localOptionVar, "isDefined", Collections.NoExprs), Block(nodes));
+            return Block(localOption, ifCond);
+        }
+
+        public override IEnumerable<IRppExpr> DeclareVariables(RType inputType)
+        {
+            // Check inputType with _type
+            RType retType = _unapplyMethod.ReturnType;
+            Debug.Assert(retType != null, "retType != null");
+
+            _classParamTypes = ExtractTypes(retType).ToArray();
+            if (_classParamTypes.Length != _patterns.Count())
+            {
+                throw new Exception($"Class ${inputType.Name} doesn't contain the same amount of class params as specified in case ({_classParamTypes.Count()})");
+            }
+
+            return _patterns.Zip(_classParamTypes, Tuple.Create).SelectMany(pair => pair.Item1.DeclareVariables(pair.Item2));
+        }
+
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
+        {
+            _type.Resolve(scope);
+
+            TypeSymbol companionObjectSymbol = scope.LookupObject(_type.Name.Name);
+            if (companionObjectSymbol != null)
+            {
+                RppMethodInfo unapplyMethod = FindUnapply(companionObjectSymbol.Type);
+                if (unapplyMethod == null)
+                {
+                    throw new Exception("Can't find unapply method or amount of parameters is wrong");
+                }
+                _unapplyMethod = unapplyMethod;
+            }
+            else
+            {
+                throw new Exception("Can't find companion object!");
+            }
+
+            return this;
+        }
+
+        [NotNull]
+        private IEnumerable<RType> ExtractTypes([NotNull] RType unapplyRetType)
+        {
+            if (Equals(unapplyRetType, RppTypeSystem.BooleanTy))
+            {
+                yield return RppTypeSystem.BooleanTy;
+            }
+            else
+            {
+                RType firstType = unapplyRetType.GenericArguments.First();
+
+                // TODO this is not very reliable, because class can be TupleSomething, and it is not std tuple, but let it be for now
+                if (firstType.Name.StartsWith("Tuple"))
+                {
+                    foreach (RType genericArgument in firstType.GenericArguments)
+                    {
+                        yield return genericArgument;
+                    }
+                }
+                else
+                {
+                    yield return firstType;
+                }
+            }
+        }
+
+        [CanBeNull]
+        private RppMethodInfo FindUnapply([NotNull] RType companionType)
+        {
+            return companionType.Methods.FirstOrDefault(m => m.Name == "unapply");
         }
     }
 
@@ -241,19 +366,17 @@ namespace CSharpRpp
             return this;
         }
 
-        public override IEnumerable<IRppExpr> DeclareVariables()
+        public override IEnumerable<IRppExpr> DeclareVariables(RType inputType)
         {
             RppVar variable = new RppVar(MutabilityFlag.MfVal, Name, _resolvableType, new RppDefaultExpr(_resolvableType)) {Token = Token};
             return List(variable);
         }
 
-        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
+        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
             RppVar variable = new RppVar(MutabilityFlag.MfVal, Name, _resolvableType, new RppAsInstanceOf(inVar, _resolvableType)) {Token = Token};
-            RppId variableRef = new RppId(Name, variable);
-            RppIf ifCond = new RppIf(RppBinOp.Create("!=", variableRef, RppNull.Instance), new RppAssignOp(outOut, thenExpr), elseExpr);
-
-            return new RppBlockExpr(List<IRppNode>(variable, ifCond));
+            RppIf ifCond = If(BinOp("!=", Id(Name), Null), Block(Assign(outOut, thenExpr), Break), EmptyExpr);
+            return Block(variable, ifCond);
         }
 
         public override string ToString()
@@ -268,7 +391,7 @@ namespace CSharpRpp
         {
         }
 
-        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, IRppExpr elseExpr)
+        public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
             throw new System.NotImplementedException();
         }
