@@ -87,5 +87,46 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
+        [TestMethod, TestCategory("PatternMatching")]
+        public void ConstructorPatternMatchingWithOneClassParam()
+        {
+            const string code = @"
+case class Foo(val length: Int)
+
+object Main {
+    def main : Int = {
+        val k = new Foo(3)
+        k match {
+            case Foo(x) => x
+            case _ => 0
+        }
+    }
+}
+";
+            Type mainTy = ParseAndCreateType(code, "Main$");
+            object res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(3, res);
+        }
+
+        [TestMethod, TestCategory("PatternMatching")]
+        public void ConstructorPatternMatchingWithoutClassParams()
+        {
+            const string code = @"
+case class Foo
+
+object Main {
+    def main : Int = {
+        val k = new Foo
+        k match {
+            case Foo() => 13
+            case _ => 0
+        }
+    }
+}
+";
+            Type mainTy = ParseAndCreateType(code, "Main$");
+            object res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+        }
     }
 }

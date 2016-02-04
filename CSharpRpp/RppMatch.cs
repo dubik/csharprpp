@@ -214,14 +214,14 @@ namespace CSharpRpp
     public class RppConstructorPattern : RppMatchPattern
     {
         private readonly ResolvableType _type;
-        private readonly IEnumerable<RppMatchPattern> _patterns;
+        private readonly RppMatchPattern[] _patterns;
         private RppMethodInfo _unapplyMethod;
         private RType[] _classParamTypes;
 
         public RppConstructorPattern(ResolvableType typeName, IEnumerable<RppMatchPattern> patterns)
         {
             _type = typeName;
-            _patterns = patterns;
+            _patterns = patterns.ToArray();
         }
 
         public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
@@ -230,12 +230,11 @@ namespace CSharpRpp
             RppVar localOption = Val(localOptionVar, _unapplyMethod.ReturnType, CallMethod(_type.Value.Name, _unapplyMethod.Name, Id(inVar.Name)));
 
             List<IRppNode> nodes = new List<IRppNode>();
-            RppMatchPattern[] patterns = _patterns.ToArray();
             List<IRppExpr> conds = new List<IRppExpr>();
-            for (int i = 0; i < patterns.Length; i++)
+            for (int i = 0; i < _patterns.Length; i++)
             {
-                RppMatchPattern pattern = patterns[i];
-                RppSelector classParamValue = new RppSelector(CallMethod(localOptionVar, "get"), Id($"_{i + 1}"));
+                RppMatchPattern pattern = _patterns[i];
+                IRppExpr classParamValue = GetClassParam(localOptionVar, i, _patterns.Length);
 
                 if (pattern is RppLiteralPattern)
                 {
@@ -258,7 +257,6 @@ namespace CSharpRpp
                 }
             }
 
-
             RppAssignOp assign = Assign(outOut, thenExpr);
 
             if (conds.Any())
@@ -273,9 +271,43 @@ namespace CSharpRpp
                 nodes.Add(Break);
             }
 
-
-            RppIf ifCond = If(CallMethod(localOptionVar, "isDefined", Collections.NoExprs), Block(nodes));
+            RppIf ifCond = If(GetIsValidExpression(localOption), Block(nodes));
             return Block(localOption, ifCond);
+        }
+
+        /// <summary>
+        /// For Option we call isDefined method, for bools, just return the variable content itself
+        /// </summary>
+        /// <param name="localOption">variable which has bool or Option</param>
+        private static IRppExpr GetIsValidExpression(RppVar localOption)
+        {
+            string localOptionVar = localOption.Name;
+            if (Equals(localOption.Type.Value, RppTypeSystem.BooleanTy))
+            {
+                return Id(localOptionVar);
+            }
+
+            return CallMethod(localOptionVar, "isDefined", Collections.NoExprs);
+        }
+
+        /// <summary>
+        /// If there are more then one class param it is going to be in a tuple, so we need to extract it from there,
+        /// other return just option's value.
+        /// Options value is <code>localOptionVar.get()</code> and for tuple: <code>localOptionVar.get()._&lt;ParamIndex&gt;</code>
+        /// </summary>
+        /// <param name="localOptionVar">name of variable which contains results of unapply</param>
+        /// <param name="classParamIndex">current index of class param</param>
+        /// <param name="classParamsCount">how many class params there are</param>
+        /// <returns>expression which returns value of class param at specified index</returns>
+        private static IRppExpr GetClassParam(string localOptionVar, int classParamIndex, int classParamsCount)
+        {
+            IRppExpr optionValue = CallMethod(localOptionVar, "get");
+            if (classParamsCount > 1)
+            {
+                return new RppSelector(optionValue, Id($"_{classParamIndex + 1}"));
+            }
+
+            return optionValue;
         }
 
         public override IEnumerable<IRppExpr> DeclareVariables(RType inputType)
@@ -284,8 +316,14 @@ namespace CSharpRpp
             RType retType = _unapplyMethod.ReturnType;
             Debug.Assert(retType != null, "retType != null");
 
+            // Happens when case class doesn't have class params (so unapply returns bool)
+            if (Equals(retType, RppTypeSystem.BooleanTy))
+            {
+                return Collections.NoExprs;
+            }
+
             _classParamTypes = ExtractTypes(retType).ToArray();
-            if (_classParamTypes.Length != _patterns.Count())
+            if (_classParamTypes.Length != _patterns.Length)
             {
                 throw new Exception($"Class ${inputType.Name} doesn't contain the same amount of class params as specified in case ({_classParamTypes.Count()})");
             }
@@ -346,6 +384,11 @@ namespace CSharpRpp
         {
             return companionType.Methods.FirstOrDefault(m => m.Name == "unapply");
         }
+
+        public override string ToString()
+        {
+            return $"{_type}({string.Join(", ", _patterns.Select(p => p.ToString()))})";
+        }
     }
 
     public class RppTypedPattern : RppMatchPattern
@@ -393,7 +436,7 @@ namespace CSharpRpp
 
         public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }
