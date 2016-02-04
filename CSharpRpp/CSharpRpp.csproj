@@ -88,6 +88,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PatternMatching\RppBinderPattern.cs" />
+    <Compile Include="PatternMatching\RppCaseClause.cs" />
+    <Compile Include="PatternMatching\RppConstructorPattern.cs" />
+    <Compile Include="PatternMatching\RppLiteralPattern.cs" />
+    <Compile Include="PatternMatching\RppMatchPattern.cs" />
+    <Compile Include="PatternMatching\RppTypedPattern.cs" />
+    <Compile Include="PatternMatching\RppVariablePattern.cs" />
     <Compile Include="RppBreak.cs" />
     <Compile Include="Utils\AstHelper.cs" />
     <Compile Include="Codegen\AstExtensions.cs" />
@@ -119,7 +126,7 @@
     <Compile Include="Reporting\Diagnostic.cs" />
     <Compile Include="Reporting\ErrorMessage.cs" />
     <Compile Include="RppAsInstanceOf.cs" />
-    <Compile Include="RppMatch.cs" />
+    <Compile Include="PatternMatching\RppMatch.cs" />
     <Compile Include="RppCompiler.cs" />
     <Compile Include="RppOptions.cs" />
     <Compile Include="RppVariantTypeParam.cs" />

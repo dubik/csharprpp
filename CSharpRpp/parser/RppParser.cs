@@ -234,23 +234,26 @@ namespace CSharpRpp
             var classParams = new List<RppField>();
             if (Require(RppLexer.OP_LParen))
             {
-                while (true)
+                if (!Require(RppLexer.OP_RParen))
                 {
-                    RppField classParam;
-                    if (!ParseClassParam(out classParam))
+                    while (true)
                     {
-                        throw new Exception("DeclaringType param was expected but got " + _lastToken.Text);
+                        RppField classParam;
+                        if (!ParseClassParam(out classParam))
+                        {
+                            throw new Exception("DeclaringType param was expected but got " + _lastToken.Text);
+                        }
+
+                        classParams.Add(classParam);
+
+                        if (!Peek(RppLexer.OP_Comma))
+                        {
+                            Expect(RppLexer.OP_RParen);
+                            break;
+                        }
+
+                        Consume(); // Comma
                     }
-
-                    classParams.Add(classParam);
-
-                    if (!Peek(RppLexer.OP_Comma))
-                    {
-                        Expect(RppLexer.OP_RParen);
-                        break;
-                    }
-
-                    Consume(); // Comma
                 }
             }
 

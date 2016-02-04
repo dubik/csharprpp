@@ -307,15 +307,22 @@ namespace CSharpRpp
                     throw new SyntaxException("Expected type name but got", _lastToken);
                 }
 
+                IToken varid = null;
+
                 if (Require(OP_At)) // varid '@' SimplePattern
                 {
-                    RppMatchPattern simplePattern = ParseSimplePattern();
-                    if (simplePattern == null)
-                    {
-                        throw new SyntaxException("Expected simple patter", _lastToken);
-                    }
+                    varid = id;
+                    Expect(Id);
+                    id = _lastToken;
 
-                    return new RppBinderPattern(id, simplePattern);
+                    int pos = _stream.Mark();
+                    RppMatchPattern simplePattern = ParseSimplePattern();
+                    if (simplePattern != null)
+                    {
+                        _stream.Release(pos);
+                        return new RppBinderPattern(varid, simplePattern);
+                    }
+                    _stream.Rewind(pos);
                 }
 
                 if (Require(OP_LParen))
@@ -338,7 +345,7 @@ namespace CSharpRpp
 
                     Expect(OP_RParen);
 
-                    return new RppConstructorPattern(new ResolvableType(new RTypeName(id.Text)), patterns) {Token = id};
+                    return new RppConstructorPattern(new ResolvableType(new RTypeName(id.Text)), patterns) {Token = id, BindedVariableToken = varid};
                 }
 
                 return new RppVariablePattern(id.Text) {Token = id};

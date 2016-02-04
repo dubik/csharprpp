@@ -10,7 +10,7 @@ namespace BufferCompiler
     {
         public static void Main()
         {
-            /*
+            
             const string code = @"
 abstract class QList[+A] {
   def head: A
@@ -61,24 +61,28 @@ object QList {
   }
 }
 ";
-*/
+            /*
             const string code1 = @"
-case class Foo
+abstract class Expr()
+case class Number(val value: Int) extends Expr
+case class Str(val value: String) extends Expr
 
 object Main {
-    def main : Int = {
-        val k = new Foo
-        k match {
-            case Foo() => 13
-            case _ => 0
-        }
+    def main1: Expr = matchExpr(Number(31))
+
+    def main2: Expr = matchExpr(Str(""Hello""))
+
+    def matchExpr(e: Expr): Expr = e match {
+        case Number(x) => Number(x * 29)
+        case Str(x) => Str(""Matched"")
+        case _ => e
     }
 }
 ";
-
+*/
             Diagnostic diagnostic = new Diagnostic();
 
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (codeGen == null)
             {
                 diagnostic.Report();

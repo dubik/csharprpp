@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Antlr.Runtime;
 using CSharpRpp.Expr;
 using CSharpRpp.TypeSystem;
 
@@ -115,6 +116,11 @@ namespace CSharpRpp.Utils
         public static RppVar Val(string name, RType type, IRppExpr initExpr)
         {
             return new RppVar(MutabilityFlag.MfVal, name, type.AsResolvable(), initExpr);
+        }
+
+        public static RppVar Val(IToken nameToken, RType type, IRppExpr initExpr)
+        {
+            return new RppVar(MutabilityFlag.MfVal, nameToken.Text, type.AsResolvable(), initExpr) {Token = nameToken};
         }
 
         public static RppNull Null = RppNull.Instance;
