@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -104,6 +105,17 @@ object Bar
 
             RType wrongInterfaceTy = new RType("IFoo", RTypeAttributes.Interface);
             Assert.IsFalse(fooTy.IsInstanceOf(wrongInterfaceTy));
+        }
+
+        [TestMethod]
+        public void FindCommonType()
+        {
+            RType fooTy = new RType("Foo");
+            RType barTy = new RType("Bar");
+
+            RType commonTy = TypeInference.ResolveCommonType(fooTy, barTy);
+            Assert.IsNotNull(commonTy);
+            Assert.AreEqual(RppTypeSystem.AnyTy, commonTy);
         }
     }
 }

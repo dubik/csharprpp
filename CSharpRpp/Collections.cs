@@ -19,7 +19,10 @@ namespace CSharpRpp
 
         public static IReadOnlyCollection<RppFunc> NoFuncsCollection = new List<RppFunc>();
         public static IReadOnlyCollection<RppMethodInfo> NoRFuncsCollection = new List<RppMethodInfo>();
-        public static IReadOnlyCollection<RType> NoRTypes = new List<RType>().AsReadOnly();
+
+        public static IReadOnlyList<RType> NoRTypesList = new List<RType>().AsReadOnly();
+        public static IReadOnlyCollection<RType> NoRTypes = NoRTypesList;
+
         public static IList<ResolvableType> NoResolvableTypes = new List<ResolvableType>().AsReadOnly();
 
         public static IEnumerable<T> Concat<T>(this IEnumerable<T> collection, T item)

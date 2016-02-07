@@ -469,7 +469,7 @@ namespace CSharpRpp
             if (funcParams.Any() && funcParams.Last().IsVariadic)
             {
                 // Variadic param is an array, so extract sub type.
-                RType variadicParamType = ((RType) funcParams.Last().Type).SubType();
+                RType variadicParamType = ((RType) funcParams.Last().Type).ArrayElementType();
                 Enumerable.Range(0, totalNumberOfParams - expandedList.Count).ForEach(i => expandedList.Add(variadicParamType));
             }
 
@@ -541,7 +541,7 @@ namespace CSharpRpp
 
         private static RType GetElementType(RType arrayType)
         {
-            return arrayType.SubType();
+            return arrayType.ArrayElementType();
         }
 
         private static IRppExpr BoxIfValueType(IRppExpr arg, RType targetType)

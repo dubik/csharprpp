@@ -293,7 +293,7 @@ namespace CSharpRpp.TypeSystem
                     // So we get subtype by looking at return type of apply() method
                     if (Name == "Array")
                     {
-                        RType subType = this.SubType();
+                        RType subType = this.ArrayElementType();
                         _type = subType.NativeType.MakeArrayType();
                         return _type;
                     }
@@ -373,6 +373,19 @@ namespace CSharpRpp.TypeSystem
 
         [CanBeNull] private List<RType> _implementedInterfaces;
 
+        public IReadOnlyList<RType> Interfaces
+        {
+            get
+            {
+                if (_implementedInterfaces == null)
+                {
+                    return Collections.NoRTypesList;
+                }
+
+                return _implementedInterfaces;
+            }
+        }
+
         public RType([NotNull] string name, [NotNull] Type type)
         {
             Name = name;
@@ -400,10 +413,11 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.None)
+        public RType([NotNull] string name, RTypeAttributes attributes = RTypeAttributes.Class)
         {
             Name = name;
             Attributes = attributes;
+            BaseType = AnyTy;
         }
 
         public RType(string name, RTypeAttributes attributes, RType parent, RType declaringType)
@@ -412,6 +426,11 @@ namespace CSharpRpp.TypeSystem
             Attributes = attributes;
             BaseType = parent;
             DeclaringType = declaringType;
+
+            if (IsClass && BaseType == null)
+            {
+                BaseType = AnyTy;
+            }
         }
 
         private void InitGenericParameters()

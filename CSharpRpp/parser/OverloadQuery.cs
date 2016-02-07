@@ -125,7 +125,7 @@ namespace CSharpRpp.Parser
 
                 if (param.IsVariadic)
                 {
-                    paramType = param.Type.SubType();
+                    paramType = param.Type.ArrayElementType();
                 }
                 else
                 {

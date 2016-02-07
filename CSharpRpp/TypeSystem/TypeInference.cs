@@ -109,7 +109,8 @@ namespace CSharpRpp.TypeSystem
             {Types.Double, FtDouble},
         };
 
-        public static RType ResolveCommonType(RType left, RType right)
+        [CanBeNull]
+        public static RType ResolveCommonType([NotNull] RType left, [NotNull] RType right)
         {
             if (left.IsNumeric() && right.IsNumeric())
             {
@@ -119,9 +120,21 @@ namespace CSharpRpp.TypeSystem
                 return commonType;
             }
 
-            Debug.Fail("Not done yet");
+            if (left.IsNumeric() != right.IsNumeric())
+            {
+                throw new NotImplementedException();
+            }
 
-            return null;
+            IEnumerable<RType> resolveCommonType = ResolveCommonTypes(left, right);
+            return resolveCommonType.FirstOrDefault();
+        }
+
+        [NotNull]
+        public static IEnumerable<RType> ResolveCommonTypes([NotNull] RType left, [NotNull] RType right)
+        {
+            var leftLinearized = left.LinearizeHierarchy();
+            var rightLinearized = right.LinearizeHierarchy();
+            return leftLinearized.Intersect(rightLinearized);
         }
 
         [NotNull]

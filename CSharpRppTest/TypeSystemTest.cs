@@ -8,6 +8,7 @@ using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
@@ -165,5 +166,22 @@ object Main
             var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
             return assemblyBuilder.DefineDynamicModule("TestAssembly", "TestAssembly.dll");
         }
+
+        [TestMethod]
+        public void LinearizeSimpleClass()
+        {
+            RType fooTy = new RType("Foo");
+            List<RType> hierarchy = fooTy.LinearizeHierarchy().ToList();
+            CollectionAssert.AreEqual(List(fooTy, AnyTy), hierarchy);
+        }
+
+        [TestMethod]
+        public void LinearizeSimpleInterface()
+        {
+            RType fooTy = new RType("IFoo", RTypeAttributes.Interface);
+            List<RType> hierarchy = fooTy.LinearizeHierarchy().ToList();
+            CollectionAssert.AreEqual(List(fooTy), hierarchy);
+        }
+
     }
 }
