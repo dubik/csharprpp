@@ -13,17 +13,31 @@ namespace CSharpRpp
 {
     public class RppMatchingContext
     {
-        private int _localVarCounter;
-        private int _localOptionsCounter;
+        private readonly Dictionary<string, int> _counts = new Dictionary<string, int>();
 
         public string CreateLocal()
         {
-            return $"localVar{_localVarCounter++}";
+            return CreateLocal("Var");
         }
 
         public string CreateLocalOption()
         {
-            return $"localOption{_localOptionsCounter++}";
+            return CreateLocal("Option");
+        }
+
+        public string CreateLocal(string name)
+        {
+            int count;
+            if (_counts.TryGetValue(name, out count))
+            {
+                _counts[name] = count + 1;
+            }
+            else
+            {
+                _counts.Add(name, 1);
+            }
+
+            return $"local{name}{count}";
         }
     }
 
@@ -52,6 +66,7 @@ namespace CSharpRpp
             RppVar declOut = new RppVar(MutabilityFlag.MfVar, "<out>", Type, new RppDefaultExpr(Type));
 
             RppId declInId = new RppId("<in>", declIn);
+            declInId.Analyze(scope, diagnostic);
             RppId declOutId = new RppId("<out>", declOut);
 
             RppMatchingContext ctx = new RppMatchingContext();
@@ -66,21 +81,7 @@ namespace CSharpRpp
         private static RType CheckCommonType(IEnumerable<RppCaseClause> caseClauses, IToken token)
         {
             IEnumerable<RType> types = caseClauses.Select(c => c.Type.Value).Distinct();
-
-            RType commonType = types.Aggregate((left, right) =>
-                {
-                    if (left != null && left.IsAssignable(right))
-                    {
-                        // TODO i think this should work the other way around
-                        // if right can be assigned to left we need to return left, not right
-                        return right;
-                    }
-                    if (right != null && right.IsAssignable(left))
-                    {
-                        return left;
-                    }
-                    return null;
-                });
+            RType commonType = TypeInference.ResolveCommonType(types).FirstOrDefault();
 
             if (commonType == null)
             {

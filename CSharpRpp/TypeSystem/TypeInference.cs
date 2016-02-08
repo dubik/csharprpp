@@ -98,7 +98,8 @@ namespace CSharpRpp.TypeSystem
             {Types.Double, DoubleTy},
         };
 
-        private static readonly Dictionary<Type, Dictionary<Type, RType>> ConvTable = new Dictionary<Type, Dictionary<Type, RType>>()
+        private static readonly Dictionary<Type, Dictionary<Type, RType>> ConvTable = new Dictionary
+            <Type, Dictionary<Type, RType>>()
         {
             {Types.Char, FtChar},
             {Types.Byte, FtByte},
@@ -137,6 +138,11 @@ namespace CSharpRpp.TypeSystem
             return leftLinearized.Intersect(rightLinearized);
         }
 
+        public static IEnumerable<RType> ResolveCommonType(IEnumerable<RType> types)
+        {
+            return types.Select(t => t.LinearizeHierarchy()).Aggregate((a, b) => a.Intersect(b));
+        }
+
         [NotNull]
         public static IRppExpr ReplaceUndefinedClosureTypesIfNeeded([NotNull] IRppExpr expr, ResolvableType targetType)
         {
@@ -149,7 +155,8 @@ namespace CSharpRpp.TypeSystem
                     RType type = targetType.Value;
                     IReadOnlyCollection<RType> genericArguments = type.GenericArguments;
                     List<IRppParam> newBindings =
-                        genericArguments.Zip(closure.Bindings, (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
+                        genericArguments.Zip(closure.Bindings,
+                            (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
                     return new RppClosure(newBindings, closure.Expr);
                 }
             }
@@ -179,7 +186,8 @@ namespace CSharpRpp.TypeSystem
                 return target;
             }
 
-            if (target.IsGenericParameter && !dict.ContainsKey(target.GenericParameterPosition) && AreDifferent(source, target))
+            if (target.IsGenericParameter && !dict.ContainsKey(target.GenericParameterPosition) &&
+                AreDifferent(source, target))
             {
                 dict.Add(target.GenericParameterPosition, source);
                 return source;
@@ -187,7 +195,9 @@ namespace CSharpRpp.TypeSystem
 
             if (source.IsGenericType)
             {
-                var newGenericArguments = source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict)).ToArray();
+                var newGenericArguments =
+                    source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict))
+                        .ToArray();
 
                 // Add generic arguments to dictionary in case they were resolved to some real type
                 for (int i = 0; i < newGenericArguments.Length; i++)

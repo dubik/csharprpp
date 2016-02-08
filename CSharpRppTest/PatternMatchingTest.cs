@@ -150,7 +150,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching"), Ignore]
+        [TestMethod, TestCategory("PatternMatching")]
         public void ConstructorPatternForMatchingHierarchies()
         {
             const string code = @"
@@ -173,12 +173,14 @@ object Main {
             Type mainTy = ParseAndCreateType(code, "Main$");
             object res = InvokeStatic(mainTy, "main1");
             Assert.IsNotNull(res);
+            Assert.AreEqual(31 * 29, res.GetPropertyValue("value"));
 
             res = InvokeStatic(mainTy, "main2");
             Assert.IsNotNull(res);
+            Assert.AreEqual("Matched", res.GetPropertyValue("value"));
         }
 
-        [TestMethod, TestCategory("PatternMatching"), Ignore]
+        [TestMethod, TestCategory("PatternMatching")]
         public void ComplexConstructorPatternMatching()
         {
             const string code = @"
@@ -194,6 +196,7 @@ object Main {
         case Mult(left, Number(0)) => Number(0)
         case Mult(Number(1), right) => simplify(right)
         case Mult(left, Number(1)) => simplify(left)
+        case Mult(left, right) => Mult(simplify(left), simplify(right))
         case _ => e
     }
 }
@@ -201,6 +204,7 @@ object Main {
             Type mainTy = ParseAndCreateType(code, "Main$");
             object res = InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
+            Assert.AreEqual(5, res.GetPropertyValue("value"));
         }
     }
 }

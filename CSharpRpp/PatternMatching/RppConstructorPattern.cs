@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Antlr.Runtime;
-using CSharpRpp.Expr;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -28,73 +27,81 @@ namespace CSharpRpp
 
         public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
+            return MatchInstance(inVar, outOut, Assign(outOut, thenExpr), ctx);
+        }
+
+        private IRppExpr MatchInstance(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
+        {
+            // If type of input variable do not match pattern type, we need to cast it
+            if (!inVar.Type.Equals(_type))
+            {
+                string localVar = ctx.CreateLocal(_type.Name.Name);
+                var castedVariable = Val(localVar, _type.Value, new RppAsInstanceOf(inVar, _type));
+
+                return If(BinOp("!=", new RppAsInstanceOf(inVar, _type), Null), Block(castedVariable, ProcessMatchExpr(Id(localVar), outOut, thenExpr, ctx)));
+            }
+
+            return ProcessMatchExpr(inVar, outOut, thenExpr, ctx);
+        }
+
+        private IRppExpr ProcessMatchExpr(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
+        {
             string localOptionVar = ctx.CreateLocalOption();
+            RppVar localOption = Val(localOptionVar, _unapplyMethod.ReturnType, CallMethod(_type.Value.Name, _unapplyMethod.Name, inVar));
+            return Block(localOption, If(GetIsValidExpression(localOption), ProcessCases(inVar, outOut, thenExpr, ctx, localOptionVar, 0)));
+        }
 
-            RppVar localOption = Val(localOptionVar, _unapplyMethod.ReturnType, CallMethod(_type.Value.Name, _unapplyMethod.Name, Id(inVar.Name)));
-
-            List<IRppNode> nodes = new List<IRppNode>();
-            List<IRppExpr> conds = new List<IRppExpr>();
-            for (int i = 0; i < _patterns.Length; i++)
+        private IRppExpr ProcessCases(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx, string localOptionVar, int patternIndex)
+        {
+            if (patternIndex >= _patterns.Length)
             {
-                RppMatchPattern pattern = _patterns[i];
-                IRppExpr classParamValue = GetClassParam(localOptionVar, i, _patterns.Length);
+                List<IRppNode> nodes = new List<IRppNode>();
 
-                if (pattern is RppLiteralPattern)
+                // Binding to a variable if it exists varid@Foo...
+                if (BindedVariableToken != null)
                 {
-                    RppLiteralPattern literalPattern = (RppLiteralPattern) pattern;
-                    RppBinOp cond = BinOp("==", literalPattern.Literal, classParamValue);
-                    conds.Add(cond);
+                    var varId = Val(BindedVariableToken, _type.Value, inVar);
+                    nodes.Add(varId);
                 }
-                else if (pattern is RppVariablePattern)
-                {
-                    var classParamType = _classParamTypes[i];
-                    RType patternType = classParamType;
 
-                    RppVar var = Val(pattern.Token.Text, patternType, classParamValue);
-                    var.Token = pattern.Token;
-                    nodes.Add(var);
-                }
-                else if (pattern is RppConstructorPattern)
-                {
-                    string classParamArg = ctx.CreateLocal();
-                    RppVar classParamArgVar = Val(classParamArg, _classParamTypes[i], classParamValue);
-                    nodes.Add(pattern.RewriteCaseClause(classParamArgVar, outOut, thenExpr, ctx));
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            RppAssignOp assign = Assign(outOut, thenExpr);
-
-            if (conds.Any())
-            {
-                IRppExpr cond = conds.Aggregate((left, right) => BinOp("&&", left, right));
-                RppIf specCond = If(cond, Block(assign, Break));
-                nodes.Add(specCond);
-            }
-            else
-            {
-                nodes.Add(assign);
+                nodes.Add(thenExpr);
                 nodes.Add(Break);
+                return Block(nodes);
             }
 
-            RppIf ifCond = If(GetIsValidExpression(localOption), Block(nodes));
+            IRppExpr classParamValue = GetClassParam(localOptionVar, patternIndex, _patterns.Length);
 
-            List<IRppNode> wholethingy = new List<IRppNode>();
+            RppMatchPattern pattern = _patterns[patternIndex];
+            int nextPatternIndex = patternIndex + 1;
 
-            // Binding to a variable if it exists varid@Foo...
-            if (BindedVariableToken != null)
+            if (pattern is RppLiteralPattern)
             {
-                var bindedVal = Val(BindedVariableToken, _type.Value, inVar);
-                wholethingy.Add(bindedVal);
+                RppLiteralPattern literalPattern = (RppLiteralPattern) pattern;
+                return If(BinOp("==", literalPattern.Literal, classParamValue), ProcessCases(inVar, outOut, thenExpr, ctx, localOptionVar, nextPatternIndex));
             }
 
-            wholethingy.Add(localOption);
-            wholethingy.Add(ifCond);
+            RType classParamType = _classParamTypes[patternIndex];
 
-            return Block(wholethingy);
+            if (pattern is RppVariablePattern)
+            {
+                RType patternType = classParamType;
+                RppVar var = Val(pattern.Token.Text, patternType, classParamValue);
+                var.Token = pattern.Token;
+                return Block(var, ProcessCases(inVar, outOut, thenExpr, ctx, localOptionVar, nextPatternIndex));
+            }
+
+            if (pattern is RppConstructorPattern)
+            {
+                RppConstructorPattern constructorPattern = (RppConstructorPattern) pattern;
+                string classParamArg = ctx.CreateLocal(classParamType.Name);
+                RppVar classParamArgVar = Val(classParamArg, classParamType, classParamValue);
+                RppId classParamInput = StaticId(classParamArgVar);
+
+                IRppExpr nextPattern = ProcessCases(inVar, outOut, thenExpr, ctx, localOptionVar, nextPatternIndex);
+                return Block(classParamArgVar, constructorPattern.MatchInstance(classParamInput, outOut, nextPattern, ctx));
+            }
+
+            return ProcessCases(inVar, outOut, thenExpr, ctx, localOptionVar, nextPatternIndex);
         }
 
         /// <summary>
@@ -155,7 +162,7 @@ namespace CSharpRpp
             if (BindedVariableToken != null)
             {
                 var bindedVariable = Val(BindedVariableToken.Text, inputType, new RppDefaultExpr(inputType.AsResolvable()));
-                return classParams.Concat(bindedVariable);
+                return classParams.Concat(bindedVariable).ToList();
             }
 
             return classParams;
@@ -185,8 +192,14 @@ namespace CSharpRpp
             return this;
         }
 
+        /// <summary>
+        /// Extract class param types from unapply return type. E.g. unapply returns
+        /// Option[Tuple[Int, String]] => [Int, String] or Option[Int] => [Int]
+        /// </summary>
+        /// <param name="unapplyRetType">unapply return type</param>
+        /// <returns>list of types</returns>
         [NotNull]
-        private IEnumerable<RType> ExtractTypes([NotNull] RType unapplyRetType)
+        private static IEnumerable<RType> ExtractTypes([NotNull] RType unapplyRetType)
         {
             if (Equals(unapplyRetType, RppTypeSystem.BooleanTy))
             {
@@ -212,7 +225,7 @@ namespace CSharpRpp
         }
 
         [CanBeNull]
-        private RppMethodInfo FindUnapply([NotNull] RType companionType)
+        private static RppMethodInfo FindUnapply([NotNull] RType companionType)
         {
             return companionType.Methods.FirstOrDefault(m => m.Name == "unapply");
         }

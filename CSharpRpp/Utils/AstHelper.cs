@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.Expr;
+using CSharpRpp.Reporting;
+using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Utils
@@ -26,6 +28,18 @@ namespace CSharpRpp.Utils
         public static RppId Id(string name)
         {
             return new RppId(name);
+        }
+
+        /// <summary>
+        /// Creates reference to variable and resolves to it's type
+        /// </summary>
+        public static RppId StaticId(RppVar rppVar)
+        {
+            RppId classParamInput = Id(rppVar.Name);
+            SymbolTable symbolTable = new SymbolTable();
+            symbolTable.AddLocalVar(rppVar.Name, rppVar.Type.Value, rppVar);
+            classParamInput.Analyze(symbolTable, new Diagnostic());
+            return classParamInput;
         }
 
         public static RppNew New(string typeNameString, IEnumerable<IRppExpr> args)
