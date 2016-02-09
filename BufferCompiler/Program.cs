@@ -64,18 +64,15 @@ object QList {
             /*
             const string code1 = @"
 abstract class Expr()
+case class Mult(val left: Expr) extends Expr
 case class Number(val value: Int) extends Expr
 case class Str(val value: String) extends Expr
 
 object Main {
-    def main1: Expr = matchExpr(Number(31))
+    def main : Expr = simplify(Mult(Number(1)))
 
-    def main2: Expr = matchExpr(Str(""Hello""))
-
-    def matchExpr(e: Expr): Expr = e match {
-        case Number(x) => Number(x * 29)
-        case Str(x) => Str(""Matched"")
-        case _ => e
+    def simplify(e: Expr): Expr = e match {
+        case Mult(Number(0)) => simplify(e)
     }
 }
 ";

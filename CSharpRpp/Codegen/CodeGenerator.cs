@@ -46,7 +46,7 @@ namespace CSharpRpp.Codegen
         {
             _assemblyName = new AssemblyName(AssemblyName);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll");
+            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll", true);
         }
 
         public void Save(string fullPath)
