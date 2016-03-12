@@ -395,7 +395,7 @@ namespace CSharpRpp.TypeSystem
             // TODO perhaps make one method which will map attributes
             Attributes = RTypeUtils.GetRTypeAttributes(type.Attributes, type.IsValueType);
 
-            // Name ends with '$' when we import Rpp generated Type, but if it was done in C# we check for "_instance" field
+            // Name ends with '$' when we import Rpp generated Type
             if (type.Name.EndsWith("$") || name.EndsWith("$"))
             {
                 Attributes = Attributes.UnSet(RTypeAttributes.Class);
