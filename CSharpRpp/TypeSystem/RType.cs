@@ -415,6 +415,10 @@ namespace CSharpRpp.TypeSystem
                 {
                     BaseType = new RType(baseType.Name, baseType);
                 }
+                else if (Name != "Any")
+                {
+                    BaseType = AnyTy;
+                }
             }
         }
 

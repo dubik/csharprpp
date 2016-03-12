@@ -1,10 +1,8 @@
-﻿using System;
-
-class Console
+﻿class Console
 {
     public static Console _instance = new Console();
 
-    public void println(string obj)
+    public void println(object obj)
     {
         System.Console.WriteLine(obj);
     }
