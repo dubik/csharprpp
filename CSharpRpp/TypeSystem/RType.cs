@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.Utils;
 using JetBrains.Annotations;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
@@ -390,10 +391,14 @@ namespace CSharpRpp.TypeSystem
         {
             Name = name;
             _type = type;
+
+            // TODO perhaps make one method which will map attributes
             Attributes = RTypeUtils.GetRTypeAttributes(type.Attributes, type.IsValueType);
 
-            if (type.Name.EndsWith("$"))
+            // Name ends with '$' when we import Rpp generated Type, but if it was done in C# we check for "_instance" field
+            if (type.Name.EndsWith("$") || name.EndsWith("$"))
             {
+                Attributes = Attributes.UnSet(RTypeAttributes.Class);
                 Attributes |= RTypeAttributes.Object;
             }
 
@@ -495,7 +500,7 @@ namespace CSharpRpp.TypeSystem
             Type declaringType = method.DeclaringType;
             Debug.Assert(declaringType != null, "declaringType != null");
 
-            RType returnType = new RType(method.ReturnType.Name, method.ReturnType);
+            RType returnType = CreateType(method.ReturnType.Name, method.ReturnType);
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(method.Attributes);
             var parameters = method.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();

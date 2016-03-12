@@ -732,7 +732,7 @@ namespace CSharpRpp
             }
             else
             {
-                Type = new ResolvableType(RppTypeSystem.UnitTy);
+                Type = UnitTy;
             }
         }
 

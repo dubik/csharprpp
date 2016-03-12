@@ -71,6 +71,16 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(AnyTy);
             scope.AddType(NothingTy);
             scope.AddType(ArrayTy);
+
+            Instance._allTypes.Add(typeof(void).Name, UnitTy);
+            Instance._allTypes.Add(typeof(char).Name, CharTy);
+            Instance._allTypes.Add(typeof(bool).Name, BooleanTy);
+            Instance._allTypes.Add(typeof(short).Name, ShortTy);
+            Instance._allTypes.Add(typeof(int).Name, IntTy);
+            Instance._allTypes.Add(typeof(byte).Name, ByteTy);
+            Instance._allTypes.Add(typeof(long).Name, LongTy);
+            Instance._allTypes.Add(typeof(float).Name, FloatTy);
+            Instance._allTypes.Add(typeof(object).Name, AnyTy);
         }
 
         public static RType ImportClass(Type systemType)

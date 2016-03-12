@@ -136,6 +136,12 @@ namespace CSharpRpp
                     name = name.Substring(0, name.IndexOf('`'));
                 }
 
+                if (type.GetField("_instance", BindingFlags.Public | BindingFlags.Static) != null && !name.EndsWith("$"))
+                {
+                    name = name + "$";
+                }
+
+
                 RType rType = RppTypeSystem.CreateType(name, type);
                 scope.AddType(rType);
             }

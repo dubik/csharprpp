@@ -63,20 +63,16 @@ object QList {
 ";
 */
             const string code1 = @"
-abstract class Expr()
-case class Mult(val left: Expr, val right: Expr) extends Expr
-case class Number(val value: Int) extends Expr
-
 object Main {
-    def main : Expr = simplify(Mult(Number(1), Number(5)))
+    def myPrt(str: String) : Unit = {
+    }
 
-    def simplify(e: Expr): Expr = e match {
-        case Mult(Number(0), right) => Number(0)
-        case Mult(left, Number(0)) => Number(0)
-        case Mult(Number(1), right) => simplify(right)
-        case Mult(left, Number(1)) => simplify(left)
-        case Mult(left, right) => Mult(simplify(left), simplify(right))
-        case _ => e
+    def another : Unit = {
+        myPrt(""Hello"")
+    }
+
+    def main(argv: Array[String]) : Unit = {
+        Console.println(""Hello"")
     }
 }
 ";
