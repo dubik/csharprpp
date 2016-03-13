@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
@@ -16,17 +17,18 @@ namespace CSharpRpp.Codegen
         public ModuleBuilder Module { get; private set; }
 
         private readonly RppProgram _program;
-        private readonly Dictionary<RppFunc, MethodBuilder> _funcBuilders;
 
         private AssemblyName _assemblyName;
         private AssemblyBuilder _assemblyBuilder;
 
-        public CodeGenerator(RppProgram program, string assemblyName)
-        {
-            AssemblyName = Path.GetFileNameWithoutExtension(assemblyName);
-            _program = program;
+        public MethodInfo MainFunc;
+        private readonly string _fileName;
 
-            _funcBuilders = new Dictionary<RppFunc, MethodBuilder>();
+        public CodeGenerator(RppProgram program, string fileName)
+        {
+            _fileName = fileName;
+            AssemblyName = Path.GetFileNameWithoutExtension(fileName);
+            _program = program;
 
             CreateModule();
         }
@@ -40,25 +42,26 @@ namespace CSharpRpp.Codegen
         {
             ClrCodegen codegen = new ClrCodegen();
             _program.Accept(codegen);
+
+            MainFunc = FindMain();
         }
 
         private void CreateModule()
         {
             _assemblyName = new AssemblyName(AssemblyName);
             _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(_assemblyName, AssemblyBuilderAccess.RunAndSave);
-            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _assemblyName.Name + ".dll", true);
+            Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _fileName, true);
         }
 
-        public void Save(string fullPath)
+        public void Save()
         {
-            var mainFunc = FindMain();
-            if (mainFunc != null)
+            if (MainFunc != null)
             {
-                MethodInfo wrappedMain = WrapMain(mainFunc);
+                MethodInfo wrappedMain = WrapMain(MainFunc);
                 _assemblyBuilder.SetEntryPoint(wrappedMain, PEFileKinds.ConsoleApplication);
             }
 
-            SaveAssembly(fullPath, _assemblyBuilder);
+            SaveAssembly(_fileName, _assemblyBuilder);
         }
 
         private static void SaveAssembly(string fullPath, AssemblyBuilder assemblyBuilder)
@@ -90,12 +93,30 @@ namespace CSharpRpp.Codegen
 
         public bool HasMain()
         {
-            return _funcBuilders.Values.Any(f => f.Name == "main");
+            return MainFunc != null;
         }
 
+        private class MainFunctionSearcher : RppNodeVisitor
+        {
+            public readonly List<RppFunc> MainFunctions = new List<RppFunc>();
+
+            public override void VisitEnter(RppFunc node)
+            {
+                if (node.Name == "main" && node.IsStatic)
+                {
+                    MainFunctions.Add(node);
+                }
+            }
+        }
+
+        [CanBeNull]
         private MethodInfo FindMain()
         {
-            MethodBuilder mainFunc = _funcBuilders.Values.FirstOrDefault(func => func.Name == "main");
+            MainFunctionSearcher mainFunctionSearcher = new MainFunctionSearcher();
+            _program.Accept(mainFunctionSearcher);
+
+            RppMethodInfo methodInfo = mainFunctionSearcher.MainFunctions.Select(f => f.MethodInfo).FirstOrDefault(func => func.Name == "main");
+            MethodBuilder mainFunc = (MethodBuilder) methodInfo?.Native;
             return mainFunc?.GetBaseDefinition();
         }
 

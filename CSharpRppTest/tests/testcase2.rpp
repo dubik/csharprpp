@@ -13,5 +13,5 @@ class MyList[A](val tail: MyList[A]) extends List[A]{
 }
 
 object Main {
-    def main: MyList[Any] = new MyList[Any](null)
+    def mainFunc: MyList[Any] = new MyList[Any](null)
 }

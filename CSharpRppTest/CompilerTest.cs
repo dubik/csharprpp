@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.ListExtensions;
 
 namespace CSharpRppTest
 {
@@ -17,9 +19,9 @@ namespace CSharpRppTest
         [TestCategory("ILVerifier"), TestMethod]
         public void TestThatCompilerAndVerifierCanBeRun()
         {
-            int csharProcess = SpawnCompiler(new string[0]);
-            Assert.AreEqual(1, csharProcess);
             string output;
+            int csharProcess = SpawnCompiler(new string[0], out output);
+            Assert.AreEqual(1, csharProcess);
             csharProcess = SpawnPreverifier(new string[0], out output);
             Assert.AreEqual(0, csharProcess, output);
         }
@@ -42,23 +44,60 @@ namespace CSharpRppTest
             PeverifyTest("testcase3.rpp");
         }
 
+        [TestCategory("Runtime"), TestMethod]
+        public void PrintHelloToConsole()
+        {
+            CompileExe("runtimetest1.rpp");
+            string output = ExecuteOutExe();
+            Assert.AreEqual("Hello\r\n", output);
+        }
+
         #region Spawn
 
-        private static void PeverifyTest(string testcase)
+        private static string ExecuteOutExe()
+        {
+            string output;
+            int returnCode = SpawnProcess("out.exe", new string[] {}, out output);
+            Assert.AreEqual(0, returnCode, output);
+            return output;
+        }
+
+        private static void CompileLibrary(string testcase)
+        {
+            CompileTestCase(testcase, "--library", "--out", "out.dll");
+        }
+
+        private static void CompileExe(string testcase)
+        {
+            CompileTestCase(testcase, "--out", "out.exe");
+        }
+
+        private static void CompileTestCase(string testcase, params string[] args)
+        {
+            string testcaseFullName = GetTestCaseFullPath(testcase);
+            string consoleOutput;
+            int compilerExitCode = SpawnCompiler(List(testcaseFullName).Concat(args).ToArray(), out consoleOutput);
+            Assert.AreEqual(0, compilerExitCode, consoleOutput);
+        }
+
+        private static string GetTestCaseFullPath(string testcase)
         {
             string testcaseFullName = @"tests\" + testcase;
             Assert.IsTrue(File.Exists(testcaseFullName), "Test case file can't be found (forgot to set 'Copy To Output Directory'?)");
-            int compilerExitCode = SpawnCompiler(new[] {testcaseFullName, "--library", "--out", "out.dll"});
-            Assert.AreEqual(0, compilerExitCode);
+            return testcaseFullName;
+        }
+
+        private static void PeverifyTest(string testcase)
+        {
+            CompileLibrary(testcase);
             string output;
             int peverifyExitCode = SpawnPreverifier(new[] {@"out.dll"}, out output);
             Assert.AreEqual(0, peverifyExitCode, output);
         }
 
-        private static int SpawnCompiler(string[] arguments)
+        private static int SpawnCompiler(string[] arguments, out string consoleOutput)
         {
-            string output;
-            return SpawnProcess("CSharpRpp.exe", arguments, out output);
+            return SpawnProcess("CSharpRpp.exe", arguments, out consoleOutput);
         }
 
         private static int SpawnPreverifier(string[] arguments, out string output)
@@ -74,14 +113,17 @@ namespace CSharpRppTest
                 Arguments = string.Join(" ", arguments),
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
             };
 
             Process process = Process.Start(info);
             Assert.IsNotNull(process);
 
-            output = process.StandardOutput.ReadToEnd();
+            string stdOut = process.StandardOutput.ReadToEnd();
+            string stdErr = process.StandardError.ReadToEnd();
             process.WaitForExit();
+            output = process.ExitCode == 0 ? stdOut : stdErr;
             return process.ExitCode;
         }
 

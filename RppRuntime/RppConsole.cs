@@ -1,6 +1,6 @@
-﻿class Console
+﻿public class RppConsole
 {
-    public static Console _instance = new Console();
+    public static RppConsole _instance = new RppConsole();
 
     public void println(object obj)
     {

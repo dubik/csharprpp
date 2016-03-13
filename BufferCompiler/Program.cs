@@ -64,15 +64,8 @@ object QList {
 */
             const string code1 = @"
 object Main {
-    def myPrt(str: String) : Unit = {
-    }
-
-    def another : Unit = {
-        myPrt(""Hello"")
-    }
-
     def main(argv: Array[String]) : Unit = {
-        Console.println(""Hello"")
+        RppConsole.println(""Hello"")
     }
 }
 ";
@@ -85,7 +78,7 @@ object Main {
             }
             else
             {
-                codeGen.Save("Sample.dll");
+                codeGen.Save();
             }
         }
 
