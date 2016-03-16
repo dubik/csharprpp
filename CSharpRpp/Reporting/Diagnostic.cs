@@ -28,5 +28,10 @@ namespace CSharpRpp.Reporting
             _errors.ForEach(e => outStream.WriteLine(e.ToString()));
             outStream.WriteLine();
         }
+
+        public bool HasError()
+        {
+            return _errors.NonEmpty();
+        }
     }
 }

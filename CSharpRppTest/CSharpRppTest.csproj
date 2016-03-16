@@ -94,6 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="tests\runtimetest2.rpp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="tests\runtimetest1.rpp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

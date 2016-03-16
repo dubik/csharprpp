@@ -1,0 +1,16 @@
+﻿class Foo {
+    override def ToString: String = "Foo"
+}
+
+class Bar
+{
+    override def ToString: String = "Bar"
+}
+
+object Main
+{
+    def main(argv: Array[String]) : Unit = {
+        RppConsole.println(new Foo)
+        RppConsole.println(new Bar)
+    }
+}

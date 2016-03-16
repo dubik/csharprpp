@@ -52,6 +52,14 @@ namespace CSharpRppTest
             Assert.AreEqual("Hello\r\n", output);
         }
 
+        [TestCategory("Runtime"), TestMethod]
+        public void OverrideToString()
+        {
+            CompileExe("runtimetest2.rpp");
+            string output = ExecuteOutExe();
+            Assert.AreEqual("Foo\r\nBar\r\n", output);
+        }
+
         #region Spawn
 
         private static string ExecuteOutExe()

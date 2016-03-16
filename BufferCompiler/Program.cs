@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using CSharpRpp;
 using CSharpRpp.Codegen;
@@ -63,21 +65,32 @@ object QList {
 ";
 */
             const string code1 = @"
-object Main {
-    def main(argv: Array[String]) : Unit = {
-        RppConsole.println(""Hello"")
+class Foo {
+    override def ToString: String = ""Foo""
+}
+
+class Bar
+{
+    override def ToString: String = ""Bar""
+}
+
+object Main
+{
+    def main(argv: Array [String]) : Unit = {
+        RppConsole.println(new Foo)
+        RppConsole.println(new Bar)
     }
 }
 ";
             Diagnostic diagnostic = new Diagnostic();
-
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
-            if (codeGen == null)
+            if (diagnostic.HasError())
             {
                 diagnostic.Report();
             }
             else
             {
+                Debug.Assert(codeGen != null, "codeGen != null");
                 codeGen.Save();
             }
         }
