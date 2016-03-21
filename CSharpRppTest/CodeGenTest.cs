@@ -289,6 +289,30 @@ object Bar
             Assert.AreEqual(5, res);
         }
 
+
+        [TestMethod]
+        public void FuncAsWhileCondition()
+        {
+            const string code = @"
+object Bar
+{
+    def hasNext() : Boolean = false
+
+    def invoke() : Int = {
+        var ret : Int = 13
+        while(hasNext())
+        {
+            ret = 0
+        }
+        ret
+    }
+}
+";
+            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            object res = Utils.InvokeStatic(barTy, "invoke");
+            Assert.AreEqual(13, res);
+        }
+
         [TestMethod]
         public void AutoBoxingForVarargs()
         {

@@ -589,8 +589,8 @@ namespace CSharpRpp.Codegen
             _body.MarkLabel(body);
             node.Body.Accept(this);
             _body.MarkLabel(condition);
-            ClrCodegen codegen = new ClrCodegen(_body, body, false) {FirstLogicalBinOp = false};
-            node.Condition.Accept(codegen);
+            node.Condition.Accept(this);
+            _body.Emit(OpCodes.Brtrue, body);
         }
 
         public override void Visit(RppIf node)
