@@ -734,7 +734,7 @@ namespace CSharpRpp
                     if (item is IRppExpr && !(item is RppVar))
                     {
                         IRppExpr expr = (IRppExpr) item;
-                        if (!Equals(expr.Type, UnitTy))
+                        if (!Equals(expr.Type, UnitTy) && !Equals(expr.Type, NothingTy))
                         {
                             res.Add(RppPop.Instance);
                         }

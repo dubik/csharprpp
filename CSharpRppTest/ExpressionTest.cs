@@ -25,6 +25,28 @@ object Main
         }
 
         [TestMethod]
+        public void TestIfWithFunctionAsCondition()
+        {
+            const string code = @"
+object Main
+{
+    def hasNext: Boolean = false
+    def main: Int = {
+        if(hasNext()) {
+            throw new Exception
+        }
+
+        13
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+
+        }
+
+        [TestMethod]
         public void PopSimpleIntIfFuncReturnsUnit()
         {
             const string code = @"
