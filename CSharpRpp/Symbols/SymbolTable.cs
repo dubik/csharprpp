@@ -153,5 +153,16 @@ namespace CSharpRpp.Symbols
         {
             return name + "$";
         }
+
+        [CanBeNull]
+        public RType GetEnclosingType()
+        {
+            if (_classType != null)
+            {
+                return _classType;
+            }
+
+            return Parent?.GetEnclosingType();
+        }
     }
 }

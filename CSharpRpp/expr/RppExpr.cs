@@ -907,6 +907,12 @@ namespace CSharpRpp
         // TODO Replace RppId with something like RppFieldAcces, RppParamAccess and so on those Ref and Field looks very bad
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
+            if (Name == "this")
+            {
+                RppThis thisNode = new RppThis();
+                return thisNode.Analyze(scope, diagnostic);
+            }
+
             TypeSymbol objectType = scope.LookupObject(Name);
             // Lookup <name> or <name>$
             if (objectType != null)

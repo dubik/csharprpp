@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using CSharpRpp;
@@ -25,6 +24,47 @@ abstract class XIterator[+A] {
       f(next())
 
 }
+
+abstract class XIterable[+A] {
+  def iterator: XIterator[A]
+}
+
+class XListIterator[A](var list: XList[A]) extends XIterator[A] {
+  override def hasNext: Boolean = !list.isEmpty()
+
+  override def next(): A = {
+    if (list.isEmpty())
+      throw new Exception
+
+    val item = list.head()
+    list = list.tail()
+    item
+  }
+
+  override def copy(): XIterator[A] = new XListIterator[A](list)
+}
+
+
+abstract class XList[+A] extends XIterable[A] {
+  def head: A
+  def tail: XList[A]
+  def isEmpty: Boolean
+  def asStream: XIterator[A] = iterator()
+  override def iterator: XIterator[A] = new XListIterator[A](this)
+}
+
+object XNil extends XList[Nothing] {
+  override def isEmpty: Boolean = true
+  override def head: Nothing = throw new Exception
+  override def tail: XList[Nothing] = throw new Exception
+}
+
+class XCons[A](val _head: A, val _tail: XList[A]) extends XList[A] {
+  override def isEmpty: Boolean = false
+  override def head: A = _head
+  override def tail: XList[A] = _tail
+}
+
 ";
 
             Diagnostic diagnostic = new Diagnostic();

@@ -40,6 +40,7 @@ namespace CSharpRpp
         void Visit([NotNull] RppAsInstanceOf node);
         void Visit([NotNull] RppBreak node);
         void Visit([NotNull] RppPop node);
+        void Visit([NotNull] RppThis node);
     }
 
     public class RppNodeVisitor : IRppNodeVisitor
@@ -132,6 +133,10 @@ namespace CSharpRpp
         {
         }
 
+        public virtual void Visit(RppThis node)
+        {
+        }
+
         public virtual void Visit(RppString node)
         {
         }
@@ -183,5 +188,7 @@ namespace CSharpRpp
         public virtual void Visit(RppBox node)
         {
         }
+
+
     }
 }

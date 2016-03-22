@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Expr\RppPop.cs" />
+    <Compile Include="Expr\RppThis.cs" />
     <Compile Include="PatternMatching\RppBinderPattern.cs" />
     <Compile Include="PatternMatching\RppCaseClause.cs" />
     <Compile Include="PatternMatching\RppConstructorPattern.cs" />

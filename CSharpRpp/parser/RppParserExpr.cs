@@ -605,6 +605,7 @@ namespace CSharpRpp
             return false;
         }
 
+
         // clazz.myField
         // class.Func()
         // class.Func[Int]()

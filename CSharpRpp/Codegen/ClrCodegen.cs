@@ -735,5 +735,10 @@ namespace CSharpRpp.Codegen
         {
             _body.Emit(OpCodes.Pop);
         }
+
+        public override void Visit(RppThis node)
+        {
+            _body.Emit(OpCodes.Ldarg_0);
+        }
     }
 }
