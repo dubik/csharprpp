@@ -43,7 +43,33 @@ object Main
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(13, res);
+        }
 
+        [TestMethod]
+        public void TestOneLineIf()
+        {
+            const string code = @"
+object Main
+{
+    def main(flag: Boolean): Int = {
+        if(flag)
+            throw new Exception(""flag is wrong"")
+
+        13
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            try
+            {
+                object res = Utils.InvokeStatic(mainTy, "main", new object[] {true});
+                Assert.Fail("Should throw exception");
+            }
+                // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception exc)
+            {
+                Assert.AreEqual("flag is wrong", exc.InnerException.Message);
+            }
         }
 
         [TestMethod]

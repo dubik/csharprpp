@@ -66,6 +66,7 @@ namespace CSharpRpp
                 throw new Exception("Expected expression");
             }
             Expect(OP_RParen);
+            Require(NewLine);
             IRppExpr thenExpr = ParseExpr();
             if (thenExpr == null)
             {
@@ -76,6 +77,7 @@ namespace CSharpRpp
             if (Peek(KW_Else))
             {
                 Consume();
+                Require(NewLine);
                 elseExpr = ParseExpr();
                 if (elseExpr == null)
                 {
