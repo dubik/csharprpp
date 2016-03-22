@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using CSharpRpp;
@@ -12,39 +13,19 @@ namespace BufferCompiler
         public static void Main()
         {
             const string code = @"
-class Bar
-{
-    def hasNext() : Boolean = false
+abstract class XIterator[+A] {
+  def hasNext: Boolean
 
-    def invoke() : Int = {
-        var ret : Int = 13
-        while(hasNext())
-        {
-            ret = 0
-        }
-        ret
-    }
+  def next(): A
 
-    def invoke1() : Int = {
-        var ret : Int = 13
-        while(ret > 13)
-        {
-            ret = 0
-        }
-        ret
-    }
+  def copy(): XIterator[A]
 
-    def invoke2(k : Int) : Int = {
-        var ret : Int = 13
-        while(ret > 13 && k < 121)
-        {
-            ret = 0
-        }
-        ret
-    }
+  protected def foreach(f: A => Unit): Unit =
+    while (hasNext())
+      f(next())
+
 }
 ";
-
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
@@ -57,6 +38,7 @@ class Bar
                 Debug.Assert(codeGen != null, "codeGen != null");
                 codeGen.Save();
             }
+            
         }
 
         public static Assembly GetStdlibAssembly()

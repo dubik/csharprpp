@@ -818,12 +818,26 @@ namespace CSharpRpp
             return false;
         }
 
+        /// <summary>
+        /// Creates Function[paramCount] type name if return type is not Unit.
+        /// If it's Unit then it creates Action[paramCount].
+        /// </summary>
         private static RTypeName CreateClosureTypeName(ICollection<RTypeName> paramTypes, RTypeName returnType)
         {
-            RTypeName closureType = new RTypeName("Function" + paramTypes.Count);
+            bool isAction = IsAction(returnType);
+            string baseTypeName = isAction ? "Action" : "Function";
+            RTypeName closureType = new RTypeName(baseTypeName + paramTypes.Count);
             paramTypes.ForEach(closureType.AddGenericArgument);
-            closureType.AddGenericArgument(returnType);
+            if (!isAction)
+            {
+                closureType.AddGenericArgument(returnType);
+            }
             return closureType;
+        }
+
+        private static bool IsAction(RTypeName returnType)
+        {
+            return returnType.Name.Equals("Unit");
         }
 
         private static RTypeName CreateTupleTypeName(ICollection<RTypeName> paramTypes)

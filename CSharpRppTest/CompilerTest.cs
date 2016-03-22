@@ -51,6 +51,12 @@ namespace CSharpRppTest
             PeverifyTest("testcase4.rpp");
         }
 
+        [TestCategory("ILVerifier"), TestMethod]
+        public void UsingUnitAsClosureReturn()
+        {
+            PeverifyTest("testcase5.rpp");
+        }
+
         [TestCategory("Runtime"), TestMethod]
         public void PrintHelloToConsole()
         {

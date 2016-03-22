@@ -1,0 +1,11 @@
+﻿abstract class XIterator[+A] {
+  def hasNext: Boolean
+
+  def next(): A
+
+  def copy(): XIterator[A]
+
+  protected def foreach(f: A => Unit): Unit =
+    while (hasNext())
+      f(next())
+}
