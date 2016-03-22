@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using CSharpRpp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static CSharpRpp.ListExtensions;
 
@@ -42,6 +43,12 @@ namespace CSharpRppTest
         public void MethodWhichThrowExceptionShouldntUseReturn()
         {
             PeverifyTest("testcase3.rpp");
+        }
+
+        [TestCategory("ILVerifier"), TestMethod]
+        public void ExpressionsWhichResultsAreNotUsedShouldBePopped()
+        {
+            PeverifyTest("testcase4.rpp");
         }
 
         [TestCategory("Runtime"), TestMethod]
@@ -131,7 +138,11 @@ namespace CSharpRppTest
             string stdOut = process.StandardOutput.ReadToEnd();
             string stdErr = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            output = process.ExitCode == 0 ? stdOut : stdErr;
+            output = stdOut;
+            if (stdErr.NonEmpty())
+            {
+                output = stdOut + "\n" + stdErr;
+            }
             return process.ExitCode;
         }
 

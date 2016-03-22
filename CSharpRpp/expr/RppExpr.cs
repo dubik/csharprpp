@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.Exceptions;
+using CSharpRpp.Expr;
 using CSharpRpp.Parser;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
@@ -714,10 +715,38 @@ namespace CSharpRpp
         {
             SymbolTable localScope = new SymbolTable(scope);
             _exprs = NodeUtils.Analyze(localScope, _exprs, diagnostic);
+            _exprs = PopUnusedResultsOfExpressions();
 
             InitializeType();
 
             return this;
+        }
+
+        private IList<IRppNode> PopUnusedResultsOfExpressions()
+        {
+            if (_exprs.Count > 0)
+            {
+                // Add pop after each expression which returns expression
+                var popedUnusedExpr = _exprs.Take(_exprs.Count - 1).Aggregate(new List<IRppNode>(), (res, item) =>
+                {
+                    res.Add(item);
+                    // TODO RppVar shouldn't be a special case. Type or RppVar should be Unit, right now it's type of declared variable
+                    if (item is IRppExpr && !(item is RppVar))
+                    {
+                        IRppExpr expr = (IRppExpr) item;
+                        if (!Equals(expr.Type, UnitTy))
+                        {
+                            res.Add(RppPop.Instance);
+                        }
+                    }
+
+                    return res;
+                });
+                popedUnusedExpr.Add(_exprs.Last());
+                return popedUnusedExpr.ToList();
+            }
+
+            return _exprs;
         }
 
         private void InitializeType()

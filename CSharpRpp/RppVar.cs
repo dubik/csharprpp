@@ -12,9 +12,10 @@ namespace CSharpRpp
 {
     public class RppVar : RppMember
     {
+        // TODO RppVar doesn't have a type as a statement, so it should communicate type of variable using another property
         public sealed override ResolvableType Type { get; protected set; }
 
-        public MutabilityFlag MutabilityFlag { get; private set; }
+        public MutabilityFlag MutabilityFlag { get; }
 
         [NotNull]
         public IRppExpr InitExpr { get; private set; }

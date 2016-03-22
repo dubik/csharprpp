@@ -23,7 +23,7 @@ namespace CSharpRpp.Codegen
         private TypeBuilder _typeBuilder;
         private MethodBase _func;
 
-        private static readonly Dictionary<string, OpCode> _arithmToIl = new Dictionary<string, OpCode>
+        private static readonly Dictionary<string, OpCode> ArithmToIl = new Dictionary<string, OpCode>
         {
             {"+", OpCodes.Add},
             {"-", OpCodes.Sub},
@@ -31,7 +31,7 @@ namespace CSharpRpp.Codegen
             {"/", OpCodes.Div}
         };
 
-        private static readonly Regex _typeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
+        private static readonly Regex TypeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
         private readonly Label _exitLabel;
         public readonly bool Branching;
@@ -101,7 +101,7 @@ namespace CSharpRpp.Codegen
             } // TODO This is a hack, we should do our own semantic analyzes and find out which methods were not overriden
             catch (TypeLoadException exception)
             {
-                MatchCollection groups = _typeExcSplitter.Matches(exception.Message);
+                MatchCollection groups = TypeExcSplitter.Matches(exception.Message);
                 if (groups.Count != 3)
                 {
                     throw;
@@ -186,17 +186,6 @@ namespace CSharpRpp.Codegen
                 _body.MarkLabel(_blockExprExitLabels.Pop());
             }
         }
-
-        private readonly Dictionary<string, OpCode> _logToIl = new Dictionary<string, OpCode>
-        {
-            {"&&", OpCodes.Ceq},
-            {"||", OpCodes.Sub},
-            {"<", OpCodes.Clt},
-            {">", OpCodes.Cgt},
-            {"==", OpCodes.Ceq},
-            {"!=", OpCodes.Ceq}
-        };
-
 
         public override void Visit(RppLogicalBinOp node)
         {
@@ -294,7 +283,7 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppArithmBinOp node)
         {
             OpCode opCode;
-            if (_arithmToIl.TryGetValue(node.Op, out opCode))
+            if (ArithmToIl.TryGetValue(node.Op, out opCode))
             {
                 node.Left.Accept(this);
                 node.Right.Accept(this);
@@ -740,6 +729,11 @@ namespace CSharpRpp.Codegen
         public override void Visit(RppBreak node)
         {
             _body.Emit(OpCodes.Br, _blockExprExitLabels.Peek());
+        }
+
+        public override void Visit(RppPop node)
+        {
+            _body.Emit(OpCodes.Pop);
         }
     }
 }
