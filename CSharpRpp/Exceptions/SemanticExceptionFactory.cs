@@ -38,7 +38,12 @@ namespace CSharpRpp.Exceptions
 
         public static SemanticException PatternMatchingCaseClausesHaveDifferentExpressionTypes(IToken token)
         {
-            return new SemanticException(108, FormatErrorAndPointAtToken(token, $"cases can't have different return types"));
+            return new SemanticException(108, FormatErrorAndPointAtToken(token, "cases can\'t have different return types"));
+        }
+
+        public static SemanticException ValueIsNotMember(IToken token, string typeName)
+        {
+            return new SemanticException(109, FormatErrorAndPointAtToken(token, $"value {token.Text} is not a member of {typeName}"));
         }
 
         private static string MethodString(RppMethodInfo method)

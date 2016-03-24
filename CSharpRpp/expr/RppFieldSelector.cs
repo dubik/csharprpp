@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using CSharpRpp.Exceptions;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -45,7 +46,7 @@ namespace CSharpRpp
 
             if (Field == null)
             {
-                throw new Exception($"Can't find field {Name} for type {TargetType}");
+                throw SemanticExceptionFactory.ValueIsNotMember(Token, TargetType.ToString());
             }
 
             Debug.Assert(classType != null, "obj != null");
