@@ -268,10 +268,16 @@ namespace CSharpRpp.Codegen
                     case "!=":
                         _body.Emit(OpCodes.Cgt_Un);
                         break;
-//                    case ">=":
-//                        break;
-//                    case "<=":
-//                        break;
+                    case ">=":
+                        _body.Emit(OpCodes.Clt);
+                        _body.Emit(OpCodes.Ldc_I4_0);
+                        _body.Emit(OpCodes.Ceq);
+                        break;
+                    case "<=":
+                        _body.Emit(OpCodes.Cgt);
+                        _body.Emit(OpCodes.Ldc_I4_0);
+                        _body.Emit(OpCodes.Ceq);
+                        break;
                     default:
                         throw new Exception("Unknown op " + node.Op);
                 }
