@@ -36,18 +36,15 @@ namespace CSharpRpp.Symbols
             classType.Nested?.ForEach(AddType);
         }
 
-        public SymbolTable(SymbolTable parent, RppMethodInfo methodInfo)
+        public SymbolTable([CanBeNull] SymbolTable parent, [NotNull] RppMethodInfo methodInfo)
         {
             Parent = parent;
             AddGenericParametersToScope(methodInfo);
         }
 
-        private void AddGenericParametersToScope(RppMethodInfo methodInfo)
+        private void AddGenericParametersToScope([NotNull] RppMethodInfo methodInfo)
         {
-            if (methodInfo.GenericParameters != null && methodInfo.GenericParameters.Any())
-            {
-                methodInfo.GenericParameters.ForEach(p => AddType(p.Type));
-            }
+            methodInfo.GenericParameters?.ForEach(p => AddType(p.Type));
         }
 
         private void AddGenericParametersToScope(RType classType)
@@ -132,14 +129,18 @@ namespace CSharpRpp.Symbols
             {
                 var field = _classType.Fields.FirstOrDefault(f => f.MangledName == name || f.MangledName == RppFieldInfo.GetMangledName(name));
                 if (field != null)
+                {
                     return field;
+                }
 
                 RType baseClass = _classType.BaseType;
                 while (baseClass != null)
                 {
                     field = _classType.Fields.FirstOrDefault(f => f.MangledName == name || f.MangledName == RppFieldInfo.GetMangledName(name));
                     if (field != null)
+                    {
                         return field;
+                    }
                     baseClass = baseClass.BaseType;
                 }
 
