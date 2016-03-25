@@ -504,7 +504,7 @@ namespace CSharpRpp
             NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure, diagnostic);
             if (resolveResults.Method.IsVariadic)
             {
-                args = RewriteArgListForVariadicParameter(scope, args, resolveResults.Method);
+                args = RewriteArgListForVariadicParameter(scope, genericArguments, args, resolveResults.Method);
             }
 
             return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);
@@ -518,10 +518,12 @@ namespace CSharpRpp
         /// Function rewrites it the following way [1, [4.5f, 3.5f]]
         /// </summary>
         /// <param name="scope">current scope, needed to anaylize array which contains variable number of args</param>
+        /// <param name="genericArguments"></param>
         /// <param name="args">list of expressions</param>
         /// <param name="function">target function</param>
         /// <returns>list of arguments</returns>
-        private static List<IRppExpr> RewriteArgListForVariadicParameter(SymbolTable scope, IList<IRppExpr> args, RppMethodInfo function)
+        private static List<IRppExpr> RewriteArgListForVariadicParameter(SymbolTable scope, IList<RType> genericArguments, IList<IRppExpr> args,
+            RppMethodInfo function)
         {
             List<RppParameterInfo> funcParams = function.Parameters.ToList();
             int variadicIndex = funcParams.FindIndex(p => p.IsVariadic);
@@ -531,6 +533,12 @@ namespace CSharpRpp
             RppParameterInfo variadicParam = funcParams.Find(p => p.IsVariadic);
 
             RType elementType = GetElementType(variadicParam.Type);
+            if (elementType.IsGenericParameter) // If type is generic we shouldn't take _that_ type, we should get type from the call itself
+            {
+                int targetFuncParamTypePosition = elementType.GenericParameterPosition;
+                elementType = genericArguments[targetFuncParamTypePosition];
+            }
+
             variadicParams = variadicParams.Select(param => BoxIfValueType(param, elementType)).ToList();
 
             RppArray variadicArgsArray = new RppArray(elementType, variadicParams);
@@ -728,20 +736,20 @@ namespace CSharpRpp
             {
                 // Add pop after each expression which returns expression
                 var popedUnusedExpr = _exprs.Take(_exprs.Count - 1).Aggregate(new List<IRppNode>(), (res, item) =>
-                {
-                    res.Add(item);
-                    // TODO RppVar shouldn't be a special case. Type or RppVar should be Unit, right now it's type of declared variable
-                    if (item is IRppExpr && !(item is RppVar))
                     {
-                        IRppExpr expr = (IRppExpr) item;
-                        if (!Equals(expr.Type, UnitTy) && !Equals(expr.Type, NothingTy))
+                        res.Add(item);
+                        // TODO RppVar shouldn't be a special case. Type or RppVar should be Unit, right now it's type of declared variable
+                        if (item is IRppExpr && !(item is RppVar))
                         {
-                            res.Add(RppPop.Instance);
+                            IRppExpr expr = (IRppExpr) item;
+                            if (!Equals(expr.Type, UnitTy) && !Equals(expr.Type, NothingTy))
+                            {
+                                res.Add(RppPop.Instance);
+                            }
                         }
-                    }
 
-                    return res;
-                });
+                        return res;
+                    });
                 popedUnusedExpr.Add(_exprs.Last());
                 return popedUnusedExpr.ToList();
             }

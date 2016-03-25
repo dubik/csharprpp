@@ -320,7 +320,6 @@ namespace CSharpRpp.Codegen
         {
             var arrayType = node.Type.Value.NativeType;
             Type elementType = arrayType.GetElementType();
-
             LocalBuilder arrVar = _body.DeclareLocal(arrayType);
             ClrCodegenUtils.LoadInt(node.Size, _body);
             _body.Emit(OpCodes.Newarr, elementType);
