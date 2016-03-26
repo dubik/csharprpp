@@ -32,13 +32,21 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            _arguments = NodeUtils.Analyze(scope, _arguments, diagnostic);
+            // TODO should be unified with RppFuncCall and rethink how types for closures are figureout.
+            // we should use constraints and type inference only, not this kind of hacks when we check target
+            // closure signature and use types from there
+
+            // Skip closures because they may have missing types
+            _arguments = NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => !(node is RppClosure), diagnostic);
 
             Type.Resolve(scope);
 
             RType classType = Type.Value;
 
             var constructor = FindConstructor(classType);
+
+            _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, constructor.Parameters);
+            NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => node is RppClosure, diagnostic);
 
             IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;
             if (genericParameters.Count > 0)
@@ -57,7 +65,8 @@ namespace CSharpRpp
             return this;
         }
 
-        private RppMethodInfo FindConstructor(RType classType)
+        [NotNull]
+        private RppMethodInfo FindConstructor([NotNull] RType classType)
         {
             var constructors = classType.Constructors;
 
@@ -69,8 +78,7 @@ namespace CSharpRpp
                 throw SemanticExceptionFactory.CreateOverloadFailureException(Token, candidates, Args, constructors);
             }
 
-            RppMethodInfo constructor = candidates[0];
-            return constructor;
+            return candidates.First();
         }
 
         private static RType[] InferGenericArguments(IReadOnlyCollection<RppGenericParameter> genericParameters,
