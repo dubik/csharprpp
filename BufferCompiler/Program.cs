@@ -51,6 +51,17 @@ abstract class XList[+A] extends XIterable[A] {
   def isEmpty: Boolean
   def asStream: XIterator[A] = iterator()
   override def iterator: XIterator[A] = new XListIterator[A](this)
+
+  def reverse: XList[A] = {
+    val iter = iterator()
+    val k: A = iter.next()
+    var res = XList[A]()
+
+    while (iter.hasNext()) {
+      res = new XCons[A](iter.next(), res)
+    }
+    res
+  }
 }
 
 object XNil extends XList[Nothing] {
@@ -65,6 +76,22 @@ class XCons[A](val _head: A, val _tail: XList[A]) extends XList[A] {
   override def tail: XList[A] = _tail
 }
 
+object XList {
+  def apply[A](args: A*): XList[A] = {
+    if (args.length() == 0) {
+      XNil
+    } else {
+      var k = args.length() - 1
+      var list: XList[A] = XNil
+      while (k >= 0) {
+        val it: A = args(k)
+        list = new XCons[A](it, list)
+        k = k - 1
+      }
+      list
+    }
+  }
+}
 ";
 
             Diagnostic diagnostic = new Diagnostic();
@@ -78,7 +105,6 @@ class XCons[A](val _head: A, val _tail: XList[A]) extends XList[A] {
                 Debug.Assert(codeGen != null, "codeGen != null");
                 codeGen.Save();
             }
-            
         }
 
         public static Assembly GetStdlibAssembly()
