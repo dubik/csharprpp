@@ -557,6 +557,27 @@ class Foo {
         }
 
         [TestMethod]
+        public void ArgumentOfChainedCallIsFunction()
+        {
+            const string code = @"
+class Foo {
+    def getInt(i: Int) : Int = i
+}
+
+object Main {
+    def getMainInt: Int = 27
+    def mainn: Int = {
+        val foo = new Foo
+        foo.getInt(getMainInt())
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "mainn");
+            Assert.AreEqual(27, res);
+        }
+
+        [TestMethod]
         public void WriteToProperty()
         {
             const string code = @"

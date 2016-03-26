@@ -445,7 +445,7 @@ namespace CSharpRpp
             Type = type;
         }
 
-        private static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
+        public static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
             IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count()).ToList();
@@ -480,8 +480,16 @@ namespace CSharpRpp
         // TODO This needs to be rewritten.
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
+            // TODO this is some sort a hack for cases when calls are chained
+            // getObject().getSubObject().call(getArgumentsForCall())
+            // .getSubObject and .call needs to be searched in correspoinding types which are
+            // passed as scope. But getArgumentsForCall() should be search in "outer" scope, e.g.
+            // not withing RppSelector (which wrapps all this chain). If call is not inside rppselector
+            // outer symbol table corresponds to same symbol table.
+            SymbolTable outerScope = scope.GetOuterSymbolTable();
+
             // Skip closures because they may have missing types
-            ArgList = NodeUtils.AnalyzeWithPredicate(scope, ArgList, node => !(node is RppClosure), diagnostic);
+            ArgList = NodeUtils.AnalyzeWithPredicate(outerScope, ArgList, node => !(node is RppClosure), diagnostic);
 
             _typeArgs.ForEach(arg => arg.Resolve(scope));
 
@@ -501,10 +509,10 @@ namespace CSharpRpp
 
             IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Method.Parameters);
             //var args = ArgList;
-            NodeUtils.AnalyzeWithPredicate(scope, args, node => node is RppClosure, diagnostic);
+            NodeUtils.AnalyzeWithPredicate(outerScope, args, node => node is RppClosure, diagnostic);
             if (resolveResults.Method.IsVariadic)
             {
-                args = RewriteArgListForVariadicParameter(scope, genericArguments, args, resolveResults.Method);
+                args = RewriteArgListForVariadicParameter(outerScope, genericArguments, args, resolveResults.Method);
             }
 
             return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);
@@ -533,6 +541,7 @@ namespace CSharpRpp
             RppParameterInfo variadicParam = funcParams.Find(p => p.IsVariadic);
 
             RType elementType = GetElementType(variadicParam.Type);
+            // TODO this won't help when variadic func uses generic type from class and not from method
             if (elementType.IsGenericParameter) // If type is generic we shouldn't take _that_ type, we should get type from the call itself
             {
                 int targetFuncParamTypePosition = elementType.GenericParameterPosition;
@@ -636,7 +645,7 @@ namespace CSharpRpp
         {
             NodeUtils.Analyze(scope, ArgList, diagnostic);
 
-            SymbolTable sc = new SymbolTable(null, BaseClassType2.Value);
+            SymbolTable sc = new SymbolTable(null, BaseClassType2.Value, null);
             BaseConstructor = FindMatchingConstructor(ArgList, sc);
             Type = UnitTy;
             return this;
@@ -839,7 +848,7 @@ namespace CSharpRpp
 
             Debug.Assert(targetType != null, "targetType != null");
 
-            SymbolTable classScope = new SymbolTable(scope, targetType);
+            SymbolTable classScope = new SymbolTable(scope, targetType, scope.GetOuterSymbolTable());
 
             Path.TargetType = targetType;
             Path = (RppMember) Path.Analyze(classScope, diagnostic);

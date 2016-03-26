@@ -128,7 +128,7 @@ namespace CSharpRpp
 
             NodeUtils.PreAnalyze(scope, _nested);
 
-            Scope = new SymbolTable(scope, Type);
+            Scope = new SymbolTable(scope, Type, null);
             BaseConstructorCall.ResolveBaseClass(Scope);
         }
 
@@ -157,7 +157,7 @@ namespace CSharpRpp
 
             NodeUtils.Analyze(scope, _nested, diagnostic);
 
-            SymbolTable constructorScope = new SymbolTable(Scope, Type);
+            SymbolTable constructorScope = new SymbolTable(Scope, Type, null);
 
             _classParams = NodeUtils.Analyze(Scope, _classParams, diagnostic);
             _fields = NodeUtils.Analyze(Scope, _fields, diagnostic);

@@ -13,6 +13,8 @@ namespace CSharpRpp.Symbols
 
         private readonly Dictionary<string, Symbol> _symbols = new Dictionary<string, Symbol>();
 
+        private SymbolTable _outerSymbolTable;
+
         public SymbolTable()
         {
         }
@@ -22,10 +24,11 @@ namespace CSharpRpp.Symbols
             Parent = parent;
         }
 
-        public SymbolTable(SymbolTable parent, RType classType)
+        public SymbolTable(SymbolTable parent, RType classType, SymbolTable outerScope)
         {
             Parent = parent;
             _classType = classType;
+            _outerSymbolTable = outerScope;
 
             AddGenericParametersToScope(_classType);
             AddNestedToScope(_classType);
@@ -164,6 +167,11 @@ namespace CSharpRpp.Symbols
             }
 
             return Parent?.GetEnclosingType();
+        }
+
+        public SymbolTable GetOuterSymbolTable()
+        {
+            return _outerSymbolTable ?? this;
         }
     }
 }

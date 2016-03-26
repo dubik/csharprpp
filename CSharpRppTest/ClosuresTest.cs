@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpRppTest
@@ -116,6 +117,7 @@ object Main
         }
 
         [TestMethod]
+        [TestCategory("Closures")]
         public void FiguringOutTypesOfSimpleClosureTypeInAGenericClass()
         {
             const string code = @"
@@ -151,6 +153,26 @@ class Bar[A, B]
 ";
 */
             //var barTy = Utils.ParseAndCreateType(code, "Bar$");
+        }
+
+        [TestMethod]
+        [TestCategory("Closures")]
+        public void UseClosureInClassParam()
+        {
+            const string code = @"
+class Foo(val f: Int => Boolean) {
+    def isItTwo(v: Int) : Boolean = f(v)
+}
+
+object Main {
+    def main(v: Int) : Boolean = {
+        val foo = new Foo((k) => k == 13)
+        foo.isItTwo(v)
+    }
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main", new object[] {13});
         }
     }
 }
