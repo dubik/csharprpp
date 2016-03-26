@@ -5,6 +5,7 @@ using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -78,7 +79,7 @@ namespace CSharpRpp
             // For closures we don't specify types explicitely, they are deduced during resolution
             public override IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> unused)
             {
-                return new RppSelector(new RppId(_expr.Name, _expr),
+                return new RppSelector(_expr,
                     new RppFuncCall(Method.Name, resolvedArgList, Method, new ResolvableType(Method.ReturnType), Collections.NoResolvableTypes));
             }
         }
@@ -175,10 +176,13 @@ namespace CSharpRpp
 
         private static ResolveResults SearchInClosures(string name, IEnumerable<IRppExpr> args, SymbolTable scope)
         {
-            Symbol symbol = scope.Lookup(name);
-            if (symbol is LocalVarSymbol) // () applied to expression, so it could be closure
+            RppId closure = new RppId(name);
+            Diagnostic diagnostic = new Diagnostic();
+            try
             {
-                List<RppMethodInfo> applyMethods = symbol.Type.Methods.Where(m => m.Name == "apply").ToList();
+                RppMember member = (RppMember) closure.Analyze(scope, diagnostic);
+                RType closureType = member.Type.Value;
+                List<RppMethodInfo> applyMethods = closureType.Methods.Where(m => m.Name == "apply").ToList();
 
                 List<RType> argTypes = args.Select(a => a.Type.Value).ToList();
                 IEnumerable<RppMethodInfo> candidates = OverloadQuery.Find(argTypes, applyMethods).ToList();
@@ -192,12 +196,12 @@ namespace CSharpRpp
                 {
                     return null;
                 }
-
-                var member = (RppMember) ((LocalVarSymbol) symbol).Var; // TODO too many casts
                 return new ClosureResolveResults(member, candidates.First());
             }
-
-            return null;
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         [CanBeNull]
