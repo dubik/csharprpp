@@ -3,6 +3,7 @@ using System.Linq;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
+using JetBrains.Annotations;
 
 namespace CSharpRpp
 {
@@ -40,15 +41,25 @@ namespace CSharpRpp
             visitor.Visit(this);
         }
 
-        private ResolvableType CreateClosureType(SymbolTable scope)
+        private ResolvableType CreateClosureType([NotNull] SymbolTable scope)
         {
-            var functionTypeName = "Function" + Bindings.Count();
+            RType returnType = ReturnType.Value;
+            var typeName = IsAction(returnType) ? "Action" : "Function";
+            var functionTypeName = typeName + Bindings.Count();
             RType functionType = scope.LookupType(functionTypeName).Type;
 
             List<RType> bindingTypes = Bindings.Select(b => b.Type.Value).ToList();
-            bindingTypes.Add(Expr.Type.Value);
+            if (!IsAction(returnType))
+            {
+                bindingTypes.Add(Expr.Type.Value);
+            }
             RType specializedFunctionType = functionType.MakeGenericType(bindingTypes.ToArray());
             return new ResolvableType(specializedFunctionType);
+        }
+
+        private static bool IsAction(RType returnType)
+        {
+            return returnType.Name == "Unit";
         }
     }
 }

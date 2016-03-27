@@ -85,6 +85,27 @@ object Bar
         }
 
         [TestMethod]
+        public void ClosureWhichDoesntReturnAValue()
+        {
+            const string code = @"
+object Foo
+{
+    def printSomething: Unit = {
+        val k = 10
+    }
+
+    def main() : Unit = {
+        val action = (i: Int) => printSomething()
+        action(13)
+    }
+}
+";
+            var fooTy = Utils.ParseAndCreateType(code, "Foo$");
+            Assert.IsNotNull(fooTy);
+            Utils.InvokeStatic(fooTy, "main");
+        }
+
+        [TestMethod]
         public void TestIsInstanceOfSimpleClass()
         {
             RType fooTy = new RType("Foo", RTypeAttributes.Class, RppTypeSystem.AnyTy, null);
