@@ -10,6 +10,12 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.Codegen
 {
+    public enum ApplicationType
+    {
+        Library,
+        Application
+    }
+
     public sealed class CodeGenerator
     {
         public string AssemblyName { get; set; }
@@ -53,9 +59,9 @@ namespace CSharpRpp.Codegen
             Module = _assemblyBuilder.DefineDynamicModule(_assemblyName.Name, _fileName, true);
         }
 
-        public void Save()
+        public void Save(ApplicationType type)
         {
-            if (MainFunc != null)
+            if (type == ApplicationType.Application && MainFunc != null)
             {
                 MethodInfo wrappedMain = WrapMain(MainFunc);
                 _assemblyBuilder.SetEntryPoint(wrappedMain, PEFileKinds.ConsoleApplication);

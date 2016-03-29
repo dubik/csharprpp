@@ -103,7 +103,7 @@ object XList {
             else
             {
                 Debug.Assert(codeGen != null, "codeGen != null");
-                codeGen.Save();
+                codeGen.Save(ApplicationType.Library);
             }
         }
 

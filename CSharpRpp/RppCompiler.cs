@@ -33,7 +33,7 @@ namespace CSharpRpp
                 ValidateEntryPoint(generator, options, diagnostic);
                 if (!diagnostic.Errors.Any())
                 {
-                    generator.Save();
+                    generator.Save(options.Library ? ApplicationType.Library : ApplicationType.Application);
                 }
             }
         }
