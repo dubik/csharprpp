@@ -730,7 +730,7 @@ namespace CSharpRpp
 
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
-            SymbolTable localScope = new SymbolTable(scope);
+            SymbolTable localScope = new SymbolTable(scope, scope.ClosureContext);
             _exprs = NodeUtils.Analyze(localScope, _exprs, diagnostic);
             _exprs = PopUnusedResultsOfExpressions();
 
@@ -928,6 +928,11 @@ namespace CSharpRpp
             {
                 RppThis thisNode = new RppThis();
                 return thisNode.Analyze(scope, diagnostic);
+            }
+
+            if (scope.IsInsideClosure)
+            {
+                scope.ClosureContext.Capture(this);
             }
 
             TypeSymbol objectType = scope.LookupObject(Name);

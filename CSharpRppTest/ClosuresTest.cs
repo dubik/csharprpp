@@ -1,6 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
@@ -19,7 +19,7 @@ object Bar
     }
 }
 ";
-            Utils.ParseAndCreateType(code, "Bar$");
+            ParseAndCreateType(code, "Bar$");
         }
 
         [TestMethod]
@@ -35,7 +35,7 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            var barTy = ParseAndCreateType(code, "Bar$");
             Assert.IsNotNull(barTy);
             MethodInfo mainMethod = barTy.GetMethod("main", BindingFlags.Public | BindingFlags.Instance);
             Assert.IsNotNull(mainMethod);
@@ -54,14 +54,13 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            var barTy = ParseAndCreateType(code, "Bar$");
             Assert.IsNotNull(barTy);
-            var res = Utils.InvokeStatic(barTy, "main");
+            var res = InvokeStatic(barTy, "main");
             Assert.AreEqual(23, res);
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
         public void PassClosureAsAParam()
         {
             const string code = @"
@@ -77,13 +76,12 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$");
-            var res = Utils.InvokeStatic(barTy, "main");
+            var barTy = ParseAndCreateType(code, "Bar$");
+            var res = InvokeStatic(barTy, "main");
             Assert.AreEqual(34, res);
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
         public void GenericMethod()
         {
             const string code = @"
@@ -95,11 +93,10 @@ object Bar
     }
 }
 ";
-            var barTy = Utils.ParseAndCreateType(code, "Bar$");
+            var barTy = ParseAndCreateType(code, "Bar$");
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
         public void ParseOneParamClosureWithoutParents()
         {
             const string code = @"
@@ -111,13 +108,12 @@ object Main
     }
 }
 ";
-            var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            var res = Utils.InvokeStatic(mainTy, "main");
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual(14, res);
         }
 
-        [TestMethod]
-        [TestCategory("Closures")]
+        [TestMethod, TestCategory("Closures")]
         public void FiguringOutTypesOfSimpleClosureTypeInAGenericClass()
         {
             const string code = @"
@@ -132,8 +128,8 @@ object Main {
   }
 }
 ";
-            var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            var res = Utils.InvokeStatic(mainTy, "main");
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
             Assert.IsNotNull(res);
             Assert.AreEqual(24, res.GetPropertyValue("k"));
         }
@@ -155,8 +151,7 @@ class Bar[A, B]
             //var barTy = Utils.ParseAndCreateType(code, "Bar$");
         }
 
-        [TestMethod]
-        [TestCategory("Closures")]
+        [TestMethod, TestCategory("Closures")]
         public void UseClosureInClassParam()
         {
             const string code = @"
@@ -171,8 +166,84 @@ object Main {
     }
 }
 ";
-            var mainTy = Utils.ParseAndCreateType(code, "Main$");
-            var res = Utils.InvokeStatic(mainTy, "main", new object[] {13});
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main", new object[] {13});
+            Assert.IsTrue((bool) res);
+        }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CaptureLocalVariable()
+        {
+            const string code = @"
+object Main {
+    def returnTheSame(v: Int) : Int = v
+    def main : Int = {
+        val foo = 13
+        val func = () => returnTheSame(foo)
+        func()
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+        }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CapturedVariableUsedInExpressions()
+        {
+            const string code = @"
+object Main {
+    def returnTheSame(v: Int) : Int = v
+    def main : Int = {
+        val foo = 13
+        val func = () => foo = 27
+        func()
+        foo + 13
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(40, res);
+        }
+
+        [TestMethod, TestCategory("Closures")]
+        public void StoringToCapturedVariable()
+        {
+            const string code = @"
+object Main {
+    def main : Int = {
+        val foo = 13
+        val func = () => foo = 27
+        func()
+        foo = 1
+        foo
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(1, res);
+        }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CaptureSeveralVariables()
+        {
+            const string code = @"
+object Main {
+    def main : Int = {
+        val foo = 13
+        val bar = 27
+        val func = () => foo + bar
+        val z = func()
+        foo + bar + z
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(80, res);
         }
     }
 }

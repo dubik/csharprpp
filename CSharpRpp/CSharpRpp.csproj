@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codegen\ClrVarCodegen.cs" />
     <Compile Include="Expr\RppPop.cs" />
     <Compile Include="Expr\RppThis.cs" />
     <Compile Include="PatternMatching\RppBinderPattern.cs" />

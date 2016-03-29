@@ -13,7 +13,11 @@ namespace CSharpRpp.Symbols
 
         private readonly Dictionary<string, Symbol> _symbols = new Dictionary<string, Symbol>();
 
-        private SymbolTable _outerSymbolTable;
+        private readonly SymbolTable _outerSymbolTable;
+
+        public RppClosureContext ClosureContext { get; }
+
+        public bool IsInsideClosure => ClosureContext != null;
 
         public SymbolTable()
         {
@@ -22,6 +26,12 @@ namespace CSharpRpp.Symbols
         public SymbolTable(SymbolTable parent)
         {
             Parent = parent;
+        }
+
+        public SymbolTable([CanBeNull] SymbolTable parent, [NotNull] RppClosureContext closureContext)
+        {
+            Parent = parent;
+            ClosureContext = closureContext;
         }
 
         public SymbolTable(SymbolTable parent, RType classType, SymbolTable outerScope)

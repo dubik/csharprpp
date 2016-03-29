@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection.Emit;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
@@ -23,6 +22,8 @@ namespace CSharpRpp
         public LocalBuilder Builder { get; set; }
 
         protected bool IsLocalSemantic = true;
+
+        public bool IsCaptured { get; private set; }
 
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {
@@ -80,6 +81,11 @@ namespace CSharpRpp
             return this;
         }
 
+        public void MakeCaptured()
+        {
+            IsCaptured = true;
+        }
+
         public override string ToString()
         {
             return $"{MutabilityFlagToString(MutabilityFlag)} {Name}: {Type}";
@@ -118,7 +124,7 @@ namespace CSharpRpp
             {
                 return true;
             }
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
@@ -127,7 +133,10 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            int hash = 13;
+            hash = hash + Name.GetHashCode();
+            hash = hash * 7 + Type.GetHashCode();
+            return hash;
         }
 
         #endregion

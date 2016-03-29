@@ -41,6 +41,12 @@ namespace CSharpRpp.Codegen
 
         private int _closureId;
 
+        /// <summary>
+        /// Maps local variable builders to fields if ClrCodegen generates code for closure
+        /// </summary>
+        [CanBeNull]
+        public Dictionary<LocalBuilder, FieldBuilder> CapturedVars { get; private set; }
+
         public ClrCodegen()
         {
             FirstLogicalBinOp = true;
@@ -66,6 +72,11 @@ namespace CSharpRpp.Codegen
             _exitLabel = exitLabel;
             Branching = true;
             _invert = invert;
+        }
+
+        public ClrCodegen(ILGenerator body, Dictionary<LocalBuilder, FieldBuilder> capturedVars) : this(body)
+        {
+            CapturedVars = capturedVars;
         }
 
         public override void VisitEnter(RppClass node)
@@ -157,13 +168,14 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppVar node)
         {
-            node.Builder = _body.DeclareLocal(node.Type.Value.NativeType);
-            node.Builder.SetLocalSymInfo(node.Name);
-
             if (!(node.InitExpr is RppEmptyExpr) && !(node.InitExpr is RppDefaultExpr))
             {
                 node.InitExpr.Accept(this);
-                _body.Emit(OpCodes.Stloc, node.Builder);
+                ClrVarCodegen.DeclareAndInitialize(node, _body);
+            }
+            else
+            {
+                ClrVarCodegen.Declare(node, _body);
             }
         }
 
@@ -193,7 +205,7 @@ namespace CSharpRpp.Codegen
             var shortCircuitExit = !Branching ? _body.DefineLabel() : _exitLabel; // Branching is false for the first '&&'
 
             Label exitLabel = _body.DefineLabel();
-            ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, branchingFlag) {FirstLogicalBinOp = false};
+            ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, branchingFlag) {FirstLogicalBinOp = false, CapturedVars = CapturedVars};
             node.Left.Accept(codegen); // First condition can short circuit, since this is && we load 'false' (ldc_I4_0)
             if (!codegen.Jumped) // Check if we jumped on shortcircuite label, if not - jump 
             {
@@ -379,7 +391,7 @@ namespace CSharpRpp.Codegen
 
                     // Create own code generator for arguments because they can have RppSelectors which may interfer with already existing RppSelector
                     // myField.CallFunc(anotherInstanceFunc()) would set _inSelector to true and no 'this' will be loaded
-                    ClrCodegen codegen = new ClrCodegen(_typeBuilder, _body);
+                    ClrCodegen codegen = new ClrCodegen(_typeBuilder, _body) {CapturedVars = CapturedVars};
                     node.Args.ForEach(arg => arg.Accept(codegen));
 
                     MethodInfo method = rppMethodInfo.Native as MethodInfo;
@@ -475,7 +487,7 @@ namespace CSharpRpp.Codegen
             }
             else if (node.IsVar)
             {
-                _body.Emit(OpCodes.Ldloc, ((RppVar) node.Ref).Builder);
+                ClrVarCodegen.Load((RppVar) node.Ref, _body, CapturedVars);
             }
             else if (node.IsParam)
             {
@@ -560,7 +572,7 @@ namespace CSharpRpp.Codegen
             {
                 RppVar var = (RppVar) id.Ref;
                 node.Right.Accept(this);
-                ClrCodegenUtils.StoreLocal(var.Builder, _body);
+                ClrVarCodegen.Store(var, _body, CapturedVars);
             }
             else if (id.IsParam)
             {
@@ -618,6 +630,8 @@ namespace CSharpRpp.Codegen
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate);
 
+            var capturedVars = CreateFieldsForCapturedVars(closureClass, node.CapturedVars);
+
             Type returnType = node.ReturnType.Value.NativeType;
 
             // We need to create closure's own generic parameters because we can't reuse function's ones
@@ -649,14 +663,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
+                {
+                    if (t.IsGenericParameter)
                     {
-                        if (t.IsGenericParameter)
-                        {
-                            Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                            return closureGenericArgument;
-                        }
-                        return t;
-                    }).ToArray();
+                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                        return closureGenericArgument;
+                    }
+                    return t;
+                }).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
                 parentType = genericTypeDef.MakeGenericType(targetSignature);
@@ -664,7 +678,6 @@ namespace CSharpRpp.Codegen
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
             }
 
-            //closureClass.SetParent(parentType);
             closureClass.AddInterfaceImplementation(parentType);
             MethodBuilder applyMethod = closureClass.DefineMethod("apply",
                 MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.Public,
@@ -681,7 +694,7 @@ namespace CSharpRpp.Codegen
             }
 
             ILGenerator body = applyMethod.GetILGenerator();
-            ClrCodegen codegen = new ClrCodegen(body);
+            ClrCodegen codegen = new ClrCodegen(body, capturedVars);
             node.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
 
@@ -694,7 +707,25 @@ namespace CSharpRpp.Codegen
 
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
+            LocalBuilder closureClassInstance = _body.DeclareLocal(closureClass);
+            _body.Emit(OpCodes.Stloc, closureClassInstance);
+            capturedVars.ForEach(pair =>
+            {
+                _body.Emit(OpCodes.Ldloc, closureClassInstance);
+                LocalBuilder capturedVariable = pair.Key;
+                _body.Emit(OpCodes.Ldloc, capturedVariable);
+                FieldBuilder field = pair.Value;
+                _body.Emit(OpCodes.Stfld, field);
+            });
+
+            _body.Emit(OpCodes.Ldloc, closureClassInstance);
             closureClass.CreateType();
+        }
+
+        private static Dictionary<LocalBuilder, FieldBuilder> CreateFieldsForCapturedVars(TypeBuilder closureClass, IEnumerable<RppVar> capturedVars)
+        {
+            return capturedVars.ToDictionary(v => v.Builder,
+                v => closureClass.DefineField(v.Name, ClrVarCodegen.GetRefType(v.Type.Value.NativeType), FieldAttributes.Public));
         }
 
         public override void Visit(RppFieldSelector fieldSelector)
