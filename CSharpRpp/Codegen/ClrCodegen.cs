@@ -672,10 +672,18 @@ namespace CSharpRpp.Codegen
                     return t;
                 }).ToArray();
 
-                Type genericTypeDef = parentType.GetGenericTypeDefinition();
-                parentType = genericTypeDef.MakeGenericType(targetSignature);
                 returnType = targetSignature.Last();
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
+
+                Type genericTypeDef = parentType.GetGenericTypeDefinition();
+                if (returnType == typeof (void))
+                {
+                    parentType = genericTypeDef.MakeGenericType(argTypes); // don't include 'void'
+                }
+                else
+                {
+                    parentType = genericTypeDef.MakeGenericType(targetSignature);
+                }
             }
 
             closureClass.AddInterfaceImplementation(parentType);

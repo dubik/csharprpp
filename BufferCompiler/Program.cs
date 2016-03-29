@@ -23,6 +23,11 @@ abstract class XIterator[+A] {
     while (hasNext())
       f(next())
 
+  def count: Int = {
+    var c = 0
+    foreach(item => c = c + 1)
+    c
+  }
 }
 
 abstract class XIterable[+A] {

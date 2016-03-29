@@ -245,5 +245,30 @@ object Main {
             var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual(80, res);
         }
+
+
+        [TestMethod, TestCategory("Closures")]
+        public void ClosureWhichDoesntReturnValue()
+        {
+            const string code = @"
+object Main {
+    protected def twice(f: () => Unit): Unit = {
+        f()
+        f()
+    }
+
+    def count: Int = {
+        var c = 0
+        twice(() => c = c + 1)
+        c
+    }
+
+    def main : Int = count()
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(2, res);
+        }
     }
 }
