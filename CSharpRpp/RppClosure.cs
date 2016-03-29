@@ -53,7 +53,7 @@ namespace CSharpRpp
             {
                 bindingTypes.Add(Expr.Type.Value);
             }
-            RType specializedFunctionType = functionType.MakeGenericType(bindingTypes.ToArray());
+            var specializedFunctionType = bindingTypes.Count == 0 ? functionType : functionType.MakeGenericType(bindingTypes.ToArray());
             return new ResolvableType(specializedFunctionType);
         }
 
