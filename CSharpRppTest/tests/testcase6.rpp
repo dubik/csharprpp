@@ -1,0 +1,9 @@
+﻿object Main {
+    def main : String = {
+        val str = "Hello"
+        var res = ""
+        val action = () => res = str
+        action()
+        res
+    }
+}

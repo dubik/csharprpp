@@ -39,7 +39,7 @@ namespace CSharpRpp.Codegen
         private readonly bool _invert;
         public bool FirstLogicalBinOp { get; set; }
 
-        private int _closureId;
+        private static int _closureId;
 
         /// <summary>
         /// Maps local variable builders to fields if ClrCodegen generates code for closure
@@ -733,7 +733,12 @@ namespace CSharpRpp.Codegen
         private static Dictionary<LocalBuilder, FieldBuilder> CreateFieldsForCapturedVars(TypeBuilder closureClass, IEnumerable<RppVar> capturedVars)
         {
             return capturedVars.ToDictionary(v => v.Builder,
-                v => closureClass.DefineField(v.Name, ClrVarCodegen.GetRefType(v.Type.Value.NativeType), FieldAttributes.Public));
+                v =>
+                {
+                    Type varType = v.Type.Value.NativeType;
+                    Type refType = ClrVarCodegen.GetRefType(varType);
+                    return closureClass.DefineField(v.Name, refType, FieldAttributes.Public);
+                });
         }
 
         public override void Visit(RppFieldSelector fieldSelector)

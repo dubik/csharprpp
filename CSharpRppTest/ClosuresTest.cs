@@ -270,5 +270,25 @@ object Main {
             var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual(2, res);
         }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CaptureNonPrimitiveVars()
+        {
+            const string code = @"
+object Main {
+    def main : String = {
+        val str = ""Hello""
+        var res = """"
+        val action = () => res = str
+        action()
+        res
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual("Hello", res);
+        }
+
     }
 }

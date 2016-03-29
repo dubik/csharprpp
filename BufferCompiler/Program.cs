@@ -23,6 +23,14 @@ abstract class XIterator[+A] {
     while (hasNext())
       f(next())
 
+  def toList: XList[A] = {
+    var res = XList[A]()
+    foreach((item) => {
+      res = new XCons(item, res)
+    })
+    res.reverse()
+  }
+
   def count: Int = {
     var c = 0
     foreach(item => c = c + 1)
