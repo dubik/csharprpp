@@ -28,7 +28,7 @@ namespace CSharpRpp.Codegen
         {
             Type varType = node.Type.Value.NativeType;
 
-            if (IsWrappedVar(node))
+            if (node.IsCaptured)
             {
                 Type elementType = varType;
                 varType = GetRefType(varType);
@@ -138,11 +138,6 @@ namespace CSharpRpp.Codegen
         private static FieldInfo GetRefElemField(Type refType)
         {
             return refType.GetField("elem");
-        }
-
-        private static bool IsWrappedVar(RppVar node)
-        {
-            return node.IsCaptured;
         }
     }
 }
