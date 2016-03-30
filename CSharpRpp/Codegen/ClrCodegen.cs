@@ -47,6 +47,9 @@ namespace CSharpRpp.Codegen
         [CanBeNull]
         public Dictionary<LocalBuilder, FieldBuilder> CapturedVars { get; private set; }
 
+        [CanBeNull]
+        public FieldBuilder CapturedThis { get; private set; }
+
         public ClrCodegen()
         {
             FirstLogicalBinOp = true;
@@ -74,9 +77,10 @@ namespace CSharpRpp.Codegen
             _invert = invert;
         }
 
-        public ClrCodegen(ILGenerator body, Dictionary<LocalBuilder, FieldBuilder> capturedVars) : this(body)
+        public ClrCodegen(ILGenerator body, Dictionary<LocalBuilder, FieldBuilder> capturedVars, FieldBuilder capturedThis) : this(body)
         {
             CapturedVars = capturedVars;
+            CapturedThis = capturedThis;
         }
 
         public override void VisitEnter(RppClass node)
@@ -385,7 +389,16 @@ namespace CSharpRpp.Codegen
                         }
                         else
                         {
-                            _body.Emit(OpCodes.Ldarg_0); // load 'this'
+                            if (node.IsFromClosure)
+                            {
+                                _body.Emit(OpCodes.Ldarg_0);
+                                Debug.Assert(CapturedThis != null, "CapturedThis != null");
+                                _body.Emit(OpCodes.Ldfld, CapturedThis);
+                            }
+                            else
+                            {
+                                _body.Emit(OpCodes.Ldarg_0); // load 'this'
+                            }
                         }
                     }
 
@@ -631,7 +644,7 @@ namespace CSharpRpp.Codegen
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate);
 
             var capturedVars = CreateFieldsForCapturedVars(closureClass, node.CapturedVars);
-
+            var capturedThis = node.Context.IsCaptureThis ? CreatedCapturedThis(closureClass) : null;
             Type returnType = node.ReturnType.Value.NativeType;
 
             // We need to create closure's own generic parameters because we can't reuse function's ones
@@ -663,14 +676,14 @@ namespace CSharpRpp.Codegen
             {
                 GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
-                {
-                    if (t.IsGenericParameter)
                     {
-                        Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
-                        return closureGenericArgument;
-                    }
-                    return t;
-                }).ToArray();
+                        if (t.IsGenericParameter)
+                        {
+                            Type closureGenericArgument = gpBuilders[t.GenericParameterPosition];
+                            return closureGenericArgument;
+                        }
+                        return t;
+                    }).ToArray();
 
                 returnType = targetSignature.Last();
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
@@ -702,7 +715,7 @@ namespace CSharpRpp.Codegen
             }
 
             ILGenerator body = applyMethod.GetILGenerator();
-            ClrCodegen codegen = new ClrCodegen(body, capturedVars);
+            ClrCodegen codegen = new ClrCodegen(body, capturedVars, capturedThis);
             node.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
 
@@ -718,27 +731,39 @@ namespace CSharpRpp.Codegen
             LocalBuilder closureClassInstance = _body.DeclareLocal(closureClass);
             _body.Emit(OpCodes.Stloc, closureClassInstance);
             capturedVars.ForEach(pair =>
+                {
+                    _body.Emit(OpCodes.Ldloc, closureClassInstance);
+                    LocalBuilder capturedVariable = pair.Key;
+                    _body.Emit(OpCodes.Ldloc, capturedVariable);
+                    FieldBuilder field = pair.Value;
+                    _body.Emit(OpCodes.Stfld, field);
+                });
+
+            if (capturedThis != null)
             {
                 _body.Emit(OpCodes.Ldloc, closureClassInstance);
-                LocalBuilder capturedVariable = pair.Key;
-                _body.Emit(OpCodes.Ldloc, capturedVariable);
-                FieldBuilder field = pair.Value;
-                _body.Emit(OpCodes.Stfld, field);
-            });
+                _body.Emit(OpCodes.Ldarg_0);
+                _body.Emit(OpCodes.Stfld, capturedThis);
+            }
 
             _body.Emit(OpCodes.Ldloc, closureClassInstance);
             closureClass.CreateType();
+        }
+
+        private FieldBuilder CreatedCapturedThis(TypeBuilder closureClass)
+        {
+            return closureClass.DefineField("<>this", _typeBuilder, FieldAttributes.Public);
         }
 
         private static Dictionary<LocalBuilder, FieldBuilder> CreateFieldsForCapturedVars(TypeBuilder closureClass, IEnumerable<RppVar> capturedVars)
         {
             return capturedVars.ToDictionary(v => v.Builder,
                 v =>
-                {
-                    Type varType = v.Type.Value.NativeType;
-                    Type refType = ClrVarCodegen.GetRefType(varType);
-                    return closureClass.DefineField(v.Name, refType, FieldAttributes.Public);
-                });
+                    {
+                        Type varType = v.Type.Value.NativeType;
+                        Type refType = ClrVarCodegen.GetRefType(varType);
+                        return closureClass.DefineField(v.Name, refType, FieldAttributes.Public);
+                    });
         }
 
         public override void Visit(RppFieldSelector fieldSelector)

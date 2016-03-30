@@ -18,16 +18,18 @@ namespace CSharpRpp
         {
             public RppMethodInfo Method { get; }
             public IEnumerable<RType> TypeArguments { get; }
+            private bool _isInsideClosure;
 
             public ResolveResults(RppMethodInfo resolvedFunc)
             {
                 Method = resolvedFunc;
             }
 
-            public ResolveResults(RppMethodInfo resolvedFunc, IEnumerable<RType> typeArguments)
+            public ResolveResults(RppMethodInfo resolvedFunc, IEnumerable<RType> typeArguments, bool isInsideClosure)
             {
                 Method = resolvedFunc;
                 TypeArguments = typeArguments;
+                _isInsideClosure = isInsideClosure;
             }
 
             public virtual IRppExpr RewriteFunctionCall(RType targetType, string functionName, IList<IRppExpr> resolvedArgList, IList<RType> typeArgs)
@@ -38,7 +40,8 @@ namespace CSharpRpp
 
                 return new RppFuncCall(functionName, resolvedArgList, Method, new ResolvableType(returnType), resolvableTypeArgs)
                 {
-                    TargetType = targetType
+                    TargetType = targetType,
+                    IsFromClosure = _isInsideClosure
                 };
             }
 
@@ -140,7 +143,7 @@ namespace CSharpRpp
                 inferredTypeArguments = InferTypes(candidate, argList).ToList();
             }
 
-            return new ResolveResults(candidate, inferredTypeArguments);
+            return new ResolveResults(candidate, inferredTypeArguments, scope.IsInsideClosure);
         }
 
         private IEnumerable<RType> InferTypes(RppMethodInfo candidate, IEnumerable<IRppExpr> args)

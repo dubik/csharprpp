@@ -427,6 +427,8 @@ namespace CSharpRpp
 
         public IEnumerable<ResolvableType> TypeArgs => _typeArgs;
 
+        public bool IsFromClosure { get; internal set; }
+
         public RppFuncCall([NotNull] string name, [NotNull] IList<IRppExpr> argList) : this(name, argList, Collections.NoResolvableTypes)
         {
         }
@@ -513,6 +515,16 @@ namespace CSharpRpp
             if (resolveResults.Method.IsVariadic)
             {
                 args = RewriteArgListForVariadicParameter(outerScope, genericArguments, args, resolveResults.Method);
+            }
+
+            if (scope.IsInsideClosure)
+            {
+                RType methodDeclaringType = resolveResults.Method.DeclaringType;
+                RType enclosingType = scope.GetEnclosingType();
+                if (methodDeclaringType.Equals(enclosingType))
+                {
+                    scope.ClosureContext.CaptureThis();
+                }
             }
 
             return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);

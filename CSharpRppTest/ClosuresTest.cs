@@ -93,7 +93,7 @@ object Bar
     }
 }
 ";
-            var barTy = ParseAndCreateType(code, "Bar$");
+            ParseAndCreateType(code, "Bar$");
         }
 
         [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
@@ -288,6 +288,32 @@ object Main {
             var mainTy = ParseAndCreateType(code, "Main$");
             var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual("Hello", res);
+        }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CaptureThisForAccessingMethods()
+        {
+            const string code = @"
+class Foo {
+  def twice(k: Int): Int = k * 2
+
+  def calc(k: Int): Int = {
+    val func = (x: Int) => twice(x)
+
+    func(k)
+  }
+}
+
+object Main {
+   def main: Int = {
+    val foo = new Foo
+    foo.calc(13)
+  }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(26, res);
         }
 
     }
