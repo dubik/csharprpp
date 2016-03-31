@@ -336,5 +336,27 @@ object Main {
             Assert.AreEqual(18, res);
         }
 
+        [TestMethod, TestCategory("Closures")]
+        public void UseFieldInAClosure()
+        {
+            const string code = @"
+class Bar(val length: Int) {
+  def makeOffset(size: Int) : Int = {
+    val offsetFunc = (k: Int) => k + length
+    offsetFunc(size)
+  }
+}
+
+object Main {
+  def main : Int = {
+    val bar = new Bar(13)
+    bar.makeOffset(9)
+  }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(22, res);
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace CSharpRpp
         private readonly List<RppId> _capturedVariableReferences = new List<RppId>();
         public bool IsCaptureThis { get; private set; }
 
-        public void Capture(RppId rppId)
+        public void CaptureVar(RppId rppId)
         {
             _capturedVariableReferences.Add(rppId);
         }

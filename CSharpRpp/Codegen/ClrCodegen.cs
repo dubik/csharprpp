@@ -776,6 +776,10 @@ namespace CSharpRpp.Codegen
             if (!_inSelector)
             {
                 _body.Emit(OpCodes.Ldarg_0);
+                if (CapturedThis != null)
+                {
+                    _body.Emit(OpCodes.Ldfld, CapturedThis);
+                }
             }
 
             if (IsInsideGetterOrSetter(field.Name))

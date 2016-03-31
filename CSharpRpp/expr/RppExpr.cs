@@ -942,11 +942,6 @@ namespace CSharpRpp
                 return thisNode.Analyze(scope, diagnostic);
             }
 
-            if (scope.IsInsideClosure)
-            {
-                scope.ClosureContext.Capture(this);
-            }
-
             TypeSymbol objectType = scope.LookupObject(Name);
             // Lookup <name> or <name>$
             if (objectType != null)
@@ -981,6 +976,19 @@ namespace CSharpRpp
                     {
                         throw SemanticExceptionFactory.ValueNotFound(Token);
                     }
+                }
+            }
+
+            if (scope.IsInsideClosure)
+            {
+                if (IsVar)
+                {
+                    scope.ClosureContext.CaptureVar(this);
+                }
+
+                if (IsField)
+                {
+                    scope.ClosureContext.CaptureThis();
                 }
             }
 
