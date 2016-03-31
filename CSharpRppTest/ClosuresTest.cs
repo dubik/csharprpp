@@ -316,5 +316,25 @@ object Main {
             Assert.AreEqual(26, res);
         }
 
+        [TestMethod, TestCategory("Closures")]
+        public void CallObjectFunctionFromClosure()
+        {
+            const string code = @"
+object Factory {
+  def twice(k: Int) : Int = k + k
+}
+
+object Main {
+   def main: Int = {
+     val twiceClosure = (k: Int) => Factory.twice(k)
+     twiceClosure(9)
+   }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(18, res);
+        }
+
     }
 }
