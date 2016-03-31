@@ -254,7 +254,7 @@ namespace CSharpRpp
     {
         int Index { get; set; }
         bool IsVariadic { get; set; }
-
+        bool IsClosureBinding { get; set; }
         IRppParam CloneWithNewType(RType newType);
     }
 
@@ -267,10 +267,11 @@ namespace CSharpRpp
 
         public bool IsVariadic { get; set; }
 
+        public bool IsClosureBinding { get; set; }
+
         public RppParam(string name, ResolvableType type, bool variadic = false) : base(name)
         {
             IsVariadic = variadic;
-            //Type = variadic ? new RppArrayType(type) : type;
             Type = type;
         }
 
@@ -292,7 +293,7 @@ namespace CSharpRpp
 
         public IRppParam CloneWithNewType(RType newType)
         {
-            return new RppParam(Name, new ResolvableType(newType), IsVariadic);
+            return new RppParam(Name, new ResolvableType(newType), IsVariadic) {IsClosureBinding = IsClosureBinding};
         }
     }
 }

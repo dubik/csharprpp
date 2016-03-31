@@ -358,5 +358,25 @@ object Main {
             var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual(22, res);
         }
+
+        [TestMethod, TestCategory("Closures")]
+        public void CaptureParameterForAClosure()
+        {
+            const string code = @"
+object Main {
+  def makeTwice(k: Int): Int = {
+    val action = () => k + k
+    action()
+  }
+
+  def main : Int = {
+    makeTwice(13)
+  }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(26, res);
+        }
     }
 }

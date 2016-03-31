@@ -981,7 +981,7 @@ namespace CSharpRpp
 
             if (scope.IsInsideClosure)
             {
-                if (IsVar)
+                if (IsVar || IsParam)
                 {
                     scope.ClosureContext.CaptureVar(this);
                 }

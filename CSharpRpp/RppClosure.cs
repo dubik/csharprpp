@@ -38,8 +38,11 @@ namespace CSharpRpp
 
         public RppClosureContext Context { get; }
 
-        private IList<RppVar> _capturedVars;
+        private List<RppVar> _capturedVars;
+        private List<RppParam> _capturedParams;
+
         public IEnumerable<RppVar> CapturedVars => _capturedVars;
+        public IEnumerable<RppParam> CapturedParams => _capturedParams;
 
         public RppClosure(IEnumerable<IRppParam> bindings, IRppExpr body)
         {
@@ -68,8 +71,11 @@ namespace CSharpRpp
 
         private void ProcessCapturedVariables(IEnumerable<RppId> capturedVariableReferences)
         {
-            _capturedVars = capturedVariableReferences.Where(v => v.IsVar).Select(v => (RppVar) v.Ref).Distinct().ToList();
+            var references = capturedVariableReferences as IList<RppId> ?? capturedVariableReferences.ToList();
+            _capturedVars = references.Where(v => v.IsVar).Select(v => (RppVar) v.Ref).Distinct().ToList();
             _capturedVars.ForEach(v => v.MakeCaptured());
+
+            _capturedParams = references.Where(v => v.IsParam && !((IRppParam) v.Ref).IsClosureBinding).Select(v => (RppParam) v.Ref).Distinct().ToList();
         }
 
         public override void Accept(IRppNodeVisitor visitor)

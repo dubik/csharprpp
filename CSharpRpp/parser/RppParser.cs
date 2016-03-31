@@ -621,7 +621,7 @@ namespace CSharpRpp
                 type = new ResolvableType(typeName);
             }
 
-            binding = new RppParam(name, type);
+            binding = new RppParam(name, type) {IsClosureBinding = true};
             return true;
         }
 
