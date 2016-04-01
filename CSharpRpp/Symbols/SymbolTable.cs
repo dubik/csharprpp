@@ -112,6 +112,7 @@ namespace CSharpRpp.Symbols
             _symbols.Add(symbol.Name, symbol);
         }
 
+        [NotNull]
         public IReadOnlyCollection<RppMethodInfo> LookupFunction(string name)
         {
             if (_classType != null)

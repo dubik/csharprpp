@@ -299,5 +299,19 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {8, 7, 5}));
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {0, 0, 0}));
         }
+
+        [TestMethod]
+        public void CallFunctionWithoutParametersWithoutParens()
+        {
+            const string code = @"
+object Main {
+    def count: Int = 3
+    def main : Int = count
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(3, res);
+        }
     }
 }

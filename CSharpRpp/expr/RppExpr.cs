@@ -974,6 +974,14 @@ namespace CSharpRpp
                     }
                     else
                     {
+                        // Last thing to check if there is a function without parameters, so it was used without parens
+                        var functions = scope.LookupFunction(Name);
+                        if (functions.Any(f => f.Parameters.IsEmpty()))
+                        {
+                            RppFuncCall funcCall = new RppFuncCall(Name, Collections.NoExprs);
+                            return funcCall.Analyze(scope, diagnostic);
+                        }
+
                         throw SemanticExceptionFactory.ValueNotFound(Token);
                     }
                 }

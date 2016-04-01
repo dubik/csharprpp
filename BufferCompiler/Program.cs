@@ -56,7 +56,7 @@ class XListIterator[A](var list: XList[A]) extends XIterator[A] {
   override def hasNext: Boolean = !list.isEmpty()
 
   override def next(): A = {
-    if (list.isEmpty())
+    if (list.isEmpty)
       throw new Exception
 
     val item = list.head()
@@ -65,6 +65,16 @@ class XListIterator[A](var list: XList[A]) extends XIterator[A] {
   }
 
   override def copy(): XIterator[A] = new XListIterator[A](list)
+}
+
+class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterator[U] {
+  override def hasNext(): Boolean = iter.hasNext()
+
+  override def next(): U = f(iter.next())
+
+  override def count(): Int = iter.count()
+
+  override def copy(): XIterator[U] = new XMapIterator(iter.copy(), f)
 }
 
 
@@ -116,6 +126,13 @@ object XList {
   }
 }
 ";
+            const string code1 = @"
+object Main {
+    def count: Int = 3
+    def main : Int = count
+}
+";
+
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
