@@ -36,6 +36,16 @@ abstract class XIterator[+A] {
     foreach(item => c = c + 1)
     c
   }
+
+  def toArray[B <: A]: Array[B] = {
+    val res = new Array[B](count())
+    var index = 0
+    foreach((item) => {
+      res(index) = next()
+      index = index + 1
+    })
+    res
+  }
 }
 
 abstract class XIterable[+A] {
@@ -106,7 +116,6 @@ object XList {
   }
 }
 ";
-
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())

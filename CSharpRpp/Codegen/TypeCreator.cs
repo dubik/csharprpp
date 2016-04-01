@@ -146,20 +146,20 @@ namespace CSharpRpp.Codegen
         private static void ProcessGenerics(IEnumerable<RppVariantTypeParam> typeParams, IEnumerable<RppGenericParameter> genericParameters)
         {
             genericParameters.EachPair(typeParams, (genericParam, typeParam) =>
-            {
-                genericParam.Constraint = typeParam.ConstraintType;
-                if (typeParam.ConstraintType != null)
                 {
-                    if (typeParam.ConstraintType.IsClass)
+                    genericParam.Constraint = typeParam.ConstraintType;
+                    if (typeParam.ConstraintType != null)
                     {
-                        genericParam.Type.BaseType = typeParam.ConstraintType;
+                        if (typeParam.ConstraintType.IsClass || typeParam.ConstraintType.IsGenericParameter)
+                        {
+                            genericParam.Type.BaseType = typeParam.ConstraintType;
+                        }
+                        else
+                        {
+                            throw new Exception("Interfaces and value types are not supported yet");
+                        }
                     }
-                    else
-                    {
-                        throw new Exception("Interfaces and value types are not supported yet");
-                    }
-                }
-            });
+                });
         }
 
         public override void VisitExit(RppFunc node)
