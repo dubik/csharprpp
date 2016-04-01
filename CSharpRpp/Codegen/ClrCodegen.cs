@@ -437,15 +437,19 @@ namespace CSharpRpp.Codegen
         {
             if (function.DeclaringType.Name == "Array")
             {
+                RType elementType = function.DeclaringType.GenericArguments.First();
                 switch (function.Name)
                 {
+                    case "ctor":
+                        _body.Emit(OpCodes.Newarr, elementType.NativeType);
+                        break;
+
                     case "length":
                         _body.Emit(OpCodes.Ldlen);
                         break;
 
                     case "apply":
                     {
-                        RType elementType = function.DeclaringType.GenericArguments.First();
                         if (elementType.IsGenericParameter)
                         {
                             _body.Emit(OpCodes.Ldelem, elementType.NativeType);
@@ -460,7 +464,6 @@ namespace CSharpRpp.Codegen
 
                     case "update":
                     {
-                        RType elementType = function.DeclaringType.GenericArguments.First();
                         OpCode ldOpCode = ClrCodegenUtils.ArrayStoreOpCodeByType(elementType.NativeType);
                         _body.Emit(ldOpCode);
                         break;
@@ -579,14 +582,20 @@ namespace CSharpRpp.Codegen
             RppMethodInfo constructor = node.Constructor;
 
             var methodBase = constructor.Native;
-            Debug.Assert(methodBase != null);
-            ConstructorInfo constructorInfo = methodBase as ConstructorInfo;
-            if (constructorInfo == null)
+            if (methodBase == null)
             {
-                Console.WriteLine(methodBase.GetType());
+                CodegenForStub(constructor);
             }
-            Debug.Assert(constructorInfo != null);
-            _body.Emit(OpCodes.Newobj, constructorInfo);
+            else
+            {
+                ConstructorInfo constructorInfo = methodBase as ConstructorInfo;
+                if (constructorInfo == null)
+                {
+                    Console.WriteLine(methodBase.GetType());
+                }
+                Debug.Assert(constructorInfo != null);
+                _body.Emit(OpCodes.Newobj, constructorInfo);
+            }
         }
 
         public override void Visit(RppAssignOp node)

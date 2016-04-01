@@ -72,15 +72,15 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(NothingTy);
             scope.AddType(ArrayTy);
 
-            Instance._allTypes.Add(typeof(void).Name, UnitTy);
-            Instance._allTypes.Add(typeof(char).Name, CharTy);
-            Instance._allTypes.Add(typeof(bool).Name, BooleanTy);
-            Instance._allTypes.Add(typeof(short).Name, ShortTy);
-            Instance._allTypes.Add(typeof(int).Name, IntTy);
-            Instance._allTypes.Add(typeof(byte).Name, ByteTy);
-            Instance._allTypes.Add(typeof(long).Name, LongTy);
-            Instance._allTypes.Add(typeof(float).Name, FloatTy);
-            Instance._allTypes.Add(typeof(object).Name, AnyTy);
+            Instance._allTypes.Add(typeof (void).Name, UnitTy);
+            Instance._allTypes.Add(typeof (char).Name, CharTy);
+            Instance._allTypes.Add(typeof (bool).Name, BooleanTy);
+            Instance._allTypes.Add(typeof (short).Name, ShortTy);
+            Instance._allTypes.Add(typeof (int).Name, IntTy);
+            Instance._allTypes.Add(typeof (byte).Name, ByteTy);
+            Instance._allTypes.Add(typeof (long).Name, LongTy);
+            Instance._allTypes.Add(typeof (float).Name, FloatTy);
+            Instance._allTypes.Add(typeof (object).Name, AnyTy);
         }
 
         public static RType ImportClass(Type systemType)
@@ -99,6 +99,7 @@ namespace CSharpRpp.TypeSystem
         {
             RType arrayType = new RType("Array") {IsArray = true};
             RppGenericParameter genericParameter = arrayType.DefineGenericParameters(new[] {"A"})[0];
+            arrayType.DefineConstructor(RMethodAttributes.Public, new[] {new RppParameterInfo("size", IntTy)});
             arrayType.DefineMethod("length", RMethodAttributes.Public, IntTy, new RppParameterInfo[0]);
             arrayType.DefineMethod("apply", RMethodAttributes.Public, genericParameter.Type, new[] {new RppParameterInfo("index", IntTy)},
                 new RppGenericParameter[0]);
