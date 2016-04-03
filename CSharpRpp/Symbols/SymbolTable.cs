@@ -134,7 +134,7 @@ namespace CSharpRpp.Symbols
                 return methods;
             }
 
-            return Parent != null ? Parent.LookupFunction(name) : Collections.NoRFuncsCollection;
+            return Parent?.LookupFunction(name) ?? Collections.NoRFuncsCollection;
         }
 
         public RppFieldInfo LookupField(string name)

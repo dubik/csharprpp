@@ -27,10 +27,7 @@ namespace CSharpRpp
                 throw new Exception("TargetType should be specified before anaylyze is called");
             }
 
-            //IEnumerable<RppType> typeArgs = T.BaseConstructorCall.BaseClassTypeArgs;
-
             RType classType = TargetType;
-            
             // TODO It's kinda weird to have resolution here and not in the scope, because similar
             // lookup is done for methods
             while (classType != null && Field == null)
@@ -44,39 +41,20 @@ namespace CSharpRpp
                 classType = classType.BaseType;
             }
 
+
             if (Field == null)
             {
+                var functions = scope.LookupFunction(Name);
+                if (functions.Any(f => f.Parameters.IsEmpty()))
+                {
+                    RppFuncCall funcCall = new RppFuncCall(Name, Collections.NoExprs);
+                    return funcCall.Analyze(scope, diagnostic);
+                }
+
                 throw SemanticExceptionFactory.ValueIsNotMember(Token, TargetType.ToString());
             }
 
             Debug.Assert(classType != null, "obj != null");
-
-            /*
-            if (Field.Type.IsGenericParameter())
-            {
-                // Figure out generic args from the type of the target type
-                // class Option[A]
-                // class Some() extends Option[Int]
-                // so 'Int' will be part of RppConstructorCall or 
-                // class Some[A](val k : A)
-                // is TargetType (RppGenericObjectType)
-
-                ClassType = FindSpecializedClassInHierarchy(classType.Name);
-                Debug.Assert(ClassType != null, "ClassType can't be null because we found that earlier");
-
-                RppGenericObjectType genericClassType = ClassType as RppGenericObjectType;
-                Debug.Assert(genericClassType != null, "Field is generic so has to be a ClassType");
-
-                Type fieldRuntimeType = Field.Type.Runtime;
-                Type = RppNativeType.Create(genericClassType.GenericArguments.ElementAt(fieldRuntimeType.GenericParameterPosition));
-            }
-            else
-            {
-                Debug.Assert(classType != null, "obj != null");
-                ClassType = new RppObjectType(classType);
-                Type = Field.Type;
-            }
-            */
 
             Type = new ResolvableType(Field.Type);
 

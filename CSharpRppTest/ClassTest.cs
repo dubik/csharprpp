@@ -620,5 +620,25 @@ object Main {
             object propertiesInst = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(27, propertiesInst.GetPropertyValue("item"));
         }
+
+        [TestMethod]
+        public void CallingFunctionsWithoutParens()
+        {
+            const string code = @"
+class Foo {
+    def func: Int = 13
+}
+
+object Main {
+    def main : Int = {
+        val f = new Foo
+        f.func
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+        }
     }
 }
