@@ -41,7 +41,6 @@ namespace CSharpRpp
                 classType = classType.BaseType;
             }
 
-
             if (Field == null)
             {
                 var functions = scope.LookupFunction(Name);
@@ -120,7 +119,7 @@ namespace CSharpRpp
 
         public override int GetHashCode()
         {
-            return (Field != null ? Field.GetHashCode() : 0);
+            return Field?.GetHashCode() ?? 0;
         }
 
         #endregion
