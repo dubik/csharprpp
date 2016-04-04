@@ -542,7 +542,7 @@ namespace CSharpRpp
         /// <param name="args">list of expressions</param>
         /// <param name="function">target function</param>
         /// <returns>list of arguments</returns>
-        private static List<IRppExpr> RewriteArgListForVariadicParameter(SymbolTable scope, IList<RType> genericArguments, IList<IRppExpr> args,
+        private List<IRppExpr> RewriteArgListForVariadicParameter(SymbolTable scope, IList<RType> genericArguments, IList<IRppExpr> args,
             RppMethodInfo function)
         {
             List<RppParameterInfo> funcParams = function.Parameters.ToList();
@@ -553,10 +553,16 @@ namespace CSharpRpp
             RppParameterInfo variadicParam = funcParams.Find(p => p.IsVariadic);
 
             RType elementType = GetElementType(variadicParam.Type);
+
             // TODO this won't help when variadic func uses generic type from class and not from method
             if (elementType.IsGenericParameter) // If type is generic we shouldn't take _that_ type, we should get type from the call itself
             {
                 int targetFuncParamTypePosition = elementType.GenericParameterPosition;
+                if (genericArguments.Count <= targetFuncParamTypePosition)
+                {
+                    throw SemanticExceptionFactory.MethodGenericArgumentIsNotSpecified(Token);
+                }
+
                 elementType = genericArguments[targetFuncParamTypePosition];
             }
 

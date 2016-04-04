@@ -46,6 +46,11 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(109, FormatErrorAndPointAtToken(token, $"value {token.Text} is not a member of {typeName}"));
         }
 
+        public static SemanticException MethodGenericArgumentIsNotSpecified(IToken token)
+        {
+            return new SemanticException(110, FormatErrorAndPointAtToken(token, "please specify generic arguments, type inference is more limited when varargs are used"));
+        }
+
         private static string MethodString(RppMethodInfo method)
         {
             if (method.Name == "ctor")
