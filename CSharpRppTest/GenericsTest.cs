@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -391,6 +388,27 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "execute", null);
             Assert.AreEqual("Hello", res);
+        }
+
+        [TestMethod]
+        public void MixClassAndMethodGenerics()
+        {
+            const string code = @"
+class ObjRef[T](val value: T) {
+  def map[U](f: T => U): U = f(value)
+}
+
+object Main {
+  def main(): Int = {
+    val objRef = new ObjRef(13)
+    val ret = objRef.map(x => x * 2)
+    ret
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(26, res);
         }
     }
 }

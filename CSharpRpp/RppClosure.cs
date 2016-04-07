@@ -103,5 +103,11 @@ namespace CSharpRpp
         {
             return returnType.Name == "Unit";
         }
+
+        public override string ToString()
+        {
+            string bindings = string.Join(", ", Bindings.Select(b => $"{b.Name}: {b.Type}"));
+            return $"{bindings} => {Expr}: {Expr.Type}";
+        }
     }
 }

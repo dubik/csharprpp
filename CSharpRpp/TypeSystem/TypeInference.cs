@@ -170,7 +170,8 @@ namespace CSharpRpp.TypeSystem
             var targetTypes = targetList as IList<RType> ?? targetList.ToList();
             var stage1 = callList.Zip(targetTypes, (callTy, targetTy) => Infer(callTy, targetTy, dict)).ToList();
             var stage2 = stage1.Zip(targetTypes, (callTy, targetTy) => Infer(callTy, targetTy, dict)).ToList();
-            return stage2;
+            var stage3 = stage2.Zip(targetTypes, (callTy, targetTy) => Infer(callTy, targetTy, dict)).ToList();
+            return stage3;
         }
 
         private static RType Infer(RType source, RType target, IDictionary<int, RType> dict)

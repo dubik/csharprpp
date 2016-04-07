@@ -12,7 +12,7 @@ namespace CSharpRpp.TypeSystem
         public static ResolvableType AnyTy = new ResolvableType(RppTypeSystem.AnyTy);
         public static ResolvableType BooleanTy = new ResolvableType(RppTypeSystem.BooleanTy);
         public static ResolvableType NothingTy = new ResolvableType(RppTypeSystem.NothingTy);
-        public static ResolvableType UndefinedTy = new ResolvableType(new RTypeName("Undefined"));
+        public static ResolvableType UndefinedTy = new ResolvableType(RppTypeSystem.Undefined);
 
         [NotNull]
         public RTypeName Name { get; }

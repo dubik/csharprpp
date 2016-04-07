@@ -95,6 +95,12 @@ abstract class XList[+A] extends XIterable[A] {
     }
     res
   }
+
+    def map[U](f: A => U): XList[U] = XFunc.map(iterator, f).toList
+}
+
+object XFunc {
+  def map[A, U](iter: XIterator[A], f: A => U): XIterator[U] = new XMapIterator(iter, f)
 }
 
 object XNil extends XList[Nothing] {
@@ -129,12 +135,26 @@ object XList {
 object Main {
     def main: Unit = {
         val nums = XList[Int](1, 2, 3, 4, 5)
+        nums.map(x => x * 2)
     }
 }
 ";
 
+            const string code1 = @"
+class ObjRef[T](val value: T) {
+  def map[U](f: T => U): U = f(value)
+}
+
+object Main {
+  def main(): Int = {
+    val objRef = new ObjRef(13)
+    val ret = objRef.map(x => x * 2)
+    ret
+  }
+}
+";
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();
