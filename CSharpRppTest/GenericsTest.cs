@@ -410,5 +410,24 @@ object Main {
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(26, res);
         }
+
+        [TestMethod]
+        public void UsingClosuresInFunctionsWithGenericParameters()
+        {
+            const string code = @"
+object XFunc {
+  def map[A, U](v: A, f: A => U) : U = f(v)
+}
+
+object Main {
+  def main: Int = {
+    XFunc.map[Int, Int](13, x => x * 2)
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(26, res);
+        }
     }
 }

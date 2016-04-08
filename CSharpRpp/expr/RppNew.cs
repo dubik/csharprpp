@@ -45,7 +45,7 @@ namespace CSharpRpp
 
             var constructor = FindConstructor(classType);
 
-            _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, constructor.Parameters);
+            _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, constructor.Parameters, new List<RType>());
             NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => node is RppClosure, diagnostic);
 
             IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;

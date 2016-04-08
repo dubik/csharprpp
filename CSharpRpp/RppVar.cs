@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Expr;
@@ -52,7 +53,7 @@ namespace CSharpRpp
             {
                 Type.Resolve(scope);
 
-                InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type);
+                InitExpr = TypeInference.ReplaceUndefinedClosureTypesIfNeeded(InitExpr, Type, new List<RType>());
                 InitExpr = (IRppExpr) InitExpr.Analyze(scope, diagnostic);
             }
             else

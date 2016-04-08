@@ -447,11 +447,11 @@ namespace CSharpRpp
             Type = type;
         }
 
-        public static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams)
+        public static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams, IList<RType> genericArguments)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
             IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count()).ToList();
-            return rppExprs.Zip(funcParamTypes, TypeInference.ReplaceUndefinedClosureTypesIfNeeded).ToList();
+            return rppExprs.Zip(funcParamTypes, (expr, funcTypeParam) => TypeInference.ReplaceUndefinedClosureTypesIfNeeded(expr, funcTypeParam, genericArguments)).ToList();
         }
 
         /// <summary>
@@ -509,7 +509,7 @@ namespace CSharpRpp
                 throw SemanticExceptionFactory.MemberNotFound(Token, TargetType.Name);
             }
 
-            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Method.Parameters);
+            IList<IRppExpr> args = ReplaceUndefinedClosureTypesIfNeeded(ArgList, resolveResults.Method.Parameters, genericArguments);
             //var args = ArgList;
             NodeUtils.AnalyzeWithPredicate(outerScope, args, node => node is RppClosure, diagnostic);
             if (resolveResults.Method.IsVariadic)

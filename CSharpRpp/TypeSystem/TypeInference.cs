@@ -144,7 +144,7 @@ namespace CSharpRpp.TypeSystem
         }
 
         [NotNull]
-        public static IRppExpr ReplaceUndefinedClosureTypesIfNeeded([NotNull] IRppExpr expr, ResolvableType targetType)
+        public static IRppExpr ReplaceUndefinedClosureTypesIfNeeded([NotNull] IRppExpr expr, ResolvableType targetType, IList<RType> genericArgs)
         {
             if (expr is RppClosure)
             {
@@ -153,7 +153,18 @@ namespace CSharpRpp.TypeSystem
                 if (targetType.IsDefined() && hasUndefinedClosureBinding)
                 {
                     RType type = targetType.Value;
+
+                    if (genericArgs.NonEmpty())
+                    {
+                        // Substitute generics parameters with specified generic arguments
+                        // def func[A,U]()...
+                        // func[Int, Float]()...
+                        // Function1[!!A, !!U] -> Function1[Int, Float]
+                        type = type.MakeGenericType(genericArgs.ToArray());
+                    }
+
                     IReadOnlyCollection<RType> genericArguments = type.GenericArguments;
+
                     List<IRppParam> newBindings =
                         genericArguments.Zip(closure.Bindings,
                             (varTypeGenArg, binding) => binding.CloneWithNewType(varTypeGenArg)).ToList();
