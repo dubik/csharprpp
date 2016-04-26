@@ -18,7 +18,7 @@ namespace CSharpRpp
         {
             public RppMethodInfo Method { get; }
             public IEnumerable<RType> TypeArguments { get; }
-            private bool _isInsideClosure;
+            private readonly bool _isInsideClosure;
 
             public ResolveResults(RppMethodInfo resolvedFunc)
             {
@@ -52,9 +52,15 @@ namespace CSharpRpp
                 Debug.Assert(methodReturnType != null, "methodReturnType != null");
                 RType[] genericArguments = GetTypeArguments(typeArgs).ToArray();
                 RType returnType = (methodReturnType.IsGenericType || methodReturnType.IsGenericParameter) && genericArguments.Length != 0
-                    ? methodReturnType.MakeGenericType(genericArguments)
+                    ? MakeReturnType(methodReturnType, genericArguments)
                     : methodReturnType;
                 return returnType;
+            }
+
+            private RType MakeReturnType(RType methodReturnType, RType[] genericArguments)
+            {
+                RppInflatedMethodInfo inflatedMethod = (RppInflatedMethodInfo) Method.MakeGenericType(genericArguments);
+                return inflatedMethod.ReturnType;
             }
 
             private IEnumerable<RType> GetTypeArguments(IEnumerable<RType> typeArgs)

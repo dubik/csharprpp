@@ -23,7 +23,6 @@ namespace CSharpRpp
         private List<RppFunc> _funcs;
         private IList<RppField> _fields;
         private IList<RppField> _classParams;
-        private readonly List<IRppExpr> _constrExprs;
 
         public ClassKind Kind { get; }
 
@@ -79,7 +78,7 @@ namespace CSharpRpp
             IEnumerable<IRppNode> rppNodes = classBody as IList<IRppNode> ?? classBody.ToList();
             _funcs = rppNodes.OfType<RppFunc>().Where(f => !f.IsConstructor).ToList();
             _funcs.ForEach(DefineFunc);
-            _constrExprs = rppNodes.OfType<IRppExpr>().ToList();
+            var constrExprs = rppNodes.OfType<IRppExpr>().ToList();
             _typeParams = typeParams;
             Modifiers = modifiers;
 
@@ -87,7 +86,7 @@ namespace CSharpRpp
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MfUnspecified || IsCase).ToList();
 
-            var primaryConstructor = CreatePrimaryConstructor(_constrExprs);
+            var primaryConstructor = CreatePrimaryConstructor(constrExprs);
             _constructors.Add(primaryConstructor);
 
             CreateProperties();

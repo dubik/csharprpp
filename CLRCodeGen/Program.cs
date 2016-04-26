@@ -345,9 +345,37 @@ namespace CLRCodeGen
 
         private static string GetGetterAccessorName(string propertyName) => $"get_{propertyName}";
 
+        private static void CheckIfInlfatedClassIsGeneric()
+        {
+            AssemblyName assemblyName = new AssemblyName("inflatedClass");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".exe");
+
+            // Stack[T]
+            TypeBuilder clazz = moduleBuilder.DefineType("Stack", TypeAttributes.Public);
+            GenericTypeParameterBuilder[] genericBuilder = clazz.DefineGenericParameters("T");
+            Type genericTType = genericBuilder[0].AsType();
+
+            Type retType = clazz.MakeGenericType(typeof (int));
+
+            bool genericType = retType.IsGenericType;
+            bool genericTypeDef = retType.IsGenericTypeDefinition;
+            bool clazzIsGenericTypeDef = clazz.IsGenericTypeDefinition;
+
+            TypeBuilder listTy = moduleBuilder.DefineType("List", TypeAttributes.Public);
+            GenericTypeParameterBuilder genericTypeParameterBuilders = listTy.DefineGenericParameters("A")[0];
+            Type aTy = genericTypeParameterBuilders.AsType();
+
+            Type stillGenericType = clazz.MakeGenericType(aTy);
+            bool stillIsGenericType = stillGenericType.IsGenericType;
+            bool stillIsGenericTypeDef = stillGenericType.IsGenericTypeDefinition;
+
+            Type makeGenericType = stillGenericType.MakeGenericType(typeof (int));
+        }
+
         public static void Main()
         {
-            CreateProperty();
+            CheckIfInlfatedClassIsGeneric();
         }
     }
 }

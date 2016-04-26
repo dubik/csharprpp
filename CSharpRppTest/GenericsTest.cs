@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using CSharpRpp;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
@@ -56,7 +59,7 @@ class Foo[T] extends Bar[Int]
             Type fooTy = Utils.ParseAndCreateType(code, "Foo");
             Assert.IsNotNull(fooTy);
             Assert.IsTrue(fooTy.IsGenericType);
-            Assert.AreEqual(typeof (int), fooTy.BaseType?.GenericTypeArguments[0]);
+            Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
 
         [TestMethod]
@@ -70,9 +73,8 @@ class Foo extends Bar[Int]
             Type fooTy = Utils.ParseAndCreateType(code, "Foo");
             Assert.IsNotNull(fooTy);
             Assert.IsFalse(fooTy.IsGenericType);
-            Assert.AreEqual(typeof (int), fooTy.BaseType?.GenericTypeArguments[0]);
+            Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
-
 
         [TestMethod]
         [TestCategory("Generics")]
@@ -260,7 +262,7 @@ object Main
         {
             RType listOfFruitsTy;
             RType listOfApplesTy;
-            CreateTypes(RppGenericParameterCovariance.Invariant, out listOfFruitsTy, out listOfApplesTy);
+            CreateTypes(RppGenericParameterVariance.Invariant, out listOfFruitsTy, out listOfApplesTy);
 
             // List[Fruit] = List[Apple]
             Assert.IsFalse(listOfFruitsTy.IsAssignable(listOfApplesTy));
@@ -275,7 +277,7 @@ object Main
         {
             RType listOfFruitsTy;
             RType listOfApplesTy;
-            CreateTypes(RppGenericParameterCovariance.Covariant, out listOfFruitsTy, out listOfApplesTy);
+            CreateTypes(RppGenericParameterVariance.Covariant, out listOfFruitsTy, out listOfApplesTy);
 
             // List[Fruit] = List[Apple]
             Assert.IsTrue(listOfFruitsTy.IsAssignable(listOfApplesTy));
@@ -284,14 +286,13 @@ object Main
             Assert.IsFalse(listOfApplesTy.IsAssignable(listOfFruitsTy));
         }
 
-
         [TestMethod]
         [TestCategory("Covariance")]
         public void ContravariantTypesEquality()
         {
             RType listOfFruitsTy;
             RType listOfApplesTy;
-            CreateTypes(RppGenericParameterCovariance.Contravariant, out listOfFruitsTy, out listOfApplesTy);
+            CreateTypes(RppGenericParameterVariance.Contravariant, out listOfFruitsTy, out listOfApplesTy);
 
             // List[Fruit] = List[Apple]
             Assert.IsFalse(listOfFruitsTy.IsAssignable(listOfApplesTy));
@@ -299,6 +300,26 @@ object Main
             // List[Apple] = List[Fruit]
             Assert.IsTrue(listOfApplesTy.IsAssignable(listOfFruitsTy));
         }
+
+        [TestMethod]
+        public void TestSpecializedGenericTypesEquality()
+        {
+// class Foo[T](val id: T)
+// class SecondFoo[A](id: Int, val name: A) extends Foo[Int](id)
+            RType fooTy = new RType("Foo");
+            fooTy.DefineGenericParameters("T");
+            RType intFooTy = fooTy.MakeGenericType(IntTy);
+
+            RType secondTy = new RType("SecondFoo");
+            secondTy.DefineGenericParameters("A");
+            secondTy.BaseType = intFooTy;
+
+            Assert.IsTrue(secondTy.IsGenericType);
+            Assert.IsTrue(secondTy.IsGenericTypeDefinition);
+
+            Assert.IsTrue(intFooTy.IsAssignable(secondTy));
+        }
+
 
         /// <summary>
         /// Creates 2 types, List[Fruit] and List[Apple], where:
@@ -308,23 +329,126 @@ object Main
         /// class Apple extends Fruit
         /// </code>
         /// </summary>
-        /// <param name="covariance">covariance type for type argument <code>'A'</code></param>
+        /// <param name="variance">variance type for type argument <code>'A'</code></param>
         /// <param name="listOfFruits"></param>
         /// <param name="listOfApples"></param>
-        private static void CreateTypes(RppGenericParameterCovariance covariance, out RType listOfFruits, out RType listOfApples)
+        private static void CreateTypes(RppGenericParameterVariance variance, out RType listOfFruits, out RType listOfApples)
         {
             RType listTy = new RType("List", RTypeAttributes.Interface);
-            RppGenericParameter[] genericParameters = listTy.DefineGenericParameters(new[] {"A"});
-            genericParameters[0].Covariance = covariance;
+            RppGenericParameter[] genericParameters = listTy.DefineGenericParameters("A");
+            genericParameters[0].Variance = variance;
             RType fruitTy = new RType("Fruit");
 
-            RType listOfFruitsTy = listTy.MakeGenericType(new[] {fruitTy});
+            RType listOfFruitsTy = listTy.MakeGenericType(fruitTy);
 
             RType appleTy = new RType("Apple", RTypeAttributes.Class, fruitTy, null);
-            listOfApples = listTy.MakeGenericType(new[] {appleTy});
+            listOfApples = listTy.MakeGenericType(appleTy);
 
             listOfFruits = listOfFruitsTy;
         }
+
+        [TestMethod]
+        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        public void InflateMinimalMethod()
+        {
+            RType fooTy = new RType("Foo");
+            // func(): Unit
+            RppMethodInfo method = new RppMethodInfo("func", fooTy, RMethodAttributes.Public, UnitTy, new RppParameterInfo[0]);
+            RppMethodInfo inflatedMethod = method.MakeGenericType(new RType[0]);
+            Assert.AreEqual(method, inflatedMethod);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        public void InflateReturnTypeOfSmallMethod()
+        {
+            RType fooTy = new RType("Foo");
+
+            // func[A](): A
+            RppMethodInfo method = new RppMethodInfo("func", fooTy, RMethodAttributes.Public, UnitTy, new RppParameterInfo[0]);
+            RppGenericParameter[] genericParams = method.DefineGenericParameters(new[] {"A"});
+            method.ReturnType = genericParams[0].Type;
+            RppMethodInfo inflatedMethod = method.MakeGenericType(new[] {IntTy});
+            Assert.AreEqual(IntTy, inflatedMethod.ReturnType);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        public void InflateReturnTypeAndOneParamOfSmallMethod()
+        {
+            RType fooTy = new RType("Foo");
+
+            // func[A](x: A): A
+            RppMethodInfo method = new RppMethodInfo("func", fooTy, RMethodAttributes.Public, UnitTy, new RppParameterInfo[0]);
+            RppGenericParameter[] genericParams = method.DefineGenericParameters(new[] {"A"});
+            method.Parameters = new[] {new RppParameterInfo("x", genericParams[0].Type)};
+            method.ReturnType = genericParams[0].Type;
+            RppMethodInfo inflatedMethod = method.MakeGenericType(new[] {IntTy});
+            Assert.AreEqual(IntTy, inflatedMethod.ReturnType);
+            Assert.AreEqual(IntTy, inflatedMethod.Parameters[0].Type);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void InflateSimpleGenericType()
+        {
+            /*
+             class Foo[A] {
+                def func: A
+             }
+             */
+            RType fooTy = new RType("Foo");
+            RType aTy = fooTy.DefineGenericParameters(new[] {"A"}).First().Type;
+            RppMethodInfo method = fooTy.DefineMethod("foo", RMethodAttributes.Public);
+            method.ReturnType = aTy;
+            RType intFooTy = fooTy.MakeGenericType(new[] {IntTy});
+            Assert.AreEqual(IntTy, intFooTy.Methods[0].ReturnType);
+        }
+
+        [TestMethod]
+        public void InflateBaseClass()
+        {
+            /*
+             class Bar[A] {
+               def func: A
+             }
+             class Foo[X] extends Bar[X]
+             */
+            RType barTy = new RType("Bar");
+            RType aTy = barTy.DefineGenericParameters(new[] {"A"}).First().Type;
+            RppMethodInfo method = barTy.DefineMethod("foo", RMethodAttributes.Public);
+            method.ReturnType = aTy;
+
+            RType fooTy = new RType("Foo");
+            RType xTy = fooTy.DefineGenericParameters("X").First().Type;
+            fooTy.BaseType = barTy.MakeGenericType(xTy);
+
+            RType specializedType = fooTy.MakeGenericType(IntTy);
+            RType specifliedBaseType = specializedType.BaseType;
+            Debug.Assert(specifliedBaseType != null, "specifliedBaseType != null");
+            var specializedMethods = specifliedBaseType.Methods;
+            Assert.AreEqual(IntTy, specializedMethods[0].ReturnType);
+        }
+
+        [TestMethod]
+        public void InflateTypeTwice()
+        {
+            RType barTy = new RType("Bar");
+            RType bTy = barTy.DefineGenericParameters("B")[0].Type;
+
+            RType fooTy = new RType("Foo");
+            RppGenericParameter[] fooTyGenericParams = fooTy.DefineGenericParameters("F");
+            RType fTy = fooTyGenericParams[0].Type;
+
+            // Bar[B], Foo[F], B = F, e.g. Bar[F]
+            RType barOfFTy = barTy.MakeGenericType(fTy);
+            Assert.IsTrue(barOfFTy.IsGenericType);
+            var genericArguments = barOfFTy.GenericArguments;
+            CollectionAssert.AreEqual(ListExtensions.List(fTy), genericArguments.ToList());
+            var genericParameters = barOfFTy.GenericParameters.Select(gp => gp.Type).ToList();
+            CollectionAssert.AreEqual(ListExtensions.List(bTy), genericParameters);
+        }
+
 
         [TestMethod]
         [TestCategory("Generics")]
@@ -391,6 +515,7 @@ object Main {
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void MixClassAndMethodGenerics()
         {
             const string code = @"
@@ -412,6 +537,7 @@ object Main {
         }
 
         [TestMethod]
+        [TestCategory("Generics")]
         public void UsingClosuresInFunctionsWithGenericParameters()
         {
             const string code = @"
@@ -428,6 +554,34 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(26, res);
+        }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void CallFunctionWithTwoGenericsButInReturnValueUsedOnlyOneGeneric()
+        {
+            const string code = @"
+class Bar[X]
+
+class Foo[A](val k: A) {
+  def process[U](x: Bar[A]): Bar[U] = Factory.map[A, U](x)
+}
+
+object Factory {
+    def map[A, U](x: Bar[A]): Bar[U] = null
+}
+
+object Main {
+    def main: Any = {
+        val f = new Foo(10)
+        var b = new Bar[Int]
+        f.process[Int](b)
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNull(res);
         }
     }
 }

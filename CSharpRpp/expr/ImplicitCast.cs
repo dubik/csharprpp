@@ -99,7 +99,7 @@ namespace CSharpRpp.Expr
                 return true;
             }
 
-            if (source.IsAssignable(dest))
+            if (dest.IsAssignable(source))
             {
                 return true;
             }

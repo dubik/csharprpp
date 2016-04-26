@@ -155,10 +155,10 @@ object Main {
             RppGenericParameter[] genericParams = closureTy.DefineGenericParameters(genericNames);
             for (int i = 0; i < genericParams.Length - 1; i++)
             {
-                genericParams[i].Covariance = RppGenericParameterCovariance.Contravariant;
+                genericParams[i].Variance = RppGenericParameterVariance.Contravariant;
             }
 
-            genericParams[genericParams.Length - 1].Covariance = RppGenericParameterCovariance.Covariant;
+            genericParams[genericParams.Length - 1].Variance = RppGenericParameterVariance.Covariant;
             return closureTy;
         }
 

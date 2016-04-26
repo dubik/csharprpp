@@ -77,7 +77,6 @@ class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterato
   override def copy(): XIterator[U] = new XMapIterator(iter.copy(), f)
 }
 
-
 abstract class XList[+A] extends XIterable[A] {
   def head: A
   def tail: XList[A]
@@ -96,7 +95,7 @@ abstract class XList[+A] extends XIterable[A] {
     res
   }
 
-    def map[U](f: A => U): XList[U] = XFunc.map(iterator, f).toList
+    def map[U](f: A => U): XList[U] = XFunc.map[A, U](iterator, f).toList
 }
 
 object XFunc {
@@ -141,18 +140,17 @@ object Main {
 ";
 
             const string code1 = @"
-class ObjRef[T](val value: T) {
-  def map[U](f: T => U): U = f(value)
-}
+class Foo[T](val id: T)
 
-object Main {
-  def main(): Int = {
-    val objRef = new ObjRef(13)
-    val ret = objRef.map(x => x * 2)
-    ret
-  }
+class SecondFoo[A](id: Int, val name: A) extends Foo[Int](id)
+
+object Bar
+{
+    def main : Foo[Int] = new SecondFoo[String](10, ""Hello"")
 }
 ";
+            
+
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())

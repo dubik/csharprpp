@@ -30,12 +30,14 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsStatic => DeclaringType.Name.EndsWith("$");
 
-        public bool IsGenericMethod
+        public bool ContainsGenericParameters
             => ReturnType.IsGenericType || ReturnType.IsGenericParameter || Parameters.Any(p => p.Type.IsGenericType || p.Type.IsGenericParameter);
+
+        public bool IsGenericMethod => GenericParameters.NonEmpty();
 
         public RppMethodInfo GenericMethodDefinition { get; set; }
 
-        private RppGenericParameter[] _genericParameters;
+        private RppGenericParameter[] _genericParameters = {};
 
         public virtual RppGenericParameter[] GenericParameters => _genericParameters;
 
@@ -66,6 +68,17 @@ namespace CSharpRpp.TypeSystem
             return GenericParameters != null && GenericParameters.Length > 0;
         }
 
+        public RppMethodInfo MakeGenericType(RType[] genericArguments)
+        {
+            if (IsGenericMethod || ContainsGenericParameters)
+            {
+                RppInflatedMethodInfo inflatedType = new RppInflatedMethodInfo(this, genericArguments, DeclaringType);
+                return inflatedType;
+            }
+
+            return this;
+        }
+
         public static string GetSetterAccessorName(string propertyName) => $"set_{propertyName}";
 
         public static string GetGetterAccessorName(string propertyName) => $"get_{propertyName}";
@@ -94,13 +107,13 @@ namespace CSharpRpp.TypeSystem
             List<string> res = new List<string>();
 
             _attrToStr.Aggregate(res, (list, tuple) =>
-                                      {
-                                          if (attrs.HasFlag(tuple.Item1))
-                                          {
-                                              list.Add(tuple.Item2);
-                                          }
-                                          return list;
-                                      });
+                {
+                    if (attrs.HasFlag(tuple.Item1))
+                    {
+                        list.Add(tuple.Item2);
+                    }
+                    return list;
+                });
 
             return string.Join(" ", res);
         }

@@ -123,7 +123,7 @@ namespace CSharpRpp.TypeSystem
         }
     }
 
-    public enum RppGenericParameterCovariance
+    public enum RppGenericParameterVariance
     {
         Invariant,
 
@@ -144,20 +144,20 @@ namespace CSharpRpp.TypeSystem
         public RType Type { get; set; }
         public int Position { get; set; }
         public GenericTypeParameterBuilder Native { get; private set; }
-        public RppGenericParameterCovariance Covariance { get; set; }
+        public RppGenericParameterVariance Variance { get; set; }
         public RType Constraint { get; set; }
 
         public RppGenericParameter(string name)
         {
             Name = name;
-            Covariance = RppGenericParameterCovariance.Invariant;
+            Variance = RppGenericParameterVariance.Invariant;
         }
 
         public override string ToString()
         {
-            string covarianceStr = Covariance == RppGenericParameterCovariance.Covariant
+            string covarianceStr = Variance == RppGenericParameterVariance.Covariant
                 ? "+"
-                : Covariance == RppGenericParameterCovariance.Contravariant ? "-" : "";
+                : Variance == RppGenericParameterVariance.Contravariant ? "-" : "";
             return $"{covarianceStr}{Name}";
         }
 
@@ -346,7 +346,7 @@ namespace CSharpRpp.TypeSystem
 
         public virtual IReadOnlyCollection<RType> GenericArguments => Collections.NoRTypes;
 
-        public IReadOnlyCollection<RppGenericParameter> GenericParameters
+        public virtual IReadOnlyCollection<RppGenericParameter> GenericParameters
         {
             get
             {
@@ -387,6 +387,8 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
+        public virtual bool IsGenericTypeDefinition => GenericParameters.Any();
+
         public RType([NotNull] string name, [NotNull] Type type)
         {
             Name = name;
@@ -411,7 +413,7 @@ namespace CSharpRpp.TypeSystem
             if (type.IsClass)
             {
                 Type baseType = type.BaseType;
-                if (baseType != null && baseType != typeof (object))
+                if (baseType != null && baseType != typeof(object))
                 {
                     BaseType = new RType(baseType.Name, baseType);
                 }
@@ -429,7 +431,7 @@ namespace CSharpRpp.TypeSystem
             BaseType = AnyTy;
         }
 
-        public RType(string name, RTypeAttributes attributes, RType parent, RType declaringType)
+        public RType(string name, RTypeAttributes attributes, RType parent, RType declaringType = null)
         {
             Name = name;
             Attributes = attributes;
@@ -591,10 +593,10 @@ namespace CSharpRpp.TypeSystem
 
         public RType MakeArrayType()
         {
-            return ArrayTy.MakeGenericType(new[] {this});
+            return ArrayTy.MakeGenericType(this);
         }
 
-        public virtual RType MakeGenericType(RType[] genericArguments)
+        public virtual RType MakeGenericType(params RType[] genericArguments)
         {
             if (IsGenericParameter)
             {
@@ -605,7 +607,7 @@ namespace CSharpRpp.TypeSystem
             return inflatedType;
         }
 
-        public RppGenericParameter[] DefineGenericParameters(string[] genericParameterName)
+        public RppGenericParameter[] DefineGenericParameters(params string[] genericParameterName)
         {
             if (_genericParameters.Any())
             {
@@ -859,41 +861,51 @@ namespace CSharpRpp.TypeSystem
         /// <returns><code>true</code>if type can be assigned</returns>
         public bool IsAssignable(RType right)
         {
-            if (!IsSubclassOf(right))
+            if (!right.IsSubclassOf(this))
             {
                 return false;
             }
 
             if (BaseType != null && BaseType.IsAssignable(right))
             {
+                if (IsGenericType)
+                {
+                    return VarianceCheck(right);
+                }
+
                 return true;
             }
 
             if (IsGenericType)
             {
-                // TODO This is quite suspicious, it takes generic parameters from type or definition type, but what if type added 
-                // additional generic parameters?
-                RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
-                int index = 0;
-                return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                    {
-                        RppGenericParameter genericParam = genericParametrs[index++];
-                        return Compare(genericParam.Covariance, leftGeneric, rightGeneric);
-                    }).Contains(false);
+                return VarianceCheck(right);
             }
 
             return true;
         }
 
-        private static bool Compare(RppGenericParameterCovariance covariance, RType leftGeneric, RType rightGeneric)
+        private bool VarianceCheck(RType right)
         {
-            switch (covariance)
+            // TODO This is quite suspicious, it takes generic parameters from type or definition type, but what if type added 
+            // additional generic parameters?
+            RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
+            int index = 0;
+            return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
+                {
+                    RppGenericParameter genericParam = genericParametrs[index++];
+                    return Compare(genericParam.Variance, leftGeneric, rightGeneric);
+                }).Contains(false);
+        }
+
+        private static bool Compare(RppGenericParameterVariance variance, RType leftGeneric, RType rightGeneric)
+        {
+            switch (variance)
             {
-                case RppGenericParameterCovariance.Invariant:
+                case RppGenericParameterVariance.Invariant:
                     return leftGeneric.IsSame(rightGeneric);
-                case RppGenericParameterCovariance.Covariant:
+                case RppGenericParameterVariance.Covariant:
                     return rightGeneric.IsSubclassOf(leftGeneric);
-                case RppGenericParameterCovariance.Contravariant:
+                case RppGenericParameterVariance.Contravariant:
                     return leftGeneric.IsSubclassOf(rightGeneric);
                 default:
                     throw new ArgumentOutOfRangeException();

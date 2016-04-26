@@ -48,10 +48,10 @@ namespace CSharpRpp
             _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, constructor.Parameters, new List<RType>());
             NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => node is RppClosure, diagnostic);
 
-            IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;
-            if (genericParameters.Count > 0)
+            if (classType.IsGenericTypeDefinition)
             {
                 List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
+                IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;
                 var inferredTypeArguments = InferGenericArguments(genericParameters, argTypes, constructor.Parameters.Select(p => p.Type));
                 RType inferredType = Type.Value.MakeGenericType(inferredTypeArguments);
                 Type = new ResolvableType(inferredType);

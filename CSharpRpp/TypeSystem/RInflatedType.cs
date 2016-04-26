@@ -18,9 +18,13 @@ namespace CSharpRpp.TypeSystem
 
         public override IReadOnlyCollection<RType> GenericArguments => _genericArguments;
 
+        public override IReadOnlyCollection<RppGenericParameter> GenericParameters => DefinitionType.GenericParameters;
+
         private readonly RType[] _genericArguments;
 
         private Type _type;
+
+        public override bool IsGenericTypeDefinition => false;
 
         public override Type NativeType
         {
@@ -69,6 +73,11 @@ namespace CSharpRpp.TypeSystem
             if (baseType == null)
             {
                 return null;
+            }
+
+            if (!baseType.IsGenericTypeDefinition)
+            {
+                return baseType;
             }
 
             if (baseType.GenericParameters.Count == 0)

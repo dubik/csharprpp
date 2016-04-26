@@ -51,7 +51,7 @@ namespace CSharpRpp
 
             if (!Equals(Left.Type, Right.Type))
             {
-                if (!Right.Type.Value.IsAssignable(Left.Type.Value))
+                if (!Left.Type.Value.IsAssignable(Right.Type.Value))
                 {
                     throw SemanticExceptionFactory.TypeMismatch(Right.Token, Left.Type.Value.Name, Right.Type.Value.Name);
                 }

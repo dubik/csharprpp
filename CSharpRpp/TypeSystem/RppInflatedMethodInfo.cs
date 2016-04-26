@@ -69,21 +69,23 @@ namespace CSharpRpp.TypeSystem
         private RppParameterInfo[] _parameters;
         public override RppParameterInfo[] Parameters => _parameters ?? (_parameters = InflateParameters());
 
-        private RType _returnType;
-        public override RType ReturnType => _returnType ?? (_returnType = SubstitutedType(GenericMethodDefinition.ReturnType));
+        private readonly RType _returnType;
+        public override RType ReturnType => _returnType;
 
         private readonly RType[] _genericArguments;
         private MethodBase _nativeMethod;
 
-        private readonly RppGenericParameter[] _genericParameters;
-        public override RppGenericParameter[] GenericParameters => _genericParameters;
+        public override RppGenericParameter[] GenericParameters { get; }
 
-        public RppInflatedMethodInfo([NotNull] RppMethodInfo genericMethodDefinition, RType[] genericArguments, RType declaringType)
+        public RppInflatedMethodInfo([NotNull] RppMethodInfo genericMethodDefinition, [NotNull] RType[] genericArguments, [NotNull] RType declaringType)
             : base(genericMethodDefinition.Name, declaringType, genericMethodDefinition.Attributes, null, new RppParameterInfo[0])
         {
             GenericMethodDefinition = genericMethodDefinition;
             _genericArguments = genericArguments;
-            _genericParameters = genericMethodDefinition.GenericParameters;
+
+            GenericParameters = genericMethodDefinition.GenericParameters;
+
+            _returnType = SubstitutedType(GenericMethodDefinition.ReturnType);
         }
 
         private RppParameterInfo[] InflateParameters()
@@ -111,7 +113,19 @@ namespace CSharpRpp.TypeSystem
 
             if (type.IsGenericType)
             {
-                var mappedGenericArguments = type.GenericArguments.Select(ga => _genericArguments[ga.GenericParameterPosition]).ToArray();
+                RType[] mappedGenericArguments;
+                // Generictype definition is an RType which contains generic params
+                // Inflated type doesn't contain generic params but contains generic arguments
+                // So for RType we should use GenericParameters and for RInflatedType - GenericArguments
+                if (type.IsGenericTypeDefinition)
+                {
+                    mappedGenericArguments = type.GenericParameters.Select(ga => _genericArguments[ga.Position]).ToArray();
+                }
+                else
+                {
+                    mappedGenericArguments = type.GenericArguments.Select(ga => _genericArguments[ga.GenericParameterPosition]).ToArray();
+                }
+
                 var substitutedType = type.MakeGenericType(mappedGenericArguments);
                 return substitutedType;
             }
@@ -124,7 +138,7 @@ namespace CSharpRpp.TypeSystem
         {
             if (type.IsMethodGenericParameter)
             {
-                return _genericParameters[type.GenericParameterPosition].Type;
+                return _genericArguments[type.GenericParameterPosition];
             }
 
             return _genericArguments[type.GenericParameterPosition];
