@@ -269,6 +269,8 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsGenericParameter { get; internal set; }
 
+        public virtual bool IsConstructedGenericType => false;
+
         public RType DefinitionType { get; protected set; }
 
         [CanBeNull] private TypeBuilder _typeBuilder;
@@ -649,7 +651,7 @@ namespace CSharpRpp.TypeSystem
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode();
+            return base.GetHashCode();
         }
 
         #endregion
@@ -808,6 +810,27 @@ namespace CSharpRpp.TypeSystem
             return BaseType?.IsSubclassOf(targetType) ?? false;
         }
 
+        public bool IsTrueSubsclassOf(RType perhpasBaseClass)
+        {
+            RType clazz = this;
+            if (clazz == perhpasBaseClass)
+            {
+                return false;
+            }
+
+            while (clazz != null)
+            {
+                if (clazz == perhpasBaseClass)
+                {
+                    return true;
+                }
+
+                clazz = clazz.BaseType;
+            }
+
+            return false;
+        }
+
         public bool IsNumeric()
         {
             return Name == "Int" || Name == "Float" || Name == "Double" || Name == "Char" || Name == "Short" || Name == "Byte";
@@ -853,63 +876,58 @@ namespace CSharpRpp.TypeSystem
             return false;
         }
 
+        public bool IsImplementsInterface(RType interfce)
+        {
+            if (!interfce.IsInterface)
+                throw new ArgumentException("Interface is expected", nameof(interfce));
+
+            return _implementedInterfaces != null && _implementedInterfaces.Contains(interfce);
+        }
+
         /// <summary>
         /// <code>true</code> if specified type can be 'assigned' to the current one.
         /// <code>'x:this' = 'y:right'</code>
         /// </summary>
         /// <param name="right">some type</param>
         /// <returns><code>true</code>if type can be assigned</returns>
-        public bool IsAssignable(RType right)
+        public bool IsAssignable([CanBeNull] RType right)
         {
-            if (!right.IsSubclassOf(this))
+            if (right == null)
             {
                 return false;
             }
 
-            if (BaseType != null && BaseType.IsAssignable(right))
+            if (ReferenceEquals(this, right))
             {
-                if (IsGenericType)
-                {
-                    return VarianceCheck(right);
-                }
-
                 return true;
             }
 
-            if (IsGenericType)
+            if (IsPrimitive || right.IsPrimitive)
             {
-                return VarianceCheck(right);
+                return Name.Equals(right.Name);
             }
 
-            return true;
-        }
-
-        private bool VarianceCheck(RType right)
-        {
-            // TODO This is quite suspicious, it takes generic parameters from type or definition type, but what if type added 
-            // additional generic parameters?
-            RppGenericParameter[] genericParametrs = DefinitionType?.GenericParameters.ToArray() ?? GenericParameters.ToArray();
-            int index = 0;
-            return !GenericArguments.Zip(right.GenericArguments, (leftGeneric, rightGeneric) =>
-                {
-                    RppGenericParameter genericParam = genericParametrs[index++];
-                    return Compare(genericParam.Variance, leftGeneric, rightGeneric);
-                }).Contains(false);
-        }
-
-        private static bool Compare(RppGenericParameterVariance variance, RType leftGeneric, RType rightGeneric)
-        {
-            switch (variance)
+            if (IsCovariant(right))
             {
-                case RppGenericParameterVariance.Invariant:
-                    return leftGeneric.IsSame(rightGeneric);
-                case RppGenericParameterVariance.Covariant:
-                    return rightGeneric.IsSubclassOf(leftGeneric);
-                case RppGenericParameterVariance.Contravariant:
-                    return leftGeneric.IsSubclassOf(rightGeneric);
-                default:
-                    throw new ArgumentOutOfRangeException();
+                return true;
             }
+
+            if (IsInterface && right.IsImplementsInterface(this))
+            {
+                return true;
+            }
+
+            if (right.IsTrueSubsclassOf(this))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool IsCovariant([NotNull] RType right)
+        {
+            return false;
         }
     }
 }

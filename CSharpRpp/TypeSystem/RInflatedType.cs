@@ -26,6 +26,8 @@ namespace CSharpRpp.TypeSystem
 
         public override bool IsGenericTypeDefinition => false;
 
+        public override bool IsConstructedGenericType => true;
+
         public override Type NativeType
         {
             get
@@ -117,6 +119,65 @@ namespace CSharpRpp.TypeSystem
         public override RType MakeGenericType(RType[] genericArguments)
         {
             return DefinitionType.MakeGenericType(genericArguments);
+        }
+
+        protected override bool IsCovariant(RType right)
+        {
+            RInflatedType other = right as RInflatedType;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (IsConstructedGenericType && right.IsConstructedGenericType && ReferenceEquals(DefinitionType, other.DefinitionType))
+            {
+                RppGenericParameter[] genericParameters = DefinitionType.GenericParameters.ToArray();
+
+                RType[] otherGenericArguments = other.GenericArguments.ToArray();
+                for (int i = 0; i < genericParameters.Length; i++)
+                {
+                    RppGenericParameter p = genericParameters[i];
+                    RType type = _genericArguments[i];
+                    RType otherType = otherGenericArguments[i];
+
+                    if (type.IsPrimitive != otherType.IsPrimitive)
+                    {
+                        return false;
+                    }
+
+                    switch (p.Variance)
+                    {
+                        case RppGenericParameterVariance.Invariant:
+                            if (type != otherType)
+                            {
+                                return false;
+                            }
+                            break;
+
+                        case RppGenericParameterVariance.Covariant:
+                            if (!type.IsAssignable(otherType))
+                            {
+                                return false;
+                            }
+                            break;
+
+                        case RppGenericParameterVariance.Contravariant:
+                            if (!otherType.IsAssignable(type))
+                            {
+                                return false;
+                            }
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

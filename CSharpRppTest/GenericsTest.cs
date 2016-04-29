@@ -398,10 +398,10 @@ object Main
              }
              */
             RType fooTy = new RType("Foo");
-            RType aTy = fooTy.DefineGenericParameters(new[] {"A"}).First().Type;
+            RType aTy = fooTy.DefineGenericParameters("A").First().Type;
             RppMethodInfo method = fooTy.DefineMethod("foo", RMethodAttributes.Public);
             method.ReturnType = aTy;
-            RType intFooTy = fooTy.MakeGenericType(new[] {IntTy});
+            RType intFooTy = fooTy.MakeGenericType(IntTy);
             Assert.AreEqual(IntTy, intFooTy.Methods[0].ReturnType);
         }
 
@@ -415,7 +415,7 @@ object Main
              class Foo[X] extends Bar[X]
              */
             RType barTy = new RType("Bar");
-            RType aTy = barTy.DefineGenericParameters(new[] {"A"}).First().Type;
+            RType aTy = barTy.DefineGenericParameters("A").First().Type;
             RppMethodInfo method = barTy.DefineMethod("foo", RMethodAttributes.Public);
             method.ReturnType = aTy;
 

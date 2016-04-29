@@ -25,7 +25,7 @@ namespace CSharpRpp.Expr
                 return new RppBox(sourceExpr);
             }
 
-            if (IsAssignableFrom(sourceExpr.Type.Runtime, targetType))
+            if (IsAssignable(sourceExpr.Type.Runtime, targetType))
             {
                 return sourceExpr;
             }

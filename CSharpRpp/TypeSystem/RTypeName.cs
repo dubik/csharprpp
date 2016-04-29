@@ -61,10 +61,23 @@ namespace CSharpRpp.TypeSystem
                 }
 
                 RType[] genericArguments = _params.Select(p => p.Resolve(scope)).ToArray();
-                return type.MakeGenericType(genericArguments);
+                return MakeGenericType(type, genericArguments);
             }
 
             return type;
+        }
+
+        private static Dictionary<RType, Dictionary<List<object>, RType>> GenericMap = new Dictionary<RType, Dictionary<List<object>, RType>>();
+
+        private static RType MakeGenericType(RType type, RType[] genericArguments)
+        {
+            Dictionary<List<object>, RType> specializations;
+            if (GenericMap.TryGetValue(type, out specializations))
+            {
+                
+            }
+
+            return type.MakeGenericType(genericArguments);
         }
 
         public override string ToString()

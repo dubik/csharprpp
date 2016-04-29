@@ -52,7 +52,6 @@ namespace CSharpRpp.TypeSystem
 
             type = typeFactory();
             _allTypes.Add(name, type);
-
             return type;
         }
 

@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayTest.cs" />
+    <Compile Include="AssignableFromTest.cs" />
     <Compile Include="AstNodeMatcher.cs" />
     <Compile Include="CaseClassTest.cs" />
     <Compile Include="ClassTest.cs" />
