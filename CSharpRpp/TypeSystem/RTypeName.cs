@@ -10,9 +10,8 @@ namespace CSharpRpp.TypeSystem
 {
     public class RTypeName
     {
-        public static RTypeName Undefined = new RTypeName("Undefined");
-        public static RTypeName UnitN = new RTypeName("Unit");
-        public static RTypeName IntN = new RTypeName("Int");
+        public static readonly RTypeName Undefined = new RTypeName("Undefined");
+        public static readonly RTypeName UnitN = new RTypeName("Unit");
 
         [NotNull]
         public string Name { get; }
@@ -21,7 +20,7 @@ namespace CSharpRpp.TypeSystem
         public IToken Token
         {
             get { return _token ?? new ClassicToken(0, Name); }
-            set { _token = value; }
+            private set { _token = value; }
         }
 
         private readonly IList<RTypeName> _params = new List<RTypeName>();
@@ -61,23 +60,10 @@ namespace CSharpRpp.TypeSystem
                 }
 
                 RType[] genericArguments = _params.Select(p => p.Resolve(scope)).ToArray();
-                return MakeGenericType(type, genericArguments);
+                return type.MakeGenericType(genericArguments);
             }
 
             return type;
-        }
-
-        private static Dictionary<RType, Dictionary<List<object>, RType>> GenericMap = new Dictionary<RType, Dictionary<List<object>, RType>>();
-
-        private static RType MakeGenericType(RType type, RType[] genericArguments)
-        {
-            Dictionary<List<object>, RType> specializations;
-            if (GenericMap.TryGetValue(type, out specializations))
-            {
-                
-            }
-
-            return type.MakeGenericType(genericArguments);
         }
 
         public override string ToString()

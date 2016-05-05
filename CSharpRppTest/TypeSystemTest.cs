@@ -98,11 +98,11 @@ object Main
             }
             */
             RType fooTy = new RType("Foo");
-            RppGenericParameter[] gp = fooTy.DefineGenericParameters(new[] {"A", "B"});
+            RppGenericParameter[] gp = fooTy.DefineGenericParameters("A", "B");
             fooTy.DefineMethod("get", RMethodAttributes.Public, gp[0].Type, new[] {new RppParameterInfo(gp[0].Type), new RppParameterInfo(gp[1].Type)});
 
             // Foo[Int, Float]
-            RType specializedFooTy = fooTy.MakeGenericType(new[] {IntTy, FloatTy});
+            RType specializedFooTy = fooTy.MakeGenericType(IntTy, FloatTy);
             // get(x: Int) : Float
             RppMethodInfo getMethod = specializedFooTy.Methods[0];
             Assert.AreEqual(IntTy, getMethod.ReturnType);
@@ -124,19 +124,19 @@ object Main
             */
             RType fooTy = new RType("Foo");
             {
-                RppGenericParameter[] gp = fooTy.DefineGenericParameters(new[] {"A", "B"});
+                RppGenericParameter[] gp = fooTy.DefineGenericParameters("A", "B");
                 fooTy.DefineMethod("get", RMethodAttributes.Public, gp[1].Type, new[] {new RppParameterInfo(gp[0].Type)});
             }
 
             RType barTy = new RType("Bar", RTypeAttributes.Class, fooTy, null);
-            RppGenericParameter[] barGp = barTy.DefineGenericParameters(new[] {"A", "B", "C"});
+            RppGenericParameter[] barGp = barTy.DefineGenericParameters("A", "B", "C");
             barTy.DefineMethod("map", RMethodAttributes.Public, barGp[2].Type, new[]
             {
                 new RppParameterInfo(barGp[0].Type),
                 new RppParameterInfo(barGp[1].Type)
             });
 
-            RType specilizedBarTy = barTy.MakeGenericType(new[] {IntTy, FloatTy, StringTy});
+            RType specilizedBarTy = barTy.MakeGenericType(IntTy, FloatTy, StringTy);
             Assert.IsNotNull(specilizedBarTy.BaseType);
             IReadOnlyCollection<RType> barGenericArguments = specilizedBarTy.GenericArguments;
             CollectionAssert.AreEqual(new[] {IntTy, FloatTy, StringTy}, barGenericArguments.ToList());
@@ -183,5 +183,15 @@ object Main
             CollectionAssert.AreEqual(List(fooTy), hierarchy);
         }
 
+        [TestMethod]
+        public void OnlyOneInstanceOfTypeIsCreated()
+        {
+            SymbolTable scope = new SymbolTable();
+            PopulateBuiltinTypes(scope);
+
+            RType fooTy = CreateType("Foo");
+            RType otherFooTy = CreateType("Foo");
+            Assert.IsTrue(ReferenceEquals(fooTy, otherFooTy));
+        }
     }
 }

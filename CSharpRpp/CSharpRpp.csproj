@@ -84,6 +84,7 @@
     <Compile Include="PatternMatching\RppTypedPattern.cs" />
     <Compile Include="PatternMatching\RppVariablePattern.cs" />
     <Compile Include="RppBreak.cs" />
+    <Compile Include="TypeSystem\ArrayOfTypesComparator.cs" />
     <Compile Include="TypeSystem\RTypeExtensions.cs" />
     <Compile Include="Utils\AstHelper.cs" />
     <Compile Include="Codegen\AstExtensions.cs" />

@@ -77,7 +77,7 @@ namespace CSharpRpp.TypeSystem
                 return null;
             }
 
-            if (!baseType.IsGenericTypeDefinition)
+            if (!baseType.ContainsGenericParameters)
             {
                 return baseType;
             }
@@ -116,7 +116,7 @@ namespace CSharpRpp.TypeSystem
             return $"{Name}[{genericArgumentsStr}]";
         }
 
-        public override RType MakeGenericType(RType[] genericArguments)
+        public override RType MakeGenericType(params RType[] genericArguments)
         {
             return DefinitionType.MakeGenericType(genericArguments);
         }

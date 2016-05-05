@@ -64,6 +64,7 @@
     <Compile Include="GenericsTest.cs" />
     <Compile Include="ImplicitCastsTest.cs" />
     <Compile Include="InferenceContext.cs" />
+    <Compile Include="InflatingTest.cs" />
     <Compile Include="MethodDispatchTest.cs" />
     <Compile Include="NestedTest.cs" />
     <Compile Include="ObjectExtension.cs" />

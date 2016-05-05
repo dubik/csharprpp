@@ -139,27 +139,5 @@ object Foo
             Assert.IsNotNull(commonTy);
             Assert.AreEqual(AnyTy, commonTy);
         }
-
-        [TestMethod]
-        public void InheritSpecializedType()
-        {
-            // class Bar[A]
-            // class Foo[T] extends Bar[Int]
-            // Foo[String]....
-            RType barTy = new RType("Bar");
-            barTy.DefineGenericParameters("A");
-            RType intBarTy = barTy.MakeGenericType(IntTy);
-
-            RType fooTy = new RType("Foo", RTypeAttributes.Class, intBarTy);
-            fooTy.DefineGenericParameters("T");
-
-            RType stringFooTy = fooTy.MakeGenericType(StringTy);
-
-            string stringFooTyStr = stringFooTy.ToString();
-            Assert.AreEqual("Foo[String]", stringFooTyStr);
-
-            string baseTypeStr = stringFooTy.BaseType?.ToString();
-            Assert.AreEqual("Bar[Int]", baseTypeStr);
-        }
     }
 }

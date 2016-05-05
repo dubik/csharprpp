@@ -376,7 +376,9 @@ namespace CSharpRpp.TypeSystem
 
         [CanBeNull] private List<RType> _implementedInterfaces;
 
-        public IReadOnlyList<RType> Interfaces
+        private readonly Dictionary<RType[], RType> InflatedTypesMap = new Dictionary<RType[], RType>(ArrayOfTypesComparator.Instance);
+
+        public IEnumerable<RType> Interfaces
         {
             get
             {
@@ -390,6 +392,25 @@ namespace CSharpRpp.TypeSystem
         }
 
         public virtual bool IsGenericTypeDefinition => GenericParameters.Any();
+
+        /// <summary>
+        /// Returns true if type itself is generic parameter or contains generic parameter in generic arguments e.g.
+        /// they can be replaced by type. 
+        /// </summary>
+        public bool ContainsGenericParameters
+        {
+            get
+            {
+                if (IsGenericParameter)
+                    return true;
+
+                if (IsGenericType)
+                    if (GenericArguments.Any(ga => ga.ContainsGenericParameters))
+                        return true;
+
+                return GenericParameters.Count != GenericArguments.Count;
+            }
+        }
 
         public RType([NotNull] string name, [NotNull] Type type)
         {
@@ -605,7 +626,13 @@ namespace CSharpRpp.TypeSystem
                 return genericArguments[GenericParameterPosition];
             }
 
-            RInflatedType inflatedType = new RInflatedType(this, genericArguments);
+            RType inflatedType;
+            if (!InflatedTypesMap.TryGetValue(genericArguments, out inflatedType))
+            {
+                inflatedType = new RInflatedType(this, genericArguments);
+                InflatedTypesMap.Add(genericArguments, inflatedType);
+            }
+
             return inflatedType;
         }
 
@@ -627,6 +654,7 @@ namespace CSharpRpp.TypeSystem
 
         #region Equality
 
+        // TODO perhaps we should remove this since we check equality only by reference
         protected bool Equals(RType other)
         {
             return string.Equals(Name, other.Name);
@@ -668,7 +696,7 @@ namespace CSharpRpp.TypeSystem
 
             if (IsGenericType)
             {
-                string genericParameters = string.Join(", ", _genericParameters.Select(p => p.ToString()));
+                string genericParameters = String.Join(", ", _genericParameters.Select(p => p.ToString()));
                 return $"{prefix}{Name}[{genericParameters}]";
             }
 
@@ -802,7 +830,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsSubclassOf(RType targetType)
         {
-            if (string.Equals(Name, targetType.Name))
+            if (String.Equals(Name, targetType.Name))
             {
                 return true;
             }
