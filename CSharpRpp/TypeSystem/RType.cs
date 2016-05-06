@@ -265,7 +265,7 @@ namespace CSharpRpp.TypeSystem
 
         public bool IsGenericType => GenericParameters.Any() || GenericArguments.Any();
 
-        public bool IsPrimitive => !IsClass;
+        public bool IsPrimitive => !IsClass && !IsObject && !IsGenericParameter;
 
         public bool IsGenericParameter { get; internal set; }
 
@@ -828,6 +828,7 @@ namespace CSharpRpp.TypeSystem
             return attrs;
         }
 
+        [Obsolete("Use IsTrueSubclassOf")]
         public bool IsSubclassOf(RType targetType)
         {
             if (String.Equals(Name, targetType.Name))
@@ -925,6 +926,11 @@ namespace CSharpRpp.TypeSystem
                 return false;
             }
 
+            if (ReferenceEquals(right, NothingTy))
+            {
+                return true;
+            }
+
             if (ReferenceEquals(this, right))
             {
                 return true;
@@ -950,8 +956,14 @@ namespace CSharpRpp.TypeSystem
                 return true;
             }
 
+            if (IsAssignable(right.BaseType))
+            {
+                return true;
+            }
+
             return false;
         }
+
 
         protected virtual bool IsCovariant([NotNull] RType right)
         {

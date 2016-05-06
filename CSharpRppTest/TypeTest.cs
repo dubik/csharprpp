@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
@@ -109,7 +108,7 @@ object Foo
         [TestMethod]
         public void TestIsInstanceOfSimpleClass()
         {
-            RType fooTy = new RType("Foo", RTypeAttributes.Class, AnyTy, null);
+            RType fooTy = new RType("Foo", RTypeAttributes.Class, AnyTy);
             Assert.IsTrue(fooTy.IsInstanceOf(AnyTy));
             Assert.IsFalse(fooTy.IsInstanceOf(StringTy));
         }
@@ -118,7 +117,7 @@ object Foo
         public void TestIsInstanceOfClassWhichImplementsInterface()
         {
             RType interfaceTy = new RType("IBar", RTypeAttributes.Interface);
-            RType fooTy = new RType("Foo", RTypeAttributes.Class);
+            RType fooTy = new RType("Foo");
             fooTy.AddInterfaceImplementation(interfaceTy);
 
             Assert.IsTrue(fooTy.IsInstanceOf(interfaceTy));

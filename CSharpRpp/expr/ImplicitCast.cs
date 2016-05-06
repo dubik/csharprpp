@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Expr
@@ -51,40 +50,6 @@ namespace CSharpRpp.Expr
             }
 
             throw new Exception("Can't cast expression to a specific type");
-        }
-
-        // dest s = (source) s;
-        public static bool IsAssignableFrom(Type dest, Type source)
-        {
-            return IsSubclassOf(source, dest);
-        }
-
-        private static bool IsSubclassOf(Type sourceType, Type possibleBaseType)
-        {
-            if (sourceType.Name == possibleBaseType.Name)
-            {
-                if (sourceType.IsGenericType != possibleBaseType.IsGenericType)
-                {
-                    return false;
-                }
-
-                var sourceGenericTypes = sourceType.GenericTypeArguments;
-                var possibleBaseGenericTypes = possibleBaseType.GenericTypeArguments;
-                if (sourceGenericTypes.Length != possibleBaseGenericTypes.Length)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < sourceGenericTypes.Length; i++)
-                {
-                    if (sourceGenericTypes[i].Name != possibleBaseGenericTypes[i].Name)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
         public static bool CanCast(RType source, RType dest)
