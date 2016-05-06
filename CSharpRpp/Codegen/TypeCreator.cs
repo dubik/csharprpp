@@ -37,7 +37,7 @@ namespace CSharpRpp.Codegen
             _outterTypes.Push(classType);
 
             string[] typeParamsNames = CombineGenericParameters(node.TypeParams.Select(tp => tp.Name));
-            RppGenericParameter[] genericParameters = classType.DefineGenericParameters(typeParamsNames);
+            classType.DefineGenericParameters(typeParamsNames);
         }
 
         /// <summary>
