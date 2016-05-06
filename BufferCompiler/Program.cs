@@ -140,13 +140,8 @@ object Main {
 ";
 
             const string code1 = @"
-abstract class TOption[+A]
-{
-    def map[B](): TOption[B] = TNone 
-}
-
-object TNone extends TOption[Nothing]
-{
+object Main {
+    def create: Option[Int] = Some[Int](13)
 }
 ";
 

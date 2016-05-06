@@ -71,6 +71,9 @@ namespace CSharpRpp
         {
             RppProgram program = new RppProgram();
             SymbolTable runtimeScope = new SymbolTable();
+
+            RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
+
             WireRuntime(runtimeScope);
 
             if (stdlibAssembly != null)
@@ -79,8 +82,6 @@ namespace CSharpRpp
             }
 
             parseFactory(program);
-
-            RppTypeSystem.PopulateBuiltinTypes(runtimeScope);
 
             CodeGenerator generator = new CodeGenerator(program, fileName);
             try

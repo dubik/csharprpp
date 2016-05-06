@@ -9,19 +9,19 @@ namespace CSharpRpp.TypeSystem
     {
         public static readonly RppTypeSystem Instance = new RppTypeSystem();
 
-        public static RType UnitTy = CreateType("Unit", typeof (void));
-        public static RType CharTy = CreateType("Char", typeof (char));
-        public static RType BooleanTy = CreateType("Boolean", typeof (bool));
-        public static RType ShortTy = CreateType("Short", typeof (short));
-        public static RType IntTy = CreateType("Int", typeof (int));
-        public static RType ByteTy = CreateType("Byte", typeof (byte));
-        public static RType LongTy = CreateType("Long", typeof (long));
-        public static RType FloatTy = CreateType("Float", typeof (float));
-        public static RType DoubleTy = CreateType("Double", typeof (double));
-        public static RType NullTy = ImportClass("Null", typeof (object));
-        public static RType AnyTy = ImportClass("Any", typeof (object));
-        public static RType StringTy = ImportClass("String", typeof (string));
-        public static RType NothingTy = ImportClass("Nothing", typeof (object));
+        public static RType UnitTy = CreateType("Unit", typeof(void));
+        public static RType CharTy = CreateType("Char", typeof(char));
+        public static RType BooleanTy = CreateType("Boolean", typeof(bool));
+        public static RType ShortTy = CreateType("Short", typeof(short));
+        public static RType IntTy = CreateType("Int", typeof(int));
+        public static RType ByteTy = CreateType("Byte", typeof(byte));
+        public static RType LongTy = CreateType("Long", typeof(long));
+        public static RType FloatTy = CreateType("Float", typeof(float));
+        public static RType DoubleTy = CreateType("Double", typeof(double));
+        public static RType NullTy = ImportClass("Null", typeof(object));
+        public static RType AnyTy = ImportClass("Any", typeof(object));
+        public static RType StringTy = ImportClass("String", typeof(string));
+        public static RType NothingTy = ImportClass("Nothing", typeof(object));
         public static RType Undefined = new RType("Undefined");
         public static RType ArrayTy = CreateArrayType();
 
@@ -58,6 +58,7 @@ namespace CSharpRpp.TypeSystem
         public static void PopulateBuiltinTypes([NotNull] SymbolTable scope)
         {
             Instance._allTypes.Clear();
+
             scope.AddType(UnitTy);
             scope.AddType(CharTy);
             scope.AddType(BooleanTy);
@@ -66,20 +67,20 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(LongTy);
             scope.AddType(FloatTy);
             scope.AddType(DoubleTy);
-            scope.AddType(ImportClass(typeof (string)));
+            scope.AddType(ImportClass(typeof(string)));
             scope.AddType(AnyTy);
             scope.AddType(NothingTy);
             scope.AddType(ArrayTy);
 
-            Instance._allTypes.Add(typeof (void).Name, UnitTy);
-            Instance._allTypes.Add(typeof (char).Name, CharTy);
-            Instance._allTypes.Add(typeof (bool).Name, BooleanTy);
-            Instance._allTypes.Add(typeof (short).Name, ShortTy);
-            Instance._allTypes.Add(typeof (int).Name, IntTy);
-            Instance._allTypes.Add(typeof (byte).Name, ByteTy);
-            Instance._allTypes.Add(typeof (long).Name, LongTy);
-            Instance._allTypes.Add(typeof (float).Name, FloatTy);
-            Instance._allTypes.Add(typeof (object).Name, AnyTy);
+            Instance._allTypes.Add(typeof(void).Name, UnitTy);
+            Instance._allTypes.Add(typeof(char).Name, CharTy);
+            Instance._allTypes.Add(typeof(bool).Name, BooleanTy);
+            Instance._allTypes.Add(typeof(short).Name, ShortTy);
+            Instance._allTypes.Add(typeof(int).Name, IntTy);
+            Instance._allTypes.Add(typeof(byte).Name, ByteTy);
+            Instance._allTypes.Add(typeof(long).Name, LongTy);
+            Instance._allTypes.Add(typeof(float).Name, FloatTy);
+            Instance._allTypes.Add(typeof(object).Name, AnyTy);
         }
 
         public static RType ImportClass(Type systemType)
@@ -110,47 +111,47 @@ namespace CSharpRpp.TypeSystem
         [NotNull]
         public static RType ImportPrimitive([NotNull] Type type)
         {
-            if (type == typeof (void))
+            if (type == typeof(void))
             {
                 return UnitTy;
             }
 
-            if (type == typeof (char))
+            if (type == typeof(char))
             {
                 return CharTy;
             }
 
-            if (type == typeof (bool))
+            if (type == typeof(bool))
             {
                 return BooleanTy;
             }
 
-            if (type == typeof (short))
+            if (type == typeof(short))
             {
                 return ShortTy;
             }
 
-            if (type == typeof (int))
+            if (type == typeof(int))
             {
                 return IntTy;
             }
 
-            if (type == typeof (long))
+            if (type == typeof(long))
             {
                 return LongTy;
             }
 
-            if (type == typeof (float))
+            if (type == typeof(float))
             {
                 return FloatTy;
             }
 
-            if (type == typeof (double))
+            if (type == typeof(double))
             {
                 return DoubleTy;
             }
 
-            if (type == typeof (string))
+            if (type == typeof(string))
             {
                 return StringTy;
             }
