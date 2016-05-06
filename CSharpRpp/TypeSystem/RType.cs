@@ -412,7 +412,7 @@ namespace CSharpRpp.TypeSystem
             }
         }
 
-        public RType([NotNull] string name, [NotNull] Type type)
+        public RType([NotNull] string name, [NotNull] Type type, [NotNull] Func<Type, RType> typeFactory)
         {
             Name = name;
             _type = type;
@@ -438,7 +438,7 @@ namespace CSharpRpp.TypeSystem
                 Type baseType = type.BaseType;
                 if (baseType != null && baseType != typeof(object))
                 {
-                    BaseType = new RType(baseType.Name, baseType);
+                    BaseType = typeFactory(baseType);
                 }
                 else if (Name != "Any")
                 {
@@ -472,8 +472,21 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(_type != null, "_type != null");
             _genericParameters =
                 _type.GetGenericArguments()
-                    .Select(gp => new RppGenericParameter(gp.Name) {Position = gp.GenericParameterPosition, Type = new RType(gp.Name, gp)})
+                    .Select(
+                        gp =>
+                            new RppGenericParameter(gp.Name) {Position = gp.GenericParameterPosition, Type = CreateGenericParameterType(gp)})
                     .ToArray();
+        }
+
+        private static RType CreateGenericParameterType(Type gp)
+        {
+            if (!gp.IsGenericParameter)
+            {
+                // TODO Hm, but it should be also broken for generic parameters, no?
+                throw new ArgumentException("Shouldn't create non generic parameters via new RType, because then reference equality among type will break");
+            }
+
+            return new RType(gp.Name, gp, CreateGenericParameterType);
         }
 
         private void InitNativeConstructors()

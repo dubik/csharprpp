@@ -34,7 +34,7 @@ namespace CSharpRpp.TypeSystem
 
         public static RType CreateType(string name, Type systemType)
         {
-            return Instance.GetOrCreate(name, () => new RType(name, systemType));
+            return Instance.GetOrCreate(name, () => new RType(name, systemType, type => CreateType(type.Name, type)));
         }
 
         public static RType CreateType(string name, RTypeAttributes attributes, RType parent, RType declaringType)
