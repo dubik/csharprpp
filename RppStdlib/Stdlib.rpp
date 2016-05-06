@@ -3,7 +3,7 @@ class Tuple2[+T1, +T2](val _1: T1, val _2: T2)
 class Tuple3[+T1, +T2, +T3](val _1: T1, val _2: T2, val _3: T3)
 class Tuple4[+T1, +T2, +T3, +T4](val _1: T1, val _2: T2, val _3: T3, val _4: T4)
 
-abstract class Option[A]
+abstract class Option[+A]
 {
     def isEmpty : Boolean
     def get: A

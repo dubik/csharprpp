@@ -5,7 +5,7 @@ using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Exceptions
 {
-    public class SemanticExceptionFactory
+    public static class SemanticExceptionFactory
     {
         public static SemanticException TypeNotFound(IToken token)
         {

@@ -447,7 +447,7 @@ object Main
         public void OptionMonad()
         {
             const string code = @"
-abstract class TOption[A]
+abstract class TOption[+A]
 {
     def isEmpty : Boolean
     def get: A

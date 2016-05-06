@@ -140,16 +140,15 @@ object Main {
 ";
 
             const string code1 = @"
-class Foo[T](val id: T)
-
-class SecondFoo[A](id: Int, val name: A) extends Foo[Int](id)
-
-object Bar
+abstract class TOption[+A]
 {
-    def main : Foo[Int] = new SecondFoo[String](10, ""Hello"")
+    def map[B](): TOption[B] = TNone 
+}
+
+object TNone extends TOption[Nothing]
+{
 }
 ";
-            
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
@@ -166,7 +165,7 @@ object Bar
 
         public static Assembly GetStdlibAssembly()
         {
-            var location = Assembly.GetAssembly(typeof (Program)).Location;
+            var location = Assembly.GetAssembly(typeof(Program)).Location;
             string directory = Path.GetDirectoryName(location);
             return Assembly.LoadFile(directory + @"\RppStdlib.dll");
         }

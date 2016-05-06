@@ -190,5 +190,18 @@ namespace CSharpRppTest
 
             Assert.IsTrue(intFooTy.IsAssignable(secondFooTy));
         }
+
+        [TestMethod]
+        public void TestAssigningNothing()
+        {
+            RType optionTy = new RType("Option");
+            RppGenericParameter[] genericParameters = optionTy.DefineGenericParameters("A");
+            genericParameters[0].Variance = RppGenericParameterVariance.Covariant;
+
+            RType nothingOptionTy = optionTy.MakeGenericType(NothingTy);
+            RType stringOptionTy = optionTy.MakeGenericType(StringTy);
+
+            Assert.IsTrue(stringOptionTy.IsAssignable(nothingOptionTy));
+        }
     }
 }
