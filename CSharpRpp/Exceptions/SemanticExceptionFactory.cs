@@ -63,10 +63,15 @@ namespace CSharpRpp.Exceptions
 
         private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
         {
-            string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
-            string secondLine = TokenUtils.GetTokenLine(token);
-            string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
-            return $"{firstLine}\n{secondLine}\n{pointerLine}";
+            if (token.InputStream != null)
+            {
+                string firstLine = $"Error({token.Line}, {token.CharPositionInLine}) {errorMsg}";
+                string secondLine = TokenUtils.GetTokenLine(token);
+                string pointerLine = $"{TokenUtils.Ident(token.CharPositionInLine)}^";
+                return $"{firstLine}\n{secondLine}\n{pointerLine}";
+            }
+
+            return errorMsg;
         }
 
         public static SemanticException CreateOverloadFailureException(IToken token, IEnumerable<RppMethodInfo> matchingFunctions, IEnumerable<IRppExpr> args,
