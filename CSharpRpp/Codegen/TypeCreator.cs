@@ -37,7 +37,7 @@ namespace CSharpRpp.Codegen
             _outterTypes.Push(classType);
 
             string[] typeParamsNames = CombineGenericParameters(node.TypeParams.Select(tp => tp.Name));
-            classType.DefineGenericParameters(typeParamsNames);
+            RppGenericParameter[] genericParameters = classType.DefineGenericParameters(typeParamsNames);
         }
 
         /// <summary>
@@ -159,6 +159,8 @@ namespace CSharpRpp.Codegen
                             throw new Exception("Interfaces and value types are not supported yet");
                         }
                     }
+
+                    genericParam.Variance = GetVariance(typeParam.Variant);
                 });
         }
 
@@ -240,6 +242,21 @@ namespace CSharpRpp.Codegen
                 attrs |= RMethodAttributes.Abstract;
             }
             return attrs;
+        }
+
+        private static RppGenericParameterVariance GetVariance(TypeVariant variant)
+        {
+            switch (variant)
+            {
+                case TypeVariant.Invariant:
+                    return RppGenericParameterVariance.Invariant;
+                case TypeVariant.Covariant:
+                    return RppGenericParameterVariance.Covariant;
+                case TypeVariant.Contravariant:
+                    return RppGenericParameterVariance.Contravariant;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(variant), variant, null);
+            }
         }
     }
 
