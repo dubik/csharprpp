@@ -58,7 +58,7 @@ namespace CSharpRpp.TypeSystem
 
             if (!type.IsGenericType)
             {
-                throw new Exception("Can't inlfate non generic type");
+                throw new Exception("Can't inflate non generic type");
             }
 
             if (type.GenericParameters.Count != genericArguments.Length)

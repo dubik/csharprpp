@@ -115,6 +115,42 @@ object Main {
             Assert.IsNotNull(res);
         }
 
+        [TestMethod]
+        public void InfereTypesWhenSubClassOfAnObjectIsInstantiated()
+        {
+            const string code = @"
+class XList[A]
+class XCons[A](val head: A) extends XList[A]
+
+object Main {
+  def main: XList[Int] = {
+    var k = new XCons(13)
+    k
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+            object head = res.GetPropertyValue("head");
+            Assert.AreEqual(13, head);
+        }
+
+        [TestMethod]
+        public void InfereTypesWhenSubClassOfAnObjectIsInstantiatedWithGenericParam()
+        {
+            const string code = @"
+class XList[X]
+class XCons[Y](val head: Y) extends XList[Y]
+
+class XConsApp[A] {
+  def make(a: A) : XList[A] = new XCons(a)
+}
+";
+            Type xconsAppTy = Utils.ParseAndCreateType(code, "XConsApp");
+            Assert.IsNotNull(xconsAppTy);
+        }
+
         #region Utils
 
         private static void TestTypeInference(string methodCode, IEnumerable<RType> callTypes, IEnumerable<RType> expectedInferredTypes)

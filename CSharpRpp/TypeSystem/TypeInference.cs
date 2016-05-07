@@ -235,7 +235,7 @@ namespace CSharpRpp.TypeSystem
         /// <returns><code>true</code> if different</returns>
         private static bool AreDifferent(RType source, RType target)
         {
-            return target.Name != source.Name || target.IsMethodGenericParameter != source.IsMethodGenericParameter;
+            return target.Name != source.Name || !ReferenceEquals(source, target) || target.IsMethodGenericParameter != source.IsMethodGenericParameter;
         }
 
         private static bool IsUndefined(RType type)

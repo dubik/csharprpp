@@ -690,11 +690,6 @@ namespace CSharpRpp.TypeSystem
             return Equals((RType) obj);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         #endregion
 
         #region ToString
@@ -709,11 +704,11 @@ namespace CSharpRpp.TypeSystem
 
             if (IsGenericType)
             {
-                string genericParameters = String.Join(", ", _genericParameters.Select(p => p.ToString()));
-                return $"{prefix}{Name}[{genericParameters}]";
+                string genericParameters = string.Join(", ", _genericParameters.Select(p => p.ToString()));
+                return $"{prefix}{Name}[{genericParameters}]";// + $"@{ GetHashCode()}";
             }
 
-            return $"{prefix}{Name}";
+            return $"{prefix}{Name}"; //+ $"@{GetHashCode()}";
         }
 
         #endregion

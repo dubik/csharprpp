@@ -138,12 +138,13 @@ object Main {
     }
 }
 ";
-
             const string code1 = @"
-object Main {
-    def create: Option[Int] = Some[Int](13)
-}
-";
+class XList[X]
+class XCons[A](val head: A) extends XList[A]
+
+class XConsApp[A] {
+  def make(a: A) : XList[A] = new XCons(a)
+}";
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
