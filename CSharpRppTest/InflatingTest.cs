@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using CSharpRpp;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
@@ -125,6 +127,58 @@ namespace CSharpRppTest
             RType baseType = intFloatFooTy.BaseType;
 
             Assert.AreEqual("Bar[Float]", baseType?.ToString());
+        }
+
+        internal class MyBaseClass<T>
+        {
+        }
+
+        internal class MyClass<B> : MyBaseClass<B>
+        {
+        }
+
+        [TestMethod]
+        public void InflatingNativeBaseType()
+        {
+            RType myClassTy = new RType("MyClass", typeof(MyClass<>), CreateType);
+            Assert.IsNotNull(myClassTy);
+            RType myBaseClassTy = myClassTy.BaseType;
+            Assert.IsNotNull(myBaseClassTy);
+            CollectionAssert.AreEqual(myClassTy.GenericParameters.Select(gp => gp.Type).ToList(), myBaseClassTy.GenericArguments.ToList());
+        }
+
+        private static RType CreateType(Type type)
+        {
+            string typeName = type.Name;
+
+            if (type.IsConstructedGenericType)
+            {
+                var resType = ConstructSpecializedTypeFromGenericTypeDefinition(typeName, type);
+                return resType;
+            }
+
+            return new RType(type.Name, type, CreateType);
+        }
+
+        /// <summary>
+        /// Creates wrapper around native type by inflating wrapper of generic type definition of specified type.
+        /// This will initialize properly generic arguments for the returned type. Let say native type looks like this:
+        /// <code>
+        /// class Foo&lt;B&gt; : Bar&lt;B&gt;
+        /// </code>
+        /// B is a generic parameter but for Bar that is a generic argument. We can't inherit generic class we have to
+        /// specialized it with generic parameter.
+        /// </summary>
+        /// <param name="typeName">name of the created wrapped type</param>
+        /// <param name="type">specialized native type</param>
+        /// <returns></returns>
+        private static RType ConstructSpecializedTypeFromGenericTypeDefinition(string typeName, Type type)
+        {
+            Type nativeTypeDefinition = type.GetGenericTypeDefinition();
+            RType typeDefinition = new RType(typeName, nativeTypeDefinition, CreateType);
+            RType[] genericArguments = type.GenericTypeArguments.Select(typeArg => new RType(typeArg.Name, typeArg, CreateType)).ToArray();
+            RType resType = typeDefinition.MakeGenericType(genericArguments);
+            return resType;
         }
     }
 }

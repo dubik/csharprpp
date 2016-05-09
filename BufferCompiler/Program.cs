@@ -138,19 +138,9 @@ object Main {
     }
 }
 ";
-            const string code1 = @"
-abstract class XIterator[+A] {
-  def copy(): XIterator[A]
-}
-
-class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterator[U] {
-  override def copy(): XIterator[U] = new XMapIterator[A, U](iter.copy(), f)
-}
-
-";
 
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();

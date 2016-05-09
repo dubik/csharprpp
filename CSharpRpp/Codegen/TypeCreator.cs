@@ -29,7 +29,7 @@ namespace CSharpRpp.Codegen
             }
             else
             {
-                classType = RppTypeSystem.CreateType(typeName, typeAttributes, null, null);
+                classType = RppTypeSystem.GetOrCreateType(typeName, typeAttributes, null, null);
             }
 
             node.Type = classType;

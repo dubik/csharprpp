@@ -87,7 +87,7 @@ namespace CSharpRpp.TypeSystem
 
         private bool Equals(RppFieldInfo other)
         {
-            return string.Equals(Name, other.Name) && Attributes == other.Attributes && Type.Equals(other.Type)
+            return String.Equals(Name, other.Name) && Attributes == other.Attributes && Type.Equals(other.Type)
                    && DeclaringType.Equals(other.DeclaringType);
         }
 
@@ -433,6 +433,7 @@ namespace CSharpRpp.TypeSystem
                 GenericParameterPosition = type.GenericParameterPosition;
             }
 
+
             if (type.IsClass)
             {
                 Type baseType = type.BaseType;
@@ -514,7 +515,7 @@ namespace CSharpRpp.TypeSystem
 
         private static RppFieldInfo Convert(PropertyInfo property, RType declaringType)
         {
-            RType fieldType = CreateType(property.PropertyType.Name, property.PropertyType);
+            RType fieldType = GetOrCreateType(property.PropertyType.Name, property.PropertyType);
             const RFieldAttributes attr = RFieldAttributes.Public;
             RppFieldInfo rppField = new RppFieldInfo(property.Name, fieldType, attr, declaringType)
             {
@@ -526,7 +527,7 @@ namespace CSharpRpp.TypeSystem
 
         private static RppFieldInfo Convert(FieldInfo field, RType declaringType)
         {
-            RType fieldType = CreateType(field.FieldType.Name, field.FieldType);
+            RType fieldType = GetOrCreateType(field.FieldType.Name, field.FieldType);
             bool priv = (field.Attributes & FieldAttributes.Private) != 0;
             RFieldAttributes attr = priv ? RFieldAttributes.Private : RFieldAttributes.Public;
             RppFieldInfo rppField = new RppFieldInfo(field.Name, fieldType, attr, declaringType)
@@ -542,11 +543,11 @@ namespace CSharpRpp.TypeSystem
             Type declaringType = method.DeclaringType;
             Debug.Assert(declaringType != null, "declaringType != null");
 
-            RType returnType = CreateType(method.ReturnType.Name, method.ReturnType);
+            RType returnType = GetOrCreateType(method.ReturnType.Name, method.ReturnType);
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(method.Attributes);
-            var parameters = method.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, CreateType(declaringType.Name, declaringType), rMethodAttributes,
+            var parameters = method.GetParameters().Select(p => new RppParameterInfo(GetOrCreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo(method.Name, GetOrCreateType(declaringType.Name, declaringType), rMethodAttributes,
                 returnType, parameters)
             {
                 Native = method
@@ -561,8 +562,8 @@ namespace CSharpRpp.TypeSystem
             Debug.Assert(declaringType != null, "declaringType != null");
 
             var rMethodAttributes = RTypeUtils.GetRMethodAttributes(constructor.Attributes);
-            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(CreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
-            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", CreateType(declaringType.Name, declaringType), rMethodAttributes,
+            var parameters = constructor.GetParameters().Select(p => new RppParameterInfo(GetOrCreateType(p.ParameterType.Name, p.ParameterType))).ToArray();
+            RppMethodInfo rppConstructor = new RppMethodInfo("ctor", GetOrCreateType(declaringType.Name, declaringType), rMethodAttributes,
                 UnitTy, parameters)
             {
                 Native = constructor
@@ -690,6 +691,11 @@ namespace CSharpRpp.TypeSystem
             return Equals((RType) obj);
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         #endregion
 
         #region ToString
@@ -705,7 +711,7 @@ namespace CSharpRpp.TypeSystem
             if (IsGenericType)
             {
                 string genericParameters = string.Join(", ", _genericParameters.Select(p => p.ToString()));
-                return $"{prefix}{Name}[{genericParameters}]";// + $"@{ GetHashCode()}";
+                return $"{prefix}{Name}[{genericParameters}]"; // + $"@{ GetHashCode()}";
             }
 
             return $"{prefix}{Name}"; //+ $"@{GetHashCode()}";
@@ -839,7 +845,7 @@ namespace CSharpRpp.TypeSystem
         [Obsolete("Use IsTrueSubclassOf")]
         public bool IsSubclassOf(RType targetType)
         {
-            if (String.Equals(Name, targetType.Name))
+            if (string.Equals(Name, targetType.Name))
             {
                 return true;
             }

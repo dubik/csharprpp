@@ -190,8 +190,8 @@ object Main
             SymbolTable scope = new SymbolTable();
             PopulateBuiltinTypes(scope);
 
-            RType fooTy = CreateType("Foo");
-            RType otherFooTy = CreateType("Foo");
+            RType fooTy = GetOrCreateType("Foo");
+            RType otherFooTy = GetOrCreateType("Foo");
             Assert.IsTrue(ReferenceEquals(fooTy, otherFooTy));
         }
     }

@@ -122,7 +122,7 @@ namespace CSharpRpp
             Assembly runtimeAssembly = GetRuntimeAssembly();
             WireAssembly(scope, runtimeAssembly);
 
-            scope.AddType(RppTypeSystem.CreateType("Exception", typeof (Exception)));
+            scope.AddType(RppTypeSystem.GetOrCreateType("Exception", typeof (Exception)));
         }
 
         private static void WireAssembly(SymbolTable scope, Assembly assembly)
@@ -143,7 +143,7 @@ namespace CSharpRpp
                 }
 
 
-                RType rType = RppTypeSystem.CreateType(name, type);
+                RType rType = RppTypeSystem.GetOrCreateType(name, type);
                 scope.AddType(rType);
             }
         }
