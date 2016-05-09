@@ -110,5 +110,21 @@ namespace CSharpRppTest
             string baseTypeStr = stringFooTy.BaseType?.ToString();
             Assert.AreEqual("Bar[Int]", baseTypeStr);
         }
+
+        [TestMethod]
+        public void InflatedGenericClassWithSecondGenericArgument()
+        {
+            RType barTy = new RType("Bar");
+            barTy.DefineGenericParameters("A");
+
+            RType fooTy = new RType("Foo");
+            RppGenericParameter[] fooGenericParams = fooTy.DefineGenericParameters("X", "Y");
+            fooTy.BaseType = barTy.MakeGenericType(fooGenericParams[1].Type);
+
+            RType intFloatFooTy = fooTy.MakeGenericType(IntTy, FloatTy);
+            RType baseType = intFloatFooTy.BaseType;
+
+            Assert.AreEqual("Bar[Float]", baseType?.ToString());
+        }
     }
 }

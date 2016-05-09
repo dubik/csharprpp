@@ -70,7 +70,7 @@ namespace CSharpRpp.TypeSystem
         }
 
         [CanBeNull]
-        private static RType InflateBaseType([CanBeNull] RType baseType, [NotNull] IEnumerable<RType> genericArguments)
+        private static RType InflateBaseType([CanBeNull] RType baseType, [NotNull] RType[] genericArguments)
         {
             if (baseType == null)
             {
@@ -87,7 +87,8 @@ namespace CSharpRpp.TypeSystem
                 return baseType;
             }
 
-            return baseType.MakeGenericType(genericArguments.Take(baseType.GenericParameters.Count).ToArray());
+            var replacedGenericArguments = baseType.GenericArguments.Select(ga => genericArguments[ga.GenericParameterPosition]).ToArray();
+            return baseType.MakeGenericType(replacedGenericArguments);
         }
 
         private RppFieldInfo[] InflateFields(IEnumerable<RppFieldInfo> fields)
