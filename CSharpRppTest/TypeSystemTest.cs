@@ -124,17 +124,18 @@ object Main
             */
             RType fooTy = new RType("Foo");
             {
-                RppGenericParameter[] gp = fooTy.DefineGenericParameters("A", "B");
+                RppGenericParameter[] gp = fooTy.DefineGenericParameters("X", "Y");
                 fooTy.DefineMethod("get", RMethodAttributes.Public, gp[1].Type, new[] {new RppParameterInfo(gp[0].Type)});
             }
 
-            RType barTy = new RType("Bar", RTypeAttributes.Class, fooTy, null);
+            RType barTy = new RType("Bar");
             RppGenericParameter[] barGp = barTy.DefineGenericParameters("A", "B", "C");
             barTy.DefineMethod("map", RMethodAttributes.Public, barGp[2].Type, new[]
             {
                 new RppParameterInfo(barGp[0].Type),
                 new RppParameterInfo(barGp[1].Type)
             });
+            barTy.BaseType = fooTy.MakeGenericType(barGp[0].Type, barGp[1].Type);
 
             RType specilizedBarTy = barTy.MakeGenericType(IntTy, FloatTy, StringTy);
             Assert.IsNotNull(specilizedBarTy.BaseType);
