@@ -53,19 +53,34 @@ abstract class XIterable[+A] {
 }
 
 class XListIterator[A](var list: XList[A]) extends XIterator[A] {
-  override def hasNext: Boolean = !list.isEmpty()
+  override def hasNext: Boolean = !list.isEmpty
 
   override def next(): A = {
     if (list.isEmpty)
       throw new Exception
 
-    val item = list.head()
-    list = list.tail()
+    val item = list.head
+    list = list.tail
     item
   }
 
-  override def copy(): XIterator[A] = new XListIterator[A](list)
+  override def copy(): XIterator[A] = new XListIterator(list)
 }
+
+class XArrayIterator[A](var array: Array[A]) extends XIterator[A] {
+  private var index = 0
+
+  override def hasNext: Boolean = array.length > index
+
+  override def next(): A = {
+    val item = array(index)
+    index += 1
+    item
+  }
+
+  override def copy(): XIterator[A] = new XArrayIterator(array)
+}
+
 
 class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterator[U] {
   override def hasNext(): Boolean = iter.hasNext()
@@ -139,8 +154,21 @@ object Main {
 }
 ";
 
+            const string code1 = @"
+class Foo
+{
+  protected var index: Int = 13
+  private var offset: Int = 27
+}
+
+object Main
+{
+    def main: Foo = new Foo
+}
+";
+
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();
@@ -150,6 +178,11 @@ object Main {
                 Debug.Assert(codeGen != null, "codeGen != null");
                 codeGen.Save(ApplicationType.Library);
             }
+        }
+
+        protected void func()
+        {
+            
         }
 
         public static Assembly GetStdlibAssembly()

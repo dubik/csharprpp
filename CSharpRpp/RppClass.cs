@@ -54,7 +54,7 @@ namespace CSharpRpp
 
         private readonly IList<RppVariantTypeParam> _typeParams;
 
-        public HashSet<ObjectModifier> Modifiers { get; private set; }
+        public HashSet<ObjectModifier> Modifiers { get; }
 
         private IList<RppFunc> _constructors;
         private readonly IList<RppClass> _nested;
@@ -74,17 +74,20 @@ namespace CSharpRpp
             Kind = kind;
             BaseConstructorCall = baseConstructorCall;
             _classParams = classParams;
-
+            // TODO all of this can be simplified, we don't need to separate body of class. We can just walk rpp nodes with visitors
             IEnumerable<IRppNode> rppNodes = classBody as IList<IRppNode> ?? classBody.ToList();
             _funcs = rppNodes.OfType<RppFunc>().Where(f => !f.IsConstructor).ToList();
             _funcs.ForEach(DefineFunc);
-            var constrExprs = rppNodes.OfType<IRppExpr>().ToList();
+            var constrExprs = rppNodes.OfType<IRppExpr>().Where(n => !(n is RppField)).ToList();
+            // TODO for some reason RppField is also IRppExpr, I think it shouldn't be
             _typeParams = typeParams;
             Modifiers = modifiers;
 
             _constructors = rppNodes.OfType<RppFunc>().Where(f => f.IsConstructor).ToList();
 
             _fields = _classParams.Where(param => param.MutabilityFlag != MutabilityFlag.MfUnspecified || IsCase).ToList();
+
+            rppNodes.OfType<RppField>().ForEach(_fields.Add);
 
             var primaryConstructor = CreatePrimaryConstructor(constrExprs);
             _constructors.Add(primaryConstructor);
@@ -95,7 +98,7 @@ namespace CSharpRpp
             {
                 string objectName = SymbolTable.GetObjectName(Name);
                 ResolvableType instanceFieldType = new ResolvableType(new RTypeName(objectName));
-                InstanceField = new RppField(MutabilityFlag.MfVal, "_instance", Collections.NoStrings, instanceFieldType,
+                InstanceField = new RppField(MutabilityFlag.MfVal, "_instance", Collections.NoModifiers, instanceFieldType,
                     new RppNew(instanceFieldType, Collections.NoExprs));
                 _fields.Add(InstanceField);
             }
@@ -181,25 +184,29 @@ namespace CSharpRpp
         {
             IRppParam valueParam = new RppParam("value", field.Type);
 
-            RppFunc setter = new RppFunc(RppMethodInfo.GetSetterAccessorName(field.Name), new[] {valueParam}, ResolvableType.UnitTy,
-                new RppAssignOp(new RppId(field.MangledName), new RppId("value", valueParam)))
+            if (field.MutabilityFlag != MutabilityFlag.MfVal)
             {
-                IsSynthesized = true,
-                IsPropertyAccessor = true
-            };
+                RppFunc setter = new RppFunc(RppMethodInfo.GetSetterAccessorName(field.Name), new[] {valueParam}, ResolvableType.UnitTy,
+                    new RppAssignOp(new RppId(field.MangledName), new RppId("value", valueParam)))
+                {
+                    IsSynthesized = true,
+                    IsPropertyAccessor = true,
+                    Modifiers = field.Modifiers
+                };
 
-            yield return setter;
+                yield return setter;
+            }
 
             RppFunc getter = new RppFunc(RppMethodInfo.GetGetterAccessorName(field.Name), Enumerable.Empty<IRppParam>(), field.Type,
                 new RppId(field.MangledName, field))
             {
                 IsSynthesized = true,
-                IsPropertyAccessor = true
+                IsPropertyAccessor = true,
+                Modifiers = field.Modifiers
             };
 
             yield return getter;
         }
-
 
         [NotNull]
         private RppFunc CreatePrimaryConstructor(IEnumerable<IRppExpr> exprs)
@@ -209,8 +216,19 @@ namespace CSharpRpp
 
             foreach (var classParam in _fields)
             {
-                string argName = MakeConstructorArgName(classParam.Name);
-                RppAssignOp assign = new RppAssignOp(new RppId(classParam.MangledName), new RppId(argName));
+                IRppExpr initExpr;
+                if (classParam.IsClassParam)
+                {
+                    string argName = MakeConstructorArgName(classParam.Name);
+                    initExpr = new RppId(argName);
+                }
+                else
+                {
+                    RppField field = classParam;
+                    initExpr = field.InitExpr;
+                }
+
+                RppAssignOp assign = new RppAssignOp(new RppId(classParam.MangledName), initExpr);
                 assignExprs.Add(assign);
             }
 

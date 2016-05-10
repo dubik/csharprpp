@@ -34,7 +34,8 @@ namespace CSharpRpp.TypeSystem
         Public = 8,
         Static = 16,
         Override = 32,
-        Synthesized = 64
+        Synthesized = 64,
+        Protected = 128
     }
 
     [Flags]

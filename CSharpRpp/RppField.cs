@@ -18,27 +18,28 @@ namespace CSharpRpp
     [DebuggerDisplay("Field = {Name}: {Type}")]
     public class RppField : RppVar
     {
-        private readonly IList<string> _modifiers;
+        public readonly HashSet<ObjectModifier> Modifiers;
 
         public string MangledName => RppFieldInfo.GetMangledName(Name);
-
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type)
-            : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
-        {
-            _modifiers = modifiers;
-            IsLocalSemantic = false;
-        }
-
-        public RppField(MutabilityFlag mutabilityFlag, string name, IList<string> modifiers, ResolvableType type, IRppExpr initExpr)
-            : base(mutabilityFlag, name, type, initExpr)
-        {
-            _modifiers = modifiers;
-            IsLocalSemantic = false;
-        }
 
         public new FieldBuilder Builder { get; set; }
 
         public RppFieldInfo FieldInfo { get; set; }
+        public bool IsClassParam { get; set; }
+
+        public RppField(MutabilityFlag mutabilityFlag, string name, HashSet<ObjectModifier> modifiers, ResolvableType type)
+            : base(mutabilityFlag, name, type, RppEmptyExpr.Instance)
+        {
+            Modifiers = modifiers;
+            IsLocalSemantic = false;
+        }
+
+        public RppField(MutabilityFlag mutabilityFlag, string name, HashSet<ObjectModifier> modifiers, ResolvableType type, IRppExpr initExpr)
+            : base(mutabilityFlag, name, type, initExpr)
+        {
+            Modifiers = modifiers;
+            IsLocalSemantic = false;
+        }
 
         public override void Accept(IRppNodeVisitor visitor)
         {
@@ -49,7 +50,7 @@ namespace CSharpRpp
 
         protected bool Equals(RppField other)
         {
-            return Equals(Name, other.Name) && Equals(Type, other.Type) && Equals(_modifiers, other._modifiers);
+            return Equals(Name, other.Name) && Equals(Type, other.Type) && Equals(Modifiers, other.Modifiers);
         }
 
         public override bool Equals(object obj)

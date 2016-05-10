@@ -118,9 +118,15 @@ namespace CSharpRpp.TypeSystem
         public static MethodAttributes GetMethodAttributes(RMethodAttributes rAttributes, bool constructor)
         {
             MethodAttributes attrs = MethodAttributes.Public;
+
             if (rAttributes.HasFlag(RMethodAttributes.Private))
             {
                 attrs = MethodAttributes.Private;
+            }
+
+            if (rAttributes.HasFlag(RMethodAttributes.Protected))
+            {
+                attrs = MethodAttributes.Family;
             }
 
             // always virtual, even for statics but not for property accessors :)

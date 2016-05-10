@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
@@ -98,16 +99,16 @@ namespace CSharpRppTest
         {
             RTypeName type;
             Assert.IsTrue(CreateParser(code).ParseType(out type));
-            Assert.IsInstanceOfType(type, typeof (T));
+            Assert.IsInstanceOfType(type, typeof(T));
             Assert.AreEqual(expectedType, type);
         }
 
         [TestMethod]
         public void TestParseClassParam()
         {
-            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MfVal, "foo", null, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MfVar, "foo", null, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("foo : Int", new RppField(MutabilityFlag.MfVal, "foo", null, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MfVar, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
+            TestClassParam("foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
         }
 
         private static void TestClassParam(string code, RppField expected)
@@ -118,14 +119,14 @@ namespace CSharpRppTest
         }
 
         [TestMethod]
-        public void TestVarDef()
+        public void TestFieldDef()
         {
-            TestVarDef("k : Int = 10", new RppVar(MutabilityFlag.MfVal, "k", new ResolvableType(new RTypeName("Int")), RppEmptyExpr.Instance));
+            TestVarDef("k : Int = 10", new RppField(MutabilityFlag.MfVal, "k", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
         }
 
         private static void TestVarDef(string code, RppVar expected)
         {
-            var var = CreateParser(code).ParsePatDef(MutabilityFlag.MfVal);
+            var var = CreateParser(code).ParsePatDef(MutabilityFlag.MfVal, Collections.NoModifiers);
             Assert.IsNotNull(var);
             Assert.AreEqual(expected, var);
         }

@@ -233,10 +233,19 @@ namespace CSharpRpp.Codegen
             {
                 attrs |= RMethodAttributes.Override;
             }
-            if (!modifiers.Contains(ObjectModifier.OmPrivate))
+            if (modifiers.Contains(ObjectModifier.OmPrivate))
+            {
+                attrs |= RMethodAttributes.Private;
+            }
+            else if (modifiers.Contains(ObjectModifier.OmProtected))
+            {
+                attrs |= RMethodAttributes.Protected;
+            }
+            else
             {
                 attrs |= RMethodAttributes.Public;
             }
+
             if (modifiers.Contains(ObjectModifier.OmAbstract))
             {
                 attrs |= RMethodAttributes.Abstract;

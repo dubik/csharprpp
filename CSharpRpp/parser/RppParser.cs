@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
@@ -281,6 +282,7 @@ namespace CSharpRpp
             }
 
             string name = _lastToken.Text;
+            IToken nameToken = _lastToken;
             Expect(RppLexer.OP_Colon);
             RTypeName paramType;
             if (!ParseType(out paramType))
@@ -288,7 +290,7 @@ namespace CSharpRpp
                 throw new Exception("Expected type but found: " + _lastToken.Text);
             }
 
-            classParam = new RppField(mutability, name, null, new ResolvableType(paramType));
+            classParam = new RppField(mutability, name, Collections.NoModifiers, new ResolvableType(paramType)) {Token = nameToken, IsClassParam = true};
             return true;
         }
 
@@ -462,12 +464,12 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_Val))
             {
-                return ParsePatDef(MutabilityFlag.MfVal);
+                return ParsePatDef(MutabilityFlag.MfVal, modifiers);
             }
 
             if (Require(RppLexer.KW_Var))
             {
-                return ParsePatDef(MutabilityFlag.MfVar);
+                return ParsePatDef(MutabilityFlag.MfVar, modifiers);
             }
 
             if (Require(RppLexer.KW_Def))
@@ -485,36 +487,46 @@ namespace CSharpRpp
 
         // FunSig [‘:’ Type] ‘=’ Expr
         // FunSig ::= id [FunTypeParamClause] ParamClauses
+        private bool _isInsideFunction;
 
         private RppFunc ParseFunDef(HashSet<ObjectModifier> modifiers)
         {
-            Expect(RppLexer.Id);
-            string name = _lastToken.Text;
-            IList<RppVariantTypeParam> typeParams = Collections.NoVariantTypeParams;
-            if (name != "this")
+            try
             {
-                typeParams = ParseTypeParams();
-            }
-            IEnumerable<IRppParam> funcParams = ParseParamClauses();
-            RTypeName funcReturnType = RTypeName.UnitN;
-            if (name != "this")
-            {
-                Expect(RppLexer.OP_Colon);
-                if (!ParseType(out funcReturnType))
+                _isInsideFunction = true;
+
+                Expect(RppLexer.Id);
+                string name = _lastToken.Text;
+                IList<RppVariantTypeParam> typeParams = Collections.NoVariantTypeParams;
+                if (name != "this")
                 {
-                    throw new Exception("Expecting type but got " + _lastToken);
+                    typeParams = ParseTypeParams();
                 }
-            }
+                IEnumerable<IRppParam> funcParams = ParseParamClauses();
+                RTypeName funcReturnType = RTypeName.UnitN;
+                if (name != "this")
+                {
+                    Expect(RppLexer.OP_Colon);
+                    if (!ParseType(out funcReturnType))
+                    {
+                        throw new Exception("Expecting type but got " + _lastToken);
+                    }
+                }
 
-            if (Require(RppLexer.OP_Eq))
+                if (Require(RppLexer.OP_Eq))
+                {
+                    SkipNewLines();
+
+                    IRppExpr expr = ParseExpr();
+                    return new RppFunc(name, funcParams, new ResolvableType(funcReturnType), expr) {Modifiers = modifiers, TypeParams = typeParams};
+                }
+
+                return new RppFunc(name, funcParams, new ResolvableType(funcReturnType)) {Modifiers = modifiers, TypeParams = typeParams};
+            }
+            finally
             {
-                SkipNewLines();
-
-                IRppExpr expr = ParseExpr();
-                return new RppFunc(name, funcParams, new ResolvableType(funcReturnType), expr) {Modifiers = modifiers, TypeParams = typeParams};
+                _isInsideFunction = false;
             }
-
-            return new RppFunc(name, funcParams, new ResolvableType(funcReturnType)) {Modifiers = modifiers, TypeParams = typeParams};
         }
 
 
@@ -649,7 +661,7 @@ namespace CSharpRpp
         }
 
         // PatDef ::= Pattern2 {',' Pattern2} [':' Type] ['=' Expr]
-        public RppVar ParsePatDef(MutabilityFlag mutabilityFlag)
+        public RppVar ParsePatDef(MutabilityFlag mutabilityFlag, HashSet<ObjectModifier> modifiers)
         {
             Expect(RppLexer.Id);
             IToken varIdToken = _lastToken;
@@ -669,7 +681,14 @@ namespace CSharpRpp
                 expr = ParseExpr();
             }
 
-            return new RppVar(mutabilityFlag, varIdToken.Text, new ResolvableType(type), expr) {Token = varIdToken};
+            if (_isInsideFunction)
+            {
+                return new RppVar(mutabilityFlag, varIdToken.Text, new ResolvableType(type), expr) {Token = varIdToken};
+            }
+            else
+            {
+                return new RppField(mutabilityFlag, varIdToken.Text, modifiers, new ResolvableType(type), expr) {Token = varIdToken};
+            }
         }
 
         public bool ParseModifier()

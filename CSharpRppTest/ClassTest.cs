@@ -309,7 +309,7 @@ abstract class Foo
         }
 
         [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [ExpectedException(typeof(SemanticException))]
         public void MissingAbstractMethodShouldThrowAnException()
         {
             const string code = @"
@@ -639,6 +639,90 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(13, res);
+        }
+
+        [TestMethod]
+        public void DefinePublicField()
+        {
+            const string code = @"
+class Foo
+{
+  val index: Int = 13
+  var mutIndex: Int = 27
+}
+
+object Main
+{
+    def main: Foo = new Foo
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+            var indexProp = res.GetType().GetProperty("index");
+            Assert.IsNotNull(indexProp, "Property was not generated");
+            var indexValue = indexProp.GetValue(res);
+            Assert.AreEqual(13, indexValue);
+
+            var mutIndexProp = res.GetType().GetProperty("mutIndex");
+            Assert.IsNotNull(mutIndexProp, "Property was not generated");
+            var mutIndexValue = mutIndexProp.GetValue(res);
+            Assert.AreEqual(27, mutIndexValue);
+        }
+
+        [TestMethod]
+        public void DefineReadonlyPublicField()
+        {
+            const string code = @"
+class Foo
+{
+  val index: Int = 13
+}
+
+object Main
+{
+    def main: Foo = new Foo
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+            PropertyInfo indexProp = res.GetType().GetProperty("index");
+            Assert.IsNotNull(indexProp, "Property was not generated");
+            var indexValue = indexProp.GetValue(res);
+            Assert.AreEqual(13, indexValue);
+
+            Assert.IsTrue(indexProp.CanRead);
+            Assert.IsFalse(indexProp.CanWrite);
+        }
+
+        [TestMethod]
+        public void DefineProtectedAndPrivateProperties()
+        {
+            const string code = @"
+class Foo
+{
+  protected var index: Int = 13
+  private var offset: Int = 27
+}
+
+object Main
+{
+    def main: Foo = new Foo
+}
+";
+            var mainTy = Utils.ParseAndCreateType(code, "Main$");
+            var res = Utils.InvokeStatic(mainTy, "main");
+            Assert.IsNotNull(res);
+            PropertyInfo indexProp = res.GetType().GetProperty("index", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(indexProp, "Property was not generated");
+            Assert.IsTrue(indexProp.GetMethod.IsFamily);
+            Assert.IsTrue(indexProp.SetMethod.IsFamily);
+
+            PropertyInfo offsetProp = res.GetType().GetProperty("offset", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(offsetProp, "Property was not generated");
+            Assert.IsTrue(offsetProp.GetMethod.IsPrivate);
+            Assert.IsTrue(offsetProp.SetMethod.IsPrivate);
         }
     }
 }
