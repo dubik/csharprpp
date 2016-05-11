@@ -154,8 +154,14 @@ object Main {
 }
 ";
 
+            const string code1 = @"
+class Foo {
+    val field: Int
+}
+";
+
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();

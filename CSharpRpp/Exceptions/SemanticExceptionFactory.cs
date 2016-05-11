@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp.TypeSystem;
@@ -60,6 +61,11 @@ namespace CSharpRpp.Exceptions
         public static SemanticException NumericTypeIsExpected(IToken token)
         {
             return new SemanticException(112, FormatErrorAndPointAtToken(token, "Numeric type is expected"));
+        }
+
+        public static SemanticException MissingInitializer(IToken token)
+        {
+            return new SemanticException(113, FormatErrorAndPointAtToken(token, "Missing initializer"));
         }
 
         private static string MethodString(RppMethodInfo method)
