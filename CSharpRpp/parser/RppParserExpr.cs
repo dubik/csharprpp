@@ -133,6 +133,14 @@ namespace CSharpRpp
                         break;
                     case "=":
                     case "!":
+                    case "+=":
+                    case "-=":
+                    case "*=":
+                    case "/=":
+                    case "%=":
+                    case "&=":
+                    case "^=":
+                    case "|=":
                         precedence = 5;
                         break;
                     case "<":

@@ -167,7 +167,7 @@ namespace CSharpRppTest
             return InvokeStatic(type, name, null);
         }
 
-        public static object InvokeStatic(Type type, string name, object[] @params)
+        public static object InvokeStatic(Type type, string name, params object[] @params)
         {
             var instance = GetObjectInstance(type);
             MethodInfo method = type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);

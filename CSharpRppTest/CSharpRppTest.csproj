@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArithmTest.cs" />
     <Compile Include="ArrayTest.cs" />
     <Compile Include="AssignableFromTest.cs" />
     <Compile Include="AstNodeMatcher.cs" />

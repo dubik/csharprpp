@@ -155,6 +155,7 @@ namespace CSharpRpp
         }
     }
 
+
     [DebuggerDisplay("Op = {Op}")]
     public class RppBinOp : RppNode, IRppExpr
     {
@@ -183,9 +184,9 @@ namespace CSharpRpp
                 return new RppRelationalBinOp(op, left, right);
             }
 
-            if (op == "=")
+            if (RppAssignOp.Ops.Contains(op))
             {
-                return new RppAssignOp(left, right);
+                return RppAssignOp.Create(op, left, right);
             }
 
             Debug.Fail("Don't know how to handle op: " + op);
@@ -284,7 +285,7 @@ namespace CSharpRpp
         private void Initialize(T value)
         {
             Value = value;
-            Type = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof (T)));
+            Type = new ResolvableType(RppTypeSystem.ImportPrimitive(typeof(T)));
         }
 
         protected RppLiteralBase(T value)
@@ -447,11 +448,14 @@ namespace CSharpRpp
             Type = type;
         }
 
-        public static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams, IList<RType> genericArguments)
+        public static IList<IRppExpr> ReplaceUndefinedClosureTypesIfNeeded(IEnumerable<IRppExpr> exprs, RppParameterInfo[] funcParams,
+            IList<RType> genericArguments)
         {
             IEnumerable<IRppExpr> rppExprs = exprs as IList<IRppExpr> ?? exprs.ToList();
             IEnumerable<ResolvableType> funcParamTypes = ExpandVariadicParam(funcParams, rppExprs.Count()).ToList();
-            return rppExprs.Zip(funcParamTypes, (expr, funcTypeParam) => TypeInference.ReplaceUndefinedClosureTypesIfNeeded(expr, funcTypeParam, genericArguments)).ToList();
+            return
+                rppExprs.Zip(funcParamTypes, (expr, funcTypeParam) => TypeInference.ReplaceUndefinedClosureTypesIfNeeded(expr, funcTypeParam, genericArguments))
+                    .ToList();
         }
 
         /// <summary>

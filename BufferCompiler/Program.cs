@@ -68,7 +68,7 @@ class XListIterator[A](var list: XList[A]) extends XIterator[A] {
 }
 
 class XArrayIterator[A](var array: Array[A]) extends XIterator[A] {
-  private var index = 0
+  private var index: Int = 0
 
   override def hasNext: Boolean = array.length > index
 
@@ -155,22 +155,13 @@ object Main {
 ";
 
             const string code1 = @"
-class Foo
-{
-  var index = 10
-  def increment: Unit = index = index + 1
-  def getSomeInt(): Int = 13
-}
-
-object Main
-{
-    def main: Foo = {
-      val f = new Foo
-      f.increment
-      f
+object Main {
+    def main(k: Int) : Int = {
+        var p = 13
+        p += k
+        p
     }
-}
-";
+}";
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
@@ -183,11 +174,6 @@ object Main
                 Debug.Assert(codeGen != null, "codeGen != null");
                 codeGen.Save(ApplicationType.Library);
             }
-        }
-
-        protected void func()
-        {
-            
         }
 
         public static Assembly GetStdlibAssembly()

@@ -12,6 +12,8 @@ namespace CSharpRpp
 {
     public class RppAssignOp : RppBinOp
     {
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="};
+
         public RppAssignOp([NotNull] IRppExpr left, [NotNull] IRppExpr right) : base("=", left, right)
         {
             Type = ResolvableType.UnitTy;
@@ -58,6 +60,32 @@ namespace CSharpRpp
             }
 
             return this;
+        }
+
+        [NotNull]
+        public new static RppBinOp Create(string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
+        {
+            if (op == "=")
+            {
+                return new RppAssignOp(left, right);
+            }
+
+            string operatorStr = ExtractOperator(op);
+            return Create("=", left, RppBinOp.Create(operatorStr, left, right));
+        }
+
+        [NotNull]
+        private static string ExtractOperator([NotNull] string assignmentOp)
+        {
+            if (assignmentOp.Length < 1 && assignmentOp.Length > 3)
+                throw new ArgumentException();
+
+            if (assignmentOp.Length == 2)
+            {
+                return assignmentOp.Substring(0, 1);
+            }
+
+            return assignmentOp.Substring(0, 2);
         }
     }
 }
