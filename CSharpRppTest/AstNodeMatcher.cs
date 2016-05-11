@@ -132,6 +132,10 @@ namespace CSharpRppTest
         {
         }
 
+        public void Visit(RppBitwiseOp node)
+        {
+        }
+
         public void Visit(RppRelationalBinOp node)
         {
         }

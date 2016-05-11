@@ -111,7 +111,7 @@ namespace CSharpRpp
         private bool ParseOperator(out string op, out int precedence, out bool leftAssoc)
         {
             leftAssoc = false;
-            if (Require(OP_Ops) || Require(OP_Star) || Require(OP_Eq))
+            if (Require(OP_Ops) || Require(OP_Star) || Require(OP_Eq) || Require(OP_Bar))
             {
                 var token = _lastToken;
                 op = token.Text;

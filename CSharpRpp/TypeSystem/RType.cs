@@ -880,6 +880,11 @@ namespace CSharpRpp.TypeSystem
             return Name == "Int" || Name == "Float" || Name == "Double" || Name == "Char" || Name == "Short" || Name == "Byte";
         }
 
+        public bool IsInteger()
+        {
+            return Name == "Int" || Name == "Byte" || Name == "Short";
+        }
+
         public bool IsSame(RType other)
         {
             return Name.Equals(other.Name);

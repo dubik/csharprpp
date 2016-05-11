@@ -154,17 +154,8 @@ object Main {
 }
 ";
 
-            const string code1 = @"
-object Main {
-    def main(k: Int) : Int = {
-        var p = 13
-        p += k
-        p
-    }
-}";
-
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();

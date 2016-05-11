@@ -43,6 +43,13 @@ namespace CSharpRpp.Codegen
             {"/", OpCodes.Div}
         };
 
+        private static readonly Dictionary<string, OpCode> BitwiseArithmToIl = new Dictionary<string, OpCode>
+        {
+            {"&", OpCodes.And},
+            {"|", OpCodes.Or},
+            {"^", OpCodes.Xor},
+        };
+
         private static readonly Regex TypeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
         private readonly Label _exitLabel;
@@ -309,8 +316,18 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppArithmBinOp node)
         {
+            GenerateCodeForArithmOp(node, ArithmToIl);
+        }
+
+        public override void Visit(RppBitwiseOp node)
+        {
+            GenerateCodeForArithmOp(node, BitwiseArithmToIl);
+        }
+
+        private void GenerateCodeForArithmOp(RppBinOp node, IReadOnlyDictionary<string, OpCode> arithmToIl)
+        {
             OpCode opCode;
-            if (ArithmToIl.TryGetValue(node.Op, out opCode))
+            if (arithmToIl.TryGetValue(node.Op, out opCode))
             {
                 node.Left.Accept(this);
                 node.Right.Accept(this);
@@ -368,7 +385,7 @@ namespace CSharpRpp.Codegen
             if (node.Name == "ctor()")
             {
                 _body.Emit(OpCodes.Ldarg_0);
-                ConstructorInfo constructor = typeof (object).GetConstructor(Type.EmptyTypes);
+                ConstructorInfo constructor = typeof(object).GetConstructor(Type.EmptyTypes);
                 Debug.Assert(constructor != null, "constructor != null");
                 _body.Emit(OpCodes.Call, constructor);
             }
@@ -482,7 +499,7 @@ namespace CSharpRpp.Codegen
 
             if (node.BaseConstructor == null)
             {
-                _body.Emit(OpCodes.Call, typeof (object).GetConstructor(new Type[0]));
+                _body.Emit(OpCodes.Call, typeof(object).GetConstructor(new Type[0]));
                 return;
             }
 
@@ -719,7 +736,7 @@ namespace CSharpRpp.Codegen
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
 
                 Type genericTypeDef = parentType.GetGenericTypeDefinition();
-                if (returnType == typeof (void))
+                if (returnType == typeof(void))
                 {
                     parentType = genericTypeDef.MakeGenericType(argTypes); // don't include 'void'
                 }

@@ -48,12 +48,18 @@ namespace CSharpRpp.Exceptions
 
         public static SemanticException MethodGenericArgumentIsNotSpecified(IToken token)
         {
-            return new SemanticException(110, FormatErrorAndPointAtToken(token, "please specify generic arguments, type inference is more limited when varargs are used"));
+            return new SemanticException(110,
+                FormatErrorAndPointAtToken(token, "please specify generic arguments, type inference is more limited when varargs are used"));
         }
 
         public static SemanticException CantInferType(IToken token)
         {
             return new SemanticException(111, FormatErrorAndPointAtToken(token, "Please specify type, right now we can't infer it (shame :( )"));
+        }
+
+        public static SemanticException NumericTypeIsExpected(IToken token)
+        {
+            return new SemanticException(112, FormatErrorAndPointAtToken(token, "Numeric type is expected"));
         }
 
         private static string MethodString(RppMethodInfo method)

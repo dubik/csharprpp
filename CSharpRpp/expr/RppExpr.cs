@@ -117,16 +117,6 @@ namespace CSharpRpp
         public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
         {
             base.Analyze(scope, diagnostic);
-            // Convert less or equal to greater and greater or equal to less
-            /*
-            switch (Op)
-            {
-                case "<=":
-                    return new RppRelationalBinOp(">", Right, Left);
-                case ">=":
-                    return new RppRelationalBinOp("<", Right, Left);
-            }
-            */
             return this;
         }
     }
@@ -155,6 +145,41 @@ namespace CSharpRpp
         }
     }
 
+    public class RppBitwiseOp : RppBinOp
+    {
+        internal static readonly HashSet<string> Ops = new HashSet<string> {"^", "|", "&"};
+
+        public RppBitwiseOp([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right) : base(op, left, right)
+        {
+        }
+
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
+        {
+            base.Analyze(scope, diagnostic);
+
+            if (!Left.Type.Value.IsInteger())
+                throw SemanticExceptionFactory.NumericTypeIsExpected(Left.Token);
+
+            if (!Right.Type.Value.IsInteger())
+                throw SemanticExceptionFactory.NumericTypeIsExpected(Right.Token);
+
+            RType commonType = TypeInference.ResolveCommonType(Left.Type.Value, Right.Type.Value);
+            if (commonType == null)
+            {
+                throw SemanticExceptionFactory.TypeMismatch(Right.Token, Left.Type.ToString(), Right.Type.ToString());
+            }
+
+            Left = ImplicitCast.CastIfNeeded(Left, commonType);
+            Right = ImplicitCast.CastIfNeeded(Right, commonType);
+            Type = new ResolvableType(commonType);
+            return this;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
 
     [DebuggerDisplay("Op = {Op}")]
     public class RppBinOp : RppNode, IRppExpr
@@ -164,8 +189,8 @@ namespace CSharpRpp
         [NotNull]
         public string Op { get; }
 
-        public IRppExpr Left { get; private set; }
-        public IRppExpr Right { get; private set; }
+        public IRppExpr Left { get; protected set; }
+        public IRppExpr Right { get; protected set; }
 
         public static RppBinOp Create([NotNull] string op, [NotNull] IRppExpr left, [NotNull] IRppExpr right)
         {
@@ -182,6 +207,11 @@ namespace CSharpRpp
             if (RppRelationalBinOp.Ops.Contains(op))
             {
                 return new RppRelationalBinOp(op, left, right);
+            }
+
+            if (RppBitwiseOp.Ops.Contains(op))
+            {
+                return new RppBitwiseOp(op, left, right);
             }
 
             if (RppAssignOp.Ops.Contains(op))
