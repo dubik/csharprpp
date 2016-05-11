@@ -110,7 +110,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppField node)
         {
-            node.ResolveType(_currentClass.Scope);
+            node.ResolveType(_currentClass.Scope, _diagnostic);
         }
     }
 
@@ -206,7 +206,7 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppField node)
         {
-            node.ResolveType(_currentClass.Scope);
+            node.ResolveType(_currentClass.Scope, _diagnostic);
             node.FieldInfo = _currentType.DefineField(node.Name, node.Type.Value, GetAttributes(node));
         }
 

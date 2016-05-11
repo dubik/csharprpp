@@ -51,6 +51,11 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(110, FormatErrorAndPointAtToken(token, "please specify generic arguments, type inference is more limited when varargs are used"));
         }
 
+        public static SemanticException CantInferType(IToken token)
+        {
+            return new SemanticException(111, FormatErrorAndPointAtToken(token, "Please specify type, right now we can't infer it (shame :( )"));
+        }
+
         private static string MethodString(RppMethodInfo method)
         {
             if (method.Name == "ctor")
@@ -61,7 +66,7 @@ namespace CSharpRpp.Exceptions
             return method.ToString();
         }
 
-        private static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
+        public static string FormatErrorAndPointAtToken(IToken token, string errorMsg)
         {
             if (token.InputStream != null)
             {

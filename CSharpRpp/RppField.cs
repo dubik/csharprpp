@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using CSharpRpp.Exceptions;
+using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
 
@@ -80,8 +82,16 @@ namespace CSharpRpp
 
         #endregion
 
-        public void ResolveType(SymbolTable scope)
+        public void ResolveType(SymbolTable scope, Diagnostic diagnostic)
         {
+            if (Type.IsUndefined())
+            {
+                // TODO this is not easy to fix because field creates accessors which are functions and they are
+                // processed before Analyze, so type of field may not be infered. Solution is to delay accessor synthize
+                // to later phases when signatures of all functions are known.
+                throw SemanticExceptionFactory.CantInferType(Token);
+            }
+
             Type?.Resolve(scope);
         }
     }

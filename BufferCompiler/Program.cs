@@ -157,13 +157,18 @@ object Main {
             const string code1 = @"
 class Foo
 {
-  protected var index: Int = 13
-  private var offset: Int = 27
+  var index = 10
+  def increment: Unit = index = index + 1
+  def getSomeInt(): Int = 13
 }
 
 object Main
 {
-    def main: Foo = new Foo
+    def main: Foo = {
+      val f = new Foo
+      f.increment
+      f
+    }
 }
 ";
 
