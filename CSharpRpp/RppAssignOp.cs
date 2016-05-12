@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.Exceptions;
+using CSharpRpp.Expr;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
@@ -45,9 +46,15 @@ namespace CSharpRpp
                 else if (selector.Path is RppFieldSelector) // Rewrite assignment to field as a call to setter of the field
                 {
                     RppFieldSelector fieldSelector = (RppFieldSelector) selector.Path;
-                    RppSelector callPropertySetter = new RppSelector(selector.Target, new RppFuncCall(fieldSelector.Field.SetterName,
-                        List(Right)));
-                    return callPropertySetter.Analyze(scope, diagnostic);
+                    return CallSetter(selector.Target, fieldSelector.Field, Right).Analyze(scope, diagnostic);
+                }
+            }
+            else if (Left is RppId)
+            {
+                RppId id = (RppId) Left;
+                if (id.IsField && !id.IsFieldAccessedDirectly)
+                {
+                    return CallSetter(new RppThis(), id.Field, Right).Analyze(scope, diagnostic);
                 }
             }
 
@@ -60,6 +67,11 @@ namespace CSharpRpp
             }
 
             return this;
+        }
+
+        private static RppSelector CallSetter(IRppExpr target, RppFieldInfo field, IRppExpr value)
+        {
+            return new RppSelector(target, new RppFuncCall(field.SetterName, List(value)));
         }
 
         [NotNull]

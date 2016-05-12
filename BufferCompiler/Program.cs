@@ -156,7 +156,13 @@ object Main {
 
             const string code1 = @"
 class Foo {
-    val field: Int
+    var field: Int = 0
+
+    def calc(k : Int) : Unit = {
+        val f = new Foo
+        f.field = 12
+        field = k
+    }
 }
 ";
 

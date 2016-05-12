@@ -959,6 +959,12 @@ namespace CSharpRpp
 
         public RppFieldInfo Field { get; private set; }
 
+        /// <summary>
+        /// Returns true if field is referenced directly with &lt;field&gt;_BackingField.
+        /// If this is not a field, returns false.
+        /// </summary>
+        public bool IsFieldAccessedDirectly => IsField && Field.Name != Name;
+
         public RppId([NotNull] string name) : base(name)
         {
         }
