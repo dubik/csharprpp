@@ -97,6 +97,9 @@ namespace CSharpRpp
                 CreateRType createRType = new CreateRType(diagnostic);
                 program.Accept(createRType);
 
+                SemanticAnalyzerStage1 semanticStage1 = new SemanticAnalyzerStage1(diagnostic);
+                program.Accept(semanticStage1);
+
                 program.Analyze(runtimeScope, null);
 
                 SemanticAnalyzer semantic = new SemanticAnalyzer(diagnostic);

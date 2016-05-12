@@ -91,6 +91,9 @@ namespace CSharpRppTest
                 return null;
             }
 
+            SemanticAnalyzerStage1 semanticStage1 = new SemanticAnalyzerStage1(diagnostic);
+            program.Accept(semanticStage1);
+
             program.Analyze(scope, diagnostic);
 
             if (diagnostic.Errors.Any())

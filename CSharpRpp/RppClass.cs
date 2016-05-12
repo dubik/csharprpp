@@ -107,14 +107,6 @@ namespace CSharpRpp
             _nested = rppNodes.OfType<RppClass>().ToList();
         }
 
-        private static void ValidateField(RppField field)
-        {
-            if (field.InitExpr == null || field.InitExpr is RppEmptyExpr)
-            {
-                throw SemanticExceptionFactory.MissingInitializer(field.Token);
-            }
-        }
-
         private void DefineFunc(RppFunc func)
         {
             func.IsStatic = Kind == ClassKind.Object;
