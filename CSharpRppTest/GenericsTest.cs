@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CSharpRpp;
+using System.Reflection;
 using CSharpRpp.TypeSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
@@ -444,9 +446,9 @@ object Main
             RType barOfFTy = barTy.MakeGenericType(fTy);
             Assert.IsTrue(barOfFTy.IsGenericType);
             var genericArguments = barOfFTy.GenericArguments;
-            CollectionAssert.AreEqual(ListExtensions.List(fTy), genericArguments.ToList());
+            CollectionAssert.AreEqual(List(fTy), genericArguments.ToList());
             var genericParameters = barOfFTy.GenericParameters.Select(gp => gp.Type).ToList();
-            CollectionAssert.AreEqual(ListExtensions.List(bTy), genericParameters);
+            CollectionAssert.AreEqual(List(bTy), genericParameters);
         }
 
 
@@ -582,6 +584,39 @@ object Main {
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             object res = Utils.InvokeStatic(mainTy, "main");
             Assert.IsNull(res);
+        }
+
+        [Variance("+")]
+        internal class Foo<A>
+        {
+        }
+
+        [TestMethod]
+        public void WrapSystemTypeWithVarianceAnnotation()
+        {
+            RType fooTy = new RType("Foo", typeof(Foo<>), TypeFactory);
+            RppGenericParameter genericParameter = fooTy.GenericParameters.First();
+            Assert.AreEqual(RppGenericParameterVariance.Covariant, genericParameter.Variance);
+        }
+
+        [Variance("+_-")]
+        internal class Bar<A, B, C>
+        {
+        }
+
+        [TestMethod]
+        public void ComplexWrapSystemTypeWithVarianceAnnotation()
+        {
+            RType fooTy = new RType("Bar", typeof(Bar<,,>), TypeFactory);
+            var gps = fooTy.GenericParameters.ToArray();
+            Assert.AreEqual(RppGenericParameterVariance.Covariant, gps[0].Variance);
+            Assert.AreEqual(RppGenericParameterVariance.Invariant, gps[1].Variance);
+            Assert.AreEqual(RppGenericParameterVariance.Contravariant, gps[2].Variance);
+        }
+
+        private RType TypeFactory(Type type)
+        {
+            return new RType(type.Name, type, TypeFactory);
         }
     }
 }

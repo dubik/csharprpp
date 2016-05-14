@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +10,17 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public class VarianceAttribute : Attribute
+    {
+        public string Variance { get; }
+
+        public VarianceAttribute(string variance)
+        {
+            Variance = variance;
+        }
+    }
+
     internal class RTypeUtils
     {
         public static void DefineParams(ConstructorBuilder constructorBuilder, IEnumerable<RppParameterInfo> constructorParams)
@@ -224,6 +236,24 @@ namespace CSharpRpp.TypeSystem
         private static void UpdateGenericParameter(RppGenericParameter genericParameter, GenericTypeParameterBuilder nativeGenericParameter)
         {
             genericParameter.SetGenericTypeParameterBuilder(nativeGenericParameter);
+            UpdateGenericParameterContraints(genericParameter, nativeGenericParameter);
+        }
+
+        private static GenericParameterAttributes GetAttributes(RppGenericParameter parameter)
+        {
+            switch (parameter.Variance)
+            {
+                case RppGenericParameterVariance.Covariant:
+                    return GenericParameterAttributes.Covariant;
+                case RppGenericParameterVariance.Contravariant:
+                    return GenericParameterAttributes.Contravariant;
+                default:
+                    return GenericParameterAttributes.None;
+            }
+        }
+
+        private static void UpdateGenericParameterContraints(RppGenericParameter genericParameter, GenericTypeParameterBuilder nativeGenericParameter)
+        {
             if (genericParameter.Constraint != null)
             {
                 if (genericParameter.Constraint.IsClass)
@@ -264,9 +294,48 @@ namespace CSharpRpp.TypeSystem
 
         public static CustomAttributeBuilder CreateCompilerGeneratedAttribute()
         {
-            var compilerGeneratedAttributeCtor = typeof (CompilerGeneratedAttribute).GetConstructor(new Type[0]);
+            var compilerGeneratedAttributeCtor = typeof(CompilerGeneratedAttribute).GetConstructor(new Type[0]);
             Debug.Assert(compilerGeneratedAttributeCtor != null, "compilerGeneratedAttributeCtor != null");
             return new CustomAttributeBuilder(compilerGeneratedAttributeCtor, new object[0]);
+        }
+
+        public static CustomAttributeBuilder CreateVarianceAttribute(IEnumerable<RppGenericParameterVariance> variance)
+        {
+            var varianceAttributeCtor = typeof(VarianceAttribute).GetConstructor(new[] {typeof(string)});
+            string encodedVariance = EncodeVariance(variance);
+            Debug.Assert(varianceAttributeCtor != null, "varianceAttributeCtor != null");
+            return new CustomAttributeBuilder(varianceAttributeCtor, new object[] {encodedVariance});
+        }
+
+        private static string EncodeVariance(IEnumerable<RppGenericParameterVariance> variance)
+        {
+            return string.Join("",
+                variance.Select(v => v == RppGenericParameterVariance.Covariant ? "+" : v == RppGenericParameterVariance.Contravariant ? "-" : "_"));
+        }
+
+        public static IEnumerable<RppGenericParameterVariance> DecodeVariance(string variance)
+        {
+            return variance.ToCharArray()
+                .Select(
+                    c =>
+                        c == '+'
+                            ? RppGenericParameterVariance.Covariant
+                            : c == '-' ? RppGenericParameterVariance.Contravariant : RppGenericParameterVariance.Invariant);
+        }
+
+        public static void AttachAttributes(RType type, TypeBuilder typeBuilder)
+        {
+            if (type.IsGenericType)
+            {
+                AttachVarianceAttribute(type.GenericParameters, typeBuilder);
+            }
+        }
+
+        private static void AttachVarianceAttribute(IEnumerable<RppGenericParameter> genericParameters, TypeBuilder typeBuilder)
+        {
+            IEnumerable<RppGenericParameterVariance> variances = genericParameters.Select(gp => gp.Variance);
+            CustomAttributeBuilder attributeBuilder = CreateVarianceAttribute(variances);
+            typeBuilder.SetCustomAttribute(attributeBuilder);
         }
     }
 }

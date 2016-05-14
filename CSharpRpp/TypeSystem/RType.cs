@@ -472,12 +472,27 @@ namespace CSharpRpp.TypeSystem
         private void InitGenericParameters()
         {
             Debug.Assert(_type != null, "_type != null");
-            _genericParameters =
-                _type.GetGenericArguments()
-                    .Select(
-                        gp =>
-                            new RppGenericParameter(gp.Name) {Position = gp.GenericParameterPosition, Type = CreateGenericParameterType(gp)})
-                    .ToArray();
+
+            var genericParametersVariance = GetTypeArgumentVariance(_type);
+            _genericParameters = _type.GetGenericArguments().Select(type => CreateGenericParameter(type, genericParametersVariance)).ToArray();
+        }
+
+        [CanBeNull]
+        private static RppGenericParameterVariance[] GetTypeArgumentVariance([NotNull] Type type)
+        {
+            VarianceAttribute varianceAttribute = type.GetCustomAttribute<VarianceAttribute>();
+            if (varianceAttribute != null)
+            {
+                return RTypeUtils.DecodeVariance(varianceAttribute.Variance).ToArray();
+            }
+
+            return null;
+        }
+
+        private RppGenericParameter CreateGenericParameter(Type gp, RppGenericParameterVariance[] genericParametersVariance)
+        {
+            RppGenericParameterVariance variance = genericParametersVariance?[gp.GenericParameterPosition] ?? RppGenericParameterVariance.Invariant;
+            return new RppGenericParameter(gp.Name) {Position = gp.GenericParameterPosition, Type = CreateGenericParameterType(gp), Variance = variance};
         }
 
         private static RType CreateGenericParameterType(Type gp)
@@ -739,6 +754,8 @@ namespace CSharpRpp.TypeSystem
                     RTypeUtils.CreateNativeGenericParameters(_genericParameters,
                         genericParameterNames => _typeBuilder.DefineGenericParameters(genericParameterNames));
                 }
+
+                RTypeUtils.AttachAttributes(this, _typeBuilder);
             }
         }
 
