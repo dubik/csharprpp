@@ -112,7 +112,7 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(LongTy);
             scope.AddType(FloatTy);
             scope.AddType(DoubleTy);
-            scope.AddType(ImportClass(typeof(string)));
+            scope.AddType(StringTy);
             scope.AddType(AnyTy);
             scope.AddType(ArrayTy);
 

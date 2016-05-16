@@ -75,7 +75,7 @@ namespace CSharpRpp.Expr
                 return true;
             }
 
-            return source.Name == dest.Name;
+            return false;
         }
     }
 }
