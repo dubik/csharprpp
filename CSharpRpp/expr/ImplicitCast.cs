@@ -34,6 +34,7 @@ namespace CSharpRpp.Expr
                 return sourceExpr;
             }
             */
+
             if (sourceType.IsSubclassOf(targetType))
             {
                 return sourceExpr;

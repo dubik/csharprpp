@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
+using CSharpRpp.TypeSystem;
 
 namespace BufferCompiler
 {
@@ -92,6 +96,34 @@ class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterato
   override def copy(): XIterator[U] = new XMapIterator(iter.copy(), f)
 }
 
+class XFilterIterator[A](val iter: XIterator[A], val f: A => Boolean) extends XIterator[A] {
+  private var item: Option[A] = None
+
+  calcNext()
+
+  private def calcNext(): Unit = {
+    item = None
+    while (iter.hasNext && item.isEmpty) {
+      val it = iter.next()
+      if (f(it)) {
+        item = Some(it)
+      }
+    }
+  }
+
+  override def hasNext: Boolean = item.isDefined
+
+  override def next(): A = {
+    val nextItem = item.get
+    calcNext()
+    nextItem
+  }
+
+
+  override def copy(): XIterator[A] = new XFilterIterator(iter.copy(), f)
+}
+
+
 abstract class XList[+A] extends XIterable[A] {
   def head: A
   def tail: XList[A]
@@ -155,13 +187,10 @@ object Main {
 ";
 
             const string code1 = @"
-class Foo {
-    var field: Int = 0
-
-    def calc(k : Int) : Unit = {
-        val f = new Foo
-        f.field = 12
-        field = k
+object Main {
+    def main[A]: Unit = {
+        var k: Option[A] = None
+        k = None
     }
 }
 ";

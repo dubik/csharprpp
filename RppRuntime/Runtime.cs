@@ -1,6 +1,4 @@
-﻿using System;
-
-// ReSharper disable InconsistentNaming
+﻿// ReSharper disable InconsistentNaming
 
 public class Runtime
 {

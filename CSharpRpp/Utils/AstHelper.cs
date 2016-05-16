@@ -22,7 +22,7 @@ namespace CSharpRpp.Utils
 
         public static RppBinOp NotNull(IRppExpr expr)
         {
-            return BinOp("!=", expr, Null);
+            return BinOp("!=", expr, NullTy);
         }
 
         public static RppId Id(string name)
@@ -137,7 +137,7 @@ namespace CSharpRpp.Utils
             return new RppVar(MutabilityFlag.MfVal, nameToken.Text, type.AsResolvable(), initExpr) {Token = nameToken};
         }
 
-        public static RppNull Null = RppNull.Instance;
+        public static RppNull NullTy = RppNull.Instance;
         public static RppBreak Break = RppBreak.Instance;
         public static RppEmptyExpr EmptyExpr = RppEmptyExpr.Instance;
     }

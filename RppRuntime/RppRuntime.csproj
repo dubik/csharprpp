@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Nothing.cs" />
+    <Compile Include="Null.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="RppConsole.cs" />
     <Compile Include="Functions.cs" />

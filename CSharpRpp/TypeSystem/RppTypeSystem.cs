@@ -19,12 +19,13 @@ namespace CSharpRpp.TypeSystem
         public static RType LongTy = GetOrCreateType("Long", typeof(long));
         public static RType FloatTy = GetOrCreateType("Float", typeof(float));
         public static RType DoubleTy = GetOrCreateType("Double", typeof(double));
-        public static RType NullTy = ImportClass("Null", typeof(object));
         public static RType AnyTy = ImportClass("Any", typeof(object));
         public static RType StringTy = ImportClass("String", typeof(string));
-        public static RType NothingTy = ImportClass("Nothing", typeof(object));
         public static RType Undefined = new RType("Undefined");
         public static RType ArrayTy = CreateArrayType();
+
+        public static RType NothingTy = GetOrCreateType("Nothing", typeof(Nothing));
+        public static RType NullTy = GetOrCreateType("Null", typeof(Null));
 
         private readonly Dictionary<string, RType> _allTypes = new Dictionary<string, RType>();
 
@@ -113,7 +114,6 @@ namespace CSharpRpp.TypeSystem
             scope.AddType(DoubleTy);
             scope.AddType(ImportClass(typeof(string)));
             scope.AddType(AnyTy);
-            scope.AddType(NothingTy);
             scope.AddType(ArrayTy);
 
             Instance._allTypes.Add(typeof(void).Name, UnitTy);

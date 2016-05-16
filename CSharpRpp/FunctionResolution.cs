@@ -191,6 +191,9 @@ namespace CSharpRpp
             {
                 RppMember member = (RppMember) closure.Analyze(scope, diagnostic);
                 RType closureType = member.Type.Value;
+                if(closureType.IsObject)
+                    return null;
+
                 List<RppMethodInfo> applyMethods = closureType.Methods.Where(m => m.Name == "apply").ToList();
 
                 List<RType> argTypes = args.Select(a => a.Type.Value).ToList();

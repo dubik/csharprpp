@@ -38,7 +38,7 @@ namespace CSharpRpp
                 string localVar = ctx.CreateLocal(_type.Name.Name);
                 var castedVariable = Val(localVar, _type.Value, new RppAsInstanceOf(inVar, _type));
 
-                return If(BinOp("!=", new RppAsInstanceOf(inVar, _type), Null), Block(castedVariable, ProcessMatchExpr(Id(localVar), outOut, thenExpr, ctx)));
+                return If(BinOp("!=", new RppAsInstanceOf(inVar, _type), NullTy), Block(castedVariable, ProcessMatchExpr(Id(localVar), outOut, thenExpr, ctx)));
             }
 
             return ProcessMatchExpr(inVar, outOut, thenExpr, ctx);

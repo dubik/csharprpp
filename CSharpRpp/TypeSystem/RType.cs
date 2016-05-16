@@ -1004,6 +1004,12 @@ namespace CSharpRpp.TypeSystem
 
         protected virtual bool IsCovariant([NotNull] RType right)
         {
+            if (IsGenericParameter)
+            {
+                // TODO Should check constraints of generic parameter and compare accordingly
+                return true;
+            }
+
             return false;
         }
     }

@@ -145,7 +145,6 @@ namespace CSharpRpp
                     name = name + "$";
                 }
 
-
                 RType rType = RppTypeSystem.GetOrCreateType(name, type);
                 scope.AddType(rType);
             }

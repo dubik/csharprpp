@@ -36,7 +36,7 @@ namespace CSharpRpp
         public override IRppExpr RewriteCaseClause(RppMember inVar, RppMember outOut, IRppExpr thenExpr, RppMatchingContext ctx)
         {
             RppVar variable = new RppVar(MutabilityFlag.MfVal, Name, _resolvableType, new RppAsInstanceOf(inVar, _resolvableType)) {Token = Token};
-            RppIf ifCond = If(BinOp("!=", Id(Name), Null), Block(Assign(outOut, thenExpr), Break), EmptyExpr);
+            RppIf ifCond = If(BinOp("!=", Id(Name), NullTy), Block(Assign(outOut, thenExpr), Break), EmptyExpr);
             return Block(variable, ifCond);
         }
 
