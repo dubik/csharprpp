@@ -442,7 +442,10 @@ namespace CSharpRpp.Codegen
                     if (method.IsGenericMethod)
                     {
                         Type[] methodTypeArgs = node.TypeArgs.Select(t => t.Value.NativeType).ToArray();
-                        method = method.MakeGenericMethod(methodTypeArgs);
+                        if (methodTypeArgs.Length != 0)
+                        {
+                            method = method.MakeGenericMethod(methodTypeArgs);
+                        }
                     }
 
                     _body.Emit(OpCodes.Callvirt, method);
