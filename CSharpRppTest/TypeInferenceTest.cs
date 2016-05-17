@@ -151,6 +151,25 @@ class XConsApp[A] {
             Assert.IsNotNull(xconsAppTy);
         }
 
+        [TestMethod]
+        [Ignore]
+        public void InferTypeUsingReturnType()
+        {
+            const string code = @"
+class Foo[+A](val foo: Foo[A]) {
+  def create: Foo[A] = new Foo(this)
+}
+
+object Main {
+  def create: Foo[Int] = {
+    new Foo(null)
+  }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+        }
+
         #region Utils
 
         private static void TestTypeInference(string methodCode, IEnumerable<RType> callTypes, IEnumerable<RType> expectedInferredTypes)

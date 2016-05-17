@@ -618,5 +618,26 @@ object Main {
         {
             return new RType(type.Name, type, TypeFactory);
         }
+
+        [TestMethod]
+        [TestCategory("Generics")]
+        public void UseGenericDefinitionTypeAsArgument()
+        {
+            const string code = @"
+class Foo[+A](val foo: Foo[A]) {
+    def create: Foo[A] = new Foo(this)
+}
+
+object Main {
+    def create: Foo[Int] = {
+        new Foo[Int](null)
+    }
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            var res = Utils.InvokeStatic(mainTy, "create");
+            Assert.IsNotNull(res);
+        }
     }
 }

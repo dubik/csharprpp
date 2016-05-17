@@ -55,7 +55,8 @@ namespace CSharpRpp
                 var inferredTypeArguments = InferGenericArguments(genericParameters, argTypes, constructor.Parameters.Select(p => p.Type));
                 RType inferredType = Type.Value.MakeGenericType(inferredTypeArguments);
                 Type = new ResolvableType(inferredType);
-                Constructor = inferredType.Constructors.First(c => c.GenericMethodDefinition == constructor);
+                Constructor =
+                    inferredType.Constructors.First(c => c.GenericMethodDefinition == null ? c == constructor : c.GenericMethodDefinition == constructor);
             }
             else
             {

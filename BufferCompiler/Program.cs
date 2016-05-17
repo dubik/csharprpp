@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using CSharpRpp;
 using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
-using CSharpRpp.TypeSystem;
 
 namespace BufferCompiler
 {
@@ -186,17 +182,8 @@ object Main {
 }
 ";
 
-            const string code1 = @"
-object Main {
-    def main[A]: Unit = {
-        var k: Option[A] = None
-        k = None
-    }
-}
-";
-
             Diagnostic diagnostic = new Diagnostic();
-            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code1, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
+            CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");
             if (diagnostic.HasError())
             {
                 diagnostic.Report();

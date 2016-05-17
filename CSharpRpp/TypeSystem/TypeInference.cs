@@ -8,14 +8,14 @@ namespace CSharpRpp.TypeSystem
 {
     public class Types
     {
-        public static Type Int = typeof (int);
-        public static Type Long = typeof (long);
-        public static Type Char = typeof (char);
-        public static Type Short = typeof (short);
-        public static Type Bool = typeof (bool);
-        public static Type Byte = typeof (byte);
-        public static Type Float = typeof (float);
-        public static Type Double = typeof (double);
+        public static Type Int = typeof(int);
+        public static Type Long = typeof(long);
+        public static Type Char = typeof(char);
+        public static Type Short = typeof(short);
+        public static Type Bool = typeof(bool);
+        public static Type Byte = typeof(byte);
+        public static Type Float = typeof(float);
+        public static Type Double = typeof(double);
     }
 
     public class TypeInference
@@ -218,6 +218,9 @@ namespace CSharpRpp.TypeSystem
                         dict.Add(i, newGenericArguments[i]);
                     }
                 }
+
+                if (source == target)
+                    return target;
 
                 return source.DefinitionType.MakeGenericType(newGenericArguments);
             }

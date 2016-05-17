@@ -416,6 +416,7 @@ namespace CSharpRpp.TypeSystem
         public RType([NotNull] string name, [NotNull] Type type, [NotNull] Func<Type, RType> typeFactory)
         {
             Name = name;
+
             _type = type;
 
             // TODO perhaps make one method which will map attributes
@@ -659,11 +660,32 @@ namespace CSharpRpp.TypeSystem
             RType inflatedType;
             if (!InflatedTypesMap.TryGetValue(genericArguments, out inflatedType))
             {
-                inflatedType = new RInflatedType(this, genericArguments);
+                if (SameParametersAndArguments(genericArguments))
+                {
+                    // TODO may be we actually should inflate it with the same arguments as parameters
+                    // This happens when generic type is used inside generic class
+                    // class List[+A]
+                    //...
+                    //    def tail: List[A]
+                    // for instance
+                    // for type equality it's important to have them point to the same RType instance
+                    inflatedType = this; 
+                }
+                else
+                {
+                    inflatedType = new RInflatedType(this, genericArguments);
+                }
+
                 InflatedTypesMap.Add(genericArguments, inflatedType);
             }
 
             return inflatedType;
+        }
+
+        private bool SameParametersAndArguments(RType[] genericArguments)
+        {
+            return _genericParameters.Length == genericArguments.Length &&
+                   _genericParameters.Zip(genericArguments, (parameter, argument) => parameter.Type == argument).All(res => res);
         }
 
         public RppGenericParameter[] DefineGenericParameters(params string[] genericParameterName)
