@@ -26,6 +26,8 @@ namespace CSharpRpp
 
         public bool IsCaptured { get; private set; }
 
+        public bool CanBeCaptured { get; private set; } // vars defined inside closure can't be captured
+
         public RppVar(MutabilityFlag mutability, [NotNull] string name, [NotNull] ResolvableType type, [NotNull] IRppExpr initExpr) : base(name)
         {
             Type = type;
@@ -45,6 +47,9 @@ namespace CSharpRpp
                 diagnostic.Error(102, "local variable must be initialized");
                 return this;
             }
+
+            // Don't capture variables declared inside closure
+            CanBeCaptured = scope.GetEnclosingType()?.Name != RppClosure.TempClosureTypeName;
 
             // We have 2 cases when type is omited, so we need to get it from initializing expression
             // and when type is specified so we need to resolve it and if there is a closure, propagate that

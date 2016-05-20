@@ -378,5 +378,36 @@ object Main {
             var res = InvokeStatic(mainTy, "main");
             Assert.AreEqual(26, res);
         }
+
+        [TestMethod]
+        public void DeclareGenericVariableInClosure()
+        {
+            const string code = @"
+class Foo1[A] {
+  def update(p: A): Unit = {
+    val func = (p: A) => {
+      val v: A = p
+      v
+    }
+  }
+}
+";
+            var fooTy = ParseAndCreateType(code, "Foo1");
+            Assert.IsNotNull(fooTy);
+        }
+
+        [TestMethod]
+        public void DeclareGenericVariableInClosure2()
+        {
+            const string code = @"
+class UpdateVector[A](val v: A) {
+  def updateAt(array: Array[A], index: Int, value: A): Unit = {
+    val func = () => { val k: A = value}
+  }
+}
+";
+            var mainTy = ParseAndCreateType(code, "UpdateVector");
+            Assert.IsNotNull(mainTy);
+        }
     }
 }

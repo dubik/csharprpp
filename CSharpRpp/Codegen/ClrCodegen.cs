@@ -687,10 +687,25 @@ namespace CSharpRpp.Codegen
 
         public override void Visit(RppClosure node)
         {
-            Type[] argTypes = node.Bindings.Select(p => p.Type.Value.NativeType).ToArray();
-            Type parentType = node.Type.Value.NativeType;
+            // TODO actually we can use ast classes to create closure, RType with generic types
+            // which already has generics manipulation so this is quite bad way of doing it
             TypeBuilder closureClass = _typeBuilder.DefineNestedType("c__Closure" + (_closureId++),
                 TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPrivate);
+
+            var rppGenericParameters = node.ClosureType.GenericParameters.ToArray();
+            string[] closureGenericArgumentsNames = rppGenericParameters.Select(arg => "T" + arg.Name).ToArray();
+            GenericTypeParameterBuilder[] gpBuilders = {};
+            if (closureGenericArgumentsNames.Length > 0)
+            {
+                gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
+                for (int i = 0; i < gpBuilders.Length; i++)
+                {
+                    rppGenericParameters[i].SetGenericTypeParameterBuilder(gpBuilders[i]);
+                }
+            }
+
+            Type[] argTypes = node.Bindings.Select(p => p.Type.Value.NativeType).ToArray();
+            Type parentType = node.Type.Value.NativeType;
 
             var capturedVars = CreateFieldsForCapturedVars(closureClass, node.CapturedVars);
             var capturedParams = CreateFieldsForCapturedParams(closureClass, node.CapturedParams);
@@ -720,11 +735,9 @@ namespace CSharpRpp.Codegen
                 replace them with [_T1, _T2, ...., _TRes] (excluding non generic params)
             */
             Type[] closureSignature = argTypes.Concat(returnType).ToArray();
-            Type[] closureGenericArguments = closureSignature.Where(t => t.IsGenericParameter).ToArray();
-            string[] closureGenericArgumentsNames = closureGenericArguments.Select(arg => "T" + arg.Name).ToArray();
+
             if (closureGenericArgumentsNames.Length > 0)
             {
-                GenericTypeParameterBuilder[] gpBuilders = closureClass.DefineGenericParameters(closureGenericArgumentsNames);
                 var targetSignature = closureSignature.Select(t =>
                     {
                         if (t.IsGenericParameter)
@@ -738,14 +751,17 @@ namespace CSharpRpp.Codegen
                 returnType = targetSignature.Last();
                 argTypes = targetSignature.Take(targetSignature.Length - 1).ToArray();
 
-                Type genericTypeDef = parentType.GetGenericTypeDefinition();
-                if (returnType == typeof(void))
+                if (parentType.IsGenericType) // Parent is not generic if it's Action0
                 {
-                    parentType = genericTypeDef.MakeGenericType(argTypes); // don't include 'void'
-                }
-                else
-                {
-                    parentType = genericTypeDef.MakeGenericType(targetSignature);
+                    Type genericTypeDef = parentType.GetGenericTypeDefinition();
+                    if (returnType == typeof(void))
+                    {
+                        parentType = genericTypeDef.MakeGenericType(argTypes); // don't include 'void'
+                    }
+                    else
+                    {
+                        parentType = genericTypeDef.MakeGenericType(targetSignature);
+                    }
                 }
             }
 
@@ -775,16 +791,18 @@ namespace CSharpRpp.Codegen
             node.Expr.Accept(codegen);
             body.Emit(OpCodes.Ret);
 
+            Type[] typeArguments = node.OriginalGenericArguments.Select(arg => arg.Type.NativeType).ToArray();
+            Type specializedClosureClass = typeArguments.NonEmpty() ? closureClass.MakeGenericType(typeArguments) : closureClass;
             ConstructorInfo defaultClosureConstructor = closureClass.DefineDefaultConstructor(MethodAttributes.Public);
+
             if (closureGenericArgumentsNames.Length > 0)
             {
-                Type spec = closureClass.MakeGenericType(closureSignature);
-                defaultClosureConstructor = TypeBuilder.GetConstructor(spec, defaultClosureConstructor);
+                defaultClosureConstructor = TypeBuilder.GetConstructor(specializedClosureClass, defaultClosureConstructor);
             }
 
             Debug.Assert(defaultClosureConstructor != null, "defaultClosureConstructor != null");
             _body.Emit(OpCodes.Newobj, defaultClosureConstructor);
-            LocalBuilder closureClassInstance = _body.DeclareLocal(closureClass);
+            LocalBuilder closureClassInstance = _body.DeclareLocal(specializedClosureClass);
             _body.Emit(OpCodes.Stloc, closureClassInstance);
 
             // Initialize captured local vars

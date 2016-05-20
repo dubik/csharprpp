@@ -8,16 +8,26 @@ namespace CSharpRpp.Symbols
 {
     public class SymbolTable
     {
-        protected readonly SymbolTable Parent;
+        public RppClosureContext ClosureContext { get; }
+
+        public bool IsInsideClosure => ClosureContext != null;
+
+        /// <summary>
+        /// All available generics for a given scope, class and function ones combined
+        /// </summary>
+        public IEnumerable<RppGenericParameter> AvailableGenericArguments => Parent?.AvailableGenericArguments.Concat(GenericArguments) ?? GenericArguments;
+
+        public IEnumerable<RppGenericParameter> GenericArguments => _genericArguments ?? Enumerable.Empty<RppGenericParameter>();
+
+        private RppGenericParameter[] _genericArguments;
+
+        private readonly SymbolTable Parent;
+
         private readonly RType _classType;
 
         private readonly Dictionary<string, Symbol> _symbols = new Dictionary<string, Symbol>();
 
         private readonly SymbolTable _outerSymbolTable;
-
-        public RppClosureContext ClosureContext { get; }
-
-        public bool IsInsideClosure => ClosureContext != null;
 
         public SymbolTable()
         {
@@ -58,6 +68,7 @@ namespace CSharpRpp.Symbols
         private void AddGenericParametersToScope([NotNull] RppMethodInfo methodInfo)
         {
             methodInfo.GenericParameters?.ForEach(p => AddType(p.Type));
+            _genericArguments = methodInfo.GenericParameters?.ToArray();
         }
 
         private void AddGenericParametersToScope(RType classType)
@@ -65,6 +76,7 @@ namespace CSharpRpp.Symbols
             if (classType.IsGenericType)
             {
                 classType.GenericParameters.ForEach(p => AddType(p.Type));
+                _genericArguments = classType.GenericParameters.ToArray();
             }
         }
 
@@ -131,7 +143,10 @@ namespace CSharpRpp.Symbols
                     baseClass = baseClass.BaseType;
                 }
 
-                return methods;
+                if (methods.NonEmpty())
+                {
+                    return methods;
+                }
             }
 
             return Parent?.LookupFunction(name) ?? Collections.NoRFuncsCollection;
@@ -158,7 +173,6 @@ namespace CSharpRpp.Symbols
                     baseClass = baseClass.BaseType;
                 }
 
-                return null;
             }
 
             return Parent?.LookupField(name);

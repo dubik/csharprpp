@@ -553,12 +553,7 @@ namespace CSharpRpp
 
             if (scope.IsInsideClosure)
             {
-                RType methodDeclaringType = resolveResults.Method.DeclaringType;
-                RType enclosingType = scope.GetEnclosingType();
-                if (methodDeclaringType.Equals(enclosingType))
-                {
-                    scope.ClosureContext.CaptureThis();
-                }
+                scope.ClosureContext.CaptureThis();
             }
 
             return resolveResults.RewriteFunctionCall(TargetType, Name, args, genericArguments);
@@ -1035,12 +1030,15 @@ namespace CSharpRpp
 
             if (scope.IsInsideClosure)
             {
-                if (IsVar || IsParam)
+                if (IsVar && ((RppVar) Ref).CanBeCaptured)
                 {
                     scope.ClosureContext.CaptureVar(this);
                 }
-
-                if (IsField)
+                else if (IsParam)
+                {
+                    scope.ClosureContext.CaptureVar(this);
+                }
+                else if (IsField)
                 {
                     scope.ClosureContext.CaptureThis();
                 }
