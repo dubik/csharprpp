@@ -1,4 +1,5 @@
-﻿using CSharpRpp.Expr;
+﻿using System.Linq;
+using CSharpRpp.Expr;
 using JetBrains.Annotations;
 
 namespace CSharpRpp
@@ -192,6 +193,114 @@ namespace CSharpRpp
 
         public virtual void Visit(RppBox node)
         {
+        }
+    }
+
+    public class RppAstWalker : RppNodeVisitor
+    {
+        public override void Visit(RppVar node)
+        {
+            node.InitExpr.Accept(this);
+        }
+
+        public override void Visit(RppField node)
+        {
+            node.InitExpr.Accept(this);
+        }
+
+        public override void Visit(RppBinOp node)
+        {
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+        }
+
+        public override void Visit(RppFuncCall node)
+        {
+            node.Args.ForEach(arg => arg.Accept(this));
+        }
+
+        public override void Visit(RppBaseConstructorCall node)
+        {
+            node.Args.ForEach(arg => arg.Accept(this));
+        }
+
+        public override void Visit(RppSelector node)
+        {
+            node.Target.Accept(this);
+            node.Path.Accept(this);
+        }
+
+        public override void Visit(RppNew node)
+        {
+            node.Args.ForEach(arg => arg.Accept(this));
+        }
+
+        public override void Visit(RppAssignOp node)
+        {
+            node.Right.Accept(this);
+            node.Left.Accept(this);
+        }
+
+        public override void Visit(RppArray node)
+        {
+            node.Initializers.ForEach(arg => arg.Accept(this));
+        }
+
+        public override void Visit(RppBox node)
+        {
+            node.Expression.Accept(this);
+        }
+
+        public override void Visit(RppWhile node)
+        {
+            node.Condition.Accept(this);
+            node.Body.Accept(this);
+        }
+
+        public override void Visit(RppLogicalBinOp node)
+        {
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+        }
+
+        public override void Visit(RppArithmBinOp node)
+        {
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+        }
+
+        public override void Visit(RppBitwiseOp node)
+        {
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+        }
+
+        public override void Visit(RppRelationalBinOp node)
+        {
+            node.Left.Accept(this);
+            node.Right.Accept(this);
+        }
+
+        public override void Visit(RppThrow node)
+        {
+            node.Expr.Accept(this);
+        }
+
+        public override void Visit(RppClosure node)
+        {
+            node.Expr.Accept(this);
+        }
+
+        public override void Visit(RppIf node)
+        {
+            node.Condition.Accept(this);
+            node.ThenExpr.Accept(this);
+            node.ElseExpr.Accept(this);
+        }
+
+        public override void Visit(RppAsInstanceOf node)
+        {
+            node.Value.Accept(this);
         }
     }
 }
