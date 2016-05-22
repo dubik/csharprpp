@@ -51,5 +51,19 @@ namespace CSharpRpp
         public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
 
         public static bool NonEmpty<T>(this IEnumerable<T> collection) => !collection.IsEmpty();
+
+        public static IEnumerable<T> Apply<T>(this IEnumerable<T> collection, Action<T> action)
+        {
+            return collection.Select(c =>
+                {
+                    action(c);
+                    return c;
+                });
+        }
+
+        public static IEnumerable<TResult> Apply<T, A1, TResult>(this IEnumerable<T> collection, Func<T, A1, TResult> action, A1 arg)
+        {
+            return collection.Select(c => action(c, arg));
+        }
     }
 }
