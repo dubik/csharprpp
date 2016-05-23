@@ -17,7 +17,7 @@ namespace CSharpRpp.Codegen
         /// <summary>
         /// Maps local variable builders to fields if ClrCodegen generates code for closure
         /// </summary>
-        public Dictionary<LocalBuilder, FieldBuilder> CapturedVars { get; set; }
+        public Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> CapturedVars { get; set; }
 
         public FieldBuilder CapturedThis { get; set; }
 
@@ -788,7 +788,7 @@ namespace CSharpRpp.Codegen
             }
 
             ILGenerator body = applyMethod.GetILGenerator();
-            ClrClosureContext closureContext = new ClrClosureContext()
+            ClrClosureContext closureContext = new ClrClosureContext
             {
                 CapturedVars = capturedVars,
                 CapturedParams = capturedParams,
@@ -818,7 +818,9 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldloc, closureClassInstance);
                     LocalBuilder capturedVariable = pair.Key;
                     _body.Emit(OpCodes.Ldloc, capturedVariable);
-                    FieldBuilder field = pair.Value;
+                    FieldInfo field = pair.Value.Item1;
+                    if (specializedClosureClass.IsGenericType)
+                        field = TypeBuilder.GetField(specializedClosureClass, field);
                     _body.Emit(OpCodes.Stfld, field);
                 });
 
@@ -827,7 +829,7 @@ namespace CSharpRpp.Codegen
             {
                 _body.Emit(OpCodes.Ldloc, closureClassInstance);
                 _body.Emit(OpCodes.Ldarg_0);
-                _body.Emit(OpCodes.Stfld, capturedThis);
+                _body.Emit(OpCodes.Stfld, specializedClosureClass.IsGenericType ? TypeBuilder.GetField(specializedClosureClass, capturedThis) : capturedThis);
             }
 
             // Initialize captured params
@@ -836,7 +838,9 @@ namespace CSharpRpp.Codegen
                     _body.Emit(OpCodes.Ldloc, closureClassInstance);
                     int argIndex = pair.Key;
                     LoadArg(argIndex);
-                    FieldBuilder capturedParam = pair.Value;
+                    FieldInfo capturedParam = pair.Value;
+
+                    capturedParam = specializedClosureClass.IsGenericType ? TypeBuilder.GetField(specializedClosureClass, capturedParam) : capturedParam;
                     _body.Emit(OpCodes.Stfld, capturedParam);
                 });
 
@@ -844,10 +848,10 @@ namespace CSharpRpp.Codegen
             closureClass.CreateType();
         }
 
-        private static Dictionary<int, FieldBuilder> CreateFieldsForCapturedParams(TypeBuilder closureClass, IEnumerable<RppParam> capturedParams)
+        private static Dictionary<int, FieldBuilder> CreateFieldsForCapturedParams(TypeBuilder closureClass, IEnumerable<Tuple<RppParam, RType>> capturedParams)
         {
-            return capturedParams.ToDictionary(v => v.Index,
-                v => closureClass.DefineField(v.Name, v.Type.Value.NativeType, FieldAttributes.Public));
+            return capturedParams.ToDictionary(pair => pair.Item1.Index,
+                pair => closureClass.DefineField(pair.Item1.Name, pair.Item2.NativeType, FieldAttributes.Public));
         }
 
         private FieldBuilder CreatedCapturedThis(TypeBuilder closureClass)
@@ -855,14 +859,15 @@ namespace CSharpRpp.Codegen
             return closureClass.DefineField("<>this", _typeBuilder, FieldAttributes.Public);
         }
 
-        private static Dictionary<LocalBuilder, FieldBuilder> CreateFieldsForCapturedVars(TypeBuilder closureClass, IEnumerable<RppVar> capturedVars)
+        private static Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> CreateFieldsForCapturedVars(TypeBuilder closureClass,
+            IEnumerable<Tuple<RppVar, RType>> capturedVars)
         {
-            return capturedVars.ToDictionary(v => v.Builder,
-                v =>
+            return capturedVars.ToDictionary(pair => pair.Item1.Builder,
+                pair =>
                     {
-                        Type varType = v.Type.Value.NativeType;
+                        Type varType = pair.Item2.NativeType;
                         Type refType = ClrVarCodegen.GetRefType(varType);
-                        return closureClass.DefineField(v.Name, refType, FieldAttributes.Public);
+                        return Tuple.Create(closureClass.DefineField(pair.Item1.Name, refType, FieldAttributes.Public), varType);
                     });
         }
 

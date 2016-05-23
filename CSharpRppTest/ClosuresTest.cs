@@ -409,5 +409,29 @@ class UpdateVector[A](val v: A) {
             var mainTy = ParseAndCreateType(code, "UpdateVector");
             Assert.IsNotNull(mainTy);
         }
+
+
+        [TestMethod]
+        public void CaptureGenericArray()
+        {
+            const string code = @"
+object Main {
+    def updateArray[B](x: B) : B = {
+      val arr = new Array[B](5)
+      val func = (x: B) => arr(0) = x
+      func(x)
+      arr(0)
+    }
+
+    def main: Int = {
+        updateArray(13)
+    }
+}
+";
+            var mainTy = ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            var res = InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+        }
     }
 }

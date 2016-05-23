@@ -996,8 +996,19 @@ namespace CSharpRpp
                 {
                     if (symbol.IsLocal)
                     {
-                        Type = new ResolvableType(symbol.Type);
-                        Ref = ((LocalVarSymbol) symbol).Var;
+                        RppMember variable = (RppMember) ((LocalVarSymbol)symbol).Var;
+                        Ref = variable;
+
+                        if (scope.IsInsideClosure)
+                        {
+                            Type = variable.Type.Name.Resolve(scope).AsResolvable();
+                        }
+                        else
+                        {
+                            Type = new ResolvableType(symbol.Type);
+                        }
+                        
+                        
                     }
 
                     if (symbol.IsClass)

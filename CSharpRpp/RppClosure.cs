@@ -45,11 +45,11 @@ namespace CSharpRpp
         public RType ClosureType { get; private set; }
         public RppGenericParameter[] OriginalGenericArguments { get; private set; }
 
-        private List<RppVar> _capturedVars;
-        private List<RppParam> _capturedParams;
+        private List<Tuple<RppVar, RType>> _capturedVars;
+        private List<Tuple<RppParam, RType>> _capturedParams;
 
-        public IEnumerable<RppVar> CapturedVars => _capturedVars;
-        public IEnumerable<RppParam> CapturedParams => _capturedParams;
+        public IEnumerable<Tuple<RppVar, RType>> CapturedVars => _capturedVars;
+        public IEnumerable<Tuple<RppParam, RType>> CapturedParams => _capturedParams;
 
         public RppClosure(IEnumerable<IRppParam> bindings, IRppExpr body)
         {
@@ -81,7 +81,8 @@ namespace CSharpRpp
             Bindings.ForEach(b => closureScope.AddLocalVar(b.Name, b.Type.Value, b));
             Expr = NodeUtils.AnalyzeNode(closureScope, Expr, diagnostic);
 
-            ProcessCapturedVariables(Context.CapturedVariableReferences);
+            _capturedVars = ExtractCapturedVars(Context.CapturedVariableReferences).Apply(MakeCaptured).Apply(ReResolveType, closureScope).ToList();
+            _capturedParams = ExtractCapturedParams(Context.CapturedVariableReferences).Apply(ReResolveType, closureScope).ToList();
 
             ReturnType = Expr.Type;
 
@@ -89,7 +90,6 @@ namespace CSharpRpp
 
             return this;
         }
-
 
         private static RType CreateClosureType(SymbolTable scope)
         {
@@ -116,13 +116,24 @@ namespace CSharpRpp
             return closureType;
         }
 
-        private void ProcessCapturedVariables(IEnumerable<RppId> capturedVariableReferences)
+        private static IEnumerable<RppVar> ExtractCapturedVars(IEnumerable<RppId> capturedMembersReferences)
         {
-            var references = capturedVariableReferences as IList<RppId> ?? capturedVariableReferences.ToList();
-            _capturedVars = references.Where(v => v.IsVar).Select(v => (RppVar) v.Ref).Distinct().ToList();
-            _capturedVars.ForEach(v => v.MakeCaptured());
+            return capturedMembersReferences.Where(v => v.IsVar).Select(v => (RppVar) v.Ref).Distinct();
+        }
 
-            _capturedParams = references.Where(v => v.IsParam && !((IRppParam) v.Ref).IsClosureBinding).Select(v => (RppParam) v.Ref).Distinct().ToList();
+        private static IEnumerable<RppParam> ExtractCapturedParams(IEnumerable<RppId> capturedMembersReferences)
+        {
+            return capturedMembersReferences.Where(v => v.IsParam && !((IRppParam) v.Ref).IsClosureBinding).Select(v => (RppParam) v.Ref).Distinct();
+        }
+
+        private static void MakeCaptured(RppVar var)
+        {
+            var.MakeCaptured();
+        }
+
+        private static Tuple<T, RType> ReResolveType<T>(T member, SymbolTable scope) where T : RppMember
+        {
+            return Tuple.Create(member, member.Type.Name.Resolve(scope));
         }
 
         public override void Accept(IRppNodeVisitor visitor)
@@ -168,6 +179,40 @@ namespace CSharpRpp
         {
             string bindings = string.Join(", ", Bindings.Select(b => $"{b.Name}: {b.Type}"));
             return $"{bindings} => {Expr}: {Expr.Type}";
+        }
+    }
+
+    internal class CapturedVariablesWalker : RppAstWalker
+    {
+        private readonly SymbolTable _scope;
+
+        public IEnumerable<RppVar> CapturedVars { get; private set; }
+
+        private readonly HashSet<string> _closureVars;
+        private readonly HashSet<RppId> _referencedIds;
+
+        public CapturedVariablesWalker(SymbolTable scope)
+        {
+            _scope = scope;
+            _closureVars = new HashSet<string>();
+            _referencedIds = new HashSet<RppId>();
+        }
+
+        public override void Visit(RppVar node)
+        {
+            base.Visit(node);
+
+            _closureVars.Add(node.Name);
+        }
+
+        public override void Visit(RppId node)
+        {
+            base.Visit(node);
+
+            if (!_closureVars.Contains(node.Name))
+            {
+                _referencedIds.Add(node);
+            }
         }
     }
 }

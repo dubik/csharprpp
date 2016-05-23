@@ -62,18 +62,18 @@ namespace CSharpRpp.Codegen
             Type refElementType = elementType;
             if (elementType.IsClass)
             {
-                refElementType = typeof (object);
+                refElementType = typeof(object);
             }
 
             return refElementType;
         }
 
-        public static void Load(RppVar node, ILGenerator body, Dictionary<LocalBuilder, FieldBuilder> capturedVars)
+        public static void Load(RppVar node, ILGenerator body, Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> capturedVars)
         {
             if (node.IsCaptured)
             {
                 LoadRef(node, body, capturedVars);
-                LoadValFromRef(node, body);
+                LoadValFromRef(node, body, capturedVars);
             }
             else
             {
@@ -81,22 +81,23 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        private static void LoadValFromRef(RppVar node, ILGenerator body)
+        private static void LoadValFromRef(RppVar node, ILGenerator body, Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> capturedVars)
         {
             Type varType = node.Type.Value.NativeType;
 
             body.Emit(OpCodes.Ldfld, GetRefElemField(GetRefType(varType)));
             if (varType.IsClass)
             {
-                body.Emit(OpCodes.Castclass, varType);
+                Type varTypeInClosureContext = capturedVars == null ? varType : capturedVars[node.Builder].Item2;
+                body.Emit(OpCodes.Castclass, varTypeInClosureContext);
             }
         }
 
-        private static void LoadRef(RppVar node, ILGenerator body, IReadOnlyDictionary<LocalBuilder, FieldBuilder> capturedVars)
+        private static void LoadRef(RppVar node, ILGenerator body, Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> capturedVars)
         {
             if (capturedVars != null)
             {
-                FieldBuilder field = capturedVars[node.Builder];
+                FieldBuilder field = capturedVars[node.Builder].Item1;
                 body.Emit(OpCodes.Ldarg_0);
                 body.Emit(OpCodes.Ldfld, field);
             }
@@ -107,7 +108,7 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        public static void Store(RppVar node, ILGenerator body, Dictionary<LocalBuilder, FieldBuilder> capturedVars)
+        public static void Store(RppVar node, ILGenerator body, Dictionary<LocalBuilder, Tuple<FieldBuilder, Type>> capturedVars)
         {
             if (node.IsCaptured)
             {
@@ -132,7 +133,7 @@ namespace CSharpRpp.Codegen
 
         public static Type GetRefType(Type varType)
         {
-            return typeof (Ref<>).MakeGenericType(GetRefElementType(varType));
+            return typeof(Ref<>).MakeGenericType(GetRefElementType(varType));
         }
 
         private static FieldInfo GetRefElemField(Type refType)
