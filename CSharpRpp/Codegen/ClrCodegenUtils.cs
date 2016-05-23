@@ -102,7 +102,7 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        public static OpCode ArrayStoreOpCodeByType(Type type)
+        public static OpCode? ArrayStoreOpCodeByType(Type type)
         {
             OpCode opcode;
             if (stElemOpCode.TryGetValue(type, out opcode))
@@ -110,7 +110,7 @@ namespace CSharpRpp.Codegen
                 return opcode;
             }
 
-            return OpCodes.Stelem_Ref;
+            return null;
         }
 
         public static OpCode ArrayLoadOpCodeByType(Type type)

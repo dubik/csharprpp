@@ -484,8 +484,15 @@ namespace CSharpRpp.Codegen
 
                     case "update":
                     {
-                        OpCode ldOpCode = ClrCodegenUtils.ArrayStoreOpCodeByType(elementType.NativeType);
-                        _body.Emit(ldOpCode);
+                        OpCode? ldOpCode = ClrCodegenUtils.ArrayStoreOpCodeByType(elementType.NativeType);
+                        if (ldOpCode.HasValue)
+                        {
+                            _body.Emit(ldOpCode.Value);
+                        }
+                        else
+                        {
+                            _body.Emit(OpCodes.Stelem, elementType.NativeType);
+                        }
                         break;
                     }
 
