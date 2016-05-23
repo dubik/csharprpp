@@ -74,6 +74,11 @@ namespace CSharpRpp.Exceptions
             return new ParserException(200, FormatErrorAndPointAtToken(token, message));
         }
 
+        public static SemanticException SomethingWentWrong(IToken token)
+        {
+            return new SemanticException(-1, FormatErrorAndPointAtToken(token, "Something went wrong here"));
+        }
+
         private static string MethodString(RppMethodInfo method)
         {
             if (method.Name == "ctor")
@@ -129,7 +134,7 @@ namespace CSharpRpp.Exceptions
                 }
             }
 
-            return new SemanticException(-1, "Not done");
+            return SomethingWentWrong(token);
         }
     }
 }
