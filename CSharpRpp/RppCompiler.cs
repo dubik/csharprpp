@@ -7,6 +7,7 @@ using System.Text;
 using Antlr.Runtime;
 using CSharpRpp.Codegen;
 using CSharpRpp.Exceptions;
+using CSharpRpp.Parser;
 using CSharpRpp.Reporting;
 using CSharpRpp.Semantics;
 using CSharpRpp.Symbols;
@@ -60,7 +61,7 @@ namespace CSharpRpp
 
         public static Assembly FindStdlib()
         {
-            var location = Assembly.GetAssembly(typeof (RppCompiler)).Location;
+            var location = Assembly.GetAssembly(typeof(RppCompiler)).Location;
             string directory = Path.GetDirectoryName(location);
             return Assembly.LoadFile(directory + @"\RppStdlib.dll");
         }
@@ -81,11 +82,10 @@ namespace CSharpRpp
                 WireAssembly(runtimeScope, stdlibAssembly);
             }
 
-            parseFactory(program);
-
-            CodeGenerator generator = new CodeGenerator(program, fileName);
             try
             {
+                parseFactory(program);
+                CodeGenerator generator = new CodeGenerator(program, fileName);
                 Type2Creator typeCreator = new Type2Creator();
                 program.Accept(typeCreator);
 
@@ -109,15 +109,20 @@ namespace CSharpRpp
                 program.Accept(initializeNativeTypes);
                 CreateNativeTypes createNativeTypes = new CreateNativeTypes();
                 program.Accept(createNativeTypes);
+
+                generator.Generate();
+                return generator;
             }
             catch (SemanticException e)
             {
                 diagnostic.Error(e.Code, e.Message);
                 return null;
             }
-
-            generator.Generate();
-            return generator;
+            catch (ParserException e)
+            {
+                diagnostic.Error(e.Code, e.Message);
+                return null;
+            }
         }
 
         private static void WireRuntime(SymbolTable scope)
@@ -125,7 +130,7 @@ namespace CSharpRpp
             Assembly runtimeAssembly = GetRuntimeAssembly();
             WireAssembly(scope, runtimeAssembly);
 
-            scope.AddType(RppTypeSystem.GetOrCreateType("Exception", typeof (Exception)));
+            scope.AddType(RppTypeSystem.GetOrCreateType("Exception", typeof(Exception)));
         }
 
         private static void WireAssembly(SymbolTable scope, Assembly assembly)
@@ -210,7 +215,7 @@ namespace CSharpRpp
 
         private static Assembly GetRuntimeAssembly()
         {
-            return Assembly.GetAssembly(typeof (Runtime));
+            return Assembly.GetAssembly(typeof(Runtime));
         }
     }
 }

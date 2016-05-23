@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Antlr.Runtime;
+using CSharpRpp.Exceptions;
 using CSharpRpp.TypeSystem;
 using JetBrains.Annotations;
 
@@ -62,6 +63,12 @@ namespace CSharpRpp
         public RppParser(ITokenStream stream)
         {
             _stream = stream;
+        }
+
+        [ContractAnnotation("=> halt")]
+        private void RaiseSyntaxError(string message)
+        {
+            throw SemanticExceptionFactory.SyntaxError(_lastToken, message);
         }
 
         private bool Require(int token)
@@ -135,7 +142,7 @@ namespace CSharpRpp
         {
             if (!ParseSemi())
             {
-                throw new Exception("Expected ; or a new line but got: " + _lastToken.Text);
+                RaiseSyntaxError("Expected ; or a new line but got: ");
             }
         }
 
@@ -184,7 +191,7 @@ namespace CSharpRpp
         {
             if (Require(RppLexer.KW_Trait))
             {
-                throw new Exception("Traits are not implemented");
+                RaiseSyntaxError("Traits are not implemented");
             }
 
             if (Require(RppLexer.KW_Class))
@@ -226,7 +233,8 @@ namespace CSharpRpp
                     new RppBaseConstructorCall(baseClass, baseClassArgs));
             }
 
-            throw new Exception("Expected identifier but got : " + _lastToken.Text);
+            RaiseSyntaxError("Expected identifier but got : ");
+            return null;
         }
 
         // ClassParamClause ::= '(' [ClassParams] ')'
@@ -242,7 +250,7 @@ namespace CSharpRpp
                         RppField classParam;
                         if (!ParseClassParam(out classParam))
                         {
-                            throw new Exception("DeclaringType param was expected but got " + _lastToken.Text);
+                            RaiseSyntaxError("DeclaringType param was expected");
                         }
 
                         classParams.Add(classParam);
@@ -287,7 +295,7 @@ namespace CSharpRpp
             RTypeName paramType;
             if (!ParseType(out paramType))
             {
-                throw new Exception("Expected type but found: " + _lastToken.Text);
+                RaiseSyntaxError("Type is expected");
             }
 
             classParam = new RppField(mutability, name, Collections.NoModifiers, new ResolvableType(paramType)) {Token = nameToken, IsClassParam = true};
@@ -313,7 +321,7 @@ namespace CSharpRpp
 
                     if (!Require(RppLexer.OP_Comma))
                     {
-                        throw new Exception("Expected , or ] but got " + _lastToken.Text);
+                        RaiseSyntaxError("Expected , or ]");
                     }
                 }
             }
@@ -338,7 +346,7 @@ namespace CSharpRpp
 
                     if (!Require(RppLexer.OP_Comma))
                     {
-                        throw new Exception("Expected , or ] but got " + _lastToken.Text);
+                        RaiseSyntaxError("Expected , or ]");
                     }
                 }
             }
@@ -362,7 +370,7 @@ namespace CSharpRpp
                 }
                 else
                 {
-                    throw new Exception("Expected '+' or '-' but got " + _lastToken.Text);
+                    RaiseSyntaxError("Expected '+' or '-'");
                 }
 
                 requireId = true;
@@ -384,7 +392,7 @@ namespace CSharpRpp
 
             if (requireId)
             {
-                throw new Exception("Expected identifier but got " + _lastToken.Text);
+                RaiseSyntaxError("Expected identifier");
             }
 
             typeParam = null;
@@ -403,7 +411,7 @@ namespace CSharpRpp
                 }
                 else
                 {
-                    throw new Exception("Expected identifier but got : " + _lastToken.Text);
+                    RaiseSyntaxError("Expected identifier");
                 }
 
                 IList<RTypeName> typeArgs = ParseTypeParamClause();
@@ -509,7 +517,7 @@ namespace CSharpRpp
                     Expect(RppLexer.OP_Colon);
                     if (!ParseType(out funcReturnType))
                     {
-                        throw new Exception("Expecting type but got " + _lastToken);
+                        RaiseSyntaxError("Type is expected");
                     }
                 }
 
@@ -627,7 +635,7 @@ namespace CSharpRpp
                 RTypeName typeName;
                 if (!ParseType(out typeName))
                 {
-                    throw new Exception("Expected type but got " + _lastToken.Text);
+                    RaiseSyntaxError("Type is expected");
                 }
 
                 type = new ResolvableType(typeName);
@@ -650,7 +658,7 @@ namespace CSharpRpp
             RTypeName type;
             if (!ParseType(out type))
             {
-                throw new Exception("Expected type but got " + _lastToken.Text);
+                RaiseSyntaxError("Type is expected");
             }
 
             bool variadic = Require(RppLexer.OP_Star);
@@ -671,7 +679,7 @@ namespace CSharpRpp
             {
                 if (!ParseType(out type))
                 {
-                    throw new Exception("Expected type after ':' but got " + _lastToken.Text);
+                    RaiseSyntaxError("Type is expected after ':'");
                 }
             }
 
@@ -722,7 +730,7 @@ namespace CSharpRpp
                     RTypeName subType;
                     if (!ParseType(out subType))
                     {
-                        throw new Exception("Expected type but got " + _lastToken.Text);
+                        RaiseSyntaxError("Type is expected");
                     }
 
                     genericType.AddGenericArgument(subType);
@@ -738,14 +746,14 @@ namespace CSharpRpp
                         {
                             if (!ParseType(out subType))
                             {
-                                throw new Exception("Expected type but got " + _lastToken.Text);
+                                RaiseSyntaxError("Type is expected");
                             }
 
                             genericType.AddGenericArgument(subType);
                         }
                         else
                         {
-                            throw new Exception("Expected comma but got " + _lastToken.Text);
+                            RaiseSyntaxError("Expected comma");
                         }
                     }
 
@@ -758,7 +766,7 @@ namespace CSharpRpp
                     RTypeName returnType;
                     if (!ParseType(out returnType))
                     {
-                        throw new Exception("Expected type but got " + _lastToken.Text);
+                        RaiseSyntaxError("Type is expected");
                     }
 
                     type = CreateClosureTypeName(new List<RTypeName> {new RTypeName(typeNameToken)}, returnType);
@@ -801,7 +809,7 @@ namespace CSharpRpp
                     }
                     else
                     {
-                        throw new Exception("Expected type but got " + _lastToken.Text);
+                        RaiseSyntaxError("Type is expected");
                     }
                 }
 
@@ -821,7 +829,7 @@ namespace CSharpRpp
 
                 if (!ParseType(out returnType))
                 {
-                    throw new Exception("Expected type but got " + _lastToken.Text);
+                    RaiseSyntaxError("Type is expected");
                 }
 
                 if (closingParenRequired)

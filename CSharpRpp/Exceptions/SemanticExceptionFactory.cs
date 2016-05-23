@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Antlr.Runtime;
+using CSharpRpp.Parser;
 using CSharpRpp.TypeSystem;
 
 namespace CSharpRpp.Exceptions
@@ -66,6 +67,11 @@ namespace CSharpRpp.Exceptions
         public static SemanticException MissingInitializer(IToken token)
         {
             return new SemanticException(113, FormatErrorAndPointAtToken(token, "Missing initializer"));
+        }
+
+        public static ParserException SyntaxError(IToken token, string message)
+        {
+            return new ParserException(200, FormatErrorAndPointAtToken(token, message));
         }
 
         private static string MethodString(RppMethodInfo method)

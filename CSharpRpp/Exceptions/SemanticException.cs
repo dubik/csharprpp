@@ -6,7 +6,6 @@ namespace CSharpRpp.Exceptions
     {
         public int Code { get; set; }
 
-
         public SemanticException()
         {
         }

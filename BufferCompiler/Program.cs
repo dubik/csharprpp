@@ -38,7 +38,7 @@ abstract class XIterator[+A] {
     c
   }
 
-  def toArray[B <: A]: Array[B] = {
+  def toArray[B >: A]: Array[B] = {
     val res = new Array[B](count())
     var index = 0
     foreach((item) => {
@@ -182,6 +182,7 @@ object Main {
     }
 }
 ";
+
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");

@@ -44,7 +44,7 @@ namespace CSharpRpp
 
             if (Require(KW_Return))
             {
-                throw new Exception("Return not supported");
+                RaiseSyntaxError("Return is not supported");
             }
 
             if (Require(KW_Throw))
@@ -63,14 +63,14 @@ namespace CSharpRpp
             IRppExpr condition = ParseExpr();
             if (condition == null)
             {
-                throw new Exception("Expected expression");
+                RaiseSyntaxError("Expected expression");
             }
             Expect(OP_RParen);
             Require(NewLine);
             IRppExpr thenExpr = ParseExpr();
             if (thenExpr == null)
             {
-                throw new Exception("Expected then expression");
+                RaiseSyntaxError("Expected then expression");
             }
 
             IRppExpr elseExpr = RppEmptyExpr.Instance;
@@ -81,7 +81,7 @@ namespace CSharpRpp
                 elseExpr = ParseExpr();
                 if (elseExpr == null)
                 {
-                    throw new Exception("Expected else expression");
+                    RaiseSyntaxError("Expected else expression");
                 }
             }
 
@@ -95,14 +95,15 @@ namespace CSharpRpp
             IRppExpr condition = ParseExpr();
             if (condition == null)
             {
-                throw new Exception("Expected expression");
+                RaiseSyntaxError("Expected expression");
             }
+
             Expect(OP_RParen);
             ParseSemi();
             IRppExpr body = ParseExpr();
             if (body == null)
             {
-                throw new Exception("Expected body");
+                RaiseSyntaxError("Expected body");
             }
 
             return new RppWhile(condition, body);
@@ -223,7 +224,7 @@ namespace CSharpRpp
             RppCaseClause item = ParseClause();
             if (item == null)
             {
-                throw new SyntaxException("Expected at least one 'case' clause", _lastToken);
+                RaiseSyntaxError("Expected at least one 'case' clause");
             }
 
             while (item != null)
@@ -248,7 +249,7 @@ namespace CSharpRpp
             T item = generator();
             if (item == null)
             {
-                throw new SyntaxException(errorMessage, _lastToken);
+                RaiseSyntaxError(errorMessage);
             }
 
             while (item != null)
@@ -314,7 +315,7 @@ namespace CSharpRpp
                         return new RppTypedPattern(id, type);
                     }
 
-                    throw new SyntaxException("Expected type name but got", _lastToken);
+                    RaiseSyntaxError("Expected typename");
                 }
 
                 IToken varid = null;
@@ -563,7 +564,7 @@ namespace CSharpRpp
                     index++;
                     if (index == s.Length)
                     {
-                        throw new Exception("id or $ or { should follow single $");
+                        RaiseSyntaxError("id or $ or { should follow single $");
                     }
 
                     if (s[index] == '$')
@@ -581,7 +582,7 @@ namespace CSharpRpp
                             {
                                 if (index + 1 == s.Length)
                                 {
-                                    throw new Exception("{ should be closed with }");
+                                    RaiseSyntaxError("{ should be closed with }");
                                 }
 
                                 exprStr.Append(s[index]);
@@ -626,7 +627,7 @@ namespace CSharpRpp
                     return ParseSimpleExprRest(new RppSelector(expr, new RppFieldSelector(_lastToken.Text) {Token = _lastToken}));
                 }
 
-                throw new Exception("After . identifier is expected " + _lastToken);
+                RaiseSyntaxError("After . identifier is expected");
             }
 
             if (Peek(OP_LBracket))
@@ -634,7 +635,7 @@ namespace CSharpRpp
                 IList<RTypeName> typeArgs = ParseTypeParamClause();
                 if (!Peek(OP_LParen))
                 {
-                    throw new SyntaxException("Expecting function call after type arguments", _lastToken);
+                    RaiseSyntaxError("Expecting function call after type arguments");
                 }
 
                 IList<IRppExpr> args = ParseArgs();
@@ -700,7 +701,7 @@ namespace CSharpRpp
                 expr = ParseExpr();
                 if (expr == null)
                 {
-                    throw new Exception("Expected argument");
+                    RaiseSyntaxError("Expected argument");
                 }
 
                 exprs.Add(expr);

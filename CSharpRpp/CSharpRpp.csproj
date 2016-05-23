@@ -76,6 +76,7 @@
     <Compile Include="Codegen\ClrVarCodegen.cs" />
     <Compile Include="Expr\RppPop.cs" />
     <Compile Include="Expr\RppThis.cs" />
+    <Compile Include="Parser\ParserException.cs" />
     <Compile Include="PatternMatching\RppBinderPattern.cs" />
     <Compile Include="PatternMatching\RppCaseClause.cs" />
     <Compile Include="PatternMatching\RppConstructorPattern.cs" />
