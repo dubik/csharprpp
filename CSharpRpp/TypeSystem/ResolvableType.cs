@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CSharpRpp.Symbols;
 using JetBrains.Annotations;
 
@@ -48,6 +49,24 @@ namespace CSharpRpp.TypeSystem
             {
                 _type = Name.Resolve(scope);
             }
+        }
+
+        public RType ReResolve([NotNull] SymbolTable scope)
+        {
+            return ReResolve(Value, scope);
+        }
+
+        public static RType ReResolve(RType type, [NotNull] SymbolTable scope)
+        {
+            RTypeName typeName = Reconstruct(type);
+            return typeName.Resolve(scope);
+        }
+
+        private static RTypeName Reconstruct(RType type)
+        {
+            RTypeName typeName = new RTypeName(type.Name);
+            type.GenericArguments.ForEach(ga => typeName.AddGenericArgument(Reconstruct(ga)));
+            return typeName;
         }
 
         public override string ToString()

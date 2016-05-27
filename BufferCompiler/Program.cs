@@ -38,7 +38,7 @@ abstract class XIterator[+A] {
     c
   }
 
-  def toArray[B >: A]: Array[B] = {
+  def toArray[B <: A]: Array[B] = {
     val res = new Array[B](count())
     var index = 0
     foreach((item) => {
@@ -120,7 +120,6 @@ class XFilterIterator[A](val iter: XIterator[A], val f: A => Boolean) extends XI
   override def copy(): XIterator[A] = new XFilterIterator(iter.copy(), f)
 }
 
-
 abstract class XList[+A] extends XIterable[A] {
   def head: A
   def tail: XList[A]
@@ -182,7 +181,6 @@ object Main {
     }
 }
 ";
-
 
             Diagnostic diagnostic = new Diagnostic();
             CodeGenerator codeGen = RppCompiler.Compile(program => RppCompiler.Parse(code, program), diagnostic, GetStdlibAssembly(), "Sample.dll");

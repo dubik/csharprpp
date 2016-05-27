@@ -6,6 +6,14 @@ using JetBrains.Annotations;
 
 namespace CSharpRpp.TypeSystem
 {
+    public static class RTypeExtension
+    {
+        public static bool IsUndefined(this RType type)
+        {
+            return type == RppTypeSystem.Undefined || type.Name == RppTypeSystem.Undefined.Name;
+        }
+    }
+
     public sealed class RppTypeSystem
     {
         public static readonly RppTypeSystem Instance = new RppTypeSystem();

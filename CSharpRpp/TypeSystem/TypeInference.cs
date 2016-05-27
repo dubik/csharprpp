@@ -207,7 +207,7 @@ namespace CSharpRpp.TypeSystem
             if (source.IsGenericType)
             {
                 var newGenericArguments =
-                    source.GenericArguments.Zip(target.GenericArguments, (left, right) => Infer(left, right, dict))
+                    GetGenericArguments(source).Zip(target.GenericArguments, (left, right) => Infer(left, right, dict))
                         .ToArray();
 
                 // Add generic arguments to dictionary in case they were resolved to some real type
@@ -222,10 +222,36 @@ namespace CSharpRpp.TypeSystem
                 if (source == target)
                     return target;
 
-                return source.DefinitionType.MakeGenericType(newGenericArguments);
+                return GetDefinitionType(source).MakeGenericType(newGenericArguments);
             }
 
             return source;
+        }
+
+        /// <summary>
+        /// Returns generic arguments of specified type or if they are not specified, returns
+        /// all generic arguments "Undefined".
+        /// </summary>
+        /// <param name="type">specified type</param>
+        /// <returns>generic arguments of type or "Undefined" types which match amount of generic parameters</returns>
+        private static IEnumerable<RType> GetGenericArguments(RType type)
+        {
+            if (type.GenericArguments.Count == 0)
+            {
+                return Enumerable.Range(0, type.GenericParameters.Count).Select(x => Undefined);
+            }
+
+            return type.GenericArguments;
+        }
+
+        private static RType GetDefinitionType(RType type)
+        {
+            if (type.DeclaringType == null && type.IsGenericTypeDefinition)
+            {
+                return type;
+            }
+
+            return type.DefinitionType;
         }
 
         /// <summary>
