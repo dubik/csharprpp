@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
@@ -16,6 +17,8 @@ namespace CSharpRpp
         public IEnumerable<IRppExpr> Args => _arguments.AsEnumerable();
 
         private IList<IRppExpr> _arguments;
+
+        private IEnumerable<RType> ArgsTypes => Args.Select(arg => arg.Type.Value);
 
         public RppMethodInfo Constructor { get; private set; }
 
@@ -41,33 +44,67 @@ namespace CSharpRpp
 
             Type.Resolve(scope);
 
-            RType classType = Type.Value;
+            RType targetType = Type.Value;
 
-            var constructor = FindConstructor(classType);
-
-            _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, constructor.Parameters, new List<RType>());
-            NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => node is RppClosure, diagnostic);
-
-            if (classType.IsGenericTypeDefinition)
+            if (NeedToInferGenericArguments(targetType))
             {
-                List<RType> argTypes = Args.Select(a => a.Type.Value).ToList();
-                IReadOnlyCollection<RppGenericParameter> genericParameters = classType.GenericParameters;
-                var inferredTypeArguments = InferGenericArguments(genericParameters, argTypes, constructor.Parameters.Select(p => p.Type));
-                RType inferredType = Type.Value.MakeGenericType(inferredTypeArguments);
-                Type = new ResolvableType(inferredType);
-                Constructor =
-                    inferredType.Constructors.First(c => c.GenericMethodDefinition == null ? c == constructor : c.GenericMethodDefinition == constructor);
+                RType inferredTargetType;
+                Constructor = FindGenericConstructor(targetType, out inferredTargetType);
+                Type = new ResolvableType(inferredTargetType);
             }
             else
             {
-                Constructor = constructor;
+                Constructor = FindConstructor(targetType);
             }
+
+            _arguments = RppFuncCall.ReplaceUndefinedClosureTypesIfNeeded(_arguments, Constructor.Parameters, new List<RType>());
+            NodeUtils.AnalyzeWithPredicate(scope, _arguments, node => node is RppClosure, diagnostic);
 
             return this;
         }
 
+        private RppMethodInfo FindGenericConstructor(RType targetType, out RType inferredType)
+        {
+            inferredType = null;
+            IReadOnlyList<RppMethodInfo> constructors = targetType.Constructors;
+
+            foreach (RppMethodInfo constructor in constructors)
+            {
+                if (NeedToInferGenericArguments(targetType))
+                {
+                    var genericParameters = targetType.GenericParameters;
+                    List<RType> argTypes = ArgsTypes.ToList();
+                    var inferredTypeArguments = InferGenericArguments(genericParameters, argTypes, constructor.Parameters.Select(p => p.Type));
+                    if (inferredTypeArguments.Any(t => t.IsUndefined()))
+                    {
+                        continue;
+                    }
+
+                    RType inflatedType = targetType.MakeGenericType(inferredTypeArguments);
+                    var matchingConstructors = FindConstructors(inflatedType);
+                    if (matchingConstructors.Count > 1)
+                    {
+                        throw SemanticExceptionFactory.AmbiguousReferenceToOverloadedDefinition(Token, matchingConstructors, argTypes);
+                    }
+
+                    if (matchingConstructors.Count == 1)
+                    {
+                        inferredType = inflatedType;
+                        return matchingConstructors.First();
+                    }
+                }
+            }
+
+            throw SemanticExceptionFactory.SomethingWentWrong(Token);
+        }
+
+        private static bool NeedToInferGenericArguments([NotNull] RType type)
+        {
+            return type.IsGenericTypeDefinition;
+        }
+
         [NotNull]
-        private RppMethodInfo FindConstructor([NotNull] RType classType)
+        private List<RppMethodInfo> FindConstructors([NotNull] RType classType)
         {
             var constructors = classType.Constructors;
 
@@ -79,7 +116,13 @@ namespace CSharpRpp
                 throw SemanticExceptionFactory.CreateOverloadFailureException(Token, candidates, Args, constructors);
             }
 
-            return candidates.First();
+            return candidates;
+        }
+
+        [NotNull]
+        private RppMethodInfo FindConstructor([NotNull] RType classType)
+        {
+            return FindConstructors(classType).First();
         }
 
         private static RType[] InferGenericArguments(IReadOnlyCollection<RppGenericParameter> genericParameters,

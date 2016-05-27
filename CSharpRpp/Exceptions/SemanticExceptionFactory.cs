@@ -69,6 +69,11 @@ namespace CSharpRpp.Exceptions
             return new SemanticException(113, FormatErrorAndPointAtToken(token, "Missing initializer"));
         }
 
+        public static SemanticException AmbiguousReferenceToOverloadedDefinition(IToken token, List<RppMethodInfo> matchingConstructors, List<RType> argTypes)
+        {
+            return new SemanticException(114, FormatErrorAndPointAtToken(token, "AmbiguousReferenceToOverloadedDefinition"));
+        }
+
         public static ParserException SyntaxError(IToken token, string message)
         {
             return new ParserException(200, FormatErrorAndPointAtToken(token, message));
