@@ -118,22 +118,7 @@ namespace CSharpRpp
                 op = token.Text;
                 switch (token.Text)
                 {
-                    case "==":
-                    case "||":
-                    case "&&":
-                        precedence = 2;
-                        break;
-                    case "|":
-                        precedence = 2;
-                        break;
-                    case "^":
-                        precedence = 3;
-                        break;
-                    case "&":
-                        precedence = 4;
-                        break;
                     case "=":
-                    case "!":
                     case "+=":
                     case "-=":
                     case "*=":
@@ -142,26 +127,60 @@ namespace CSharpRpp
                     case "&=":
                     case "^=":
                     case "|=":
-                        precedence = 5;
+                        precedence = 10;
                         break;
+
+                    case "||":
+                        precedence = 11;
+                        break;
+
+                    case "&&":
+                        precedence = 12;
+                        break;
+
+                    case "|":
+                        precedence = 13;
+                        break;
+
+                    case "^":
+                        precedence = 14;
+                        break;
+
+                    case "&":
+                        precedence = 15;
+                        break;
+
+                    case "==":
+                    case "!=":
+                        precedence = 16;
+                        break;
+
                     case "<":
                     case ">":
                     case ">=":
                     case "<=":
-                        precedence = 6;
+                        precedence = 17;
                         break;
+
                     case ":":
-                        precedence = 7;
+                        precedence = 18;
                         break;
+
                     case "+":
                     case "-":
-                        precedence = 8;
+                        precedence = 19;
                         break;
+
                     case "*":
                     case "/":
                     case "%":
-                        precedence = 9;
+                        precedence = 20;
                         break;
+
+                    case "!":
+                        precedence = 21;
+                        break;
+
                     default:
                         precedence = 0;
                         return false;

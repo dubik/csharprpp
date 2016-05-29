@@ -100,6 +100,27 @@ namespace CSharpRppTest
             Assert.IsNotNull(blockExpr);
         }
 
+        [TestMethod]
+        public void ParseLogical1()
+        {
+            TestExpr("x && y", LogicalAnd(Id("x"), Id("y")));
+            TestExpr("x || y", LogicalOr(Id("x"), Id("y")));
+        }
+
+        [TestMethod]
+        public void ParseLogical2()
+        {
+            TestExpr("x == 3 && y", LogicalAnd(Eq(Id("x"), Int(3)), Id("y")));
+            TestExpr("x == 3 || y", LogicalOr(Eq(Id("x"), Int(3)), Id("y")));
+        }
+
+        [TestMethod]
+        public void ParseLogical3()
+        {
+            TestExpr("x && y == 3", LogicalAnd(Id("x"), Eq(Id("y"), Int(3))));
+            TestExpr("x || y == 3", LogicalOr(Id("x"), Eq(Id("y"), Int(3))));
+        }
+
         private static void TestExpr(string code, IRppExpr expected)
         {
             var parser = ParserTest.CreateParser(code);
@@ -127,6 +148,21 @@ namespace CSharpRppTest
         private static RppBinOp Mult(IRppExpr left, IRppExpr right)
         {
             return RppBinOp.Create("*", left, right);
+        }
+
+        private static RppBinOp LogicalAnd(IRppExpr left, IRppExpr right)
+        {
+            return RppBinOp.Create("&&", left, right);
+        }
+
+        private static RppBinOp LogicalOr(IRppExpr left, IRppExpr right)
+        {
+            return RppBinOp.Create("||", left, right);
+        }
+
+        private static RppBinOp Eq(IRppExpr left, IRppExpr right)
+        {
+            return RppBinOp.Create("==", left, right);
         }
 
         private static RppId Id(string id)
