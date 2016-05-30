@@ -16,11 +16,11 @@ object Main
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            object res = Utils.InvokeStatic(mainTy, "main", new object[] {2});
+            object res = Utils.InvokeStatic(mainTy, "main", 2);
             Assert.AreEqual(13, res);
-            res = Utils.InvokeStatic(mainTy, "main", new object[] {-3});
+            res = Utils.InvokeStatic(mainTy, "main", -3);
             Assert.AreEqual(23, res);
-            res = Utils.InvokeStatic(mainTy, "main", new object[] {0});
+            res = Utils.InvokeStatic(mainTy, "main", 0);
             Assert.AreEqual(23, res);
         }
 
@@ -62,7 +62,7 @@ object Main
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             try
             {
-                object res = Utils.InvokeStatic(mainTy, "main", new object[] {true});
+                object res = Utils.InvokeStatic(mainTy, "main", true);
                 Assert.Fail("Should throw exception");
             }
                 // ReSharper disable once EmptyGeneralCatchClause
@@ -179,7 +179,7 @@ object Main {
             int[] array = {1, 3, 5};
             for (int i = 0; i < array.Length; i++)
             {
-                object res = Utils.InvokeStatic(mainTy, "read", new object[] {array, i});
+                object res = Utils.InvokeStatic(mainTy, "read", array, i);
                 Assert.AreEqual(array[i], res);
             }
         }
@@ -206,14 +206,14 @@ object Main {
             int[] intArray = {1, 3, 5};
             for (int i = 0; i < intArray.Length; i++)
             {
-                object res = Utils.InvokeStatic(mainTy, "readInt", new object[] {intArray, i});
+                object res = Utils.InvokeStatic(mainTy, "readInt", intArray, i);
                 Assert.AreEqual(intArray[i], res);
             }
 
             string[] stringArray = {"Hello", "Terve", "Moi"};
             for (int i = 0; i < stringArray.Length; i++)
             {
-                object res = Utils.InvokeStatic(mainTy, "readString", new object[] {stringArray, i});
+                object res = Utils.InvokeStatic(mainTy, "readString", stringArray, i);
                 Assert.AreEqual(stringArray[i], res);
             }
         }
@@ -244,11 +244,41 @@ object Main {
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {true, true}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {true, false}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", new object[] {false, true}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", new object[] {true, false, true}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", new object[] {false, false, true}));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "and2", true, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", true, false));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and2", false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", true, false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", false, false, true));
+        }
+
+        [TestMethod]
+        public void LogicalOrVariablesAndParameters()
+        {
+            const string code = @"
+object Main {
+    def or2(x: Boolean, y: Boolean) : Boolean = x || y
+    def or3(x: Boolean, y: Boolean, z: Boolean): Boolean = x || y || z;
+    def ifOr2(x: Boolean, y: Boolean) : Boolean = if(x || y) true else false
+    def ifOr3(x: Boolean, y: Boolean, z: Boolean): Boolean = if(x || y || z) true else false;
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", true, true));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", true, false));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", false, true));
+            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "or2", false, false));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or3", true, false, true));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or3", false, false, true));
+            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "or3", false, false, false));
+
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", true, true));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", true, false));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", false, true));
+            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "ifOr2", false, false));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr3", true, false, true));
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr3", false, false, true));
+            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "ifOr3", false, false, false));
+
         }
 
         [TestMethod]
@@ -261,10 +291,10 @@ object Main {
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", new object[] {13, 1}));
-            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", new object[] {13, -1}));
-            Assert.AreEqual(-1, Utils.InvokeStatic(mainTy, "min", new object[] {13, -1}));
-            Assert.AreEqual(1, Utils.InvokeStatic(mainTy, "min", new object[] {13, 1}));
+            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", 13, 1));
+            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "max", 13, -1));
+            Assert.AreEqual(-1, Utils.InvokeStatic(mainTy, "min", 13, -1));
+            Assert.AreEqual(1, Utils.InvokeStatic(mainTy, "min", 13, 1));
         }
 
         [TestMethod]
@@ -274,16 +304,21 @@ object Main {
 object Main {
     def logic1(x: Int, y: Int) : Boolean = x == 0 && y > 0 
     def logic2(x: Int, y: Int) : Boolean = x < 0 || y > 0
+
+    def logic3(x: Int, y: Int) : Boolean = x != 0 && y > 0 
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, 1}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, 0}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", new object[] {0, -10}));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic1", 0, 1));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", 0, 0));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic1", 0, -10));
 
-            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {-10, 1}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {30, -10}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", new object[] {0, 0}));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic2", -10, 1));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", 30, -10));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", 0, 0));
+
+            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "logic3", 1, 1));
+            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "logic3", 0, 1));
         }
 
         [TestMethod]
@@ -295,9 +330,9 @@ object Main {
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {8, 7, 6}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {8, 7, 5}));
-            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", new object[] {0, 0, 0}));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "condSimple", 8, 7, 6));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", 8, 7, 5));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", 0, 0, 0));
         }
 
         [TestMethod]

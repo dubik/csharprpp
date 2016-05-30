@@ -131,9 +131,6 @@ namespace CSharpRpp
                         break;
 
                     case "||":
-                        precedence = 11;
-                        break;
-
                     case "&&":
                         precedence = 12;
                         break;

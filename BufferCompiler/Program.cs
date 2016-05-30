@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using CSharpRpp;
@@ -54,7 +53,7 @@ abstract class XIterable[+A] {
 }
 
 class XListIterator[A](var list: XList[A]) extends XIterator[A] {
-  override def hasNext: Boolean = !list.isEmpty
+  override def hasNext: Boolean = ! list.isEmpty
 
   override def next(): A = {
     if (list.isEmpty)
@@ -82,7 +81,6 @@ class XArrayIterator[A](var array: Array[A]) extends XIterator[A] {
   override def copy(): XIterator[A] = new XArrayIterator(array)
 }
 
-
 class XMapIterator[A, U](val iter: XIterator[A], val f: A => U) extends XIterator[U] {
   override def hasNext(): Boolean = iter.hasNext()
 
@@ -99,11 +97,10 @@ class XFilterIterator[A](val iter: XIterator[A], val f: A => Boolean) extends XI
   calcNext()
 
   private def calcNext(): Unit = {
-    item = None
     while (iter.hasNext && item.isEmpty) {
       val it = iter.next()
       if (f(it)) {
-        item = Some(it)
+        item = Some[A](it)
       }
     }
   }

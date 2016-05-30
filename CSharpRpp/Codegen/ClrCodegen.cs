@@ -52,20 +52,30 @@ namespace CSharpRpp.Codegen
 
         private static readonly Regex TypeExcSplitter = new Regex(@"'(.*?)'", RegexOptions.Singleline);
 
-        private readonly Label _exitLabel;
-        public readonly bool Branching;
-        public bool Jumped { get; set; }
-        private readonly bool _invert;
-        public bool FirstLogicalBinOp { get; set; }
-
         private static int _closureId;
+
+        /// <summary>
+        /// Indicates if jump instruction was issued already. When we load value inside logical condition, we need to jump
+        /// according to _onTrue. But if we have nested conditions, jump was already done, so no need to issue another.
+        /// </summary>
+        private bool Jumped { get; set; }
+
+        /// <summary>
+        /// Exit label for logical operator evaluation
+        /// </summary>
+        private readonly Label? _targetLabel;
+
+        /// <summary>
+        /// Indicates on which value branch should jump. If it has true, then it will jump if result is true and will
+        /// continue with if its false
+        /// </summary>
+        private readonly bool _onTrue;
 
         [CanBeNull]
         public ClrClosureContext ClosureContext { get; set; }
 
         public ClrCodegen()
         {
-            FirstLogicalBinOp = true;
         }
 
         /// <summary>
@@ -83,11 +93,10 @@ namespace CSharpRpp.Codegen
             _typeBuilder = builder;
         }
 
-        public ClrCodegen(ILGenerator body, Label exitLabel, bool invert) : this(body)
+        public ClrCodegen(ILGenerator body, Label targetLabel, bool onTrue) : this(body)
         {
-            _exitLabel = exitLabel;
-            Branching = true;
-            _invert = invert;
+            _targetLabel = targetLabel;
+            _onTrue = onTrue;
         }
 
         public ClrCodegen(ILGenerator body, ClrClosureContext closureContext) : this(body)
@@ -215,32 +224,6 @@ namespace CSharpRpp.Codegen
             }
         }
 
-        public override void Visit(RppLogicalBinOp node)
-        {
-            bool branchingFlag = node.Op == "&&";
-            var shortCircuitExit = !Branching ? _body.DefineLabel() : _exitLabel; // Branching is false for the first '&&'
-
-            Label exitLabel = _body.DefineLabel();
-            ClrCodegen codegen = new ClrCodegen(_body, shortCircuitExit, branchingFlag) {FirstLogicalBinOp = false, ClosureContext = ClosureContext};
-            node.Left.Accept(codegen); // First condition can short circuit, since this is && we load 'false' (ldc_I4_0)
-            if (!codegen.Jumped) // Check if we jumped on shortcircuite label, if not - jump 
-            {
-                // this may happen if boolean is in identifier or returned from function
-                _body.Emit(branchingFlag ? OpCodes.Brfalse_S : OpCodes.Brtrue_S, _exitLabel);
-            }
-
-            node.Right.Accept(this);
-            if (FirstLogicalBinOp) // We should define labels only for the first logical op, others will just use our label
-            {
-                _body.Emit(OpCodes.Br_S, exitLabel); // We need to skip setting to false and use result of right condition evaluation
-                if (!Branching)
-                {
-                    _body.MarkLabel(shortCircuitExit);
-                }
-                _body.Emit(branchingFlag ? OpCodes.Ldc_I4_0 : OpCodes.Ldc_I4_1);
-                _body.MarkLabel(exitLabel);
-            }
-        }
 
         public override void Visit(RppBooleanLiteral node)
         {
@@ -253,32 +236,38 @@ namespace CSharpRpp.Codegen
             node.Left.Accept(this);
             node.Right.Accept(this);
 
-            if (Branching)
+            bool shouldJump = _targetLabel.HasValue;
+            if (shouldJump)
             {
                 OpCode cmpAndJumpOpCode;
                 switch (node.Op)
                 {
                     case "<":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Bge_S : OpCodes.Blt_S;
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Blt : OpCodes.Bge;
                         break;
                     case ">":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Ble_S : OpCodes.Bgt_S;
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Bgt : OpCodes.Ble;
                         break;
                     case "==":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Bne_Un_S : OpCodes.Beq_S;
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Beq : OpCodes.Bne_Un;
+                        break;
+                    case "!=":
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Bne_Un : OpCodes.Beq;
                         break;
                     case ">=":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Blt_S : OpCodes.Bge_S;
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Bge : OpCodes.Blt;
                         break;
                     case "<=":
-                        cmpAndJumpOpCode = _invert ? OpCodes.Bgt_S : OpCodes.Ble_S;
+                        cmpAndJumpOpCode = _onTrue ? OpCodes.Ble : OpCodes.Bgt;
                         break;
 
                     default:
                         throw new Exception("Don't know how to handle " + node.Op);
                 }
 
-                _body.Emit(cmpAndJumpOpCode, _exitLabel);
+                _body.Emit(cmpAndJumpOpCode, _targetLabel.Value);
+
+                Jumped = true;
             }
             else
             {
@@ -310,8 +299,6 @@ namespace CSharpRpp.Codegen
                         throw new Exception("Unknown op " + node.Op);
                 }
             }
-
-            Jumped = Branching;
         }
 
         public override void Visit(RppArithmBinOp node)
@@ -655,30 +642,112 @@ namespace CSharpRpp.Codegen
             _body.Emit(OpCodes.Box, node.Expression.Type.Value.NativeType);
         }
 
+        public override void Visit(RppIf node)
+        {
+            Label exitLabel = _body.DefineLabel();
+            Label elseLabel = _body.DefineLabel();
+
+            // if condition is false we jump to else label, otherwise we just fallthrough
+            EmitBranchableAndJumpOnResult(node.Condition, elseLabel, false);
+
+            node.ThenExpr.Accept(this);
+            _body.Emit(OpCodes.Br, exitLabel);
+            _body.MarkLabel(elseLabel);
+            node.ElseExpr.Accept(this);
+            _body.MarkLabel(exitLabel);
+        }
+
+        private bool EmitBranchable(IRppNode expr, Label targetLabel, bool onTrue)
+        {
+            ClrCodegen nestedCodegen = new ClrCodegen(_body, targetLabel, onTrue) {ClosureContext = ClosureContext};
+            expr.Accept(nestedCodegen);
+            return nestedCodegen.Jumped;
+        }
+
+        private void EmitBranchableAndJumpOnResult(IRppNode expr, Label targetLabel, bool onTrue)
+        {
+            bool notJumped = !EmitBranchable(expr, targetLabel, onTrue);
+            if (notJumped)
+            {
+                _body.Emit(onTrue ? OpCodes.Brtrue : OpCodes.Brfalse, targetLabel);
+            }
+
+            Jumped = true;
+        }
+
+        public override void Visit(RppLogicalBinOp node)
+        {
+            // _targetLabel doesn't contain value if logical op is not used from 'if' or 'while'
+            // e.g. k = i > 5 && k < 0
+            var targetLabel = _targetLabel ?? _body.DefineLabel();
+
+            if (node.Op == "&&")
+            {
+                if (_onTrue)
+                {
+                    Label test_end = _body.DefineLabel();
+
+                    EmitBranchableAndJumpOnResult(node.Left, test_end, false);
+                    EmitBranchableAndJumpOnResult(node.Right, targetLabel, true);
+
+                    _body.MarkLabel(test_end);
+                }
+                else
+                {
+                    EmitBranchableAndJumpOnResult(node.Left, targetLabel, false);
+                    EmitBranchableAndJumpOnResult(node.Right, targetLabel, false);
+                }
+            }
+            else if (node.Op == "||")
+            {
+                if (_onTrue)
+                {
+                    EmitBranchableAndJumpOnResult(node.Left, targetLabel, true);
+                    EmitBranchableAndJumpOnResult(node.Right, targetLabel, true);
+                }
+                else
+                {
+                    Label test_end = _body.DefineLabel();
+
+                    EmitBranchableAndJumpOnResult(node.Left, test_end, true);
+                    EmitBranchableAndJumpOnResult(node.Right, targetLabel, false);
+
+                    _body.MarkLabel(test_end);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            // Create epilogue only is target label wasn't defined, so we return a bool
+            if (!_targetLabel.HasValue)
+            {
+                Label endLabel = _body.DefineLabel();
+                _body.Emit(OpCodes.Ldc_I4_1);
+                _body.Emit(OpCodes.Br_S, endLabel);
+                _body.MarkLabel(targetLabel);
+                _body.Emit(OpCodes.Ldc_I4_0);
+                _body.MarkLabel(endLabel);
+            }
+        }
+
         public override void Visit(RppWhile node)
         {
             Label condition = _body.DefineLabel();
-            Label body = _body.DefineLabel();
+            Label loopBody = _body.DefineLabel();
+            Label exitLabel = _body.DefineLabel();
 
             _body.Emit(OpCodes.Br_S, condition);
-            _body.MarkLabel(body);
+            _body.MarkLabel(loopBody);
             node.Body.Accept(this);
             _body.MarkLabel(condition);
-            node.Condition.Accept(this);
-            _body.Emit(OpCodes.Brtrue, body);
-        }
 
-        public override void Visit(RppIf node)
-        {
-            Label jumpOverLabel = _body.DefineLabel();
-            Label elseLabel = _body.DefineLabel();
+
             node.Condition.Accept(this);
-            _body.Emit(OpCodes.Brfalse, elseLabel);
-            node.ThenExpr.Accept(this);
-            _body.Emit(OpCodes.Br, jumpOverLabel);
-            _body.MarkLabel(elseLabel);
-            node.ElseExpr.Accept(this);
-            _body.MarkLabel(jumpOverLabel);
+
+            _body.Emit(OpCodes.Brtrue, loopBody);
+            _body.MarkLabel(exitLabel);
         }
 
         public override void Visit(RppThrow node)
