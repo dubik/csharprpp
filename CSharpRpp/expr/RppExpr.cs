@@ -277,6 +277,76 @@ namespace CSharpRpp
         #endregion
     }
 
+    public class RppUnary : RppNode, IRppExpr
+    {
+        public ResolvableType Type { get; private set; }
+
+        public string Op { get; }
+
+        public IRppExpr Expr { get; set; }
+
+        public RppUnary(string op, IRppExpr expr)
+        {
+            Op = op;
+            Expr = expr;
+        }
+
+        public override IRppNode Analyze(SymbolTable scope, Diagnostic diagnostic)
+        {
+            Expr = (IRppExpr) Expr.Analyze(scope, diagnostic);
+            if (Op == "!")
+            {
+                if (Expr.Type.Value != RppTypeSystem.BooleanTy)
+                {
+                    throw SemanticExceptionFactory.OperatorCantBeAppliedToType(Token, Op, Expr.Type.Value);
+                }
+
+                Type = BooleanTy;
+            }
+            else
+            {
+                throw SemanticExceptionFactory.SomethingWentWrong(Token);
+            }
+
+            return this;
+        }
+
+        public override void Accept(IRppNodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public override string ToString()
+        {
+            return $"'{Op}' {Expr}";
+        }
+
+        #region Equality
+
+        protected bool Equals(RppUnary other)
+        {
+            return string.Equals(Op, other.Op) && Equals(Expr, other.Expr);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((RppUnary) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Op?.GetHashCode() ?? 0) * 397) ^ (Expr?.GetHashCode() ?? 0);
+            }
+        }
+
+        #endregion
+    }
+
     [DebuggerDisplay("Int: {Value}")]
     public sealed class RppInteger : RppLiteralBase<int>
     {

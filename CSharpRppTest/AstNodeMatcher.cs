@@ -179,5 +179,9 @@ namespace CSharpRppTest
         public void Visit(RppThis node)
         {
         }
+
+        public void Visit(RppUnary node)
+        {
+        }
     }
 }

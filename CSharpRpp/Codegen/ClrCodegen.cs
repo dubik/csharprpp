@@ -224,6 +224,21 @@ namespace CSharpRpp.Codegen
             }
         }
 
+        public override void Visit(RppUnary node)
+        {
+            node.Expr.Accept(this);
+            switch (node.Op)
+            {
+                case "!":
+                    _body.Emit(OpCodes.Ldc_I4_0);
+                    _body.Emit(OpCodes.Ceq);
+                    break;
+                case "~":
+                    break;
+                case "-":
+                    break;
+            }
+        }
 
         public override void Visit(RppBooleanLiteral node)
         {

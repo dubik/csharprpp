@@ -358,7 +358,7 @@ namespace CSharpRpp
         {
             TypeVariant variant = TypeVariant.Invariant; // "A"
             bool requireId = false;
-            if (Require(RppLexer.OP_Ops))
+            if (Require(RppLexer.OP_Unary))
             {
                 if (_lastToken.Text == "+") // "+A"
                 {

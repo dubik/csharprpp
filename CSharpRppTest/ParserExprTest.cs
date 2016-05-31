@@ -121,6 +121,12 @@ namespace CSharpRppTest
             TestExpr("x || y == 3", LogicalOr(Id("x"), Eq(Id("y"), Int(3))));
         }
 
+        [TestMethod]
+        public void ParseNot()
+        {
+            TestExpr("!x", Not(Id("x")));
+        }
+
         private static void TestExpr(string code, IRppExpr expected)
         {
             var parser = ParserTest.CreateParser(code);
@@ -158,6 +164,11 @@ namespace CSharpRppTest
         private static RppBinOp LogicalOr(IRppExpr left, IRppExpr right)
         {
             return RppBinOp.Create("||", left, right);
+        }
+
+        private static RppUnary Not(IRppExpr expr)
+        {
+            return new RppUnary("!", expr);
         }
 
         private static RppBinOp Eq(IRppExpr left, IRppExpr right)

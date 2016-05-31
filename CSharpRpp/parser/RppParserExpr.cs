@@ -53,6 +53,11 @@ namespace CSharpRpp
                 return new RppThrow(ParseExpr()) {Token = throwToken};
             }
 
+            if (Require(OP_Unary))
+            {
+                return new RppUnary(_lastToken.Text, ParseSimpleExpr()) {Token = _lastToken};
+            }
+
             return ParsePostfixExpr(0);
         }
 
@@ -112,7 +117,7 @@ namespace CSharpRpp
         private bool ParseOperator(out string op, out int precedence, out bool leftAssoc)
         {
             leftAssoc = false;
-            if (Require(OP_Ops) || Require(OP_Star) || Require(OP_Eq) || Require(OP_Bar))
+            if (Require(OP_Ops) || Require(OP_Star) || Require(OP_Eq) || Require(OP_Bar) || Require(OP_Unary))
             {
                 var token = _lastToken;
                 op = token.Text;
@@ -175,6 +180,7 @@ namespace CSharpRpp
                         break;
 
                     case "!":
+                    case "~":
                         precedence = 21;
                         break;
 
@@ -193,7 +199,7 @@ namespace CSharpRpp
 
         private IRppExpr ParsePostfixExpr(int minPrecedence)
         {
-            IRppExpr expr = ParsePrefixExpr();
+            IRppExpr expr = ParseParenExpr();
             if (Require(KW_Match))
             {
                 return ParseMatch(expr);
@@ -410,7 +416,7 @@ namespace CSharpRpp
             return null;
         }
 
-        private IRppExpr ParsePrefixExpr()
+        private IRppExpr ParseParenExpr()
         {
             int position = _stream.Mark();
             if (Require(OP_LParen))

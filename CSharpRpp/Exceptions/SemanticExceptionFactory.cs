@@ -79,6 +79,11 @@ namespace CSharpRpp.Exceptions
             return new ParserException(200, FormatErrorAndPointAtToken(token, message));
         }
 
+        public static ParserException OperatorCantBeAppliedToType(IToken token, string op, RType type)
+        {
+            return new ParserException(115, FormatErrorAndPointAtToken(token, $"Operator '{op}' can't be applied to operand of type: {type}"));
+        }
+
         public static SemanticException SomethingWentWrong(IToken token)
         {
             return new SemanticException(-1, FormatErrorAndPointAtToken(token, "Something went wrong here"));

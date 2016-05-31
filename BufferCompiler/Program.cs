@@ -53,7 +53,7 @@ abstract class XIterable[+A] {
 }
 
 class XListIterator[A](var list: XList[A]) extends XIterator[A] {
-  override def hasNext: Boolean = ! list.isEmpty
+  override def hasNext: Boolean = !list.isEmpty
 
   override def next(): A = {
     if (list.isEmpty)

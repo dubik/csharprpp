@@ -263,22 +263,21 @@ object Main {
 }
 ";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", true, true));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", true, false));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or2", false, true));
-            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "or2", false, false));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or3", true, false, true));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "or3", false, false, true));
-            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "or3", false, false, false));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "or2", true, true));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "or2", true, false));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "or2", false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "or2", false, false));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "or3", true, false, true));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "or3", false, false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "or3", false, false, false));
 
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", true, true));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", true, false));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr2", false, true));
-            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "ifOr2", false, false));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr3", true, false, true));
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "ifOr3", false, false, true));
-            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "ifOr3", false, false, false));
-
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "ifOr2", true, true));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "ifOr2", true, false));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "ifOr2", false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "ifOr2", false, false));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "ifOr3", true, false, true));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "ifOr3", false, false, true));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "ifOr3", false, false, false));
         }
 
         [TestMethod]
@@ -317,8 +316,8 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", 30, -10));
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic2", 0, 0));
 
-            Assert.IsTrue((bool)Utils.InvokeStatic(mainTy, "logic3", 1, 1));
-            Assert.IsFalse((bool)Utils.InvokeStatic(mainTy, "logic3", 0, 1));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "logic3", 1, 1));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic3", 0, 1));
         }
 
         [TestMethod]
@@ -348,5 +347,38 @@ object Main {
             var res = Utils.InvokeStatic(mainTy, "main");
             Assert.AreEqual(3, res);
         }
+
+        [TestMethod]
+        public void InvertBooleanValue1()
+        {
+            const string code = @"
+object Main {
+    def invertShort(x: Boolean) : Boolean = !x
+    def invertLong(x: Boolean) : Boolean = ! x
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "invertShort", false));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "invertShort", true));
+            Assert.IsTrue((bool) Utils.InvokeStatic(mainTy, "invertLong", false));
+            Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "invertLong", true));
+        }
+
+        [TestMethod]
+        public void InvertBooleanValue2()
+        {
+            const string code = @"
+object Main {
+    def invertShort(x: Boolean) : Int = if(!x) 13 else 27
+    def invertLong(x: Boolean) : Int = if(! x) 39 else 98
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.AreEqual(13, Utils.InvokeStatic(mainTy, "invertShort", false));
+            Assert.AreEqual(27, Utils.InvokeStatic(mainTy, "invertShort", true));
+            Assert.AreEqual(39, Utils.InvokeStatic(mainTy, "invertLong", false));
+            Assert.AreEqual(98, Utils.InvokeStatic(mainTy, "invertLong", true));
+        }
+
     }
 }
