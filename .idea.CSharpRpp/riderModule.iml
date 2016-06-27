@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RIDER_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/..">
+      <sourceFolder url="file://$MODULE_DIR$/.." isTestSource="false" />
+    </content>
+    <content url="file:///usr/local/Cellar/mono/4.4.0.182/lib/mono/xbuild/14.0/bin/Microsoft.Common.targets">
+      <sourceFolder url="file:///usr/local/Cellar/mono/4.4.0.182/lib/mono/xbuild/14.0/bin/Microsoft.Common.targets" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
