@@ -172,9 +172,10 @@ object XList {
 }
 
 object Main {
-    def main: Unit = {
+    def main: Array[Int] = {
         val nums = XList[Int](1, 2, 3, 4, 5)
         val dbls = nums.map(x => x * 2)
+        dbls.iterator.toArray
     }
 }
 ";
