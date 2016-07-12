@@ -4,17 +4,17 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class GenericsTest
     {
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void SimplestPossibleGeneric()
         {
             const string code = @"
@@ -25,8 +25,8 @@ class Foo[T]
             Assert.IsTrue(fooTy.IsGenericType);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void SimplestPossibleGenericWithGenericField()
         {
             const string code = @"
@@ -37,8 +37,8 @@ class Foo[T](val k: T)
             Assert.IsTrue(fooTy.IsGenericType);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ExtendingSimpleGenericClass()
         {
             const string code = @"
@@ -50,8 +50,8 @@ class Foo[T] extends Bar[T]
             Assert.IsTrue(fooTy.IsGenericType);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ExtendingSimpleGenericClassWithPredefinedGenericArgument()
         {
             const string code = @"
@@ -64,8 +64,8 @@ class Foo[T] extends Bar[Int]
             Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ExtendingClassWithPredefinedGenericArgument()
         {
             const string code = @"
@@ -78,8 +78,8 @@ class Foo extends Bar[Int]
             Assert.AreEqual(typeof(int), fooTy.BaseType?.GenericTypeArguments[0]);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void GenericStaticFunction()
         {
             const string code = @"
@@ -95,8 +95,8 @@ object Bar
             Assert.AreEqual("hello", res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void SimpleGenericClass()
         {
             const string code = @"
@@ -112,8 +112,8 @@ object Bar
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ExtendingSpecializedGeneric()
         {
             const string code = @"
@@ -131,8 +131,8 @@ object Bar
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ExtendingSpecializedGenericAndDefineOneMoreGenericParameter()
         {
             const string code = @"
@@ -150,8 +150,8 @@ object Bar
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ClosureLikeClass()
         {
             const string code = @"
@@ -179,7 +179,7 @@ object Bar {
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void GenericInNestedClasses()
         {
             const string code = @"
@@ -196,7 +196,7 @@ class First[A, B] {
             CollectionAssert.AreEqual(new[] {"A", "B", "C", "D"}, secondTy.GetGenericArguments().Select(t => t.Name).ToList());
         }
 
-        [TestMethod]
+        [Test]
         public void ExtendingRuntimeInterface()
         {
             const string code = @"
@@ -213,7 +213,7 @@ class Foo extends Function2[Int, Int, Int]
             Assert.AreEqual(38, res);
         }
 
-        [TestMethod]
+        [Test]
         public void CallObjectsGenericFunction()
         {
             const string code = @"
@@ -232,7 +232,7 @@ object Main
             Assert.AreEqual(132, res);
         }
 
-        [TestMethod]
+        [Test]
         public void CallApplyGenericFunction()
         {
             const string code = @"
@@ -258,8 +258,8 @@ object Main
             class Apple extends Fruit
         */
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void DefaultTypesEquality()
         {
             RType listOfFruitsTy;
@@ -273,8 +273,8 @@ object Main
             Assert.IsFalse(listOfApplesTy.IsAssignable(listOfFruitsTy));
         }
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void CovariantTypesEquality()
         {
             RType listOfFruitsTy;
@@ -288,8 +288,8 @@ object Main
             Assert.IsFalse(listOfApplesTy.IsAssignable(listOfFruitsTy));
         }
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void ContravariantTypesEquality()
         {
             RType listOfFruitsTy;
@@ -303,7 +303,7 @@ object Main
             Assert.IsTrue(listOfApplesTy.IsAssignable(listOfFruitsTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSpecializedGenericTypesEquality()
         {
 // class Foo[T](val id: T)
@@ -349,8 +349,8 @@ object Main
             listOfFruits = listOfFruitsTy;
         }
 
-        [TestMethod]
-        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        [Test]
+        [Category("Generics"), Category("MethodInflation")]
         public void InflateMinimalMethod()
         {
             RType fooTy = new RType("Foo");
@@ -360,8 +360,8 @@ object Main
             Assert.AreEqual(method, inflatedMethod);
         }
 
-        [TestMethod]
-        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        [Test]
+        [Category("Generics"), Category("MethodInflation")]
         public void InflateReturnTypeOfSmallMethod()
         {
             RType fooTy = new RType("Foo");
@@ -374,8 +374,8 @@ object Main
             Assert.AreEqual(IntTy, inflatedMethod.ReturnType);
         }
 
-        [TestMethod]
-        [TestCategory("Generics"), TestCategory("MethodInflation")]
+        [Test]
+        [Category("Generics"), Category("MethodInflation")]
         public void InflateReturnTypeAndOneParamOfSmallMethod()
         {
             RType fooTy = new RType("Foo");
@@ -390,8 +390,8 @@ object Main
             Assert.AreEqual(IntTy, inflatedMethod.Parameters[0].Type);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void InflateSimpleGenericType()
         {
             /*
@@ -407,7 +407,7 @@ object Main
             Assert.AreEqual(IntTy, intFooTy.Methods[0].ReturnType);
         }
 
-        [TestMethod]
+        [Test]
         public void InflateBaseClass()
         {
             /*
@@ -432,7 +432,7 @@ object Main
             Assert.AreEqual(IntTy, specializedMethods[0].ReturnType);
         }
 
-        [TestMethod]
+        [Test]
         public void InflateTypeTwice()
         {
             RType barTy = new RType("Bar");
@@ -452,8 +452,8 @@ object Main
         }
 
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void TestGenericsConstraint()
         {
             const string code = @"
@@ -466,8 +466,8 @@ class Bag[A <: Item]
             Assert.AreEqual("Item", typeParameters[0].BaseType?.Name);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ConstraintedMembersShouldBeAvailableToGenericParameter()
         {
             const string code = @"
@@ -494,8 +494,8 @@ object Main {
             Assert.AreEqual("Hello", res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ConstraintedMembersShouldBeAvailableToMethodGenericParameter()
         {
             const string code = @"
@@ -516,8 +516,8 @@ object Main {
             Assert.AreEqual("Hello", res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void MixClassAndMethodGenerics()
         {
             const string code = @"
@@ -538,8 +538,8 @@ object Main {
             Assert.AreEqual(26, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void UsingClosuresInFunctionsWithGenericParameters()
         {
             const string code = @"
@@ -558,8 +558,8 @@ object Main {
             Assert.AreEqual(26, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void CallFunctionWithTwoGenericsButInReturnValueUsedOnlyOneGeneric()
         {
             const string code = @"
@@ -591,7 +591,7 @@ object Main {
         {
         }
 
-        [TestMethod]
+        [Test]
         public void WrapSystemTypeWithVarianceAnnotation()
         {
             RType fooTy = new RType("Foo", typeof(Foo<>), TypeFactory);
@@ -604,7 +604,7 @@ object Main {
         {
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexWrapSystemTypeWithVarianceAnnotation()
         {
             RType fooTy = new RType("Bar", typeof(Bar<,,>), TypeFactory);
@@ -619,8 +619,8 @@ object Main {
             return new RType(type.Name, type, TypeFactory);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void UseGenericDefinitionTypeAsArgument()
         {
             const string code = @"

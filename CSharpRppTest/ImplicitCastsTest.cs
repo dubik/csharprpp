@@ -1,14 +1,14 @@
 ﻿using CSharpRpp;
 using CSharpRpp.Expr;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ImplicitCastsTest
     {
-        [TestMethod]
+        [Test]
         public void IntegerBoxing()
         {
             RppInteger sourceExpr = new RppInteger(10);

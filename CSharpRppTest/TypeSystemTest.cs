@@ -7,18 +7,18 @@ using CSharpRpp.Codegen;
 using CSharpRpp.Reporting;
 using CSharpRpp.Symbols;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class TypeSystemTest
     {
         private ModuleBuilder _module;
 
-        [TestMethod]
+        [Test]
         public void PrimitiveTypeEquality()
         {
             var t = new RType("Int");
@@ -26,7 +26,7 @@ namespace CSharpRppTest
             Assert.AreEqual(t, t1);
         }
 
-        [TestMethod]
+        [Test]
         public void TestVisitors()
         {
             const string code = @"
@@ -61,7 +61,7 @@ object Main
             Assert.IsTrue(mainType.IsObject);
         }
 
-        [TestMethod]
+        [Test]
         public void TypeDefinitionForClass()
         {
             var t = new RType("Foo", RTypeAttributes.Class);
@@ -73,7 +73,7 @@ object Main
             Assert.IsFalse(t.IsSealed);
         }
 
-        [TestMethod]
+        [Test]
         public void TypeDefinitionForSealedClass()
         {
             var t = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Sealed);
@@ -81,7 +81,7 @@ object Main
             Assert.IsTrue(t.IsSealed);
         }
 
-        [TestMethod]
+        [Test]
         public void TypeDefinitionForAbstractClass()
         {
             var t = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Abstract);
@@ -89,7 +89,7 @@ object Main
             Assert.IsTrue(t.IsAbstract);
         }
 
-        [TestMethod]
+        [Test]
         public void InflateSimpleGeneric()
         {
             /*
@@ -110,7 +110,7 @@ object Main
             Assert.AreEqual(FloatTy, getMethod.Parameters[1].Type);
         }
 
-        [TestMethod]
+        [Test]
         public void InflateClassWithGenericBaseType()
         {
             /*
@@ -148,13 +148,13 @@ object Main
             Assert.AreEqual(IntTy, getMethod.Parameters[0].Type);
         }
 
-        [TestInitialize]
+        [SetUp]
         public void SetUp()
         {
             _module = CreateModule();
         }
 
-        [TestMethod]
+        [Test]
         public void CreateSimpleNativeTypeFromRType()
         {
             RType simpleType = new RType("Foo", RTypeAttributes.Class | RTypeAttributes.Public);
@@ -168,7 +168,7 @@ object Main
             return assemblyBuilder.DefineDynamicModule("TestAssembly", "TestAssembly.dll");
         }
 
-        [TestMethod]
+        [Test]
         public void LinearizeSimpleClass()
         {
             RType fooTy = new RType("Foo");
@@ -176,7 +176,7 @@ object Main
             CollectionAssert.AreEqual(List(fooTy, AnyTy), hierarchy);
         }
 
-        [TestMethod]
+        [Test]
         public void LinearizeSimpleInterface()
         {
             RType fooTy = new RType("IFoo", RTypeAttributes.Interface);
@@ -184,7 +184,7 @@ object Main
             CollectionAssert.AreEqual(List(fooTy), hierarchy);
         }
 
-        [TestMethod]
+        [Test]
         public void OnlyOneInstanceOfTypeIsCreated()
         {
             SymbolTable scope = new SymbolTable();

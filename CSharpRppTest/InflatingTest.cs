@@ -2,19 +2,19 @@
 using System.Linq;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class InflatingTest
     {
         private class Foo<A>
         {
         }
 
-        [TestMethod]
+        [Test]
         public void InflateSimpleClass()
         {
             RType fooTy = new RType("Foo");
@@ -44,7 +44,7 @@ namespace CSharpRppTest
         {
         }
 
-        [TestMethod]
+        [Test]
         public void InflateTwoGenericParameters()
         {
             RType fooTy = new RType("Foo");
@@ -61,7 +61,7 @@ namespace CSharpRppTest
             CheckGenericProperties(pFooTy.MakeGenericType(typeof(float), typeof(string)), floatstringFooTy);
         }
 
-        [TestMethod]
+        [Test]
         public void InflateWithGenericAttribute()
         {
             RType barTy = new RType("Bar");
@@ -78,7 +78,7 @@ namespace CSharpRppTest
             Assert.IsTrue(xFooTy.ContainsGenericParameters);
         }
 
-        [TestMethod]
+        [Test]
         public void MakeGenericTypesCachesInflatedType()
         {
             RType fooTy = new RType("Foo");
@@ -91,7 +91,7 @@ namespace CSharpRppTest
             Assert.AreNotSame(intFooTy1, stringFooTy);
         }
 
-        [TestMethod]
+        [Test]
         public void InheritSpecializedType()
         {
             // class Bar[A]
@@ -113,7 +113,7 @@ namespace CSharpRppTest
             Assert.AreEqual("Bar[Int]", baseTypeStr);
         }
 
-        [TestMethod]
+        [Test]
         public void InflatedGenericClassWithSecondGenericArgument()
         {
             RType barTy = new RType("Bar");
@@ -137,7 +137,7 @@ namespace CSharpRppTest
         {
         }
 
-        [TestMethod]
+        [Test]
         public void InflatingNativeBaseType()
         {
             RType myClassTy = new RType("MyClass", typeof(MyClass<>), CreateType);

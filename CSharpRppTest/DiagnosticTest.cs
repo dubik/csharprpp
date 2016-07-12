@@ -1,14 +1,14 @@
 ﻿using System.Linq;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Reporting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class DiagnosticTest
     {
-        [TestMethod]
+        [Test]
         public void NonInitializedLocalVar()
         {
             const string code = @"
@@ -25,8 +25,7 @@ object Main
             Assert.AreEqual(102, diagnostic.Errors.First().Code);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [Test]
         public void TypeNotFound()
         {
             const string code = @"
@@ -36,11 +35,10 @@ object Main
     }
 }
 ";
-            Utils.ParseAndAnalyze(code, new Diagnostic());
+            Assert.Throws<SemanticException>(() => Utils.ParseAndAnalyze(code, new Diagnostic()));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [Test]
         public void ValueIsNotAMember()
         {
             const string code = @"
@@ -53,7 +51,7 @@ object Main {
     }
 }
 ";
-            Utils.ParseAndAnalyze(code, new Diagnostic());
+            Assert.Throws<SemanticException>(() => Utils.ParseAndAnalyze(code, new Diagnostic()));
         }
     }
 }

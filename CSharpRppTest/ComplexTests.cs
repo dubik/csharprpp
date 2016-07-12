@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ComplexTests
     {
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void TestOptionMoand()
         {
             const string code = @"

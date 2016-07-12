@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ArrayTest
     {
-        [TestMethod, TestCategory("Array")]
+        [Test, Category("Array")]
         public void CreateArray()
         {
             const string code = @"
@@ -21,7 +21,7 @@ object Main {
             Assert.IsNotNull(res);
         }
 
-        [TestMethod, TestCategory("Array")]
+        [Test, Category("Array")]
         public void ReadStringFromArray()
         {
             const string code = @"
@@ -40,7 +40,7 @@ object Main {
             }
         }
 
-        [TestMethod, TestCategory("Array")]
+        [Test, Category("Array")]
         public void WriteIntToArray()
         {
             const string code = @"
@@ -60,7 +60,7 @@ object Main {
             CollectionAssert.AreEqual(new[] {23, 24, 25}, array);
         }
 
-        [TestMethod, TestCategory("Array")]
+        [Test, Category("Array")]
         public void WriteStringToArray()
         {
             const string code = @"

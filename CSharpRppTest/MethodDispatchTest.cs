@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class MethodDispatchTest
     {
-        [TestMethod]
+        [Test]
         public void CallOverloadWithOneArg()
         {
             const string code = @"
@@ -27,8 +27,8 @@ object Foo
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void DefineGenericFunc()
         {
             const string code = @"

@@ -1,23 +1,25 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using CSharpRpp;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.ListExtensions;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class CompilerTest
     {
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             File.Delete("out.dll");
             File.Delete("out.exe");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void TestThatCompilerAndVerifierCanBeRun()
         {
             string output;
@@ -27,43 +29,43 @@ namespace CSharpRppTest
             Assert.AreEqual(0, csharProcess, output);
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
-        public void TestClassFoo()
+        [Category("ILVerifier"), Test]
+        public void TestFixtureFoo()
         {
             PeverifyTest("testcase1.rpp");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void TestMixingGenericArgumentsOfMethodAndClass()
         {
             PeverifyTest("testcase2.rpp");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void MethodWhichThrowExceptionShouldntUseReturn()
         {
             PeverifyTest("testcase3.rpp");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void ExpressionsWhichResultsAreNotUsedShouldBePopped()
         {
             PeverifyTest("testcase4.rpp");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void UsingUnitAsClosureReturn()
         {
             PeverifyTest("testcase5.rpp");
         }
 
-        [TestCategory("ILVerifier"), TestMethod]
+        [Category("ILVerifier"), Test]
         public void TestingTypeComplainsForRefsInClosures()
         {
             PeverifyTest("testcase6.rpp");
         }
 
-        [TestCategory("Runtime"), TestMethod]
+        [Category("Runtime"), Test]
         public void PrintHelloToConsole()
         {
             CompileExe("runtimetest1.rpp");
@@ -71,7 +73,7 @@ namespace CSharpRppTest
             Assert.AreEqual("Hello\r\n", output);
         }
 
-        [TestCategory("Runtime"), TestMethod]
+        [Category("Runtime"), Test]
         public void OverrideToString()
         {
             CompileExe("runtimetest2.rpp");
@@ -118,18 +120,18 @@ namespace CSharpRppTest
         {
             CompileLibrary(testcase);
             string output;
-            int peverifyExitCode = SpawnPreverifier(new[] {@"out.dll"}, out output);
+            int peverifyExitCode = SpawnPreverifier(new[] {"out.dll"}, out output);
             Assert.AreEqual(0, peverifyExitCode, output);
         }
 
         private static int SpawnCompiler(string[] arguments, out string consoleOutput)
         {
-            return SpawnProcess("CSharpRpp.exe", arguments, out consoleOutput);
+            return SpawnProcess(@"CSharpRpp.exe", arguments, out consoleOutput);
         }
 
         private static int SpawnPreverifier(string[] arguments, out string output)
         {
-            return SpawnProcess(@"tools\peverify.exe", arguments, out output);
+            return SpawnProcess(@"\tools\peverify.exe", arguments, out output);
         }
 
         private static int SpawnProcess(string executable, string[] arguments, out string output)
@@ -141,7 +143,7 @@ namespace CSharpRppTest
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = false,
+                UseShellExecute = false
             };
 
             Process process = Process.Start(info);

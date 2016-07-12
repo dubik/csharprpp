@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class NestedTest
     {
-        [TestMethod]
+        [Test]
         public void SimplestNestedClass()
         {
             const string code = @"
@@ -23,7 +23,7 @@ class Bar {
             Assert.AreEqual("Internal", nestedTypes[0].Name);
         }
 
-        [TestMethod]
+        [Test]
         public void CallFunctionFromNestedClass()
         {
             const string code = @"

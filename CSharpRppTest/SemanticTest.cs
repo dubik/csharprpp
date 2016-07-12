@@ -3,15 +3,16 @@ using CSharpRpp;
 using CSharpRpp.Exceptions;
 using CSharpRpp.Parser;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
+using Assert = NUnit.Framework.Assert;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class SemanticTest
     {
-        [TestMethod]
+        [Test]
         public void IdShouldResolveToClassType()
         {
             const string code = @"
@@ -33,7 +34,7 @@ object Bar
             Assert.IsNotNull(objectType, "Identifier should have been resolved to RType");
         }
 
-        [TestMethod]
+        [Test]
         public void ObjectAndClassWithTheSameNameShouldBeAllowed()
         {
             const string code = @"
@@ -53,24 +54,21 @@ object Bar
         private readonly RppFunc _intCreateFunc = new RppFunc("create", ResolvableType.IntTy);
         private readonly RppFunc _unitCreateFunc = new RppFunc("create", ResolvableType.UnitTy);
 
-        [TestMethod]
-        [ExpectedException(typeof (System.Exception))]
+        [Test]
         public void TestDifferentReturnTypesForSameFunctionName()
         {
             IList<RppFunc> functions = new List<RppFunc> {_intCreateFunc, _unitCreateFunc};
-            FuncValidator.Validate(functions);
+            Assert.Throws<System.Exception>(() => FuncValidator.Validate(functions));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (System.Exception))]
+        [Test]
         public void MethodWithSameNameDefinedTwice()
         {
             IList<RppFunc> functions = new List<RppFunc> {_intCreateFunc, _intCreateFunc};
-            FuncValidator.Validate(functions);
+            Assert.Throws<System.Exception>(() => FuncValidator.Validate(functions));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [Test]
         public void TypeDonotMatch()
         {
             const string code = @"
@@ -86,11 +84,10 @@ object Main
     }
 }
 ";
-            ParseAndAnalyze(code);
+            Assert.Throws<SemanticException>(() => ParseAndAnalyze(code));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [Test]
         public void MethodReturnTypeShouldMatchLastExpressionType()
         {
             const string code = @"
@@ -99,11 +96,10 @@ object Main
     def main: Int = ""Hello""
 }
 ";
-            ParseAndAnalyze(code);
+            Assert.Throws<SemanticException>(() => ParseAndAnalyze(code));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [Test]
         public void ShouldReportErrorWhenSymbolIsNotFound()
         {
             const string code = @"
@@ -111,11 +107,10 @@ object Main {
     def main : Int = SomeClass
 }
 ";
-            ParseAndCreateType(code, "Main$");
+            Assert.Throws<SemanticException>(() => ParseAndCreateType(code, "Main$"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (SemanticException))]
+        [Test]
         public void ShouldReportErrorWhenClassIsUsed()
         {
             const string code = @"
@@ -127,10 +122,10 @@ object Main{
     }
 }
 ";
-            ParseAndCreateType(code, "Main$");
+            Assert.Throws<SemanticException>(() => ParseAndCreateType(code, "Main$"));
         }
 
-        [TestMethod]
+        [Test]
         public void NotEnoughArgumentsForNew()
         {
             const string code = @"
@@ -142,10 +137,10 @@ object Main{
     }
 }
 ";
-            AssertRaisesException<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
+            Assert.Throws<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
         }
 
-        [TestMethod]
+        [Test]
         public void NotEnoughArgumentsForFunction()
         {
             const string code = @"
@@ -157,8 +152,7 @@ object Main{
     }
 }
 ";
-            AssertRaisesException<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
+            Assert.Throws<SemanticException>(() => ParseAndCreateType(code, "Main$"), "not enough arguments");
         }
-
     }
 }

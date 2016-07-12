@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 namespace CSharpRppTest
 {
@@ -9,11 +9,11 @@ namespace CSharpRppTest
     }
     #pragma warning restore 649
 
-    [TestClass]
+    [TestFixture]
     public class SelectorTest
     {
         /*
-        [TestMethod]
+        [Test]
         public void SelectorShouldHaveProperType()
         {
             RppNativeClass kClass = new RppNativeClass(typeof(Option));

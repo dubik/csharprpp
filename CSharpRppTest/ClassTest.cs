@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CSharpRpp.Exceptions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ClassTest
     {
-        [TestMethod]
-        public void TestClassWithoutBody()
+        [Test]
+        public void TestFixtureWithoutBody()
         {
             const string code = @"
 class Bar
@@ -31,7 +31,7 @@ class Oor extends Bar
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestEmptyClassExtend()
         {
             const string code = @"
@@ -49,7 +49,7 @@ class Bar extends Foo
             Assert.IsTrue(barTy.IsSubclassOf(fooTy));
         }
 
-        [TestMethod]
+        [Test]
         public void ResolveFuncFromBaseClass()
         {
             const string code = @"
@@ -69,7 +69,7 @@ class Bar extends Foo
             Assert.IsTrue(barTy.IsSubclassOf(fooTy));
         }
 
-        [TestMethod]
+        [Test]
         public void InstantiateClassWhichInheritsAnotherClass()
         {
             const string code = @"
@@ -95,7 +95,7 @@ object Main
             Assert.AreEqual("Bar", res.GetType().Name);
         }
 
-        [TestMethod]
+        [Test]
         public void NonTrivialConstructor()
         {
             const string code = @"
@@ -118,7 +118,7 @@ object Main
         }
 
 
-        [TestMethod]
+        [Test]
         public void InheritingClassWithClassParams()
         {
             const string code = @"
@@ -135,7 +135,7 @@ class Bar(var k: Int) extends Foo(k)
             Assert.IsNotNull(barTy);
         }
 
-        [TestMethod]
+        [Test]
         public void ValShouldMakeParamAField()
         {
             const string code = @"
@@ -147,7 +147,7 @@ class Foo(val k : Int)
             Assert.IsNotNull(fooTy.GetProperty("k"));
         }
 
-        [TestMethod]
+        [Test]
         public void NoModificatorShouldntPromotClassParamToField()
         {
             const string code = @"
@@ -159,7 +159,7 @@ class Foo(k : Int)
             Assert.IsNull(fooTy.GetProperty("k"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParentPrimaryConstructorCalled()
         {
             const string code = @"
@@ -184,7 +184,7 @@ object Main
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestParentSecondayConstructorCalled()
         {
             const string code = @"
@@ -208,8 +208,8 @@ object Main
             Assert.AreEqual(27, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ParseClassGenericArg()
         {
             const string code = @"
@@ -221,8 +221,8 @@ class Foo[T]
             Assert.AreEqual(1, fooTy.GetGenericArguments().Length);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void DeclareGenericField()
         {
             const string code = @"
@@ -233,8 +233,8 @@ class Foo[T](val k : T)
             Assert.IsTrue(fooTy.IsGenericType);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void InstantiateGenericClass()
         {
             const string code = @"
@@ -253,7 +253,7 @@ object Bar
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void InvokeOverridenMethod()
         {
             const string code = @"
@@ -280,7 +280,7 @@ object Main
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyAbstractClass()
         {
             const string code = @"
@@ -291,7 +291,7 @@ abstract class Foo
             Assert.IsTrue(fooTy.IsAbstract);
         }
 
-        [TestMethod]
+        [Test]
         public void HaveAbstractMethod()
         {
             const string code = @"
@@ -308,8 +308,7 @@ abstract class Foo
             Assert.IsTrue(lengthMethod.IsVirtual);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(SemanticException))]
+        [Test]
         public void MissingAbstractMethodShouldThrowAnException()
         {
             const string code = @"
@@ -323,12 +322,12 @@ class Bar extends Foo
 {
 }
 ";
-            Utils.ParseAndCreateType(code, "Bar");
+            Assert.Throws<SemanticException>(() => Utils.ParseAndCreateType(code, "Bar"));
         }
 
         // TODO enable this
         /*
-        [TestMethod]
+        [Test]
         [Ignore]
         [ExpectedException(typeof (SemanticException))]
         public void MissingAbstractModifierForEmptyMethods()
@@ -343,7 +342,7 @@ class Foo
         }
         */
 
-        [TestMethod]
+        [Test]
         public void SecondaryConstructor()
         {
             const string code = @"
@@ -358,7 +357,7 @@ class Foo(length: Int)
             Assert.AreEqual(2, constructors.Length);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateObjectWithSecondaryConstructor()
         {
             const string code = @"
@@ -378,8 +377,8 @@ object Main
             Assert.AreEqual(13, fooInst.GetPropertyValue("length"));
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void GenericBaseConstructor()
         {
             const string code = @"
@@ -399,8 +398,8 @@ object Main
             Assert.AreEqual(123, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void AssignGenericFieldToAVar()
         {
             const string code = @"
@@ -420,8 +419,8 @@ object Main
             Assert.AreEqual(123, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void SpecifyTypesForBaseClass()
         {
             const string code = @"
@@ -442,8 +441,8 @@ object Main
             Assert.AreEqual(123, res);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void OptionMonad()
         {
             const string code = @"
@@ -481,7 +480,7 @@ object Main
             Assert.AreEqual(123, res);
         }
 
-        [TestMethod]
+        [Test]
         public void AccessFieldFromBaseClass()
         {
             const string code = @"
@@ -505,7 +504,7 @@ object Main
             Assert.AreEqual(27, res);
         }
 
-        [TestMethod]
+        [Test]
         public void CreateSealedClass()
         {
             const string code = @"sealed class Foo";
@@ -513,8 +512,8 @@ object Main
             Assert.IsTrue(fooTy.IsSealed);
         }
 
-        [TestMethod]
-        public void TestClassAndObjectWithTheSameName()
+        [Test]
+        public void TestFixtureAndObjectWithTheSameName()
         {
             const string code = @"
 class Foo
@@ -539,7 +538,7 @@ object Main
             Assert.AreEqual("Foo", fooInst.GetType().Name);
         }
 
-        [TestMethod]
+        [Test]
         public void ChainCalls()
         {
             const string code = @"
@@ -556,7 +555,7 @@ class Foo {
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ArgumentOfChainedCallIsFunction()
         {
             const string code = @"
@@ -577,7 +576,7 @@ object Main {
             Assert.AreEqual(27, res);
         }
 
-        [TestMethod]
+        [Test]
         public void WriteToProperty()
         {
             const string code = @"
@@ -599,7 +598,7 @@ object Main {
             Assert.AreEqual(27, propertiesInst.GetPropertyValue("length"));
         }
 
-        [TestMethod]
+        [Test]
         public void WriteToGenericProperty()
         {
             const string code = @"
@@ -621,7 +620,7 @@ object Main {
             Assert.AreEqual(27, propertiesInst.GetPropertyValue("item"));
         }
 
-        [TestMethod]
+        [Test]
         public void CallingFunctionsWithoutParens()
         {
             const string code = @"
@@ -641,7 +640,7 @@ object Main {
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void DefinePublicField()
         {
             const string code = @"
@@ -670,7 +669,7 @@ object Main
             Assert.AreEqual(27, mutIndexValue);
         }
 
-        [TestMethod]
+        [Test]
         public void DefineReadonlyPublicField()
         {
             const string code = @"
@@ -696,7 +695,7 @@ object Main
             Assert.IsFalse(indexProp.CanWrite);
         }
 
-        [TestMethod]
+        [Test]
         public void DefineProtectedAndPrivateProperties()
         {
             const string code = @"

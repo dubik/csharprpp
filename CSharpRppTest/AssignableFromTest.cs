@@ -1,28 +1,28 @@
 ﻿using System.Runtime.Remoting;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class AssignableFromTest
     {
-        [TestMethod]
+        [Test]
         public void TestAssignablableFromNull()
         {
             RType type = new RType("Foo");
             Assert.IsFalse(type.IsAssignable(null));
         }
 
-        [TestMethod]
+        [Test]
         public void TestAssignableFromSameType()
         {
             RType type = new RType("Foo");
             Assert.IsTrue(type.IsAssignable(type));
         }
 
-        [TestMethod]
+        [Test]
         public void TestAssignableFromSameType2()
         {
             RType type1 = new RType("Foo");
@@ -31,7 +31,7 @@ namespace CSharpRppTest
             Assert.IsTrue(type1.IsAssignable(type1));
         }
 
-        [TestMethod]
+        [Test]
         public void TestAssignableForPrimitiveTypes()
         {
             Assert.IsFalse(IntTy.IsAssignable(FloatTy));
@@ -40,7 +40,7 @@ namespace CSharpRppTest
             Assert.IsTrue(IntTy.IsAssignable(IntTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSubclassOfWithBaseClass()
         {
             RType baseType = new RType("Bar");
@@ -48,7 +48,7 @@ namespace CSharpRppTest
             Assert.IsTrue(baseType.IsAssignable(type));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSubclassOfWithBaseBaseClass()
         {
             RType barTy = new RType("Bar");
@@ -57,7 +57,7 @@ namespace CSharpRppTest
             Assert.IsTrue(barTy.IsAssignable(fooTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSubclassOfWithInterface()
         {
             RType iBarTy = new RType("IBar", RTypeAttributes.Interface);
@@ -66,7 +66,7 @@ namespace CSharpRppTest
             Assert.IsTrue(iBarTy.IsAssignable(fooTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSpecializedGenericTypesEquality()
         {
             // class Foo[T](val id: T)
@@ -86,7 +86,7 @@ namespace CSharpRppTest
         }
 
 
-        [TestMethod]
+        [Test]
         public void TestOneGenericContainerWith2DistinctClasses()
         {
             // class List[A]
@@ -110,8 +110,8 @@ namespace CSharpRppTest
             Assert.IsTrue(listOfOrangesTy.IsAssignable(listOfOrangesTy));
         }
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void TestGenericContainerAndInvariantClasses()
         {
             RType listOfFruits, listOfApples;
@@ -123,8 +123,8 @@ namespace CSharpRppTest
             Assert.IsFalse(listOfApples.IsAssignable(listOfFruits));
         }
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void TestGenericContainerAndCovariantClasses()
         {
             RType listOfFruits, listOfApples;
@@ -136,8 +136,8 @@ namespace CSharpRppTest
             Assert.IsFalse(listOfApples.IsAssignable(listOfFruits));
         }
 
-        [TestMethod]
-        [TestCategory("Covariance")]
+        [Test]
+        [Category("Covariance")]
         public void TestGenericContainerAndContravariantClasses()
         {
             RType listOfFruits, listOfApples;
@@ -175,7 +175,7 @@ namespace CSharpRppTest
             listOfFruits = listOfFruitsTy;
         }
 
-        [TestMethod]
+        [Test]
         public void ExtendingSpecializedGenericAndDefineOneMoreGenericParameter()
         {
             // class Foo[T]
@@ -191,7 +191,7 @@ namespace CSharpRppTest
             Assert.IsTrue(intFooTy.IsAssignable(secondFooTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestAssigningNothing()
         {
             RType optionTy = new RType("Option");

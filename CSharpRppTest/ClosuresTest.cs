@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ClosuresTest
     {
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [Test]
+        [Category("Closures"), Category("Generics")]
         public void ParseAndResolveClosureType()
         {
             const string code = @"
@@ -22,8 +22,8 @@ object Bar
             ParseAndCreateType(code, "Bar$");
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [Test]
+        [Category("Closures"), Category("Generics")]
         public void ParseSimpleClosure()
         {
             const string code = @"
@@ -41,8 +41,8 @@ object Bar
             Assert.IsNotNull(mainMethod);
         }
 
-        [TestMethod]
-        [TestCategory("Closures")]
+        [Test]
+        [Category("Closures")]
         public void CallClosure()
         {
             const string code = @"
@@ -60,7 +60,7 @@ object Bar
             Assert.AreEqual(23, res);
         }
 
-        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
+        [Test, Category("Closures"), Category("Generics")]
         public void PassClosureAsAParam()
         {
             const string code = @"
@@ -81,7 +81,7 @@ object Bar
             Assert.AreEqual(34, res);
         }
 
-        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
+        [Test, Category("Closures"), Category("Generics")]
         public void GenericMethod()
         {
             const string code = @"
@@ -96,7 +96,7 @@ object Bar
             ParseAndCreateType(code, "Bar$");
         }
 
-        [TestMethod, TestCategory("Closures"), TestCategory("Generics")]
+        [Test, Category("Closures"), Category("Generics")]
         public void ParseOneParamClosureWithoutParents()
         {
             const string code = @"
@@ -113,7 +113,7 @@ object Main
             Assert.AreEqual(14, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void FiguringOutTypesOfSimpleClosureTypeInAGenericClass()
         {
             const string code = @"
@@ -134,7 +134,7 @@ object Main {
             Assert.AreEqual(24, res.GetPropertyValue("k"));
         }
 
-        [TestMethod]
+        [Test]
         public void ReturnTypeForClosure()
         {
             /*
@@ -151,7 +151,7 @@ class Bar[A, B]
             //var barTy = Utils.ParseAndCreateType(code, "Bar$");
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void UseClosureInClassParam()
         {
             const string code = @"
@@ -171,7 +171,7 @@ object Main {
             Assert.IsTrue((bool) res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CaptureLocalVariable()
         {
             const string code = @"
@@ -189,7 +189,7 @@ object Main {
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CapturedVariableUsedInExpressions()
         {
             const string code = @"
@@ -208,7 +208,7 @@ object Main {
             Assert.AreEqual(40, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void StoringToCapturedVariable()
         {
             const string code = @"
@@ -227,7 +227,7 @@ object Main {
             Assert.AreEqual(1, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CaptureSeveralVariables()
         {
             const string code = @"
@@ -247,7 +247,7 @@ object Main {
         }
 
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void ClosureWhichDoesntReturnValue()
         {
             const string code = @"
@@ -271,7 +271,7 @@ object Main {
             Assert.AreEqual(2, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CaptureNonPrimitiveVars()
         {
             const string code = @"
@@ -290,7 +290,7 @@ object Main {
             Assert.AreEqual("Hello", res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CaptureThisForAccessingMethods()
         {
             const string code = @"
@@ -316,7 +316,7 @@ object Main {
             Assert.AreEqual(26, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CallObjectFunctionFromClosure()
         {
             const string code = @"
@@ -336,7 +336,7 @@ object Main {
             Assert.AreEqual(18, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void UseFieldInAClosure()
         {
             const string code = @"
@@ -359,7 +359,7 @@ object Main {
             Assert.AreEqual(22, res);
         }
 
-        [TestMethod, TestCategory("Closures")]
+        [Test, Category("Closures")]
         public void CaptureParameterForAClosure()
         {
             const string code = @"
@@ -379,7 +379,7 @@ object Main {
             Assert.AreEqual(26, res);
         }
 
-        [TestMethod]
+        [Test]
         public void DeclareGenericVariableInClosure()
         {
             const string code = @"
@@ -396,7 +396,7 @@ class Foo1[A] {
             Assert.IsNotNull(fooTy);
         }
 
-        [TestMethod]
+        [Test]
         public void DeclareGenericVariableInClosure2()
         {
             const string code = @"
@@ -411,7 +411,7 @@ class UpdateVector[A](val v: A) {
         }
 
 
-        [TestMethod]
+        [Test]
         public void CaptureGenericArray()
         {
             const string code = @"

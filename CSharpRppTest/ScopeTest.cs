@@ -2,12 +2,12 @@
 using System.Linq;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.TypeSystem.ResolvableType;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ScopeTest
     {
         private readonly RppParam _intX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy));
@@ -16,7 +16,7 @@ namespace CSharpRppTest
         private readonly RppParam _varArgIntX = new RppParam("x", new ResolvableType(RppTypeSystem.IntTy), true);
 
         /*
-        [TestMethod]
+        [Test]
         public void OneLevelLookup()
         {
             RppScope scope = new RppScope(null);
@@ -27,7 +27,7 @@ namespace CSharpRppTest
             Assert.IsNull(scope.Lookup("somethingmissing"));
         }
 
-        [TestMethod]
+        [Test]
         public void TwoLevelLookup()
         {
             RppScope parent = new RppScope(null);
@@ -40,7 +40,7 @@ namespace CSharpRppTest
             Assert.IsNull(scope.Lookup("somethingmissing"));
         }
 
-        [TestMethod]
+        [Test]
         public void BaseClassLookup()
         {
             RppClassScope parent = new RppClassScope(null, null);
@@ -52,7 +52,7 @@ namespace CSharpRppTest
             Assert.AreSame(func, res[0]);
         }
 
-        [TestMethod]
+        [Test]
         public void TwoFuncsMatchInCurrentAndBase()
         {
             RppClassScope parent = new RppClassScope(null, null);

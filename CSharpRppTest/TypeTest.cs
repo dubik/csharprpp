@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class TypeTest
     {
-        [TestMethod]
+        [Test]
         public void FigureOutTypeForVarDeclarationWithIntInitExpression()
         {
             const string code = @"
@@ -25,8 +25,8 @@ object Foo
             Assert.AreEqual(10, res);
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [Test]
+        [Category("Closures"), Category("Generics")]
         public void FigureOutTypeForVarDeclarationWithClosureInitExpression()
         {
             const string code = @"
@@ -46,8 +46,8 @@ object Foo
             Assert.AreEqual(23, ret);
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [Test]
+        [Category("Closures"), Category("Generics")]
         public void FigureOutTypeOfClosureBasedVariableType()
         {
             const string code = @"
@@ -63,8 +63,8 @@ object Foo
             Utils.InvokeStatic(fooTy, "main");
         }
 
-        [TestMethod]
-        [TestCategory("Closures"), TestCategory("Generics")]
+        [Test]
+        [Category("Closures"), Category("Generics")]
         public void PassClosureAsAParam()
         {
             const string code = @"
@@ -84,7 +84,7 @@ object Bar
             Assert.AreEqual(34, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ClosureWhichDoesntReturnAValue()
         {
             const string code = @"
@@ -105,7 +105,7 @@ object Foo
             Utils.InvokeStatic(fooTy, "main");
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsInstanceOfSimpleClass()
         {
             RType fooTy = new RType("Foo", RTypeAttributes.Class, AnyTy);
@@ -113,7 +113,7 @@ object Foo
             Assert.IsFalse(fooTy.IsInstanceOf(StringTy));
         }
 
-        [TestMethod]
+        [Test]
         public void TestIsInstanceOfClassWhichImplementsInterface()
         {
             RType interfaceTy = new RType("IBar", RTypeAttributes.Interface);
@@ -128,7 +128,7 @@ object Foo
             Assert.IsFalse(fooTy.IsInstanceOf(wrongInterfaceTy));
         }
 
-        [TestMethod]
+        [Test]
         public void FindCommonType()
         {
             RType fooTy = new RType("Foo");

@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ArithmTest
     {
-        [TestMethod]
+        [Test]
         public void AddEqualInt()
         {
             const string code = @"
@@ -24,7 +24,7 @@ object Main {
             Assert.AreEqual(44, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexAssignmentOperatorTest()
         {
             const string code = @"
@@ -44,7 +44,7 @@ object Main {
             Assert.AreEqual(43, res);
         }
 
-        [TestMethod]
+        [Test]
         public void BitwiseAnd()
         {
             const string code = @"
@@ -60,7 +60,7 @@ object Main {
             Assert.AreEqual(14 & 7, res);
         }
 
-        [TestMethod]
+        [Test]
         public void BitwiseOr()
         {
             const string code = @"
@@ -76,7 +76,7 @@ object Main {
             Assert.AreEqual(14 | 7, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexBitwiseOperators()
         {
             const string code = @"

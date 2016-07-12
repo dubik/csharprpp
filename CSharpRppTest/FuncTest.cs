@@ -3,12 +3,12 @@ using System.Linq;
 using CSharpRpp;
 using CSharpRpp.Parser;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class FuncTest
     {
         private readonly RppParam _intX = new RppParam("x", new ResolvableType(IntTy));
@@ -16,7 +16,7 @@ namespace CSharpRppTest
         private readonly RppParam _floatY = new RppParam("y", new ResolvableType(FloatTy));
         private readonly RppParam _varArgIntX = new RppParam("x", new ResolvableType(IntTy), true);
 
-        [TestMethod]
+        [Test]
         public void QueryOneToOneOverload()
         {
             var args = new List<RType> {IntTy};
@@ -31,7 +31,7 @@ namespace CSharpRppTest
             Assert.AreEqual(func2, results.First());
         }
         /*
-        [TestMethod]
+        [Test]
         public void QueryOneOutOfTwoOverload()
         {
             var args = new List<RppType> {RppPrimitiveType.IntTy, RppPrimitiveType.IntTy};
@@ -49,7 +49,7 @@ namespace CSharpRppTest
             Assert.AreEqual(func3, results.First());
         }
 
-        [TestMethod]
+        [Test]
         public void QueryOnlyVarArg()
         {
             // def create(ids: Int*) : Unit
@@ -60,7 +60,7 @@ namespace CSharpRppTest
             Assert.AreEqual(func1, results.First());
         }
 
-        [TestMethod]
+        [Test]
         public void QuerySecondVarArg()
         {
             // def create(id: Int, ids: Int*) : Unit

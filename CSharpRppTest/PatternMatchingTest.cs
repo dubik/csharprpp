@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class PatternMatchingTest
     {
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void IntegerPatternMatching()
         {
             const string code = @"
@@ -26,7 +26,7 @@ object Main {
             Assert.AreEqual(24, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void StringPatternMatching()
         {
             const string code = @"
@@ -45,7 +45,7 @@ object Main {
             Assert.AreEqual("World", res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void InstanceOfPatternMatching()
         {
             const string code = @"
@@ -66,7 +66,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ConstructorPatternMatching()
         {
             const string code = @"
@@ -87,7 +87,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ConstructorPatternMatchingWithOneClassParam()
         {
             const string code = @"
@@ -108,7 +108,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ConstructorPatternMatchingWithoutClassParams()
         {
             const string code = @"
@@ -129,7 +129,7 @@ object Main {
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ConstructorPatternMatchingWithOneClassParamAndBindedToVariable()
         {
             const string code = @"
@@ -150,7 +150,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ConstructorPatternForMatchingHierarchies()
         {
             const string code = @"
@@ -180,7 +180,7 @@ object Main {
             Assert.AreEqual("Matched", res.GetPropertyValue("value"));
         }
 
-        [TestMethod, TestCategory("PatternMatching")]
+        [Test, Category("PatternMatching")]
         public void ComplexConstructorPatternMatching()
         {
             const string code = @"

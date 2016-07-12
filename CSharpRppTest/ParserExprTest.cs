@@ -1,68 +1,68 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using CSharpRpp;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ParserExprTest
     {
-        [TestMethod]
+        [Test]
         public void ParseSimpleIntExpr()
         {
             TestExpr("10", Int(10));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseSimplePlusExpr()
         {
             TestExpr("10 + 5", Add(Int(10), Int(5)));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseSimpleIdExpr()
         {
             TestExpr("myVar", Id("myVar"));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseParenExpr()
         {
             TestExpr("(3 + 2) * 2", Mult(Add(Int(3), Int(2)), Int(2)));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseComplexParenExpr()
         {
             TestExpr("(3 + 2) * (10 - 4)", Mult(Add(Int(3), Int(2)), Sub(Int(10), Int(4))));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseFuncCallExpr()
         {
             TestExpr("func()", Call("func"));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseFuncCallOneArg()
         {
             TestExpr("func(10)", Call("func", new IRppExpr[] {Int(10)}));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseFuncCallTwoArgs()
         {
             TestExpr("func(10, x)", Call("func", new IRppExpr[] {Int(10), Id("x")}));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseSubWithIntAndId()
         {
             TestExpr("10 - x", Sub(Int(10), Id("x")));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseSimplePath()
         {
             var parser = ParserTest.CreateParser("foo.bar");
@@ -72,25 +72,25 @@ namespace CSharpRppTest
             Assert.AreEqual(Selector(Id("foo"), Field("bar")), actual);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseMethodCall()
         {
             TestExpr("foo.MyFunc()", Selector(Id("foo"), FollowedCall("MyFunc")));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseLongChainOfFieldsAndMethods()
         {
             TestExpr("foo.MyFunc().bar.Length()", Selector(Selector(Selector(Id("foo"), FollowedCall("MyFunc")), Field("bar")), FollowedCall("Length")));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseEmptyBlockExpr()
         {
             TestExpr("{}", new RppBlockExpr(Collections.NoNodes));
         }
 
-        [TestMethod]
+        [Test]
         public void VarInBlockExpr()
         {
             RppBlockExpr blockExpr = ParserTest.CreateParser(@"{
@@ -100,28 +100,28 @@ namespace CSharpRppTest
             Assert.IsNotNull(blockExpr);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseLogical1()
         {
             TestExpr("x && y", LogicalAnd(Id("x"), Id("y")));
             TestExpr("x || y", LogicalOr(Id("x"), Id("y")));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseLogical2()
         {
             TestExpr("x == 3 && y", LogicalAnd(Eq(Id("x"), Int(3)), Id("y")));
             TestExpr("x == 3 || y", LogicalOr(Eq(Id("x"), Int(3)), Id("y")));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseLogical3()
         {
             TestExpr("x && y == 3", LogicalAnd(Id("x"), Eq(Id("y"), Int(3))));
             TestExpr("x || y == 3", LogicalOr(Id("x"), Eq(Id("y"), Int(3))));
         }
 
-        [TestMethod]
+        [Test]
         public void ParseNot()
         {
             TestExpr("!x", Not(Id("x")));

@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class TupleTest
     {
-        [TestMethod, TestCategory("Tuples")]
+        [Test, Category("Tuples")]
         public void ExplicitTupleTest()
         {
             const string code = @"
@@ -22,7 +22,7 @@ object Main {
             Assert.AreEqual("Hello", res.GetPropertyValue("_2"));
         }
 
-        [TestMethod, TestCategory("Tuples")]
+        [Test, Category("Tuples")]
         public void ImplicitTupleTest()
         {
             const string code = @"

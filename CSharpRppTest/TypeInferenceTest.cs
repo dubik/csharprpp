@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRpp.ListExtensions;
 using static CSharpRpp.TypeSystem.RppTypeSystem;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class TypeInferenceTest
     {
-        [TestMethod, TestCategory("Type Inference")]
+        [Test, Category("Type Inference")]
         public void GenericFunctionWithOneGenericParameter()
         {
             // map(32) -> map[Int](Int): Int;
             TestTypeInference("map[A](x: A) : A", List(CreateUniqueType(), IntTy, IntTy), List(IntTy, IntTy, IntTy));
         }
 
-        [TestMethod, TestCategory("Type Inference")]
+        [Test, Category("Type Inference")]
         public void ComplexGenericFunction()
         {
             // val k : String = map(13, 2.6)
@@ -28,7 +28,7 @@ namespace CSharpRppTest
                 List(IntTy, FloatTy, StringTy, IntTy, FloatTy, StringTy));
         }
 
-        [TestMethod, TestCategory("Type Inference")]
+        [Test, Category("Type Inference")]
         public void SimpleClosure()
         {
             RType undefined = CreateUniqueType();
@@ -40,7 +40,7 @@ namespace CSharpRppTest
             TestTypeInference(method, actualParamTypes, expectedInferredTypes);
         }
 
-        [TestMethod]
+        [Test]
         public void SimpleGenericFunctionCallInference()
         {
             const string code = @"
@@ -55,7 +55,7 @@ object Main {
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void InferenceOfFuncCallWhichHasAnotherFuncCallAsParameter()
         {
             const string code = @"
@@ -84,7 +84,7 @@ object Main {
             Assert.AreEqual(24.34f, item1.GetPropertyValue("item2"));
         }
 
-        [TestMethod]
+        [Test]
         public void InfereTypesWhenObjectIsInstantiated()
         {
             const string code = @"
@@ -99,7 +99,7 @@ object Main {
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void InfereTypesWhenClassIsInstantiatedFromGenericMethod()
         {
             const string code = @"
@@ -115,7 +115,7 @@ object Main {
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void InfereTypesWhenSubClassOfAnObjectIsInstantiated()
         {
             const string code = @"
@@ -136,7 +136,7 @@ object Main {
             Assert.AreEqual(13, head);
         }
 
-        [TestMethod]
+        [Test]
         public void InfereTypesWhenSubClassOfAnObjectIsInstantiatedWithGenericParam()
         {
             const string code = @"
@@ -151,8 +151,8 @@ class XConsApp[A] {
             Assert.IsNotNull(xconsAppTy);
         }
 
-        [TestMethod]
-        [Ignore]
+        [Test]
+        [Ignore("Not implemented yet")]
         public void InferTypeUsingReturnType()
         {
             const string code = @"

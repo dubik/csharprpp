@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using static CSharpRppTest.Utils;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class CaseClassTest
     {
-        [TestMethod]
+        [Test]
         public void TestCompanionObjectGeneration()
         {
             const string code = @"
@@ -23,7 +23,7 @@ object Main {
             Assert.AreEqual(238, res.GetPropertyValue("k"));
         }
 
-        [TestMethod]
+        [Test]
         public void TestNoFieldUnapply()
         {
             const string code = @"
@@ -47,7 +47,7 @@ object Main {
             Assert.AreEqual(false, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestSingleFieldUnapply()
         {
             const string code = @"
@@ -65,7 +65,7 @@ object Main {
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestMultipleFieldsUnapply()
         {
             const string code = @"

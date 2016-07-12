@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ExpressionTest
     {
-        [TestMethod]
+        [Test]
         public void TestIf()
         {
             const string code = @"
@@ -24,7 +24,7 @@ object Main
             Assert.AreEqual(23, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestIfWithFunctionAsCondition()
         {
             const string code = @"
@@ -45,7 +45,7 @@ object Main
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestOneLineIf()
         {
             const string code = @"
@@ -72,7 +72,7 @@ object Main
             }
         }
 
-        [TestMethod]
+        [Test]
         public void PopSimpleIntIfFuncReturnsUnit()
         {
             const string code = @"
@@ -86,7 +86,7 @@ object Main
             Assert.IsNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void PopSimpleIntFromBlockExprIfFuncReturnsUnit()
         {
             const string code = @"
@@ -102,7 +102,7 @@ object Main
             Assert.IsNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void PopResultOfFuncIfFuncReturnsUnit()
         {
             const string code = @"
@@ -117,7 +117,7 @@ object Main
             Assert.IsNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void UnitFuncShouldntPopIfLastExprAlreadyUnit()
         {
             const string code = @"
@@ -131,7 +131,7 @@ object Main
             Assert.IsNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void UnitFuncShouldntPopForVarDeclaration()
         {
             const string code = @"
@@ -146,7 +146,7 @@ object Main
             Assert.IsNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestEqualOperator()
         {
             const string code = @"
@@ -165,7 +165,7 @@ object Foo {
             Assert.AreEqual(5, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ReadIntFromArray()
         {
             const string code = @"
@@ -185,7 +185,7 @@ object Main {
         }
 
 
-        [TestMethod]
+        [Test]
         public void ReadGenericFromArray()
         {
             const string code = @"
@@ -218,7 +218,7 @@ object Main {
             }
         }
 
-        [TestMethod]
+        [Test]
         public void LogicalAndConstrants()
         {
             const string code = @"
@@ -234,7 +234,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "falseAndTrue"));
         }
 
-        [TestMethod]
+        [Test]
         public void LogicalAndVariablesAndParameters()
         {
             const string code = @"
@@ -251,7 +251,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "and3", false, false, true));
         }
 
-        [TestMethod]
+        [Test]
         public void LogicalOrVariablesAndParameters()
         {
             const string code = @"
@@ -280,7 +280,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "ifOr3", false, false, false));
         }
 
-        [TestMethod]
+        [Test]
         public void TestMinAndMax()
         {
             const string code = @"
@@ -296,7 +296,7 @@ object Main {
             Assert.AreEqual(1, Utils.InvokeStatic(mainTy, "min", 13, 1));
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexLogicalExpressions()
         {
             const string code = @"
@@ -320,7 +320,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "logic3", 0, 1));
         }
 
-        [TestMethod]
+        [Test]
         public void MoreComplexLogicalExpressions()
         {
             const string code = @"
@@ -334,7 +334,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "condSimple", 0, 0, 0));
         }
 
-        [TestMethod]
+        [Test]
         public void CallFunctionWithoutParametersWithoutParens()
         {
             const string code = @"
@@ -348,7 +348,7 @@ object Main {
             Assert.AreEqual(3, res);
         }
 
-        [TestMethod]
+        [Test]
         public void InvertBooleanValue1()
         {
             const string code = @"
@@ -364,7 +364,7 @@ object Main {
             Assert.IsFalse((bool) Utils.InvokeStatic(mainTy, "invertLong", true));
         }
 
-        [TestMethod]
+        [Test]
         public void InvertBooleanValue2()
         {
             const string code = @"

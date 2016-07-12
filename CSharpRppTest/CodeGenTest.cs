@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class CodeGenTest
     {
-        [TestMethod]
+        [Test]
         public void ClassEmptyConstructor()
         {
             const string code = @"
@@ -20,7 +20,7 @@ class Foo
             Assert.IsNotNull(foo);
         }
 
-        [TestMethod]
+        [Test]
         public void OneClassParamConstructor()
         {
             const string code = @"
@@ -34,7 +34,7 @@ class Foo(val k: Int)
             Assert.AreEqual(10, fooTy.GetProperty("k").GetValue(foo));
         }
 
-        [TestMethod]
+        [Test]
         public void TestSimpleExpression()
         {
             const string code = @"
@@ -49,7 +49,7 @@ object Foo
             Assert.AreEqual(9, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestVarDecl()
         {
             const string code = @"
@@ -67,7 +67,7 @@ object Foo
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestReturnField()
         {
             const string code = @"
@@ -85,7 +85,7 @@ class Foo(val k: Int)
             Assert.AreEqual(27, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestInstanceMethodInvocation()
         {
             const string code = @"
@@ -107,7 +107,7 @@ class Foo
             Assert.AreEqual(19, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestNewOperator()
         {
             const string code = @"
@@ -127,7 +127,7 @@ object Bar
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestNewOperatorWithArgs()
         {
             const string code = @"
@@ -149,7 +149,7 @@ object Bar
             Assert.AreEqual(10, res);
         }
 
-        [TestMethod]
+        [Test]
         public void CallFuncOfInstance()
         {
             const string code = @"
@@ -173,7 +173,7 @@ object Bar
             Assert.IsNotNull(fooInstance);
         }
 
-        [TestMethod]
+        [Test]
         public void LengthOfVarArgArg()
         {
             const string code = @"
@@ -189,7 +189,7 @@ object Bar
             Assert.AreEqual(2, res);
         }
 
-        [TestMethod]
+        [Test]
         public void CallVarArgFunction()
         {
             const string code = @"
@@ -209,7 +209,7 @@ object Bar
             Assert.AreEqual(2, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ImplicitBoxing()
         {
             const string code = @"
@@ -226,7 +226,7 @@ object Bar
             Assert.AreEqual(10, res);
         }
 
-        [TestMethod]
+        [Test]
         public void GetFloat()
         {
             const string code = @"
@@ -243,7 +243,7 @@ object Bar
             Assert.AreEqual(10.10f, res);
         }
 
-        [TestMethod]
+        [Test]
         public void SimpleWhile()
         {
             const string code = @"
@@ -266,7 +266,7 @@ object Bar
             Assert.AreEqual(10, res);
         }
 
-        [TestMethod]
+        [Test]
         public void ComplexWhile()
         {
             const string code = @"
@@ -290,7 +290,7 @@ object Bar
         }
 
 
-        [TestMethod]
+        [Test]
         public void FuncAsWhileCondition()
         {
             const string code = @"
@@ -313,7 +313,7 @@ object Bar
             Assert.AreEqual(13, res);
         }
 
-        [TestMethod]
+        [Test]
         public void AutoBoxingForVarargs()
         {
             const string code = @"
@@ -333,7 +333,7 @@ object Bar
             Assert.AreEqual(2, res);
         }
 
-        [TestMethod]
+        [Test]
         public void InvokeFunctionFromDifferentObject()
         {
             const string code = @"
@@ -354,7 +354,7 @@ object Bar
             Assert.AreEqual(10, res);
         }
 
-        [TestMethod]
+        [Test]
         public void TestCompanionObjectWithoutArgs()
         {
             const string code = @"
@@ -378,7 +378,7 @@ object Bar
             Assert.AreEqual("Foo", res.GetType().Name);
         }
 
-        [TestMethod]
+        [Test]
         public void TestCompanionObjectWithOneArg()
         {
             const string code = @"

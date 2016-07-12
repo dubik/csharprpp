@@ -3,11 +3,11 @@ using System.Linq;
 using Antlr.Runtime;
 using CSharpRpp;
 using CSharpRpp.TypeSystem;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ParserTest
     {
         internal static RppProgram Parse(string code)
@@ -28,7 +28,7 @@ namespace CSharpRppTest
             return parser;
         }
 
-        [TestMethod]
+        [Test]
         public void EmptyObject()
         {
             SimpleTestObjectParsing("object Main", 1);
@@ -37,14 +37,14 @@ namespace CSharpRppTest
             SimpleTestObjectParsing("object Main{}", 1);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseEmptyClass()
         {
             RppClass rppClass = ParseClass("class String");
             Assert.AreEqual("String", rppClass.Name);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseEmptyClassWithOneField()
         {
             RppClass rppClass = ParseClass("class String(val length: Int)");
@@ -68,14 +68,14 @@ namespace CSharpRppTest
             Assert.AreEqual(expectedClassesCount, program.Classes.Count());
         }
 
-        [TestMethod]
+        [Test]
         public void ParseSimpleType()
         {
             TestType("Array", new RTypeName("Array"));
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ParseGenericType()
         {
             RTypeName expected = new RTypeName("Array");
@@ -84,8 +84,8 @@ namespace CSharpRppTest
             TestType("Array[String]", expected);
         }
 
-        [TestMethod]
-        [TestCategory("Generics")]
+        [Test]
+        [Category("Generics")]
         public void ParseMultiGenericType()
         {
             RTypeName expected = new RTypeName("Array");
@@ -99,26 +99,26 @@ namespace CSharpRppTest
         {
             RTypeName type;
             Assert.IsTrue(CreateParser(code).ParseType(out type));
-            Assert.IsInstanceOfType(type, typeof(T));
+            Assert.IsInstanceOf<T>(type);
             Assert.AreEqual(expectedType, type);
         }
 
-        [TestMethod]
+        [Test]
         public void TestParseClassParam()
         {
-            TestClassParam("val foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("var foo : Int", new RppField(MutabilityFlag.MfVar, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
-            TestClassParam("foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
+            TestFixtureParam("val foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
+            TestFixtureParam("var foo : Int", new RppField(MutabilityFlag.MfVar, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
+            TestFixtureParam("foo : Int", new RppField(MutabilityFlag.MfVal, "foo", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
         }
 
-        private static void TestClassParam(string code, RppField expected)
+        private static void TestFixtureParam(string code, RppField expected)
         {
             RppField field;
             Assert.IsTrue(CreateParser(code).ParseClassParam(out field));
             Assert.AreEqual(expected, field);
         }
 
-        [TestMethod]
+        [Test]
         public void TestFieldDef()
         {
             TestVarDef("k : Int = 10", new RppField(MutabilityFlag.MfVal, "k", Collections.NoModifiers, new ResolvableType(new RTypeName("Int"))));
@@ -131,7 +131,7 @@ namespace CSharpRppTest
             Assert.AreEqual(expected, var);
         }
 
-        [TestMethod]
+        [Test]
         public void ParamClause()
         {
             Assert.AreEqual(0, CreateParser("").ParseParamClauses().Count());

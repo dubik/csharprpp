@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace CSharpRppTest
 {
-    [TestClass]
+    [TestFixture]
     public class ExceptionsTest
     {
-        [TestMethod]
+        [Test]
         public void DeclareCustomExceptionClass()
         {
             const string code = @"
@@ -20,8 +20,7 @@ class MyException extends Exception
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof (Exception))]
+        [Test]
         public void ThrowSystemException()
         {
             const string code = @"
@@ -32,19 +31,11 @@ object Foo
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             Assert.IsNotNull(fooTy);
-
-            try
-            {
-                Utils.InvokeStatic(fooTy, "main");
-            }
-            catch (Exception e)
-            {
-                throw e.InnerException;
-            }
+            var ex = Assert.Throws<TargetInvocationException>(() => Utils.InvokeStatic(fooTy, "main"));
+            Assert.IsInstanceOf<Exception>(ex.InnerException);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof (Exception))]
+        [Test]
         public void ThrowSystemExceptionWithMessage()
         {
             const string code = @"
@@ -55,15 +46,9 @@ object Foo
 ";
             var fooTy = Utils.ParseAndCreateType(code, "Foo$");
             Assert.IsNotNull(fooTy);
-            try
-            {
-                Utils.InvokeStatic(fooTy, "main");
-            }
-            catch (Exception e)
-            {
-                Assert.AreEqual("Hello", e.InnerException.Message);
-                throw e.InnerException;
-            }
+            var ex = Assert.Throws<TargetInvocationException>(() => Utils.InvokeStatic(fooTy, "main"));
+            Assert.IsInstanceOf<Exception>(ex.InnerException);
+            Assert.AreEqual("Hello", ex.InnerException.Message);
         }
     }
 }
