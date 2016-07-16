@@ -86,7 +86,9 @@ namespace AlgoW
 
         public override string ToString()
         {
-            return ((Args.Length > 0) ? String.Format("{0}<{1}>", Constructor, String.Join(",", Args.Select(arg => arg.ToString()))) : Constructor);
+            return Args.Length > 0
+                ? $"{Constructor}<{string.Join(",", Args.Select(arg => arg.ToString()))}>"
+                : Constructor;
         }
     }
 
@@ -95,7 +97,7 @@ namespace AlgoW
         private static IType Prune(IType t)
         {
             var var = t as Var;
-            return ((var != null) && (var.Type != null)) ? (var.Type = Prune(var.Type)) : t;
+            return var?.Type != null ? (var.Type = Prune(var.Type)) : t;
         }
 
         private static bool OccursCheck(IType t, IType s)
@@ -155,7 +157,7 @@ namespace AlgoW
             {
                 return new Type(type.Constructor, type.Args.Select(arg => Fresh(arg, types, vars)).ToArray());
             }
-            throw new ArgumentOutOfRangeException("t", String.Format("unsupported symbol type ({0})", t.GetType().Name));
+            throw new ArgumentOutOfRangeException(nameof(t), $"unsupported symbol type ({t.GetType().Name})");
         }
 
         internal static void Unify(IType t, IType s)
@@ -173,18 +175,19 @@ namespace AlgoW
                     ((Var) t).Type = s;
                 }
             }
-            else if ((t is Type) && (s is Var))
+            else if (t is Type && s is Var)
             {
                 Unify(s, t);
             }
-            else if ((t is Type) && (s is Type))
+            else if (t is Type && s is Type)
             {
                 var tType = (Type) t;
                 var sType = (Type) s;
 
                 if ((tType.Constructor != sType.Constructor) || (tType.Args.Length != sType.Args.Length))
                 {
-                    throw new InvalidOperationException(String.Concat(tType.ToString(), " incompatible with ", sType.ToString()));
+                    throw new InvalidOperationException(String.Concat(tType.ToString(), " incompatible with ",
+                        sType.ToString()));
                 }
 
                 for (int i = 0; i < tType.Args.Length; i++)
@@ -206,11 +209,14 @@ namespace AlgoW
 
     public interface INode
     {
-        object Name { get; } // If not null, can be either an identifier (as string, possibly empty to denote anonymity), or an identifier reference (as INode)
-        string Type { get; } // If not null, cannot be the empty string and holds a programmer-provided / -tagged type name
+        object Name { get; }
+        // If not null, can be either an identifier (as string, possibly empty to denote anonymity), or an identifier reference (as INode)
+        string Type { get; }
+        // If not null, cannot be the empty string and holds a programmer-provided / -tagged type name
         INode[] Args { get; }
         // If not null, holds either function definition formal params, or function call actual params (could also be used to hold child nodes in general)
-        object Term { get; } // If not null, is either a special inner INode (e.g., a function body), or a basic type value (which might in fact accept null)
+        object Term { get; }
+        // If not null, is either a special inner INode (e.g., a function body), or a basic type value (which might in fact accept null)
     }
 
     public class Node : INode
@@ -237,13 +243,13 @@ namespace AlgoW
         private static IType Infer(IDictionary<string, IType> env, INode node, IType[] known)
         {
             Func<INode, IType> taggedType = tagged =>
-            {
-                if (!Type.Const.ContainsKey(tagged.Type))
                 {
-                    throw new InvalidOperationException(String.Format("unknown basic type : \"{0}\"", tagged.Type));
-                }
-                return Type.Const[tagged.Type];
-            };
+                    if (!Type.Const.ContainsKey(tagged.Type))
+                    {
+                        throw new InvalidOperationException(String.Format("unknown basic type : \"{0}\"", tagged.Type));
+                    }
+                    return Type.Const[tagged.Type];
+                };
 
             known = known ?? new IType[] {};
 
@@ -415,7 +421,9 @@ namespace AlgoW
             Console.WriteLine();
             foreach (TypeOrError item in items)
             {
-                Console.WriteLine(item.Type != null ? String.Concat("Type : ", item.Type.ToString()) : String.Concat("Error: ", item.Error));
+                Console.WriteLine(item.Type != null
+                    ? String.Concat("Type : ", item.Type.ToString())
+                    : String.Concat("Error: ", item.Error));
                 Console.WriteLine();
             }
             Console.ReadLine();
