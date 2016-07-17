@@ -89,6 +89,10 @@
       <Project>{7fd873e7-cfd5-4023-8ef1-39682e068423}</Project>
       <Name>CSharpRpp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RppLexer\RppLexer.csproj">
+      <Project>{5b25fed7-493f-438f-9235-365a9f150ea7}</Project>
+      <Name>RppLexer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RppRuntime\RppRuntime.csproj">
       <Project>{05d46799-2874-40de-966b-a49b50eeb74e}</Project>
       <Name>RppRuntime</Name>

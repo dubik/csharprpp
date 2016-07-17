@@ -128,9 +128,6 @@
     <Compile Include="TypeSystem\ResolvableType.cs" />
     <Compile Include="RppAssignOp.cs" />
     <Compile Include="Expr\RppNew.cs" />
-    <Compile Include="grammar\RppLexer.g3.cs">
-      <DependentUpon>RppLexer.g3</DependentUpon>
-    </Compile>
     <Compile Include="IRppNode.cs" />
     <Compile Include="IRppNodeVisitor.cs" />
     <Compile Include="NodeUtils.cs" />
@@ -163,10 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Antlr3 Include="grammar\RppLexer.g3">
-      <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
-    </Antlr3>
     <None Include="grammar\JRpp.g">
       <Generator>MSBuild:Compile</Generator>
       <CustomToolNamespace>CSharpRpp.grammar</CustomToolNamespace>
@@ -194,6 +187,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RppLexer\RppLexer.csproj">
+      <Project>{5b25fed7-493f-438f-9235-365a9f150ea7}</Project>
+      <Name>RppLexer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RppRuntime\RppRuntime.csproj">
       <Project>{05d46799-2874-40de-966b-a49b50eeb74e}</Project>
       <Name>RppRuntime</Name>

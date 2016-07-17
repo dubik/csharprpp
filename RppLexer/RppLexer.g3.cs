@@ -8,7 +8,7 @@ namespace CSharpRpp
 {
     partial class RppLexer
     {
-        private static Dictionary<int, string> _tokenToString = new Dictionary<int, string>()
+        private static readonly Dictionary<int, string> _tokenToString = new Dictionary<int, string>()
         {
             {KW_Package, "package"},
             {KW_Abstract, "abstract"},
