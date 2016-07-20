@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpRpp;
+using CSharpRpp.Exceptions;
 using CSharpRpp.TypeSystem;
 using NUnit.Framework;
 using static CSharpRpp.ListExtensions;
@@ -152,7 +153,6 @@ class XConsApp[A] {
         }
 
         [Test]
-        [Ignore("Not implemented yet")]
         public void InferTypeUsingReturnType()
         {
             const string code = @"
@@ -166,8 +166,42 @@ object Main {
   }
 }
 ";
+            Assert.Throws<SemanticException>(() => Utils.ParseAndCreateType(code, "Main$"), "type mismatch");
+        }
+
+        [Test]
+        public void InferSimpleConstructor1()
+        {
+            const string code = @"
+class Foo[A](val v : A)
+
+object Main {
+    def main : Int = {
+        val k = new Foo(13)
+        k.v
+    }
+}
+";
             Type mainTy = Utils.ParseAndCreateType(code, "Main$");
             Assert.IsNotNull(mainTy);
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res);
+        }
+
+        [Test]
+        public void InferSimpleConstructor2()
+        {
+            const string code = @"
+class Foo[A](val v : A)
+
+object Main {
+    def main : Foo[Int] = new Foo(13)
+}
+";
+            Type mainTy = Utils.ParseAndCreateType(code, "Main$");
+            Assert.IsNotNull(mainTy);
+            object res = Utils.InvokeStatic(mainTy, "main");
+            Assert.AreEqual(13, res.GetPropertyValue("v"));
         }
 
         #region Utils
