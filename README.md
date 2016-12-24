@@ -14,6 +14,7 @@ Supported (usually with some limitations):
   * Inner classes and abstract types
   * Implicit and explicit tuples
   * Type inference (rather limited but works pretty well for my use cases)
+  * Pattern matching
 
 ### Build
   Open `CSharpRpp.sln` in Visual Studio 2015 and compile for `Debug` or `Release`.
